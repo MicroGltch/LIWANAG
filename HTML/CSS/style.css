@@ -1,0 +1,23 @@
+/*    REFERENCES    */
+/*    SELECTOR     */ /*    EXAMPLE     */ /*                  DESCRIPTION                   */
+/*    element     */ /*        p       */ /*            Selects all <p> elements            */
+/*      #id      */ /*   #firstname   */ /*    Selects the element with id="firstname"     */
+/*      *       */ /*        *       */ /*            Selects all elements                */
+/*   .class    */ /*     .intro     */ /*   Selects all elements with class="intro"      */
+/*   .class    */ /*    p.intro    */ /*  Selects all <p> elements with class="intro"   */
+
+body{
+    background-position: center;
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    width: 100vw;
+    font-family: 'Inter', sans-serif;
+}
+
+p{
+    font-family: 'Inter', sans-serif;
+}
