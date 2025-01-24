@@ -1,8 +1,14 @@
+<?php
+
+?>
+
+
 <!DOCTYPE html>
+<html lang="en">
 <head>
     <meta name="viewport" content="width=device-width" />
     
-    <title>LIWANAG - LOGIN</title>
+    <title>LIWANAG - SIGN UP</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
@@ -18,8 +24,7 @@
     <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
     
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="/HTML/CSS/style.css"/>
-
+    <link rel="stylesheet" href="CSS/style.css" type="text/css"/>
     
 </head>
 
@@ -45,8 +50,8 @@
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                            <li><a href="#">Item</a></li>
-                            <li><a href="#">Item</a></li>
+                            <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
+                            <li><a href="loginpage.php">Login</a></li>
                         </ul>
 
                         <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
@@ -62,18 +67,34 @@
         </div>
     </nav>
 
-    <div class="uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
-    <!-- Login Account Card -->
+    <div class="body-create-acc uk-flex uk-flex-center uk-flex-middle "> 
+    <!-- Create Account Card -->
         <div class="create-acc-card uk-card uk-card-default uk-card-body form-card">
             
             <!-- Title and Helper -->
-            <h3 class="uk-card-title uk-flex uk-flex-center">Welcome Back</h3>
-            <p class="uk-flex uk-flex-center">Please log in to continue.</p>
+            <h3 class="uk-card-title uk-flex uk-flex-center">Create an Account</h3>
+            <p class="uk-flex uk-flex-center">Enter your personal details to start your journey with us.</p>
             
             <!-- Form Fields -->
             <form class="uk-form-stacked uk-grid-medium" uk-grid>
 
                 <!-- psa.use uk-margin to automatically add top and bottom margin -->   
+                
+                <!-- First Name --> 
+                <div class="uk-width-1@s uk-width-1-2@l ">
+                    <label class="uk-form-label" for="form-stacked-text">First Name</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" id="form-stacked-text" type="text" placeholder="Input your First Name...">
+                    </div>
+                </div>
+            
+                <!-- Last Name --> 
+                <div class="uk-width-1@s uk-width-1-2@l">
+                    <label class="uk-form-label" for="form-stacked-text">Last Name</label>
+                    <div class="uk-form-controls">
+                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Last Name...">
+                    </div>
+                </div>
 
                 <!-- Email -->
                 <div class="uk-width-1@s uk-width-1@l">
@@ -90,20 +111,26 @@
                         <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Password...">
                     </div>
                 </div>
+            
+                <!-- Address -->
+                <div class="uk-width-1@s uk-width-1@l">
+                    <label class="uk-form-label" for="form-stacked-text">Adress</label>
+                    <div class="uk-form-controls">
+                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Address...">
+                    </div>
+                </div>  
 
-                <!--Remember Me-->
-                <div class="uk-width-1-2@s uk-width-1-2@l uk-text-left@s">
-                    <label class="uk-text-small"><input class="uk-checkbox" type="checkbox"> Remember me</label>
-                </div>
+                <!-- Phone Number -->
+                <div class="uk-width-1@s uk-width-1@l">
+                    <label class="uk-form-label" for="form-stacked-text">Phone Number</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input phonenumber-input" id="form-stacked-text" type="text" placeholder="Input your Phone Number...">
+                    </div>
+                </div> 
 
-                <!--Forgot Password-->
-                <div class="uk-width-1-2@s uk-width-1-2@l uk-text-right@s uk-text-right@l">
-                    <button class="forgotPass-btn uk-button uk-button-link uk-text-capitalize">Forgot Password?</button>
-                </div>
-
-                <!-- Login Button -->
-                <div class="login-btn-div uk-width-1@s uk-width-1@l">
-                    <button class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Log In</button>
+                <!-- Sign Up Button -->
+                <div class="signup-btn-div uk-width-1@s uk-width-1@l">
+                    <button class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Sign Up</button>
                 </div>
 
                 <!-- Divider -->
@@ -111,9 +138,9 @@
                     <hr>
                 </div>
                 
-                <!-- Sign up Redirect -->
+                <!-- Login Redirect -->
                 <div class="uk-flex uk-flex-middle uk-flex-center uk-width-1@s uk-width-1@l">
-                    <p class="signup-redirect-txt uk-flex uk-flex-middle uk-flex-center">No Account Yet? &nbsp; <a href="signuppage.html"> Register here</a> </p>
+                    <p class="login-redirect-txt uk-flex uk-flex-middle uk-flex-center">Already have an account? &nbsp; <a href="loginpage.php"> Login here!</a> </p>
                 </div>
 
             </form>
@@ -121,11 +148,20 @@
         </div>
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">
+            LIWANAG in construction, everything is subject to change.
+        </p>
+    </footer>
 
 </body>
 
-
 </html>
+
+
+
+
 
 
 
