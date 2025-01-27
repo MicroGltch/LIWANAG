@@ -1,3 +1,8 @@
+<?php
+include "dbconfig.php";
+session_start();
+?>
+
 <!DOCTYPE html>
 <head>
     <meta name="viewport" content="width=device-width" />
@@ -24,6 +29,15 @@
 </head>
 
 <body>
+<<<<<<< HEAD:HTML/hompage.php
+=======
+
+   <!-- Debugging: Print session data in the console -->
+   <script>
+        console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
+    </script>
+
+>>>>>>> 36bf0bd (+ Login Function Working):homepage.php
     <!-- Nav Bar (Ayusin pa alignment n stuff) -->
     <nav class="uk-navbar-container">
         <div class="uk-container">
@@ -42,20 +56,23 @@
                         <a class="uk-navbar-item uk-logo" href="#">Little Wanderer's Therapy Center</a>
                     </div>
 
-                <!--Navbar Right-->
+                    <!-- Navbar Right -->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
+<<<<<<< HEAD:HTML/hompage.php
                             <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
                             <li><a href="loginpage.php">Login</a></li>
+=======
+                            <?php if (isset($_SESSION['username'])): ?>
+                                <li><a href="#">Hi, <?php echo $_SESSION['username']; ?>!</a></li>
+                                <li><a href="Accounts/logout.php">Logout</a></li>
+                            <?php else: ?>
+                                <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
+                                <li><a href="Accounts/loginpage.php">Login</a></li>
+                            <?php endif; ?>
+>>>>>>> 36bf0bd (+ Login Function Working):homepage.php
                         </ul>
-
-                        <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
-                        <div class="uk-navbar-item">
-                                <button class="uk-button uk-button-default">Sign Up to Book an Appointment</button>
-                                <button class="uk-button uk-button-secondary">Login</button>
-                        </div>-->
                     </div>
-    
                 </div>
     
             </div>
