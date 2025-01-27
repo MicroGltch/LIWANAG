@@ -18,7 +18,7 @@
     <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
     
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="/HTML/CSS/style.css"/>
+    <link rel="stylesheet" href="CSS/style.css" type="text/css"/>
 
     
 </head>
@@ -45,7 +45,7 @@
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                            <li><a href="#">Item</a></li>
+                            <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
                             <li><a href="#">Item</a></li>
                         </ul>
 
@@ -113,7 +113,7 @@
                 
                 <!-- Sign up Redirect -->
                 <div class="uk-flex uk-flex-middle uk-flex-center uk-width-1@s uk-width-1@l">
-                    <p class="signup-redirect-txt uk-flex uk-flex-middle uk-flex-center">No Account Yet? &nbsp; <a href="signuppage.html"> Register here</a> </p>
+                    <p class="signup-redirect-txt uk-flex uk-flex-middle uk-flex-center">No Account Yet? &nbsp; <a href="signuppage.php"> Register here</a> </p>
                 </div>
 
             </form>
@@ -121,6 +121,12 @@
         </div>
     </div>
 
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer-text">
+                LIWANAG in construction, everything is subject to change.
+            </p>
+        </footer>
 
 </body>
 
