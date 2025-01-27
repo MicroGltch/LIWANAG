@@ -5,11 +5,9 @@ $username = "u999302509_liwanag_user";
 $password = "Jan272025!"; 
 $database = "u999302509_liwanag_db";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $database);
+$connection = new mysqli($servername, $username, $password, $database);
 
-// Check connection
-if ($conn->connect_error) {
+if ($connection->connect_error) {
     echo "<script>console.error('Connection failed: " . addslashes($conn->connect_error) . "');</script>";
 } else {
     echo "<script>console.log('You are connected to the database.');</script>";
