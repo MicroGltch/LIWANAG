@@ -1,8 +1,8 @@
 <?php
 // Database configuration
-$servername = "srv1760.hstgr.io"; // Use the IP address from the image
+$servername = "153.92.15.39"; 
 $username = "u999302509_liwanag_user";
-$password = "1f&KyP2Re;#Y"; // Replace with your actual password
+$password = "Jan272025!"; 
 $database = "u999302509_liwanag_db";
 
 // Create connection
@@ -10,8 +10,9 @@ $conn = new mysqli($servername, $username, $password, $database);
 
 // Check connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    echo "<script>console.error('Connection failed: " . addslashes($conn->connect_error) . "');</script>";
 } else {
-    echo "you are connected";
+    echo "<script>console.log('You are connected to the database.');</script>";
 }
+
 ?>
