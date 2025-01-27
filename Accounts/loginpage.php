@@ -1,3 +1,7 @@
+<?php
+include "../dbconfig.php";
+session_start();
+?>
 <!DOCTYPE html>
 <head>
     <meta name="viewport" content="width=device-width" />
@@ -71,7 +75,8 @@
             <p class="uk-flex uk-flex-center">Please log in to continue.</p>
             
             <!-- Form Fields -->
-            <form class="uk-form-stacked uk-grid-medium" uk-grid>
+            <form action="loginpage.php" method="post" class="uk-form-stacked uk-grid-medium" uk-grid>
+                            <!-- add onsubmit for validation -->
 
                 <!-- psa.use uk-margin to automatically add top and bottom margin -->   
 
@@ -79,7 +84,7 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">Email</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Email...">
+                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Email..." required name="email">
                     </div>
                 </div>
             
@@ -87,15 +92,17 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">Password</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Password...">
+                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Password..." required name="password">
                     </div>
                 </div>
 
+                <!-- Add function -->
                 <!--Remember Me-->
                 <div class="uk-width-1-2@s uk-width-1-2@l uk-text-left@s">
                     <label class="uk-text-small"><input class="uk-checkbox" type="checkbox"> Remember me</label>
                 </div>
 
+                <!-- Add function -->
                 <!--Forgot Password-->
                 <div class="uk-width-1-2@s uk-width-1-2@l uk-text-right@s uk-text-right@l">
                     <button class="forgotPass-btn uk-button uk-button-link uk-text-capitalize">Forgot Password?</button>
@@ -103,7 +110,7 @@
 
                 <!-- Login Button -->
                 <div class="login-btn-div uk-width-1@s uk-width-1@l">
-                    <button class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Log In</button>
+                    <button type="submit" name="login" class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Log In</button>
                 </div>
 
                 <!-- Divider -->
@@ -127,11 +134,85 @@
                 LIWANAG in construction, everything is subject to change.
             </p>
         </footer>
+        
+    <!-- Javascript -->
+    <script src="accountJS/login.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 
 </body>
-
-
 </html>
+
+<?php
+
+if(isset($_POST['login'])){
+
+    $email = $_POST['email'];
+    $password = md5($_POST['password']);
+
+    $loginsql = "SELECT * FROM users WHERE account_Email = '$email' AND account_Password = '$password'";    $loginresult = $connection->query($loginsql);
+
+    $loginresult = $connection->query($loginsql);
+
+    if($loginresult->num_rows > 0){
+
+        $row = $loginresult->fetch_assoc();
+        
+        //for logs dagdag nlng if need
+        $accountType = $row['account_Type'];
+        $userId = $row['account_id'];
+
+        $fullname = $row['account_FName'] . " " . $row['account_LName'];
+
+        $_SESSION['username'] = $fullname;
+
+        // Pedeng Swal pede din nde
+        // echo "<script>
+        //         Swal.fire({
+        //             title: 'Login Successful',
+        //             text: 'Welcome, $fullname!',
+        //             icon: 'success',
+        //             confirmButtonColor: '#741515'
+        //         }).then((result) => {
+        //             if (result.isConfirmed) {
+        //                 window.location.href = '../homepage.php';
+        //             }
+        //         });
+        //       </script>";
+        
+        echo "<script>window.location.href = '../homepage.php';</script>";
+
+        // Add this exit if you need to prevent further code execution
+        exit();
+
+        // LOGS code
+
+        // $logSQL = "Insert into tbl_logs(user_id, user_name, type, action, log_date) values('$userid', '$fullname', '$usertype', 'Logged In', NOW())";
+        // $connection ->query($logSQL);
+        
+        // Redirect to Dashboard/HomePage to Book
+        // if($usertype == 'Admin') {
+        //     header("location: admin.php");
+        //     exit(); 
+        // } else if($usertype == 'User'){
+        //     header("location: order.php");
+        //     exit();
+        // }
+    }
+    echo "<script>
+            Swal.fire({
+                title: 'Invalid Login',
+                text: 'Please check your email and password',
+                icon: 'error',
+                confirmButtonColor: '#741515'
+            });
+        </script>";
+
+    $connection->close();
+}
+
+
+?>
 
 
 
