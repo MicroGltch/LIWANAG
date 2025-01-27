@@ -14,10 +14,10 @@ html{
     background-repeat: no-repeat;
     margin: 0;
     padding: 0;
-    height: 100vh;
-    width: 100vw;
+
     font-family: 'Inter', sans-serif; 
 }
+
 
 h3.uk-card-title{    
     font-family: 'Roboto',sans-serif;
@@ -36,7 +36,9 @@ p{
     padding-left: 70px;
     padding-right: 70px;
     padding-top: 40px;
-    padding-bottom: 55px;
+    padding-bottom: 30px;
+    margin-top: 35px;
+    margin-bottom: 35px;
 }
 
 ::placeholder{
@@ -61,4 +63,18 @@ p{
 
 .forgotPass-btn{
     color: #001D6C;
+}
+
+
+.footer{    
+    width:auto;
+    text-align: center;
+    background-color: #1a202c;
+    padding: 2%;
+}
+
+.footer-text{
+    font-family: 'Roboto', sans-serif;
+    color: #ffffff;
+    margin-bottom: 0px;
 }
