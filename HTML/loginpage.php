@@ -98,7 +98,11 @@
 
                 <!--Forgot Password-->
                 <div class="uk-width-1-2@s uk-width-1-2@l uk-text-right@s uk-text-right@l">
-                    <button class="forgotPass-btn uk-button uk-button-link uk-text-capitalize">Forgot Password?</button>
+                    <button class="forgotPass-btn uk-button uk-button-link uk-text-capitalize">
+                    <a href="forgotpasswordpage.php">
+                    Forgot Password?
+                    </a>    
+                    </button>
                 </div>
 
                 <!-- Login Button -->
