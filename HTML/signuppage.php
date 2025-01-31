@@ -30,7 +30,7 @@
 
 <body>
     <!-- Nav Bar (Ayusin pa alignment n stuff) -->
-    <nav class="uk-navbar-container">
+    <nav class="uk-navbar-container logged-out">
         <div class="uk-container">
             <div uk-navbar>
                 <!--Navbar Left-->
@@ -44,7 +44,7 @@
 
                 <!--Navbar Center-->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="#">Little Wanderer's Therapy Center</a>
+                        <a class="uk-navbar-item uk-logo" href="hompage.php">Little Wanderer's Therapy Center</a>
                     </div>
 
                 <!--Navbar Right-->
