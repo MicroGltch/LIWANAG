@@ -60,10 +60,12 @@ if (isset($_POST['sub'])) {
                 confirmButtonColor: '#323232',
                 cancelButtonColor: '#BABABA',
                 confirmButtonText: 'Yes, proceed!',
-                cancelButtonText: 'No, stay here'
+                cancelButtonText: 'Register Again'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = 'loginpage.html';
+                    window.location.href = 'loginpage.php';
+                } else {
+                    window.location.href = 'signuppage.php';
                 }
             });
             </script>";

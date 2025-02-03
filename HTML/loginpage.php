@@ -71,7 +71,7 @@
             <p class="uk-flex uk-flex-center">Please log in to continue.</p>
             
             <!-- Form Fields -->
-            <form class="uk-form-stacked uk-grid-medium" uk-grid>
+            <form class="uk-form-stacked uk-grid-medium" uk-grid action="loginlogic.php" method="post">
 
                 <!-- psa.use uk-margin to automatically add top and bottom margin -->   
 
@@ -79,7 +79,7 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">Email</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Email...">
+                        <input  class="uk-input" id="form-stacked-text"name="email" type="text" placeholder="Input your Email..." required>
                     </div>
                 </div>
             
@@ -87,7 +87,7 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">Password</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Password...">
+                        <input  class="uk-input" id="form-stacked-text" name="password" type="password" placeholder="Input your Password...">
                     </div>
                 </div>
 
@@ -127,6 +127,22 @@
                 LIWANAG in construction, everything is subject to change.
             </p>
         </footer>
+
+
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<?php
+if (isset($_GET['loginError'])) {
+    $errorMessage = urldecode($_GET['loginError']);
+    echo "<script>
+              Swal.fire({
+                  icon: 'error',
+                  title: 'Oops...',
+                  text: '$errorMessage',
+              });
+          </script>";
+}
+?>
 
 </body>
 

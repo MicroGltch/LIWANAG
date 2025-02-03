@@ -1,39 +1,3 @@
-function validatePassword() {
-    const password = document.getElementById("password").value;
-    const confirmPassword = document.getElementById("confirmPassword").value;
-    const errorField = document.getElementById("passwordError");
-    const lengthErrorField = document.getElementById("passwordLengthError");
-
-    if (password.length < 8) {
-        lengthErrorField.innerHTML = "Password should be at least 8 characters long.";
-        return false;
-    } else {
-        lengthErrorField.innerHTML = "";
-    }
-
-    if (password !== confirmPassword) {
-        errorField.innerHTML = "Passwords do not match!";
-        return false;
-    } else {
-        errorField.innerHTML = "";
-        return true;
-    }
-}
-
-function validateMobileNumber() {
-    const mobileNumber = document.getElementById("mobileNumber").value;
-    const mobileNumberError = document.getElementById("mobileNumberError");
-    const pattern = /^\d+$/;
-
-    if (!pattern.test(mobileNumber)) {
-        mobileNumberError.innerHTML = "Please enter a valid mobile number with digits only.";
-        return false;
-    } else {
-        mobileNumberError.innerHTML = "";
-        return true;
-    }
-}
-
 function togglePassword() {
     const passwordField = document.getElementById("password");
     const togglePasswordBtn = document.getElementById("togglePassword");
@@ -63,3 +27,87 @@ function toggleConfirmPassword() {
         toggleConfirmPasswordBtn.classList.add("fa-eye");
     }
 }
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("registrationForm").addEventListener("submit", function (event) {
+        let valid = true;
+
+        // First Name Validation
+        let firstName = document.getElementById("firstName").value.trim();
+        let firstNameError = document.getElementById("firstNameError");
+        let nameRegex = /^[A-Za-z]{2,30}$/;
+        if (!nameRegex.test(firstName)) {
+            firstNameError.textContent = "Only letters allowed (2-30 characters).";
+            valid = false;
+        } else {
+            firstNameError.textContent = "";
+        }
+
+        // Last Name Validation
+        let lastName = document.getElementById("lastName").value.trim();
+        let lastNameError = document.getElementById("lastNameError");
+        if (!nameRegex.test(lastName)) {
+            lastNameError.textContent = "Only letters allowed (2-30 characters).";
+            valid = false;
+        } else {
+            lastNameError.textContent = "";
+        }
+
+        // Email Validation
+        let email = document.getElementById("email").value.trim();
+        let emailError = document.getElementById("emailError");
+        let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            emailError.textContent = "Invalid email format.";
+            valid = false;
+        } else {
+            emailError.textContent = "";
+        }
+
+        // Password Validation
+        let password = document.getElementById("password").value;
+        let passwordError = document.getElementById("passwordError");
+        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,20}$/;
+        if (!passwordRegex.test(password)) {
+            passwordError.textContent = "Password must be 8-20 chars, with uppercase, lowercase, number, and special char.";
+            valid = false;
+        } else {
+            passwordError.textContent = "";
+        }
+
+        // Confirm Password Validation
+        let confirmPassword = document.getElementById("confirmPassword").value;
+        let confirmPasswordError = document.getElementById("confirmPasswordError");
+        if (confirmPassword !== password) {
+            confirmPasswordError.textContent = "Passwords do not match.";
+            valid = false;
+        } else {
+            confirmPasswordError.textContent = "";
+        }
+
+        // Mobile Number Validation
+        let mobileNumber = document.getElementById("mobileNumber").value;
+        let mobileNumberError = document.getElementById("mobileNumberError");
+        let mobileRegex = /^\d{10,15}$/;
+        if (!mobileRegex.test(mobileNumber)) {
+            mobileNumberError.textContent = "Phone number must be 10-15 digits.";
+            valid = false;
+        } else {
+            mobileNumberError.textContent = "";
+        }
+
+        // Address Validation
+        let address = document.getElementById("address").value;
+        let addressError = document.getElementById("addressError");
+        if (address.length < 5) {
+            addressError.textContent = "Address must be at least 5 characters.";
+            valid = false;
+        } else {
+            addressError.textContent = "";
+        }
+
+        if (!valid) {
+            event.preventDefault();
+        }
+    });
+});

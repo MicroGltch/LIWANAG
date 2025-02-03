@@ -78,3 +78,28 @@ p{
     color: #ffffff;
     margin-bottom: 0px;
 }
+
+.password-input {
+    padding-right: 40px; /* Space for the icon */
+}
+
+/* Position the eye icon inside the input */
+.toggle-password {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: #666;
+    font-size: 18px;
+}
+
+/* Ensure the parent wrapper is relative */
+.uk-inline {
+    position: relative;
+}
+
+/* Change icon color on hover */
+.toggle-password:hover {
+    color: #000;
+}
