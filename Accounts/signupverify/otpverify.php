@@ -30,7 +30,7 @@
 </body>
 </html>
 <?php
-require_once "config.php"; //include database connection
+require_once "../LIWANAG/dbconfig.php"; //include database connection
 
 // Verify OTP
 if (isset($_POST['sub'])) {
