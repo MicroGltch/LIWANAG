@@ -1,86 +1,62 @@
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="otp.css"> <!--gawa ng css here-->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
-
-</head>
-<body>
-    <div class="container mt-5 w-25 border  border-secondary rounded p-5">
-        <div class="row mb-4">
-            <div class="col text-center fw-bold">
-                <span class="display-2 text-secondary" >An OTP number is sent to your email! </span>
-            </div>
-        </div>
-        <form action="otpverify.php" method=post>
-        <!-- Email input -->
-        <div class="form-outline mb-4">
-            <input type="number" name="otp" id="form2Example1" class="form-control" />
-            <label class="form-label" for="form2Example1">OTP Number</label>
-        </div>
-
-
-        <!-- Submit button -->
-        <input type="submit" name=sub value="Verify" class="btn btn-primary btn-block mb-4">
-        </form>
-    </div> 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>   
-</body>
-</html>
 <?php
-require_once "../LIWANAG/dbconfig.php"; //include database connection
+session_start();
+require_once "../../dbconfig.php";
 
-// Verify OTP
-if (isset($_POST['sub'])) {
-    $otp_user = $_POST['otp'];
+// Check if the user session exists
+if (!isset($_SESSION['email'])) {
+    echo "Session expired. Please sign up again.";
+    exit();
+}
 
-    // Use prepared statement to prevent SQL injection
-    $otp_sql = "SELECT * FROM users WHERE otp = ?";
-    $stmt = $conn->prepare($otp_sql);
-    $stmt->bind_param("s", $otp_user);
+$email = $_SESSION['email'];
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify'])) { 
+    if (!isset($_POST['otp']) || empty($_POST['otp'])) {
+        echo "No OTP was entered.";
+        exit();
+    }
+
+    $otp_input = trim($_POST['otp']);
+
+    // Check if OTP matches and is not expired
+    $otp_sql = "SELECT * FROM users WHERE account_Email = ? AND otp = ? AND otp_expiry > NOW()";
+    $stmt = $connection->prepare($otp_sql);
+    $stmt->bind_param("ss", $email, $otp_input);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows == 1) {
-        // Update user status and clear OTP
-        $updatesql = "UPDATE users SET account_Status = 'Active', otp = NULL WHERE otp = ?";
-        $stmt = $conn->prepare($updatesql);
-        $stmt->bind_param("s", $otp_user);
+        // OTP is valid: Activate account
+        $updatesql = "UPDATE users SET account_Status = 'Active', otp = NULL, otp_expiry = NULL WHERE account_Email = ?";
+        $stmt = $connection->prepare($updatesql);
+        $stmt->bind_param("s", $email);
         $stmt->execute();
 
-        // Redirect to login page
-        echo "<script>
-            Swal.fire({
-                title: 'Congratulations, your account is successfully created.',
-                text: 'Do you want to proceed to login?',
-                icon: 'success',
-                showCancelButton: true,
-                confirmButtonColor: '#323232',
-                cancelButtonColor: '#BABABA',
-                confirmButtonText: 'Yes, proceed!',
-                cancelButtonText: 'No, stay here'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    window.location.href = 'loginpage.html';
-                }
-            });
-            </script>";
-        exit;
+        session_unset();
+        session_destroy();
+
+        echo "success";
     } else {
-        // Invalid OTP
-        ?>
-        <script>
-            Swal.fire({
-                position: "center",
-                icon: "error",
-                title: "Invalid OTP",
-                showConfirmButton: false,
-                timer: 1500
-            });
-        </script>
-        <?php
+        // Check if OTP is expired
+        $expiry_check_sql = "SELECT otp_expiry FROM users WHERE account_Email = ? AND otp_expiry < NOW()";
+        $stmt = $connection->prepare($expiry_check_sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $expiry_result = $stmt->get_result();
+
+        if ($expiry_result->num_rows > 0) {
+            echo "OTP expired. Please request a new OTP.";
+        } else {
+            echo "Incorrect OTP. Please try again.";
+        }
     }
+
+    exit();
 }
+
+// Delete unverified accounts only if the latest OTP has expired
+$delete_unverified = "DELETE FROM users WHERE account_Status = 'Pending' AND otp_expiry < NOW()";
+$connection->query($delete_unverified);
+
+$connection->close();
 ?>

@@ -1,3 +1,7 @@
+<?php
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -74,12 +78,12 @@
         <p class="uk-flex uk-flex-center">Enter your personal details to start your journey with us.</p>
 
         <!-- Form Fields -->
-        <form id="registrationForm" class="uk-form-stacked uk-grid-medium" uk-grid method="POST" action="signuppage.php">
+        <form id="signupvalidate" class="uk-form-stacked uk-grid-medium" uk-grid method="POST" action="signuppage.php">
             <!-- First Name -->
             <div class="uk-width-1@s uk-width-1-2@l">
                 <label class="uk-form-label" for="firstName">First Name</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="firstName" name="fname" type="text" placeholder="Input your First Name..." required>
+                    <input class="uk-input" id="firstName" name="fname" type="text" placeholder="Input your First Name..." value="<?php echo isset($_POST['fname']) ? htmlspecialchars($_POST['fname']) : ''; ?>">
                     <span class="error" id="firstNameError" style="color: red;"></span>
                 </div>
             </div>
@@ -88,7 +92,7 @@
             <div class="uk-width-1@s uk-width-1-2@l">
                 <label class="uk-form-label" for="lastName">Last Name</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="lastName" name="lname" type="text" placeholder="Input your Last Name..." required>
+                    <input class="uk-input" id="lastName" name="lname" type="text" placeholder="Input your Last Name..." value="<?php echo isset($_POST['lname']) ? htmlspecialchars($_POST['lname']) : ''; ?>">
                     <span class="error" id="lastNameError" style="color: red;"></span>
                 </div>
             </div>
@@ -97,7 +101,7 @@
             <div class="uk-width-1@s uk-width-1@l">
                 <label class="uk-form-label" for="email">Email</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="email" name="email" type="email" placeholder="Input your Email..." required>
+                    <input class="uk-input" id="email" name="email" type="email" placeholder="Input your Email..." value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                     <span class="error" id="emailError" style="color: red;"></span>
                 </div>
             </div>
@@ -107,7 +111,7 @@
                 <label class="uk-form-label" for="password">Password</label>
                 <div class="uk-form-controls">
                     <div class="uk-inline uk-width-1-1">
-                        <input class="uk-input password-input" id="password" name="password" type="password" maxlength="20" minlength="8" placeholder="Input your Password..." required>
+                        <input class="uk-input password-input" id="password" name="password" type="password" maxlength="20" minlength="8" placeholder="Input your Password..." >
                         <span class="toggle-password">
                             <i class="fa fa-eye" id="togglePasswordIcon" onclick="togglePassword('password', 'togglePasswordIcon')"></i>
                         </span>
@@ -121,7 +125,7 @@
                 <label class="uk-form-label" for="confirmPassword">Confirm Password</label>
                 <div class="uk-form-controls">
                     <div class="uk-inline uk-width-1-1">
-                        <input class="uk-input password-input" id="confirmPassword" name="confirmPassword" type="password" maxlength="20" minlength="8" placeholder="Confirm your Password..." required>
+                        <input class="uk-input password-input" id="confirmPassword" name="confirmPassword" type="password" maxlength="20" minlength="8" placeholder="Confirm your Password..." >
                         <span class="toggle-password">
                             <i class="fa fa-eye" id="toggleConfirmPasswordIcon" onclick="toggleConfirmPassword('confirmPassword', 'toggleConfirmPasswordIcon')"></i>
                         </span>
@@ -134,7 +138,7 @@
             <div class="uk-width-1@s uk-width-1@l">
                 <label class="uk-form-label" for="address">Address</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="address" name="address" type="text" placeholder="Input your Address..." required>
+                    <input class="uk-input" id="address" name="address" type="text" placeholder="Input your Address..." value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>">
                     <span class="error" id="addressError" style="color: red;"></span>
                 </div>
             </div>   
@@ -143,7 +147,7 @@
             <div class="uk-width-1@s uk-width-1@l">
                 <label class="uk-form-label" for="mobileNumber">Phone Number</label>
                 <div class="uk-form-controls">
-                    <input class="uk-input" id="mobileNumber" name="phone" type="text" placeholder="Input your Phone Number..." required>
+                    <input class="uk-input" id="mobileNumber" name="phone" type="text" placeholder="Input your Phone Number..." value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
                     <span class="error" id="mobileNumberError" style="color: red;"></span>
                 </div>
             </div>  
@@ -184,218 +188,71 @@
 </html>
 
 
-<script>function togglePassword() {
-    const passwordField = document.getElementById("password");
-    const togglePasswordBtn = document.getElementById("togglePasswordIcon");
-
-    if (passwordField.type === "password") {
-        passwordField.type = "text";
-        togglePasswordBtn.classList.remove("fa-eye");
-        togglePasswordBtn.classList.add("fa-eye-slash");
-    } else {
-        passwordField.type = "password";
-        togglePasswordBtn.classList.remove("fa-eye-slash");
-        togglePasswordBtn.classList.add("fa-eye");
-    }
-}
-
-function toggleConfirmPassword() {
-    const confirmPasswordField = document.getElementById("confirmPassword");
-    const toggleConfirmPasswordBtn = document.getElementById("toggleConfirmPasswordIcon");
-
-    if (confirmPasswordField.type === "password") {
-        confirmPasswordField.type = "text";
-        toggleConfirmPasswordBtn.classList.remove("fa-eye");
-        toggleConfirmPasswordBtn.classList.add("fa-eye-slash");
-    } else {
-        confirmPasswordField.type = "password";
-        toggleConfirmPasswordBtn.classList.remove("fa-eye-slash");
-        toggleConfirmPasswordBtn.classList.add("fa-eye");
-    }
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("registrationForm").addEventListener("submit", function (event) {
-
-        
-    alert("Signup button clicked, form is being submitted!");
-
-
-
-        let valid = true;
-
-        // First Name Validation
-        let firstName = document.getElementById("firstName").value.trim();
-        let firstNameError = document.getElementById("firstNameError");
-        let nameRegex = /^[A-Za-z]{2,30}$/;
-        if (!nameRegex.test(firstName)) {
-            firstNameError.textContent = "Only letters allowed (2-30 characters).";
-            valid = false;
-        } else {
-            firstNameError.textContent = "";
-        }
-
-        // Last Name Validation
-        let lastName = document.getElementById("lastName").value.trim();
-        let lastNameError = document.getElementById("lastNameError");
-        if (!nameRegex.test(lastName)) {
-            lastNameError.textContent = "Only letters allowed (2-30 characters).";
-            valid = false;
-        } else {
-            lastNameError.textContent = "";
-        }
-
-        // Email Validation
-        let email = document.getElementById("email").value.trim();
-        let emailError = document.getElementById("emailError");
-        let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-        if (!emailRegex.test(email)) {
-            emailError.textContent = "Invalid email format.";
-            valid = false;
-        } else {
-            emailError.textContent = "";
-        }
-
-        // Password Validation
-        let password = document.getElementById("password").value;
-        let passwordError = document.getElementById("passwordError");
-        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-_])[A-Za-z\d@$!%*?&\-_]{8,20}$/
-        if (!passwordRegex.test(password)) {
-            passwordError.textContent = "Password must be 8-20 chars, with uppercase, lowercase, number, and special char.";
-            valid = false;
-        } else {
-            passwordError.textContent = "";
-        }
-
-        // Confirm Password Validation
-        let confirmPassword = document.getElementById("confirmPassword").value;
-        let confirmPasswordError = document.getElementById("confirmPasswordError");
-        if (confirmPassword !== password) {
-            confirmPasswordError.textContent = "Passwords do not match.";
-            valid = false;
-        } else {
-            confirmPasswordError.textContent = "";
-        }
-
-        // Mobile Number Validation
-        let mobileNumber = document.getElementById("mobileNumber").value;
-        let mobileNumberError = document.getElementById("mobileNumberError");
-        let mobileRegex = /^\d{10,15}$/;
-        if (!mobileRegex.test(mobileNumber)) {
-            mobileNumberError.textContent = "Phone number must be 10-15 digits.";
-            valid = false;
-        } else {
-            mobileNumberError.textContent = "";
-        }
-
-        // Address Validation
-        let address = document.getElementById("address").value;
-        let addressError = document.getElementById("addressError");
-        if (address.length < 5) {
-            addressError.textContent = "Address must be at least 5 characters.";
-            valid = false;
-        } else {
-            addressError.textContent = "";
-        }
-
-        if (!valid) {
-            event.preventDefault();
-        }
-    });
-});
-</script>
-
-
 <?php
-    
+    session_start();
 
-    // wala muna otp to check
-     include "signupverify/send_verification.php";
+    include "signupverify/setotp.php";
 
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["signup"])) {
+        
+        date_default_timezone_set('Asia/Manila');
 
         $firstName = ucfirst(strtolower($_POST['fname']));
         $lastName = ucfirst(strtolower($_POST['lname']));
         $email = $_POST['email'];
-        $password = md5($_POST['password']); //hashed password
+        $password = md5($_POST['password']);
         $address = $_POST['address'];
         $phoneNumber = $_POST['phone'];
+        $created = date("Y-m-d H:i:s");
 
-        // could be used for session later on
-        $fullname = $firstName." ".$lastName;
+        $fullname = $firstName . " " . $lastName;
 
-        //pabalik nlng pag oki na otp, i set ko muna as 0
-        $otp = rand(000000,999999); //random otp number
+        $otp = rand(000000, 999999);
+        $otp_expiry = date("Y-m-d H:i:s", strtotime("+5 minutes"));
 
-        //accountstatus to be checked pa ulit
+        $checkEmail = "SELECT * FROM users WHERE account_Email = '$email'";
+        $result = $connection->query($checkEmail);
 
-        $insertAccount = "INSERT INTO users (account_FName, account_LName, account_Email, account_Password, account_Address, account_PNum, account_Type, otp, created_at) 
-                            VALUES ('$firstName', '$lastName', '$email', '$password', '$address', '$phoneNumber', 'Client',  $otp, NOW())";
+        if ($result->num_rows > 0) {
+            echo "<script>
+                    Swal.fire({
+                        title: 'Email is Already in Use',
+                        text: 'The email you entered is already registered. Please use a different email.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
+                  </script>";
+        } else {
+            $insertAccount = "INSERT INTO users (account_FName, account_LName, account_Email, account_Password, account_Address, account_PNum, account_Type, account_Status, created_at, updated_at, otp, otp_expiry) 
+                              VALUES ('$firstName', '$lastName', '$email', '$password', '$address', '$phoneNumber', 'Client', 'Pending', '$created', '$created', $otp, '$otp_expiry')";
+
+            $insertResult = $connection->query($insertAccount);
+
+            $_SESSION['email'] = $email;
+
+            if ($insertResult == TRUE) {
+                send_verification($fullname, $email, $otp);
         
-        // TEMPORARY
-        // if ($connection->query($insertAccount) === TRUE) {
-        //     // Redirect to login page
-        //     echo "<script>alert('Account created successfully!');</script>";
-        //     header("Location: loginpage.php");
-        //     exit(); 
-        // } else {
-        //     echo "Error: " . $connection->error;
-        // }
-
-        // $connection->close();
-    
-
-
-         $insertResult = $connection->query($insertAccount);
-
-        //check if connected or not
-         if ($insertResult == TRUE) { 
-         send_verification($fullname, $email, $otp); 
-    ?>
-        <script>
-            Swal.fire({
-                position: "center",
-                icon: "success",
-                title: "Successfully added",
-                showConfirmButton: false,
-                timer: 1500
-            });
-    
-            window.location.href = "../signupverify/otpverify.php";
-
-        </script> 
-
-        <?php
-        
-       } else {
-        //if not inserted
-         echo $connection->error; //display table error
-     }
- 
-
-// if($insertAccount == TRUE){
-//     
-//             Swal.fire({
-//                 title: "Account Created!",
-//                 text: "You are now registered!",
-//                 icon: "success",
-//                 showCancelButton: true,
-//                 confirmButtonColor: "#741515",
-//                 cancelButtonColor: "#E4A11B",
-//                 confirmButtonText: "Login",
-//                 cancelButtonText: "Home"
-//             }).then((result) => {
-//                 if (result.isConfirmed) {
-//                     window.location.href = "login.php";
-//                 } else {
-//                     window.location.href = "index.php";
-//                 }
-//             });
-//         </script>
-//     <?php
-//     }else{
-//         echo $connection -> error;
-//     }
-    
+                echo "<script>
+                        Swal.fire({
+                            title: 'OTP Sent!',
+                            text: 'A one-time password has been sent to your email. It will expire in 5 minutes.',
+                            icon: 'info',
+                            confirmButtonText: 'Continue'
+                        }).then(() => {
+                            window.location.replace('signupverify/verify.php');
+                        });
+                      </script>";
+            } else {
+                echo "<script>
+                        Swal.fire({
+                            title: 'Signup Failed',
+                            text: 'An error occurred. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                      </script>";
+            }
+        }
     }
 ?>
