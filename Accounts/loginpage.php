@@ -150,6 +150,21 @@ if(isset($_POST['login'])){
     $email = $_POST['email'];
     $password = md5($_POST['password']);
 
+    $checkEmail = "SELECT * FROM users WHERE account_Email = '$email'";
+    $checkResult = $connection->query($checkEmail);
+
+    if ($checkResult->num_rows == 0) {
+        echo "<script>
+            Swal.fire({
+                title: 'Email Not Found',
+                text: 'The email you entered does not exist. Please sign up.',
+                icon: 'error',
+                confirmButtonColor: '#741515'
+            });
+          </script>";
+        exit(); 
+    }
+
     $loginsql = "SELECT * FROM users WHERE account_Email = '$email' AND account_Password = '$password'";    $loginresult = $connection->query($loginsql);
 
     $loginresult = $connection->query($loginsql);
@@ -166,23 +181,8 @@ if(isset($_POST['login'])){
 
         $_SESSION['username'] = $fullname;
 
-        // Pedeng Swal pede din nde
-        // echo "<script>
-        //         Swal.fire({
-        //             title: 'Login Successful',
-        //             text: 'Welcome, $fullname!',
-        //             icon: 'success',
-        //             confirmButtonColor: '#741515'
-        //         }).then((result) => {
-        //             if (result.isConfirmed) {
-        //                 window.location.href = '../homepage.php';
-        //             }
-        //         });
-        //       </script>";
-        
         echo "<script>window.location.href = '../homepage.php';</script>";
 
-        // Add this exit if you need to prevent further code execution
         exit();
 
         // LOGS code

@@ -1,8 +1,25 @@
 document.addEventListener("DOMContentLoaded", function () {
-    let otpForm = document.getElementById("otp-form");
+    let timer = 60;
+    let resendBtn = document.getElementById("resend-otp");
+    let otpForm = document.querySelector("form");
+    let verifyBtn = document.querySelector("button[name='verify']");
     let otpInputField = document.getElementById("otp-input");
     let otpError = document.getElementById("otp-error");
-    let verifyBtn = document.querySelector("button[name='verify']"); // Get the button
+
+    function startResendTimer() {
+        resendBtn.disabled = true;
+        let interval = setInterval(() => {
+            timer--;
+            resendBtn.innerText = `Resend OTP (${timer}s)`;
+            if (timer === 0) {
+                clearInterval(interval);
+                resendBtn.disabled = false;
+                resendBtn.innerText = "Resend OTP";
+            }
+        }, 1000);
+    }
+
+    startResendTimer();
 
     otpForm.addEventListener("submit", function (event) {
         event.preventDefault();
@@ -15,32 +32,68 @@ document.addEventListener("DOMContentLoaded", function () {
             return;
         }
 
-        verifyBtn.innerHTML = "Verifying..."; // Update button text
-        verifyBtn.disabled = true; // Disable button
+        verifyBtn.innerHTML = "Verifying...";
+        verifyBtn.disabled = true;
 
-        fetch("otpverify.php", {  // This is the crucial line: sending to otpverify.php
+        fetch("otpverify.php", {
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `verify=true&otp=${otpValue}`, // Sending the OTP
+            body: `verify=true&otp=${otpValue}`,
         })
         .then(response => response.text())
         .then(data => {
             console.log("Response from otpverify.php:", data); // Debugging
-            verifyBtn.innerHTML = "Verify"; // Reset button text
-            verifyBtn.disabled = false; // Enable button
+            verifyBtn.innerHTML = "Verify";
+            verifyBtn.disabled = false;
 
             if (data.trim() === "success") {
-                alert("Success!");
-                window.location.href = "../loginpage.php";
+                Swal.fire({
+                    title: "Account Verified!",
+                    text: "You are now registered!",
+                    icon: "success",
+                    confirmButtonText: "OK"
+                }).then(() => {
+                    window.location.href = "../loginpage.php";
+                });
+            } else if (data.trim() === "Incorrect OTP. Please try again.") {
+                Swal.fire("Wrong OTP", data, "error");
+            } else if (data.trim() === "OTP expired. Please request a new OTP.") {
+                Swal.fire("OTP Expired", data, "warning");
             } else {
-                alert("Error: " + data);
+                Swal.fire("Error", data, "error");
             }
         })
         .catch(error => {
             console.error("Fetch error:", error);
-            alert("An error occurred.");
-            verifyBtn.innerHTML = "Verify"; // Reset button text
-            verifyBtn.disabled = false; // Enable button
+            Swal.fire("Error", "Something went wrong. Try again later.", "error");
+            verifyBtn.innerHTML = "Verify";
+            verifyBtn.disabled = false;
+        });
+    });
+
+    resendBtn.addEventListener("click", function() {
+        resendBtn.disabled = true;
+        resendBtn.innerText = "Resending...";
+
+        fetch("resendotp.php", {
+            method: "POST",
+        })
+      .then(response => response.json())
+      .then(data => {
+            if (data.status === "success") {
+                Swal.fire("OTP Resent", data.message, "success");
+                startResendTimer(); // Restart the timer
+            } else {
+                Swal.fire("Error", data.message, "error");
+                resendBtn.disabled = false;
+                resendBtn.innerText = "Resend OTP";
+            }
+        })
+      .catch(error => {
+            console.error("Fetch error:", error);
+            Swal.fire("Error", "Something went wrong. Try again later.", "error");
+            resendBtn.disabled = false;
+            resendBtn.innerText = "Resend OTP";
         });
     });
 });

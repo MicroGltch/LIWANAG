@@ -110,6 +110,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (!valid) {
             event.preventDefault();
+            return false; 
         }
     });
 });

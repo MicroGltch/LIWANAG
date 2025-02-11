@@ -1,5 +1,6 @@
 <?php
 session_start();
+include "../dbconfig.php"
 ?>
 
 <!DOCTYPE html>
@@ -78,7 +79,16 @@ session_start();
         <p class="uk-flex uk-flex-center">Enter your personal details to start your journey with us.</p>
 
         <!-- Form Fields -->
-        <form id="signupvalidate" class="uk-form-stacked uk-grid-medium" uk-grid method="POST" action="signuppage.php">
+        <form id="signupvalidate" class="uk-form-stacked uk-grid-medium" uk-grid method="POST" action="signupverify/signupprocess.php">
+            <?php
+                if (isset($_SESSION['signup_error'])) {
+                    echo "<div class='uk-alert-danger' uk-alert>
+                            <a class='uk-alert-close' uk-close></a>
+                            <p>" . $_SESSION['signup_error'] . "</p>
+                          </div>";
+                    unset($_SESSION['signup_error']); // Remove the message after displaying it
+                }
+            ?>
             <!-- First Name -->
             <div class="uk-width-1@s uk-width-1-2@l">
                 <label class="uk-form-label" for="firstName">First Name</label>
@@ -184,79 +194,12 @@ session_start();
     </footer>
 
     <!-- Javascript -->
-     <script src="accountJS/signup.js"></script>
-     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="accountJS/signup.js"></script>
 
 </body>
 
 </html>
 
 
-<?php
-    session_start();
 
-    include "signupverify/setotp.php";
-
-    if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["signup"])) {
-        
-        date_default_timezone_set('Asia/Manila');
-
-        $firstName = ucfirst(strtolower($_POST['fname']));
-        $lastName = ucfirst(strtolower($_POST['lname']));
-        $email = $_POST['email'];
-        $password = md5($_POST['password']);
-        $address = $_POST['address'];
-        $phoneNumber = $_POST['phone'];
-        $created = date("Y-m-d H:i:s");
-
-        $fullname = $firstName . " " . $lastName;
-
-        $otp = rand(000000, 999999);
-        $otp_expiry = date("Y-m-d H:i:s", strtotime("+5 minutes"));
-
-        $checkEmail = "SELECT * FROM users WHERE account_Email = '$email'";
-        $result = $connection->query($checkEmail);
-
-        if ($result->num_rows > 0) {
-            echo "<script>
-                    Swal.fire({
-                        title: 'Email is Already in Use',
-                        text: 'The email you entered is already registered. Please use a different email.',
-                        icon: 'warning',
-                        confirmButtonText: 'OK'
-                    });
-                  </script>";
-        } else {
-            $insertAccount = "INSERT INTO users (account_FName, account_LName, account_Email, account_Password, account_Address, account_PNum, account_Type, account_Status, created_at, updated_at, otp, otp_expiry) 
-                              VALUES ('$firstName', '$lastName', '$email', '$password', '$address', '$phoneNumber', 'Client', 'Pending', '$created', '$created', $otp, '$otp_expiry')";
-
-            $insertResult = $connection->query($insertAccount);
-
-            $_SESSION['email'] = $email;
-
-            if ($insertResult == TRUE) {
-                send_verification($fullname, $email, $otp);
-        
-                echo "<script>
-                        Swal.fire({
-                            title: 'OTP Sent!',
-                            text: 'A one-time password has been sent to your email. It will expire in 5 minutes.',
-                            icon: 'info',
-                            confirmButtonText: 'Continue'
-                        }).then(() => {
-                            window.location.replace('signupverify/verify.php');
-                        });
-                      </script>";
-            } else {
-                echo "<script>
-                        Swal.fire({
-                            title: 'Signup Failed',
-                            text: 'An error occurred. Please try again.',
-                            icon: 'error',
-                            confirmButtonText: 'OK'
-                        });
-                      </script>";
-            }
-        }
-    }
-?>

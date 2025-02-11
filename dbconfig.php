@@ -7,10 +7,11 @@ $database = "u999302509_liwanag_db";
 
 $connection = new mysqli($servername, $username, $password, $database);
 
-if ($connection->connect_error) {
-    echo "<script>console.error('Connection failed: " . addslashes($conn->connect_error) . "');</script>";
-} else {
-    echo "<script>console.log('You are connected to the database.');</script>";
-}
+// Database Connection Check
+// if ($connection->connect_error) {
+//     echo "<script>console.error('Connection failed: " . addslashes($conn->connect_error) . "');</script>";
+// } else {
+//     echo "<script>console.log('You are connected to the database.');</script>";
+// }
 
 ?>
