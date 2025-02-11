@@ -3,6 +3,8 @@
     require_once "../../dbconfig.php";
     include "setotp.php";
 
+    date_default_timezone_set('Asia/Manila');  // Or your desired timezone
+
     if (!isset($_SESSION['email'])) {
         echo json_encode(["status" => "error", "message" => "Session expired. Please sign up again."]);
         exit();

@@ -82,7 +82,7 @@ document.addEventListener("DOMContentLoaded", function () {
       .then(data => {
             if (data.status === "success") {
                 Swal.fire("OTP Resent", data.message, "success");
-                startResendTimer(); // Restart the timer
+                startResendTimer(); 
             } else {
                 Swal.fire("Error", data.message, "error");
                 resendBtn.disabled = false;

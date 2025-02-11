@@ -1,58 +1,68 @@
+function togglePassword() {
+    var passwordInput = document.getElementById("login-pass");
+    var toggleIcon = document.getElementById("togglePasswordIcon");
 
-//Sample login validate
-
-function validate_login() {
-    var validate_email = validate_emailadd();
-    var validate_pass = validate_password();
-
-    if (!validate_email || !validate_pass) {
-        return false;
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        toggleIcon.classList.remove("fa-eye");
+        toggleIcon.classList.add("fa-eye-slash");
+    } else {
+        passwordInput.type = "password";
+        toggleIcon.classList.remove("fa-eye-slash");
+        toggleIcon.classList.add("fa-eye");
     }
-    return true;
 }
 
+function validate_login() {
+    var isEmailValid = validate_emailadd();
+    var isPasswordValid = validate_password();
 
-    function validate_emailadd(){
-        var email = document.getElementById("login-email");
-        var email_error = document.getElementById("email-error");
-
-        if(email.value == ''){
-            email.classList.add("is-invalid");
-            error_text = "Enter email";
-            email_error.innerHTML = error_text;
-            email_error.classList.add("invalid-feedback");
-            return false;
-        }else{
-            var emailregex = /^\S+@\S+\.\S+$/;
-            if(!emailregex.test(email.value)){
-                email.classList.add("is-invalid");
-                error_text = "Enter a valid email";
-                email_error.innerHTML = error_text;
-                email_error.classList.add("invalid-feedback");
-                return false;
-            }else{
-                email.classList.remove("is-invalid");
-                email_error.innerHTML = "";
-                email_error.classList.remove("invalid-feedback");
-                return true;
-            }
-        }
+    if (!isEmailValid || !isPasswordValid) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Please fill in all required fields.',
+            icon: 'error',
+            confirmButtonColor: '#741515' 
+        });
+        return false; 
     }
 
-    function validate_password(){
-        var pass = document.getElementById("login-pass");
-        var pass_error = document.getElementById("pass-error");
+    return true; 
+}
 
-        if(pass.value == ''){
-            pass.classList.add("is-invalid");
-            error_text = "Enter password";
-            pass_error.innerHTML = error_text;
-            pass_error.classList.add("invalid-feedback");
+function validate_emailadd() {
+    var email = document.getElementById("login-email");
+    var email_error = document.getElementById("email-error");
+
+    if (email.value.trim() === '') { 
+        email.classList.add("is-invalid");
+        email_error.textContent = "Enter email"; 
+        return false;
+    } else {
+        var emailregex = /^\S+@\S+\.\S+$/;
+        if (!emailregex.test(email.value)) {
+            email.classList.add("is-invalid");
+            email_error.textContent = "Enter a valid email";
             return false;
-        }else{
-            pass.classList.remove("is-invalid");
-            pass_error.innerHTML = "";
-            pass_error.classList.remove("invalid-feedback");
+        } else {
+            email.classList.remove("is-invalid");
+            email_error.textContent = "";
             return true;
         }
     }
+}
+
+function validate_password() {
+    var pass = document.getElementById("login-pass");
+    var pass_error = document.getElementById("pass-error");
+
+    if (pass.value.trim() === '') { 
+        pass.classList.add("is-invalid");
+        pass_error.textContent = "Enter password";
+        return false;
+    } else {
+        pass.classList.remove("is-invalid");
+        pass_error.textContent = "";
+        return true;
+    }
+}

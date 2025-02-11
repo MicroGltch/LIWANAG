@@ -84,16 +84,19 @@ session_start();
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">Email</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Email..." required name="email">
+                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Email..." name="email">
+                        <span class="invalid-feedback" id="email-error"></span> 
                     </div>
                 </div>
             
                 <!-- Password -->
                 <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label" for="form-stacked-text">Password</label>
+                    <label class="uk-form-label" for="login-pass">Password</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="password" placeholder="Input your Password..." required name="password">
-                    </div>
+                        <input class="uk-input" id="login-pass" type="password" placeholder="Input your Password..." name="password">
+                        <span style="position: absolute; right: 10px; cursor: pointer;" onclick="togglePassword()">
+                            <i class="fas fa-eye" id="togglePasswordIcon"></i>  </span>
+                        <span class="invalid-feedback" id="pass-error"></span>  </div>
                 </div>
 
                 <!-- Add function -->

@@ -43,7 +43,7 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="otp-input">OTP Verification.<br>If you don't see this email in your inbox, check your spam folder.</label>
                     <div class="uk-form-controls">
-                        <input class="uk-input" id="otp-input" type="text" required name="otp">
+                        <input class="uk-input" id="otp-input" type="text" name="otp">
                         <span class="error" id="otp-error" style="color: red;"></span>
                     </div>
                 </div>
