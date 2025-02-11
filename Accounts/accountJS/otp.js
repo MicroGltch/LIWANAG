@@ -1,72 +1,46 @@
 document.addEventListener("DOMContentLoaded", function () {
-    let timer = 60;
-    let resendBtn = document.getElementById("resend-otp");
-    let otpForm = document.querySelector("form");
-    let verifyBtn = document.querySelector("button[name='verify']");
+    let otpForm = document.getElementById("otp-form");
     let otpInputField = document.getElementById("otp-input");
     let otpError = document.getElementById("otp-error");
-
-    function startResendTimer() {
-        resendBtn.disabled = true;
-        let interval = setInterval(() => {
-            timer--;
-            resendBtn.innerText = `Resend OTP (${timer}s)`;
-            if (timer === 0) {
-                clearInterval(interval);
-                resendBtn.disabled = false;
-                resendBtn.innerText = "Resend OTP";
-            }
-        }, 1000);
-    }
-
-    startResendTimer();
+    let verifyBtn = document.querySelector("button[name='verify']"); // Get the button
 
     otpForm.addEventListener("submit", function (event) {
         event.preventDefault();
-    
+
         let otpValue = otpInputField.value.trim();
         otpError.textContent = "";
-    
-        if (!otpValue) { 
+
+        if (!otpValue) {
             otpError.textContent = "Please enter a valid OTP.";
             return;
         }
-    
-        verifyBtn.innerHTML = "Verifying...";
-        verifyBtn.disabled = true;
-    
-        fetch("otpverify.php", {
+
+        verifyBtn.innerHTML = "Verifying..."; // Update button text
+        verifyBtn.disabled = true; // Disable button
+
+        fetch("otpverify.php", {  // This is the crucial line: sending to otpverify.php
             method: "POST",
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `verify=true&otp=${otpValue}`,
+            body: `verify=true&otp=${otpValue}`, // Sending the OTP
         })
-        .then(response => response.text()) // Read response as plain text
+        .then(response => response.text())
         .then(data => {
-            verifyBtn.innerHTML = "Verify";
-            verifyBtn.disabled = false;
-    
+            console.log("Response from otpverify.php:", data); // Debugging
+            verifyBtn.innerHTML = "Verify"; // Reset button text
+            verifyBtn.disabled = false; // Enable button
+
             if (data.trim() === "success") {
-                Swal.fire({
-                    title: "Account Verified!",
-                    text: "You are now registered!",
-                    icon: "success",
-                    confirmButtonText: "OK"
-                }).then(() => {
-                    window.location.href = "../loginpage.php";
-                });
-            } else if (data.trim() === "Incorrect OTP. Please try again.") {
-                Swal.fire("Wrong OTP", data, "error");
-            } else if (data.trim() === "OTP expired. Please request a new OTP.") {
-                Swal.fire("OTP Expired", data, "warning");
+                alert("Success!");
+                window.location.href = "../loginpage.php";
             } else {
-                Swal.fire("Error", data, "error");
+                alert("Error: " + data);
             }
         })
-        .catch(() => {
-            Swal.fire("Error", "Something went wrong. Try again later.", "error");
-            verifyBtn.innerHTML = "Verify";
-            verifyBtn.disabled = false;
+        .catch(error => {
+            console.error("Fetch error:", error);
+            alert("An error occurred.");
+            verifyBtn.innerHTML = "Verify"; // Reset button text
+            verifyBtn.disabled = false; // Enable button
         });
     });
-    
 });

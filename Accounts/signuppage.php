@@ -110,10 +110,12 @@ session_start();
             <div class="uk-width-1@s uk-width-1-2@l">
                 <label class="uk-form-label" for="password">Password</label>
                 <div class="uk-form-controls">
-                    <div class="uk-inline uk-width-1-1">
-                        <input class="uk-input password-input" id="password" name="password" type="password" maxlength="20" minlength="8" placeholder="Input your Password..." >
-                        <span class="toggle-password">
-                            <i class="fa fa-eye" id="togglePasswordIcon" onclick="togglePassword('password', 'togglePasswordIcon')"></i>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input class="uk-input password-input" id="password" name="password" type="password" 
+                            maxlength="20" minlength="8" placeholder="Input your Password..." 
+                            style="width: 100%; padding-right: 40px;">
+                        <span style="position: absolute; right: 10px; cursor: pointer;" onclick="togglePassword()">
+                            <i class="fa fa-eye" id="togglePasswordIcon"></i>
                         </span>
                     </div>
                 </div>
@@ -124,10 +126,12 @@ session_start();
             <div class="uk-width-1@s uk-width-1-2@l">
                 <label class="uk-form-label" for="confirmPassword">Confirm Password</label>
                 <div class="uk-form-controls">
-                    <div class="uk-inline uk-width-1-1">
-                        <input class="uk-input password-input" id="confirmPassword" name="confirmPassword" type="password" maxlength="20" minlength="8" placeholder="Confirm your Password..." >
-                        <span class="toggle-password">
-                            <i class="fa fa-eye" id="toggleConfirmPasswordIcon" onclick="toggleConfirmPassword('confirmPassword', 'toggleConfirmPasswordIcon')"></i>
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input class="uk-input password-input" id="confirmPassword" name="confirmPassword" type="password" 
+                            maxlength="20" minlength="8" placeholder="Confirm your Password..." 
+                            style="width: 100%; padding-right: 40px;">
+                        <span style="position: absolute; right: 10px; cursor: pointer;" onclick="toggleConfirmPassword()">
+                            <i class="fa fa-eye" id="toggleConfirmPasswordIcon"></i>
                         </span>
                     </div>
                 </div>

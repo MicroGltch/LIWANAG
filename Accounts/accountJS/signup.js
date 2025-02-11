@@ -106,8 +106,6 @@ document.addEventListener("DOMContentLoaded", function () {
         } else {
             addressError.textContent = "";
         }
-
-        //Email Replication Validation
         
 
         if (!valid) {

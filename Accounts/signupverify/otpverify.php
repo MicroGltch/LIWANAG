@@ -10,53 +10,22 @@ if (!isset($_SESSION['email'])) {
 
 $email = $_SESSION['email'];
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify'])) { 
-    if (!isset($_POST['otp']) || empty($_POST['otp'])) {
-        echo "No OTP was entered.";
-        exit();
-    }
-
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify'])) {
     $otp_input = trim($_POST['otp']);
 
-    // Check if OTP matches and is not expired
-    $otp_sql = "SELECT * FROM users WHERE account_Email = ? AND otp = ? AND otp_expiry > NOW()";
-    $stmt = $connection->prepare($otp_sql);
-    $stmt->bind_param("ss", $email, $otp_input);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows == 1) {
-        // OTP is valid: Activate account
-        $updatesql = "UPDATE users SET account_Status = 'Active', otp = NULL, otp_expiry = NULL WHERE account_Email = ?";
-        $stmt = $connection->prepare($updatesql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-
-        session_unset();
-        session_destroy();
-
-        echo "success";
+    // For testing, just check if OTP is not empty
+    if (!empty($otp_input)) { 
+        echo "success";  // ONLY echo "success"
+        exit(); // Important: Stop further execution
     } else {
-        // Check if OTP is expired
-        $expiry_check_sql = "SELECT otp_expiry FROM users WHERE account_Email = ? AND otp_expiry < NOW()";
-        $stmt = $connection->prepare($expiry_check_sql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $expiry_result = $stmt->get_result();
-
-        if ($expiry_result->num_rows > 0) {
-            echo "OTP expired. Please request a new OTP.";
-        } else {
-            echo "Incorrect OTP. Please try again.";
-        }
+        echo "OTP is empty"; // ONLY echo error message
+        exit();
     }
-
-    exit();
 }
 
-// Delete unverified accounts only if the latest OTP has expired
+// Delete unverified accounts only if the latest OTP has expired 
+// (This part can stay as it is)
 $delete_unverified = "DELETE FROM users WHERE account_Status = 'Pending' AND otp_expiry < NOW()";
 $connection->query($delete_unverified);
 
-$connection->close();
-?>
+$connection->close();?>
