@@ -1,50 +1,51 @@
 <?php
-session_start();
-require_once "../../dbconfig.php";
-include "setotp.php";
+    session_start();
+    require_once "../../dbconfig.php";
+    include "setotp.php";
 
-if (!isset($_SESSION['email'])) {
-    echo json_encode(["status" => "error", "message" => "Session expired. Please sign up again."]);
-    exit();
-}
-
-$email = $_SESSION['email'];
-
-// Check last OTP request time (using NOW() for consistency)
-$check_time_sql = "SELECT otp_expiry FROM users WHERE account_Email = ?";
-$stmt = $connection->prepare($check_time_sql);
-$stmt->bind_param("s", $email);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result && $row = $result->fetch_assoc()) { // Check $result and fetch
-    $otp_expiry_time = strtotime($row['otp_expiry']);
-    $current_time = time();
-
-    if ($current_time < $otp_expiry_time) {
-        $remaining_seconds = $otp_expiry_time - $current_time;
-        echo json_encode(["status" => "error", "message" => "Please wait " . $remaining_seconds . " seconds before resending OTP."]);
+    if (!isset($_SESSION['email'])) {
+        echo json_encode(["status" => "error", "message" => "Session expired. Please sign up again."]);
         exit();
     }
-} else {
-    // Handle the case where the query might have failed or no row was found.
-    // This could happen if the user's data is somehow inconsistent.
-    echo json_encode(["status" => "error", "message" => "Error checking OTP expiry. Please try again later."]);
-    exit();
-}
 
+    $email = $_SESSION['email'];
 
-// Generate new OTP and update database (using NOW() for consistency)
-$new_otp = rand(100000, 999999);
-$update_otp_sql = "UPDATE users SET otp = ?, otp_expiry = NOW() + INTERVAL 5 MINUTE WHERE account_Email = ?";
-$stmt = $connection->prepare($update_otp_sql);
-$stmt->bind_param("ss", $new_otp, $email);
+    // 1. Check if it's been at least 1 minute since the last OTP request (using otp_time)
+    $last_request_check_sql = "SELECT otp_time FROM users WHERE account_Email = ?";
+    $stmt = $connection->prepare($last_request_check_sql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $result = $stmt->get_result();
 
-if ($stmt->execute()) {
-    // Send new OTP email
-    send_verification("User", $email, $new_otp);
-    echo json_encode(["status" => "success", "message" => "A new OTP has been sent to your email."]);
-} else {
-    echo json_encode(["status" => "error", "message" => "Failed to update OTP. Please try again later."]);
-}
+    if ($result && $row = $result->fetch_assoc()) {
+        $last_request_time = strtotime($row['otp_time']); // Convert otp_time to timestamp
+        $current_time = time();
+
+        if ($current_time - $last_request_time < 60) { // 60 seconds = 1 minute
+            $remaining_seconds = 60 - ($current_time - $last_request_time);
+            echo json_encode(["status" => "error", "message" => "Please wait " . $remaining_seconds . " seconds before resending OTP."]);
+            exit();
+        }
+    } else {
+        echo json_encode(["status" => "error", "message" => "Error checking last OTP request time. Please try again later."]);
+        exit();
+    }
+
+    // 2. Generate NEW OTP and update database (including otp_time)
+    $new_otp = rand(100000, 999999);
+    $new_otp_expiry = date("Y-m-d H:i:s", strtotime("+5 minutes")); // Calculate expiry time
+
+    $update_otp_sql = "UPDATE users SET otp = ?, otp_expiry = ?, otp_time = NOW() WHERE account_Email = ?"; // Update all three
+    $stmt = $connection->prepare($update_otp_sql);
+    $stmt->bind_param("sss", $new_otp, $new_otp_expiry, $email); // Bind all three values
+
+    if ($stmt->execute()) {
+        send_verification("User", $email, $new_otp); // Send the NEW OTP
+        echo json_encode(["status" => "success", "message" => "A new OTP has been sent to your email."]);
+    } else {
+        echo json_encode(["status" => "error", "message" => "Failed to update OTP. Please try again later."]);
+    }
+
+    $stmt->close(); // Close the statement
+    $connection->close();
 ?>

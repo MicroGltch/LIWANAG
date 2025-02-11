@@ -28,8 +28,8 @@
             header("Location: ../signuppage.php"); // Corrected redirect path
             exit();
         } else {
-            $insertAccount = "INSERT INTO users (account_FName, account_LName, account_Email, account_Password, account_Address, account_PNum, account_Type, account_Status, created_at, updated_at, otp, otp_expiry) 
-                            VALUES ('$firstName', '$lastName', '$email', '$password', '$address', '$phoneNumber', 'Client', 'Pending', '$created', '$created', $otp, '$otp_expiry')";
+            $insertAccount = "INSERT INTO users (account_FName, account_LName, account_Email, account_Password, account_Address, account_PNum, account_Type, account_Status, created_at, updated_at, otp, otp_time, otp_expiry) 
+                            VALUES ('$firstName', '$lastName', '$email', '$password', '$address', '$phoneNumber', 'Client', 'Pending', '$created', '$created', $otp,  '$created', '$otp_expiry')";
 
             $insertResult = $connection->query($insertAccount); // Use $connection here
 
