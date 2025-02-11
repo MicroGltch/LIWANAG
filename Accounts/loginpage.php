@@ -1,7 +1,3 @@
-<?php
-include "../dbconfig.php";
-session_start();
-?>
 <!DOCTYPE html>
 <head>
     <meta name="viewport" content="width=device-width" />
@@ -148,47 +144,84 @@ session_start();
 
 <?php
 
-if(isset($_POST['login'])){
+    include "../dbconfig.php";
+    session_start();
 
-    $email = $_POST['email'];
-    $password = md5($_POST['password']);
+    if (isset($_POST['login'])) {
 
-    $checkEmail = "SELECT * FROM users WHERE account_Email = '$email'";
-    $checkResult = $connection->query($checkEmail);
+        $email = $_POST['email'];
+        $password = md5($_POST['password']);
 
-    if ($checkResult->num_rows == 0) {
-        echo "<script>
-            Swal.fire({
-                title: 'Email Not Found',
-                text: 'The email you entered does not exist. Please sign up.',
-                icon: 'error',
-                confirmButtonColor: '#741515'
-            });
-          </script>";
-        exit(); 
+        $checkEmail = "SELECT * FROM users WHERE account_Email = '$email'";
+        $checkResult = $connection->query($checkEmail);
+
+        if (!$email || !$password) {
+            echo "<script>
+                Swal.fire({
+                    title: 'Incomplete Fields',
+                    text: 'Please fill in all the required fields.',
+                    icon: 'error',
+                    confirmButtonColor: '#741515'
+                });
+            </script>";
+            exit();
+        } else if ($checkResult->num_rows == 0) {
+            echo "<script>
+                Swal.fire({
+                    title: 'Email Not Found',
+                    text: 'The email you entered does not exist.',
+                    icon: 'error',
+                    confirmButtonColor: '#741515'
+                });
+            </script>";
+            exit();
+        }
+
+        $loginsql = "SELECT * FROM users WHERE account_Email = '$email' AND account_Password = '$password'";
+        $loginresult = $connection->query($loginsql);
+
+        if ($loginresult) { // Check if the query executed successfully
+            if ($loginresult->num_rows > 0) {
+                $row = $loginresult->fetch_assoc();
+                $fullname = $row['account_FName'] . " " . $row['account_LName'];
+                $_SESSION['username'] = $fullname;
+                echo "console.error('Login successful for: ' . $fullname)";
+                echo "<script>window.location.href = '../homepage.php';</script>";
+                exit();
+            } else {
+                echo "<script>console.error('Password incorrect.');</script>";  // Use console.error for errors
+                echo "<script>
+                    Swal.fire({
+                        title: 'Invalid Login',
+                        text: 'Please check your email and password',
+                        icon: 'error',
+                        confirmButtonColor: '#741515'
+                    });
+                </script>";
+                exit(); // Important: Add exit() after the Swal
+            }
+        } else {
+            echo "<script>console.error('Database query error: " . $connection->error . "');</script>";
+            echo "<script>
+                Swal.fire({
+                    title: 'Database Error',
+                    text: 'An error occurred during login. Please try again later.',
+                    icon: 'error',
+                    confirmButtonColor: '#741515'
+                });
+            </script>";
+            exit(); // Important: Add exit() here as well
+        }
+
+        $connection->close();
+    } else {
+        echo "<script>console.log('No POST data received.');</script>";
     }
 
-    $loginsql = "SELECT * FROM users WHERE account_Email = '$email' AND account_Password = '$password'";    $loginresult = $connection->query($loginsql);
 
-    $loginresult = $connection->query($loginsql);
+?>
 
-    if($loginresult->num_rows > 0){
-
-        $row = $loginresult->fetch_assoc();
-        
-        //for logs dagdag nlng if need
-        $accountType = $row['account_Type'];
-        $userId = $row['account_id'];
-
-        $fullname = $row['account_FName'] . " " . $row['account_LName'];
-
-        $_SESSION['username'] = $fullname;
-
-        echo "<script>window.location.href = '../homepage.php';</script>";
-
-        exit();
-
-        // LOGS code
+        <!-- // LOGS code
 
         // $logSQL = "Insert into tbl_logs(user_id, user_name, type, action, log_date) values('$userid', '$fullname', '$usertype', 'Logged In', NOW())";
         // $connection ->query($logSQL);
@@ -200,26 +233,4 @@ if(isset($_POST['login'])){
         // } else if($usertype == 'User'){
         //     header("location: order.php");
         //     exit();
-        // }
-    }
-    echo "<script>
-            Swal.fire({
-                title: 'Invalid Login',
-                text: 'Please check your email and password',
-                icon: 'error',
-                confirmButtonColor: '#741515'
-            });
-        </script>";
-
-    $connection->close();
-}
-
-
-?>
-
-
-
-
-
-
-
+        // } -->

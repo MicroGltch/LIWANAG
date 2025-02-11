@@ -3,7 +3,7 @@
     require_once "../../dbconfig.php";
     include "setotp.php";
 
-    date_default_timezone_set('Asia/Manila');  // Or your desired timezone
+    date_default_timezone_set('Asia/Manila');
 
     if (!isset($_SESSION['email'])) {
         echo json_encode(["status" => "error", "message" => "Session expired. Please sign up again."]);
@@ -12,24 +12,28 @@
 
     $email = $_SESSION['email'];
 
-    // 1. Check if it's been at least 1 minute since the last OTP request (using otp_time)
-    $last_request_check_sql = "SELECT otp_time FROM users WHERE account_Email = ?";
-    $stmt = $connection->prepare($last_request_check_sql);
+    // 1. Check Account Status FIRST
+    $check_active_sql = "SELECT account_Status FROM users WHERE account_Email = ?";
+    $stmt = $connection->prepare($check_active_sql); // Use $stmt consistently
     $stmt->bind_param("s", $email);
     $stmt->execute();
-    $result = $stmt->get_result();
+    $result = $stmt->get_result(); // Use $result consistently
 
-    if ($result && $row = $result->fetch_assoc()) {
-        $last_request_time = strtotime($row['otp_time']); // Convert otp_time to timestamp
-        $current_time = time();
+    if ($result && $row = $result->fetch_assoc()) { // Use $row consistently
+        if ($row['account_Status'] === 'Active') {
+            $update_null_sql = "UPDATE users SET otp = NULL, otp_time = NULL, otp_expiry = NULL WHERE account_Email = ?";
+            $stmt_null = $connection->prepare($update_null_sql);
+            $stmt_null->bind_param("s", $email);
+            $stmt_null->execute();
+            $stmt_null->close();
+            $stmt->close(); // Close the status check statement
 
-        if ($current_time - $last_request_time < 60) { // 60 seconds = 1 minute
-            $remaining_seconds = 60 - ($current_time - $last_request_time);
-            echo json_encode(["status" => "error", "message" => "Please wait " . $remaining_seconds . " seconds before resending OTP."]);
+            echo json_encode(["status" => "success", "message" => "Account is already active."]);
             exit();
         }
+        $stmt->close(); // Close the status check statement
     } else {
-        echo json_encode(["status" => "error", "message" => "Error checking last OTP request time. Please try again later."]);
+        echo json_encode(["status" => "error", "message" => "Error checking account status."]);
         exit();
     }
 

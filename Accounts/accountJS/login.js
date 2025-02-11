@@ -17,17 +17,7 @@ function validate_login() {
     var isEmailValid = validate_emailadd();
     var isPasswordValid = validate_password();
 
-    if (!isEmailValid || !isPasswordValid) {
-        Swal.fire({
-            title: 'Error',
-            text: 'Please fill in all required fields.',
-            icon: 'error',
-            confirmButtonColor: '#741515' 
-        });
-        return false; 
-    }
-
-    return true; 
+    return isEmailValid && isPasswordValid; 
 }
 
 function validate_emailadd() {
@@ -56,7 +46,7 @@ function validate_password() {
     var pass = document.getElementById("login-pass");
     var pass_error = document.getElementById("pass-error");
 
-    if (pass.value.trim() === '') { 
+    if (pass.value.trim() === '') {
         pass.classList.add("is-invalid");
         pass_error.textContent = "Enter password";
         return false;
@@ -66,3 +56,4 @@ function validate_password() {
         return true;
     }
 }
+
