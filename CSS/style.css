@@ -1,0 +1,219 @@
+/*    REFERENCES    */
+/*    SELECTOR     */ /*    EXAMPLE     */ /*                  DESCRIPTION                   */
+/*    element     */ /*        p       */ /*            Selects all <p> elements            */
+/*      #id      */ /*   #firstname   */ /*    Selects the element with id="firstname"     */
+/*      *       */ /*        *       */ /*            Selects all elements                */
+/*   .class    */ /*     .intro     */ /*   Selects all elements with class="intro"      */
+/*   .class    */ /*    p.intro    */ /*  Selects all <p> elements with class="intro"   */
+
+html{
+    background-color:#f2f4f8;
+    background-position: center;
+    background-attachment: fixed;
+    background-size: cover;
+    background-repeat: no-repeat;
+    margin: 0;
+    padding: 0;
+
+    font-family: 'Inter', sans-serif; 
+}
+
+
+h3.uk-card-title{    
+    font-family: 'Roboto',sans-serif;
+    font-weight: 800;
+    font-size: 42px;
+    color:#21272A;
+}
+
+p{
+    font-family: 'Roboto', sans-serif;
+    color: #666;
+}
+
+.create-acc-card{
+    width: 750px; 
+    padding-left: 70px;
+    padding-right: 70px;
+    padding-top: 40px;
+    padding-bottom: 30px;
+    margin-top: 35px;
+    margin-bottom: 35px;
+}
+
+::placeholder{
+    font-size: 13px;
+}
+
+.signup-btn-div{
+    margin-top: 50px !important; 
+}
+
+.login-btn-div{
+    margin-top: 50px !important; 
+}
+
+.login-redirect-txt{
+    width: inherit;
+}
+
+.signup-redirect-txt{
+    width: inherit;
+}
+
+.forgotPass-btn{
+    color: #001D6C;
+}
+
+
+.footer{    
+    width:auto;
+    text-align: center;
+    background-color: #1a202c;
+    padding: 2%;
+}
+
+.footer-text{
+    font-family: 'Roboto', sans-serif;
+    color: #ffffff;
+    margin-bottom: 0px;
+}
+
+.uk-section{    
+    height: 100vh;
+
+}
+
+.welcome-title{
+    font-size: 50px !important;
+    font-weight: bold !important;
+    margin-bottom: 15px !important;
+    color: #ffffff !important;
+}
+
+.welcome-description{
+    color: #ffffff !important;
+}
+
+
+
+
+.uk-navbar-container {
+    transition: background-color 0.3s ease-in-out;
+    z-index: 1000; 
+}
+
+
+.uk-navbar-transparent {
+    background-color: transparent !important;
+}
+
+
+.uk-navbar-sticky {
+    background-color: rgba(255, 255, 255, 0.9) !important; 
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
+}
+
+
+.uk-navbar-transparent a {
+    color: white !important;
+}
+
+.uk-navbar-sticky a {
+    color: black !important;
+}
+
+
+#section1 {
+    background-image: url(section1bg.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    height: 740px;
+    position: relative;
+    margin-top: -80px; 
+    padding-top: 80px; 
+}
+
+
+
+
+#section2{
+background-color: #ffffff;
+padding-top: 150px !important;
+
+}
+
+#section3{
+background-color: #ffffff;
+}
+
+.homepage-welcome {
+    padding: 20px;
+}
+
+.welcome-title {
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.welcome-description {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.welcome-book {
+    font-size: 16px;
+    padding: 10px 20px;
+    background-color: #001D6C;
+    color: white;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+/* Margin and Padding Adjustments based sa screen*/
+@media screen and (max-width: 1024px) {
+    .homepage-welcome {
+        text-align: center;
+        margin: 20px auto;
+        padding-left: 50px ;
+        padding-right: 50px ;
+    }
+}
+
+@media screen and (min-width: 1025px) {
+    .homepage-welcome {
+        margin-left: 150px;
+        margin-right: 150px;
+        margin-top: 100px;
+    }
+}
+
+.service-title {
+    text-align: center;
+}
+
+.service {
+    margin-bottom: 0px !important;
+    text-align: center;
+    margin-top: -50px;
+}
+
+.service-description {
+    text-align: center;
+    margin-top: -10px;
+}
+
+.ie-img {
+    display: flex;
+    justify-content: center;
+}
+
+@media (max-width: 768px) {
+    /* Reduce parallax effects further if needed */
+    [uk-parallax] {
+        transform: none !important; /* Stops any unwanted side movement */
+    }
+}
