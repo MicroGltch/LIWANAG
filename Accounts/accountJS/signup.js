@@ -33,12 +33,16 @@ document.addEventListener("DOMContentLoaded", function () {
 
         let valid = true;
 
-        // First Name Validation
+            // First Name Validation
         let firstName = document.getElementById("firstName").value.trim();
         let firstNameError = document.getElementById("firstNameError");
-        let nameRegex = /^[A-Za-z]{2,30}$/;
+        let nameRegex = /^[A-Za-z](?:[A-Za-z\s]*)$/; // Allows letters and spaces, must start with a letter
+
         if (!nameRegex.test(firstName)) {
-            firstNameError.textContent = "Only letters allowed (2-30 characters).";
+            firstNameError.textContent = "Only letters and spaces allowed.";
+            valid = false;
+        } else if (firstName.length < 2 || firstName.length > 30) {
+            firstNameError.textContent = "Must be between 2 and 30 characters.";
             valid = false;
         } else {
             firstNameError.textContent = "";
@@ -47,8 +51,12 @@ document.addEventListener("DOMContentLoaded", function () {
         // Last Name Validation
         let lastName = document.getElementById("lastName").value.trim();
         let lastNameError = document.getElementById("lastNameError");
+
         if (!nameRegex.test(lastName)) {
-            lastNameError.textContent = "Only letters allowed (2-30 characters).";
+            lastNameError.textContent = "Only letters and spaces allowed.";
+            valid = false;
+        } else if (lastName.length < 2 || lastName.length > 30) {
+            lastNameError.textContent = "Must be between 2 and 30 characters.";
             valid = false;
         } else {
             lastNameError.textContent = "";
