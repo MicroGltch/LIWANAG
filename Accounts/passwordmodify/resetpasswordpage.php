@@ -1,3 +1,27 @@
+<?php
+    require_once "../../dbconfig.php";
+
+    if (!isset($_GET['token'])) {
+        die("Invalid request.");
+    }
+
+    $token = $_GET['token'];
+
+    // Check if token exists and is valid
+    $query = "SELECT account_Email FROM users WHERE reset_token = ? AND reset_token_expiry > NOW()";
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("s", $token);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows == 1) {
+        $row = $result->fetch_assoc();
+        $email = $row['account_Email'];
+    } else {
+        die("Invalid or expired token.");
+    }
+?>
+
 <!DOCTYPE html>
 <head>
     <meta name="viewport" content="width=device-width" />
@@ -72,15 +96,17 @@
             <p class="uk-flex uk-flex-center uk-text-center">To finalize your password reset, please provide your new password in the fields below.</p>
             
             <!-- Form Fields -->
-            <form class="uk-form-stacked uk-grid-medium" uk-grid>
+            <form method="POST" action="resetpasswordprocess.php" class="uk-form-stacked uk-grid-medium" uk-grid>
 
                 <!-- psa.use uk-margin to automatically add top and bottom margin -->   
+
+                <input type="hidden" name="email" value="<?php echo $email; ?>">
 
                 <!-- New Password -->
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">New Password</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Password...">
+                        <input  class="uk-input" id="form-stacked-text" type="password" placeholder="Input your Password...">
                     </div>
                 </div>
 
@@ -88,7 +114,7 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">Confirm Password</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Reinput your Password...">
+                        <input  class="uk-input" id="form-stacked-text" type="password" placeholder="Reinput your Password...">
                     </div>
                 </div>
 
@@ -108,3 +134,5 @@
 
 
 </html>
+
+
