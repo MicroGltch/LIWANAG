@@ -14,8 +14,8 @@
 
     <!-- UIkit Library -->
     <link rel="stylesheet" href="CSS/uikit-3.22.2/css/uikit.min.css" />
-    <script src="CSS/uikit-3.22.2/js/uikit.min.js"></script>
-    <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <script src="../../CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="../../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
     
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="../../CSS/style.css" type="text/css" />
