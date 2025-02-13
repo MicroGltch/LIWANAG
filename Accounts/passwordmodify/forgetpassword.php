@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-
 <head>
     <meta name="viewport" content="width=device-width" />
-
-    <title>HOMEPAGE</title>
-
+    
+    <title>LIWANAG - LOGIN</title>
+    
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
-
+    
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -17,23 +16,20 @@
     <link rel="stylesheet" href="CSS/uikit-3.22.2/css/uikit.min.css" />
     <script src="CSS/uikit-3.22.2/js/uikit.min.js"></script>
     <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
-
+    
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="/../CSS/style.css" type="text/css" />
 
 
-
+    
 </head>
 
 <body>
-    <!-- Navbar Wrapper (Removes Absolute Positioning Issues) -->
-    <div uk-sticky="start: 200; animation: uk-animation-slide-top; sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; cls-inactive: uk-navbar-transparent uk-light">
-
-        <!-- Navbar -->
-        <nav class="uk-navbar-container uk-light uk-navbar-transparent logged-out">
-            <div class="uk-container">
-                <div uk-navbar>
-                    <!-- Navbar Left -->
+    <!-- Nav Bar (Ayusin pa alignment n stuff) -->
+    <nav class="uk-navbar-container">
+        <div class="uk-container">
+            <div uk-navbar>
+                <!--Navbar Left-->
                     <div class="uk-navbar-left">
                         <ul class="uk-navbar-nav">
                             <li class="uk-active"><a href="#">About Us</a></li>
@@ -42,17 +38,23 @@
                         </ul>
                     </div>
 
-                    <!-- Navbar Center -->
+                <!--Navbar Center-->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
+                        <a class="uk-navbar-item uk-logo" href="#">Little Wanderer's Therapy Center</a>
                     </div>
 
-                    <!-- Navbar Right -->
+                <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
                             <li><a href="#">Item</a></li>
                             <li><a href="#">Item</a></li>
                         </ul>
+
+                        <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
+                        <div class="uk-navbar-item">
+                                <button class="uk-button uk-button-default">Sign Up to Book an Appointment</button>
+                                <button class="uk-button uk-button-secondary">Login</button>
+                        </div>-->
                     </div>
                 </div>
             </div>

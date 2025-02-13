@@ -2,7 +2,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     
-    <title>RESET PASSWORD</title>
+    <title>LIWANAG - LOGIN</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
@@ -18,14 +18,14 @@
     <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
     
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="CSS/style.css" type="text/css" />
+    <link rel="stylesheet" href="/HTML/CSS/style.css"/>
 
     
 </head>
 
 <body>
     <!-- Nav Bar (Ayusin pa alignment n stuff) -->
-    <nav class="uk-navbar-container logged-out">
+    <nav class="uk-navbar-container">
         <div class="uk-container">
             <div uk-navbar>
                 <!--Navbar Left-->
@@ -39,16 +39,21 @@
 
                 <!--Navbar Center-->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="hompage.php">Little Wanderer's Therapy Center</a>
+                        <a class="uk-navbar-item uk-logo" href="#">Little Wanderer's Therapy Center</a>
                     </div>
 
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                            <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
-                            <li><a href="loginpage.php">Login</a></li>
+                            <li><a href="#">Item</a></li>
+                            <li><a href="#">Item</a></li>
                         </ul>
 
+                        <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
+                        <div class="uk-navbar-item">
+                                <button class="uk-button uk-button-default">Sign Up to Book an Appointment</button>
+                                <button class="uk-button uk-button-secondary">Login</button>
+                        </div>-->
                     </div>
     
                 </div>
