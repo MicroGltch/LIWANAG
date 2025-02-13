@@ -26,7 +26,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     
-    <title>LIWANAG - LOGIN</title>
+    <title>LOGIN</title>
     
         <!-- Favicon -->
         <link rel="icon" type="image/x-icon" href="">
@@ -70,15 +70,10 @@
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                            <li><a href="#">Item</a></li>
-                            <li><a href="#">Item</a></li>
+                            <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
+                            <li><a href="loginpage.php">Login</a></li>
                         </ul>
 
-                        <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
-                        <div class="uk-navbar-item">
-                                <button class="uk-button uk-button-default">Sign Up to Book an Appointment</button>
-                                <button class="uk-button uk-button-secondary">Login</button>
-                        </div>-->
                     </div>
     
                 </div>
@@ -110,7 +105,26 @@
                     </div>
                 </div>
 
-                <!-- Confirm Password -->
+                <!--Remember Me-->
+                <div class="uk-width-1-2@s uk-width-1-2@l uk-text-left@s">
+                    <label class="uk-text-small"><input class="uk-checkbox" type="checkbox"> Remember me</label>
+                </div>
+
+                <!--Forgot Password-->
+                <div class="uk-width-1-2@s uk-width-1-2@l uk-text-right@s uk-text-right@l">
+                    <button class="forgotPass-btn uk-button uk-button-link uk-text-capitalize">
+                    <a href="forgotpasswordpage.php">
+                    Forgot Password?
+                    </a>    
+                    </button>
+                </div>
+
+                <!-- Login Button -->
+                <div class="login-btn-div uk-width-1@s uk-width-1@l">
+                    <button class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Log In</button>
+                </div>
+
+                <!-- Divider -->
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">Confirm Password</label>
                     <div class="uk-form-controls">
