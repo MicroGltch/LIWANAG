@@ -18,7 +18,7 @@
     <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
     
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="/HTML/CSS/style.css"/>
+    <link rel="stylesheet" href="CSS/style.css" type="text/css" />
 
     
 </head>
@@ -91,10 +91,19 @@
             </form>
 
         </div>
+
+        
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">
+            LIWANAG in construction, everything is subject to change.
+        </p>
+    </footer>
 
 </body>
+
 
 
 </html>
