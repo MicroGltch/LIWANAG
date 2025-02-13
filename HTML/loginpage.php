@@ -2,7 +2,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     
-    <title>LIWANAG - LOGIN</title>
+    <title>LOGIN</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
@@ -46,14 +46,9 @@
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
                             <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
-                            <li><a href="#">Item</a></li>
+                            <li><a href="loginpage.php">Login</a></li>
                         </ul>
 
-                        <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
-                        <div class="uk-navbar-item">
-                                <button class="uk-button uk-button-default">Sign Up to Book an Appointment</button>
-                                <button class="uk-button uk-button-secondary">Login</button>
-                        </div>-->
                     </div>
     
                 </div>
