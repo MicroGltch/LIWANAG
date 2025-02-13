@@ -2,7 +2,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     
-    <title>RESET PASSWORD</title>
+    <title>BOOK APPOINMENT</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
@@ -18,7 +18,7 @@
     <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
     
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="/HTML/CSS/style.css"/>
+    <link rel="stylesheet" href="CSS/style.css" type="text/css"/>
 
     
 </head>
@@ -57,48 +57,23 @@
         </div>
     </nav>
 
-    <div class="uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
-    <!-- Login Account Card -->
-        <div class="create-acc-card uk-card uk-card-default uk-card-body uk-width-1-2 form-card">
-            
-            <!-- Title and Helper -->
-            <h3 class="uk-card-title uk-flex uk-flex-center">Reset Password</h3>
-            <p class="uk-flex uk-flex-center uk-text-center">To finalize your password reset, please provide your new password in the fields below.</p>
-            
-            <!-- Form Fields -->
-            <form class="uk-form-stacked uk-grid-medium" uk-grid>
 
-                <!-- psa.use uk-margin to automatically add top and bottom margin -->   
 
-                <!-- New Password -->
-                <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label" for="form-stacked-text">New Password</label>
-                    <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Password...">
-                    </div>
-                </div>
-
-                <!-- Confirm Password -->
-                <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label" for="form-stacked-text">Confirm Password</label>
-                    <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Reinput your Password...">
-                    </div>
-                </div>
-
-                
-                <!-- Submit Button -->
-                <div class="login-btn-div uk-width-1@s uk-width-1@l">
-                    <button class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Submit</button>
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer-text">
+                LIWANAG in construction, everything is subject to change.
+            </p>
+        </footer>
 
 </body>
 
 
 </html>
+
+
+
+
+
+
+

@@ -3,7 +3,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
 
-    <title>LIWANAG - HOMEPAGE</title>
+    <title>HOMEPAGE</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
@@ -78,7 +78,8 @@
 
                 <div>
                     <button class="welcome-book">
-                        Book an Appointment
+                        <a href="bookappoinment.php">Book an Appointment</a>
+                        
                     </button>
                 </div>
 
