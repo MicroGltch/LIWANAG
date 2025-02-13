@@ -106,7 +106,7 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">New Password</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="password" placeholder="Input your Password...">
+                        <input name="password" class="uk-input" id="form-stacked-text" type="password" placeholder="Input your Password...">
                     </div>
                 </div>
 
@@ -114,7 +114,7 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label" for="form-stacked-text">Confirm Password</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="password" placeholder="Reinput your Password...">
+                        <input name="confirm_password" class="uk-input" id="form-stacked-text" type="password" placeholder="Reinput your Password...">
                     </div>
                 </div>
 
