@@ -104,7 +104,7 @@
                 <!-- Add function -->
                 <!--Forgot Password-->
                 <div class="uk-width-1-2@s uk-width-1-2@l uk-text-right@s uk-text-right@l">
-                    <button class="forgotPass-btn uk-button uk-button-link uk-text-capitalize">Forgot Password?</button>
+ <a href="passwordmodify/forgetpassword.php"> Forgot Password?</a>
                 </div>
 
                 <!-- Login Button -->
