@@ -18,15 +18,14 @@
     <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
     
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="/../CSS/style.css" type="text/css" />
-
+    <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 
     
 </head>
 
 <body>
     <!-- Nav Bar (Ayusin pa alignment n stuff) -->
-    <nav class="uk-navbar-container">
+    <nav class="uk-navbar-container logged-out">
         <div class="uk-container">
             <div uk-navbar>
                 <!--Navbar Left-->
@@ -40,14 +39,14 @@
 
                 <!--Navbar Center-->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="#">Little Wanderer's Therapy Center</a>
+                        <a class="uk-navbar-item uk-logo" href="hompage.php">Little Wanderer's Therapy Center</a>
                     </div>
 
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                            <li><a href="#">Item</a></li>
-                            <li><a href="#">Item</a></li>
+                            <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
+                            <li><a href="loginpage.php">Login</a></li>
                         </ul>
 
                         <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
@@ -56,12 +55,12 @@
                                 <button class="uk-button uk-button-secondary">Login</button>
                         </div>-->
                     </div>
+    
                 </div>
+    
             </div>
-        </nav>
-
-    </div>
-
+        </div>
+    </nav>
 
     <div class="uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
     <!-- Login Account Card -->
@@ -72,30 +71,39 @@
             <p class="uk-flex uk-flex-center">To recover your password, kindly provide your email address.</p>
             
             <!-- Form Fields -->
-            <form action="forgotpasswordprocess.php" method="POST" class="uk-form-stacked uk-grid-medium" uk-grid>
+            <form class="uk-form-stacked uk-grid-medium" uk-grid>
 
                 <!-- psa.use uk-margin to automatically add top and bottom margin -->   
 
                 <!-- Email -->
                 <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label">Email</label>
+                    <label class="uk-form-label" for="form-stacked-text">Email</label>
                     <div class="uk-form-controls">
-                        <input class="uk-input" name="email" type="email" placeholder="Input your Email..." required>
+                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Email...">
                     </div>
                 </div>
                 
                 <!-- Submit Button -->
                 <div class="login-btn-div uk-width-1@s uk-width-1@l">
-                    <button class="uk-button uk-button-primary">Submit</button>
+                    <button class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Submit</button>
                 </div>
 
             </form>
 
         </div>
+
+        
     </div>
 
+    <!-- Footer -->
+    <footer class="footer">
+        <p class="footer-text">
+            LIWANAG in construction, everything is subject to change.
+        </p>
+    </footer>
 
 </body>
+
 
 
 </html>
