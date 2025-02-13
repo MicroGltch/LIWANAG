@@ -7,6 +7,7 @@ $message = ""; // Initialize an empty message variable
 
     $email = $_POST['email'];
     $password = md5($_POST['password']);
+    $status = $_POST['Active'];
 
     $checkEmail = "SELECT * FROM users WHERE account_Email = '$email'";
         $checkResult = $connection->query($checkEmail);
@@ -21,14 +22,14 @@ $message = ""; // Initialize an empty message variable
             $message = "Invalid email or password!";
             header(header: "Location: loginpage.php?loginError=" . urlencode($message)); // Pass the error message through URL
             exit();
-        }
+        } 
 
-        $loginsql = "SELECT * FROM users WHERE account_Email = '$email' AND account_Password = '$password'";
+        $loginsql = "SELECT * FROM users WHERE account_Email = '$email' AND account_Password = '$password' AND account_Status = '$status'";
         $loginresult = $connection->query($loginsql);
 
     // check if valid login
     
-        if($loginresult->num_rows == 1){  
+        if($loginresult->num_rows == 1 && $status == 'Active'){  
             $row = $loginresult->fetch_assoc();
             
             $fullname = $row['account_FName'] . " " . $row['account_LName'];
@@ -36,7 +37,12 @@ $message = ""; // Initialize an empty message variable
             echo "<script>window.location.href = '../homepage.php';</script>";
             exit();
 
-        } else {
+        } elseif (!$status == 'Active') {
+            $message = "Account is not Registered Yet!";
+            header(header: "Location: loginpage.php?loginError=" . urlencode($message)); // Pass the error message through URL
+            exit();
+        }
+        else {
         $message = "Invalid email or password!";
         header(header: "Location: loginpage.php?loginError=" . urlencode($message)); // Pass the error message through URL
         exit();
