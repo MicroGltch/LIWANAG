@@ -78,7 +78,7 @@
 
                 <div>
                     <button class="welcome-book">
-                        <a href="bookappointment.php">Book an Appointment</a>
+                        <a href="bookappointment.php" style="color: white ;">Book an Appointment</a>
                         
                     </button>
                 </div>
