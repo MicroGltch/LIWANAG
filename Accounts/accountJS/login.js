@@ -57,3 +57,29 @@ function validate_password() {
     }
 }
 
+// Remember Me Functionality
+const rememberMeCheckbox = document.getElementById('rememberMe');
+const emailInput = document.getElementById('form-stacked-text'); // Correct ID
+const passwordInputRemember = document.getElementById('login-pass'); // Correct ID
+
+
+rememberMeCheckbox.addEventListener('change', function () {
+    if (this.checked) {
+        localStorage.setItem('rememberedEmail', emailInput.value);
+        localStorage.setItem('rememberedPassword', passwordInputRemember.value);
+        localStorage.setItem('remembered', 'true');
+    } else {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberedPassword');
+        localStorage.removeItem('remembered');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+    const isRemembered = localStorage.getItem('remembered');
+    if (isRemembered === 'true') {
+        rememberMeCheckbox.checked = true;
+        emailInput.value = localStorage.getItem('rememberedEmail');
+        passwordInputRemember.value = localStorage.getItem('rememberedPassword');
+    }
+});
