@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->Subject = "Password Reset Request";
             $mail->Body = "Hello $fullname, <br><br>
                 Click the link below to reset your password. This link will expire in 15 minutes:<br>
-                <a href='http://yourdomain.com/resetpasswordpage.php?token=$token'>Reset Password</a><br><br>
+                <a href='http://localhost:3000/LIWANAG/Accounts/passwordmodify/resetpasswordpage.php?token=$token'>Reset Password</a><br><br>
                 If you didn't request this, you can ignore this email.<br><br>
                 Best regards, <br> LIWANAG Team";
 

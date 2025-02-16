@@ -40,10 +40,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->addAddress($email);
             $mail->isHTML(true);
             $mail->Subject = "Password Reset Request";
-            $reset_link = "http://localhost:3000/Accounts/passwordmodify/resetpasswordpage.php?token=$token";
+            $reset_link = "http://localhost:3000/LIWANAG/Accounts/passwordmodify/resetpasswordpage.php?token=$token";
             $mail->Body = "Hello,<br><br>Click the link below to reset your password:<br>
-                           <a href='$reset_link'>$reset_link</a><br><br>
-                           This link is valid for 15 minutes.<br><br>LIWANAG Team";
+                           <a href='$reset_link'>Reset Password Link</a><br><br>
+                           This link is valid for 15 minutes.<br><br>
+                           If you didn't request this, you can ignore this email.<br><br>
+                            Best regards, <br> LIWANAG TeamLIWANAG Team";
 
             $mail->send();
             echo json_encode(["status" => "success", "message" => "Password reset link sent to your email."]);
