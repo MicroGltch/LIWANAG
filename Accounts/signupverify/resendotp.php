@@ -41,9 +41,9 @@ if (substr($phoneNumber, 0, 1) !== '+') {
 }
 
 // Initiate a new verification request via Twilio Verify API.
-$sid        = "AC1e59afe3546d1c8e663ba8ff00e006fa";
-$token      = "d7775e6d8d7b463120c6343fdbd45f00";
-$serviceSid = "VA3ff689624b879eb2a69bfea9e69afd70";
+$sid        = "[SID]";
+$token      = "[TOKEN]";
+$serviceSid = "[SERVICEID]"; 
 $twilio     = new Client($sid, $token);
 
 try {
