@@ -90,7 +90,7 @@
                     <div class="profile-upload-container">
                         <img class="uk-border-circle profile-preview" src="CSS/default.jpg" alt="Profile Photo">
                         <div class="uk-flex uk-flex-column uk-margin-left">
-                            <button class="uk-button uk-button-primary uk-margin-small-bottom">Upload Photo</button>
+                            <button class="uk-button uk-button-primary uk-margin-small-bottom js-upload">Upload Photo</button>
                             <div class="uk-text-center">
                                 <a href="#" class="uk-link-muted">remove</a>
                             </div>
@@ -146,6 +146,8 @@
         document.querySelector('.sidebar-toggle').addEventListener('click', function() {
             document.querySelector('.sidebar-nav').classList.toggle('uk-open');
         });
+
+        UIkit.upload(element, options);
     </script>
 
 </body>

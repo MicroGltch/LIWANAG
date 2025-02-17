@@ -44,7 +44,7 @@
 
                     <!-- Navbar Center -->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
+                        <a class="uk-navbar-item uk-logo" href="hompage.php">Little Wanderer's Therapy Center</a>
                     </div>
 
                     <!-- Navbar Right -->
