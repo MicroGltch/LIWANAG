@@ -84,7 +84,7 @@
             <h1 class="uk-text-bold">Account Details</h1>
             
             <!--Profile Photo Section-->
-            <div class="uk-card uk-card-default uk-card-body uk-margin">
+            <div class="profile-card uk-card uk-card-default uk-card-body uk-margin">
                 <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                 <div class="uk-flex uk-flex-center">
                     <div class="uk-width-1-4">
