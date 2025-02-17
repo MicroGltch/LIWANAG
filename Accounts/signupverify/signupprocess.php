@@ -91,9 +91,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["signup"])) {
     }
 
     // Use Twilio Verify API to send OTP via SMS.
-    $sid        = "AC1e59afe3546d1c8e663ba8ff00e006fa";
-    $token      = "d7775e6d8d7b463120c6343fdbd45f00";
-    $serviceSid = "VA3ff689624b879eb2a69bfea9e69afd70"; // Your Verify Service SID
+    $sid        = "[SID]";
+    $token      = "[TOKEN]";
+    $serviceSid = "[SERVICEID]"; // Your Verify Service SID
     $twilio     = new Client($sid, $token);
 
     try {
