@@ -64,14 +64,14 @@
 
                 <!--Navbar Center-->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="hompage.php">Little Wanderer's Therapy Center</a>
+                        <a class="uk-navbar-item uk-logo" href="../../homepage.php">Little Wanderer's Therapy Center</a>
                     </div>
 
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                            <li><a href="#">Item</a></li>
-                            <li><a href="#">Item</a></li>
+                             <li><a href="../signuppage.php">Sign Up to Book an Appointment</a></li>
+                            <li><a href="../loginpage.php">Login</a></li>
                         </ul>
 
                         <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment

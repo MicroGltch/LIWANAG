@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once "../../dbconfig.php";
+date_default_timezone_set('Asia/Manila');
 
 if (!isset($_SESSION['email'])) {
     echo "Session expired. Please sign up again.";
@@ -45,8 +46,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify'])) {
     }
 }
 
-$delete_unverified = "DELETE FROM users WHERE account_Status = 'Pending' AND otp_expiry < NOW()";
-$connection->query($delete_unverified);
 
 $connection->close();
 ?>

@@ -1,3 +1,50 @@
+<?php
+session_start();
+require_once "../../dbconfig.php";
+include "setotp.php";
+date_default_timezone_set('Asia/Manila');
+
+if (!isset($_SESSION['email'])) {
+    echo "Session expired. Please sign up again.";
+    exit();
+}
+
+$email = $_SESSION['email'];
+
+if (isset($_SESSION['pending_login'])) {
+    unset($_SESSION['pending_login']);
+
+    $userDetailsSql = "SELECT account_FName, account_LName FROM users WHERE account_Email = ?";
+    $stmt = $connection->prepare($userDetailsSql);
+    $stmt->bind_param("s", $email);
+    $stmt->execute();
+    $userDetailsResult = $stmt->get_result();
+
+    if ($userDetailsResult->num_rows == 1) {
+        $row = $userDetailsResult->fetch_assoc();
+        $fullname = $row['account_FName'] . " " . $row['account_LName'];
+        $otp = rand(000000, 999999);
+
+        // *** Improved: Calculate both timestamps in PHP for consistency ***
+        $otp_time = date("Y-m-d H:i:s"); // Current time in the correct format
+        $otp_expiry = date("Y-m-d H:i:s", strtotime("+5 minutes", strtotime($otp_time))); // 5 minutes from now
+
+        $updateOtpSql = "UPDATE users SET otp = ?, otp_time = ?, otp_expiry = ? WHERE account_Email = ?";
+        $stmt = $connection->prepare($updateOtpSql);
+        $stmt->bind_param("ssss", $otp, $otp_time, $otp_expiry, $email); // Bind all four values
+        $stmt->execute();
+
+        send_verification($fullname, $email, $otp);
+        $_SESSION['otp_resent'] = "A fresh OTP has been sent to your email.";
+    } else {
+        error_log("Error fetching user details for login OTP: " . $stmt->error);
+        $_SESSION['otp_error'] = "Error sending OTP. Please try again later.";
+    }
+}
+
+?>
+
+
 <!DOCTYPE html>
 <head>
     <meta name="viewport" content="width=device-width" />

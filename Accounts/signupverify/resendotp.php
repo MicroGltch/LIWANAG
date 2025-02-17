@@ -37,13 +37,39 @@
         exit();
     }
 
+    if (isset($_GET['check_expiry'])) {
+        $get_expiry_sql = "SELECT otp_expiry FROM users WHERE account_Email = ?";
+        $stmt = $connection->prepare($get_expiry_sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+    
+        if ($result && $row = $result->fetch_assoc()) {
+            $expiry_time = $row['otp_expiry'];
+            if ($expiry_time) {
+                echo json_encode(["status" => "success", "expiry_time" => $expiry_time]);
+            } else {
+                echo json_encode(["status" => "error", "message" => "No OTP found."]);
+            }
+        } else {
+            echo json_encode(["status" => "error", "message" => "Error fetching OTP expiry."]);
+        }
+    
+        $stmt->close();
+        $connection->close();
+        exit(); // Important: Stop further processing
+    }
+
     // 2. Generate NEW OTP and update database (including otp_time)
     $new_otp = rand(100000, 999999);
-    $new_otp_expiry = date("Y-m-d H:i:s", strtotime("+5 minutes")); // Calculate expiry time
 
-    $update_otp_sql = "UPDATE users SET otp = ?, otp_expiry = ?, otp_time = NOW() WHERE account_Email = ?"; // Update all three
+    // Consistent time handling:
+    $otp_time = date("Y-m-d H:i:s"); // Current time in PHP (Asia/Manila)
+    $new_otp_expiry = date("Y-m-d H:i:s", strtotime("+5 minutes", strtotime($otp_time)));
+
+    $update_otp_sql = "UPDATE users SET otp = ?, otp_expiry = ?, otp_time = ? WHERE account_Email = ?"; // Update all three
     $stmt = $connection->prepare($update_otp_sql);
-    $stmt->bind_param("sss", $new_otp, $new_otp_expiry, $email); // Bind all three values
+    $stmt->bind_param("ssss", $new_otp, $new_otp_expiry, $otp_time, $email); // Bind $otp_time as well
 
     if ($stmt->execute()) {
         send_verification("User", $email, $new_otp); // Send the NEW OTP
