@@ -158,13 +158,21 @@ include "../dbconfig.php"
             </div>   
 
                 <!-- Phone Number -->
-            <div class="uk-width-1@s uk-width-1@l">
-                <label class="uk-form-label" for="mobileNumber">Phone Number</label>
-                <div class="uk-form-controls">
-                    <input class="uk-input" id="mobileNumber" name="phone" type="text" placeholder="Input your Phone Number..." value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>">
-                    <span class="error" id="mobileNumberError" style="color: red;"></span>
+                <div class="uk-width-1@s uk-width-1@l">
+                    <label class="uk-form-label" for="mobileNumber">Phone Number</label>
+                    <div class="uk-form-controls">
+                        <input 
+                            class="uk-input" 
+                            id="mobileNumber" 
+                            name="phone" 
+                            type="tel" 
+                            placeholder="Input your Phone Number..." 
+                            value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>" 
+                            pattern="^\+63\d{10}$" 
+                            required>
+                        <span class="error" id="mobileNumberError" style="color: red;"></span>
+                    </div>
                 </div>
-            </div>  
 
                 <!-- Sign Up Button -->
                 <div class="signup-btn-div uk-width-1@s uk-width-1@l">
@@ -196,6 +204,7 @@ include "../dbconfig.php"
     <!-- Javascript -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="accountJS/signup.js"></script>
+    
 
 </body>
 

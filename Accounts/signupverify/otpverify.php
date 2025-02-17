@@ -1,6 +1,11 @@
 <?php
 session_start();
 require_once "../../dbconfig.php";
+
+// Include Twilio's PHP helper library via Composer's autoload
+require __DIR__ . '/twilio-php-app/vendor/autoload.php';
+use Twilio\Rest\Client;
+
 date_default_timezone_set('Asia/Manila');
 
 if (!isset($_SESSION['email'])) {
@@ -13,39 +18,63 @@ $email = $_SESSION['email'];
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify'])) {
     $otp_input = trim($_POST['otp']);
 
-    $otp_sql = "SELECT * FROM users WHERE account_Email = ? AND otp = ? AND otp_expiry > NOW()";
-    $stmt = $connection->prepare($otp_sql);
-    $stmt->bind_param("ss", $email, $otp_input);
+    // Retrieve user's phone number and account_ID from the database.
+    $sql = "SELECT account_ID, account_PNum FROM users WHERE account_Email = ?";
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
-
-    if ($result->num_rows == 1) {
-        $updatesql = "UPDATE users SET account_Status = 'Active', otp = NULL, otp_expiry = NULL WHERE account_Email = ?";
-        $stmt = $connection->prepare($updatesql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-
-        session_unset();
-        session_destroy();
-
-        echo "success";
+    
+    if ($result->num_rows !== 1) {
+        echo "Account not found.";
         exit();
-    } else {
-        $expiry_check_sql = "SELECT otp_expiry FROM users WHERE account_Email = ? AND otp_expiry < NOW()";
-        $stmt = $connection->prepare($expiry_check_sql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $expiry_result = $stmt->get_result();
+    }
+    
+    $row = $result->fetch_assoc();
+    $phoneNumber = $row['account_PNum'];
+    $accountID   = $row['account_ID'];
+    $stmt->close();
 
-        if ($expiry_result->num_rows > 0) {
-            echo "OTP expired. Please request a new OTP."; 
+    // Ensure the phone number is in E.164 format (must start with '+').
+    if (substr($phoneNumber, 0, 1) !== '+') {
+        $phoneNumber = '+' . $phoneNumber;
+    }
+
+    // Check the OTP using Twilio Verify API.
+    $sid        = "AC1e59afe3546d1c8e663ba8ff00e006fa";
+    $token      = "d7775e6d8d7b463120c6343fdbd45f00";
+    $serviceSid = "VA3ff689624b879eb2a69bfea9e69afd70";
+    $twilio     = new Client($sid, $token);
+
+    try {
+        $verification_check = $twilio->verify->v2->services($serviceSid)
+                                        ->verificationChecks
+                                        ->create([
+                                            "to"   => $phoneNumber,
+                                            "code" => $otp_input
+                                        ]);
+
+        if ($verification_check->status === "approved") {
+            // OTP verified—activate the account.
+            $updateSql = "UPDATE users SET account_Status = 'Active' WHERE account_ID = ?";
+            $stmt = $connection->prepare($updateSql);
+            $stmt->bind_param("i", $accountID);
+            $stmt->execute();
+            $stmt->close();
+
+            session_unset();
+            session_destroy();
+            echo "success";
+            exit();
         } else {
-            echo "Incorrect OTP. Please try again."; 
+            echo "Incorrect OTP or OTP expired. Please request a new OTP.";
+            exit();
         }
+    } catch (Exception $e) {
+        echo "Error verifying OTP: " . $e->getMessage();
         exit();
     }
 }
-
 
 $connection->close();
 ?>

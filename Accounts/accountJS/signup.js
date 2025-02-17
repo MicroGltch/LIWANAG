@@ -29,8 +29,23 @@ function toggleConfirmPassword() {
 }
 
 document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("signupvalidate").addEventListener("submit", function (event) {
+    // Attach a blur event listener to reformat the mobile number when focus is lost.
+    let mobileNumberInput = document.getElementById("mobileNumber");
+    mobileNumberInput.addEventListener("blur", function() {
+        let phone = this.value.trim();
+        if (phone.length > 0) {
+            // If it starts with "0", replace it with "+63"
+            if (phone.startsWith("0")) {
+                phone = "+63" + phone.substring(1);
+            } else if (!phone.startsWith("+63")) {
+                // Otherwise, if it doesn't already start with +63, prepend +63.
+                phone = "+63" + phone;
+            }
+            this.value = phone;
+        }
+    });
 
+    document.getElementById("signupvalidate").addEventListener("submit", function (event) {
         let valid = true;
 
         // First Name Validation
@@ -68,7 +83,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Password Validation
         let password = document.getElementById("password").value;
         let passwordError = document.getElementById("passwordError");
-        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-_])[A-Za-z\d@$!%*?&\-_]{8,20}$/
+        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-_])[A-Za-z\d@$!%*?&\-_]{8,20}$/;
         if (!passwordRegex.test(password)) {
             passwordError.textContent = "Password must be 8-20 chars, with uppercase, lowercase, number, and special char.";
             valid = false;
@@ -87,11 +102,24 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         // Mobile Number Validation
-        let mobileNumber = document.getElementById("mobileNumber").value;
+        let mobileNumber = mobileNumberInput.value.trim();
         let mobileNumberError = document.getElementById("mobileNumberError");
-        let mobileRegex = /^\d{10,15}$/;
+
+        // Reformat the mobile number if necessary
+        if (mobileNumber.length > 0) {
+            if (mobileNumber.startsWith("0")) {
+                mobileNumber = "+63" + mobileNumber.substring(1);
+                mobileNumberInput.value = mobileNumber;
+            } else if (!mobileNumber.startsWith("+63")) {
+                mobileNumber = "+63" + mobileNumber;
+                mobileNumberInput.value = mobileNumber;
+            }
+        }
+
+        // Validate: must be "+63" followed by exactly 10 digits.
+        let mobileRegex = /^\+63\d{10}$/;
         if (!mobileRegex.test(mobileNumber)) {
-            mobileNumberError.textContent = "Phone number must be 10-15 digits.";
+            mobileNumberError.textContent = "Phone number must be in the format +63XXXXXXXXXX.";
             valid = false;
         } else {
             mobileNumberError.textContent = "";
@@ -107,7 +135,6 @@ document.addEventListener("DOMContentLoaded", function () {
             addressError.textContent = "";
         }
         
-
         if (!valid) {
             event.preventDefault();
             return false; 
