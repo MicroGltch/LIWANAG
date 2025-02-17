@@ -57,3 +57,71 @@ function validate_password() {
     }
 }
 
+// Remember Me Functionality
+const rememberMeCheckbox = document.getElementById('rememberMe');
+const emailInput = document.getElementById('form-stacked-text'); // Correct ID
+const passwordInputRemember = document.getElementById('login-pass'); // Correct ID
+
+
+rememberMeCheckbox.addEventListener('change', function () {
+    if (this.checked) {
+        localStorage.setItem('rememberedEmail', emailInput.value);
+        localStorage.setItem('rememberedPassword', passwordInputRemember.value);
+        localStorage.setItem('remembered', 'true');
+    } else {
+        localStorage.removeItem('rememberedEmail');
+        localStorage.removeItem('rememberedPassword');
+        localStorage.removeItem('remembered');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const form = document.getElementById('login-form');
+
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+            method: form.method,
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json(); // <--- Parse JSON here
+        })
+        .then(data => {
+            if (data.redirect) {
+                window.location.href = data.redirect;
+            } else if (data.sweetalert) {
+                Swal.fire({
+                    title: data.sweetalert[0],
+                    text: data.sweetalert[1],
+                    icon: data.sweetalert[2],
+                    confirmButtonColor: '#741515'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred. Please try again later.',
+                icon: 'error',
+                confirmButtonColor: '#741515'
+            });
+        });
+    });
+
+    const isRemembered = localStorage.getItem('remembered');
+    
+    if (isRemembered === 'true') {
+        rememberMeCheckbox.checked = true;
+        emailInput.value = localStorage.getItem('rememberedEmail');
+        passwordInputRemember.value = localStorage.getItem('rememberedPassword');
+    }
+});

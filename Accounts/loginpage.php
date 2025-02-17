@@ -20,7 +20,9 @@
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="../CSS/style.css" type="text/css"/>
 
-    
+    <!-- JS -->
+    <script src="accountJS/login.js" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
@@ -71,17 +73,17 @@
             <p class="uk-flex uk-flex-center">Please log in to continue.</p>
             
             <!-- Form Fields -->
-            <form action="loginpage.php" method="post" class="uk-form-stacked uk-grid-medium" uk-grid>
-                            <!-- add onsubmit for validation -->
+            <form id="login-form" action="loginverify/loginlogic.php" method="post" class="uk-form-stacked uk-grid-medium" uk-grid>
+            <!-- add onsubmit for validation -->
 
                 <!-- psa.use uk-margin to automatically add top and bottom margin -->   
 
                 <!-- Email -->
                 <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label" for="form-stacked-text">Email</label>
+                    <label class="uk-form-label" for="login-email">Email</label>
                     <div class="uk-form-controls">
-                        <input  class="uk-input" id="form-stacked-text" type="text" placeholder="Input your Email..." name="email">
-                        <span class="invalid-feedback" id="email-error"></span> 
+                    <input class="uk-input" id="login-email" type="text" placeholder="Input your Email..." name="email">
+                    <span class="invalid-feedback" id="email-error"></span> 
                     </div>
                 </div>
             
@@ -98,13 +100,13 @@
                 <!-- Add function -->
                 <!--Remember Me-->
                 <div class="uk-width-1-2@s uk-width-1-2@l uk-text-left@s">
-                    <label class="uk-text-small"><input class="uk-checkbox" type="checkbox"> Remember me</label>
+                    <label class="uk-text-small"><input class="uk-checkbox" type="checkbox" id="rememberMe"> Remember me</label>
                 </div>
 
                 <!-- Add function -->
                 <!--Forgot Password-->
                 <div class="uk-width-1-2@s uk-width-1-2@l uk-text-right@s uk-text-right@l">
- <a href="passwordmodify/forgetpassword.php"> Forgot Password?</a>
+                <a href="passwordmodify/forgetpassword.php"> Forgot Password?</a>
                 </div>
 
                 <!-- Login Button -->
@@ -133,104 +135,5 @@
                 LIWANAG in construction, everything is subject to change.
             </p>
         </footer>
-        
-    <!-- Javascript -->
-    <script src="accountJS/login.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
 </body>
 </html>
-
-<?php
-
-    include "../dbconfig.php";
-    session_start();
-
-    if (isset($_POST['login'])) {
-
-        $email = $_POST['email'];
-        $password = md5($_POST['password']);
-
-        $checkEmail = "SELECT * FROM users WHERE account_Email = '$email'";
-        $checkResult = $connection->query($checkEmail);
-
-        if (!$email || !$password) {
-            echo "<script>
-                Swal.fire({
-                    title: 'Incomplete Fields',
-                    text: 'Please fill in all the required fields.',
-                    icon: 'error',
-                    confirmButtonColor: '#741515'
-                });
-            </script>";
-            exit();
-        } else if ($checkResult->num_rows == 0) {
-            echo "<script>
-                Swal.fire({
-                    title: 'Email Not Found',
-                    text: 'The email you entered does not exist.',
-                    icon: 'error',
-                    confirmButtonColor: '#741515'
-                });
-            </script>";
-            exit();
-        }
-
-        $loginsql = "SELECT * FROM users WHERE account_Email = '$email' AND account_Password = '$password'";
-        $loginresult = $connection->query($loginsql);
-
-        if ($loginresult) { // Check if the query executed successfully
-            if ($loginresult->num_rows > 0) {
-                $row = $loginresult->fetch_assoc();
-                $fullname = $row['account_FName'] . " " . $row['account_LName'];
-                $_SESSION['username'] = $fullname;
-                echo "console.error('Login successful for: ' . $fullname)";
-                echo "<script>window.location.href = '../homepage.php';</script>";
-                exit();
-            } else {
-                echo "<script>console.error('Password incorrect.');</script>";  // Use console.error for errors
-                echo "<script>
-                    Swal.fire({
-                        title: 'Invalid Login',
-                        text: 'Please check your email and password',
-                        icon: 'error',
-                        confirmButtonColor: '#741515'
-                    });
-                </script>";
-                exit(); // Important: Add exit() after the Swal
-            }
-        } else {
-            echo "<script>console.error('Database query error: " . $connection->error . "');</script>";
-            echo "<script>
-                Swal.fire({
-                    title: 'Database Error',
-                    text: 'An error occurred during login. Please try again later.',
-                    icon: 'error',
-                    confirmButtonColor: '#741515'
-                });
-            </script>";
-            exit(); // Important: Add exit() here as well
-        }
-
-        $connection->close();
-    } else {
-        echo "<script>console.log('No POST data received.');</script>";
-    }
-
-
-?>
-
-        <!-- // LOGS code
-
-        // $logSQL = "Insert into tbl_logs(user_id, user_name, type, action, log_date) values('$userid', '$fullname', '$usertype', 'Logged In', NOW())";
-        // $connection ->query($logSQL);
-        
-        // Redirect to Dashboard/HomePage to Book
-        // if($usertype == 'Admin') {
-        //     header("location: admin.php");
-        //     exit(); 
-        // } else if($usertype == 'User'){
-        //     header("location: order.php");
-        //     exit();
-        // } -->
