@@ -3,7 +3,7 @@ session_start();
 require_once "../../dbconfig.php";
 
 // Include Twilio's PHP helper library via Composer's autoload
-require __DIR__ . '/twilio-php-app/vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 use Twilio\Rest\Client;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["signup"])) {
