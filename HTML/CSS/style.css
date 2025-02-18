@@ -461,3 +461,26 @@ background-color: #ffffff;
     flex-grow: 1;
     min-height: 600px;
 }
+
+#rightSidebar {
+    border-left: 1px solid #e5e5e5;
+    min-width: 250px;
+}
+
+#rightSidebar .uk-nav-header {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+.pending-appointments,
+.upcoming-appointments {
+    padding: 10px 0;
+}
+
+.appointment-item {
+    padding: 8px 15px;
+    margin: 5px 0;
+    background: #f8f8f8;
+    border-radius: 4px;
+}

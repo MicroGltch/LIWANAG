@@ -23,6 +23,10 @@
 
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.uikit.min.js"></script>
+
+    <!-- FullCalendar Library -->
+    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.css' rel='stylesheet' />
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@5.11.3/main.js'></script>
 </head>
 
 <body>
@@ -57,6 +61,7 @@
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
+                    <li><a href="#dashboard" onclick="showSection('dashboard')"><span class="uk-margin-small-right" uk-icon="home"></span> Dashboard</a></li>
                     <li><a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a></li>
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a></li>
                     <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
@@ -66,12 +71,55 @@
 
         <!-- Content Area -->
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
+            <!-- Dashboard Section -->
+            <div id="dashboard" class="section">
+                <h1 class="uk-text-bold">Dashboard</h1>
+                
+                <!-- Calendar Container -->
+                <div class="calendar-container uk-flex uk-flex-row">
+                    <div class="uk-width-expand">
+                        <div class="dashboard-calendar-container uk-card uk-card-default uk-card-body">
+                            <div class="dashboard-header uk-flex uk-flex-between uk-flex-middle uk-margin-bottom">
+                                <div class="dashboard-month-selector">
+                                    <select class="uk-select month-select" id="monthSelect">
+                                        <!-- Will be populated by JavaScript -->
+                                    </select>
+                                </div>
+                            </div>
+                            <div id="calendar"></div>
+                        </div>
+                    </div>
 
-    <!-- Controls for DataTable -->
-    <div id="appointmentsTableControls" class="uk-margin uk-flex uk-flex-between uk-flex-middle">
-        <div id="tableLength"></div> <!-- Items per page -->
-        <div id="tableSearch"></div> <!-- Search box -->
-    </div>
+                    <!-- Right Sidebar -->
+                    <div class="uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
+                        <div class="sidebar-nav">
+                            <ul class="uk-nav uk-nav-default">
+                                <li class="uk-nav-header">
+                                    <span class="uk-margin-small-right" uk-icon="clock"></span>
+                                    Pending Approval
+                                </li>
+                                <div class="pending-appointments">
+                                    <!-- Will be populated dynamically -->
+                                </div>
+                                
+                                <li class="uk-nav-header uk-margin-top">
+                                    <span class="uk-margin-small-right" uk-icon="calendar"></span>
+                                    Upcoming
+                                </li>
+                                <div class="upcoming-appointments">
+                                    <!-- Will be populated dynamically -->
+                                </div>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls for DataTable -->
+            <div id="appointmentsTableControls" class="uk-margin uk-flex uk-flex-between uk-flex-middle">
+                <div id="tableLength"></div> <!-- Items per page -->
+                <div id="tableSearch"></div> <!-- Search box -->
+            </div>
 
             <!--Appoinments-->
             <div id="appointments" class="section">
@@ -183,16 +231,91 @@
 </body>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Populate month select
+        const monthSelect = document.getElementById('monthSelect');
+        const months = ['January', 'February', 'March', 'April', 'May', 'June', 
+                       'July', 'August', 'September', 'October', 'November', 'December'];
+        const currentDate = new Date();
+        const currentMonth = currentDate.getMonth();
+        const currentYear = currentDate.getFullYear();
+        
+        // Add months for current year and next year
+        for (let year = currentYear; year <= currentYear + 1; year++) {
+            months.forEach((month, index) => {
+                // Skip past months for current year
+                if (year === currentYear && index < currentMonth) return;
+                
+                const option = document.createElement('option');
+                option.value = `${year}-${(index + 1).toString().padStart(2, '0')}`;
+                option.textContent = `${month} ${year}`;
+                
+                // Select current month by default
+                if (year === currentYear && index === currentMonth) {
+                    option.selected = true;
+                }
+                
+                monthSelect.appendChild(option);
+            });
+        }
+
+        // Initialize calendar
+        var calendarEl = document.getElementById('calendar');
+        var calendar = new FullCalendar.Calendar(calendarEl, {
+            initialView: 'dayGridMonth',
+            initialDate: currentDate,
+            headerToolbar: {
+                left: 'prev,next today',
+                center: 'title',
+                right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            },
+            height: 'auto',
+            events: [
+                // Your events here
+            ]
+        });
+        calendar.render();
+
+        // Handle month select change
+        monthSelect.addEventListener('change', function(e) {
+            const [year, month] = e.target.value.split('-');
+            calendar.gotoDate(`${year}-${month}-01`);
+        });
+
+        // Show dashboard by default
+        showSection('dashboard');
+        
+        // Update active state in sidebar
+        document.querySelectorAll('.sidebar-nav li').forEach(item => {
+            item.classList.remove('uk-active');
+        });
+        document.querySelector('.sidebar-nav li:first-child').classList.add('uk-active');
+    });
+
+    // Sidebar toggle
     document.querySelector('.sidebar-toggle').addEventListener('click', function() {
         document.querySelector('.sidebar-nav').classList.toggle('uk-open');
     });
 
-
     function showSection(sectionId) {
+        // Hide all sections
         document.querySelectorAll('.section').forEach(section => {
             section.style.display = 'none';
         });
+        
+        // Show selected section
         document.getElementById(sectionId).style.display = 'block';
+        
+        // Update active state in sidebar
+        document.querySelectorAll('.sidebar-nav li').forEach(item => {
+            item.classList.remove('uk-active');
+        });
+        document.querySelector(`.sidebar-nav li a[href="#${sectionId}"]`).parentElement.classList.add('uk-active');
+        
+        // Trigger window resize to fix calendar rendering if showing dashboard
+        if(sectionId === 'dashboard') {
+            window.dispatchEvent(new Event('resize'));
+        }
     }
 
     function previewProfilePhoto(event) {
@@ -231,8 +354,6 @@
                 // cancellation logic here
             });
         });
-        
-        
 </script>
 
 </html>
