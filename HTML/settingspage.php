@@ -142,6 +142,7 @@
         </p>
     </footer>
 
+    <!-- Script for sidebar toggle -->
     <script>
         document.querySelector('.sidebar-toggle').addEventListener('click', function() {
             document.querySelector('.sidebar-nav').classList.toggle('uk-open');

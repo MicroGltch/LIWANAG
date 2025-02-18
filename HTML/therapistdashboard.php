@@ -75,7 +75,7 @@
 
             <!--Appoinments-->
             <div id="appointments" class="section">
-                <h1 class="uk-text-bold">Appoinments</h1>
+                <h1 class="uk-text-bold">Appointments</h1>
                 <p>Appointment table will be displayed here.</p>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">

@@ -86,6 +86,7 @@
                                 <th>Time</th>
                                 <th>Name</th>
                                 <th>Service</th>
+                                <th>Status</th>
                                 <th>Approve</th>
                                 <th>Waitlist</th>
                             </tr>
