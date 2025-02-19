@@ -11,7 +11,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     $password = $_POST['password']; // Do NOT hash it yet!
 
     // 🔍 Fetch user details (including stored password)
-    $checkEmail = "SELECT account_ID, account_FName, account_LName, account_Status, account_PNum, created_at, account_Password 
+    $checkEmail = "SELECT account_ID, account_FName, account_LName, account_Status, account_PNum, created_at, account_Password, account_Type 
                    FROM users WHERE account_Email = ?";
     $stmt = $connection->prepare($checkEmail);
     $stmt->bind_param("s", $email);
@@ -29,6 +29,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         $status = $row['account_Status'];
         $phone = $row['account_PNum'];
         $accountID = $row['account_ID'];
+        $role = $row['account_Type']; // ✅ Use correct database column
         $storedPassword = $row['account_Password']; // Get stored password
 
         $created_at = new DateTime($row['created_at']);
@@ -37,24 +38,25 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         $days = $diff->days;
         $hours = $diff->h;
 
-        // 🔑 **PASSWORD CHECK (Supports md5() & password_hash() Verification)**
-        $passwordCorrect = false;// ✅ PASSWORD CHECK (Use only password_verify)
-        $passwordCorrect = password_verify($password, $storedPassword);
-        
-        if (!$passwordCorrect) {
+        // 🔑 **PASSWORD CHECK (Use only password_verify)**
+        if (!password_verify($password, $storedPassword)) {
             echo json_encode(['sweetalert' => ["Invalid Password", "Please check your email or password.", "error"]]);
             exit();
         }
 
-        if ($status === 'Active') {
-            // ✅ **LOG IN USER**
-            $_SESSION['username'] = $row['account_FName'] . " " . $row['account_LName'];
-            $_SESSION['account_ID'] = $accountID;
+        // ✅ **Store user details in session**
+        $_SESSION['username'] = $row['account_FName'] . " " . $row['account_LName'];
+        $_SESSION['account_ID'] = $accountID;
+        $_SESSION['account_Type'] = $role; // ✅ Store as `account_Type`, matching database
 
-            echo json_encode(['redirect' => '../Appointments/patient/register_patient.php']);
+        // ✅ **Admin Bypass Verification**
+        if ($role === 'admin') {
+            echo json_encode(['redirect' => '../dashboard/dashboard.php']); // Redirect to dashboard
             exit();
-        } elseif ($status === 'Pending') {
-            // ✅ **ACCOUNT PENDING VERIFICATION**
+        }
+
+        // ✅ **Handle Pending Accounts**
+        if ($status === 'Pending') {
             if ($days < 1 || ($days === 0 && $hours < 24)) {
                 $_SESSION['email'] = $email;
                 $_SESSION['phone'] = $phone;
@@ -79,13 +81,11 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                 $stmt->close();
                 exit();
             }
-        } else {
-            echo json_encode(['sweetalert' => ["Error", "An error occurred. Please try again later.", "error"]]);
-            exit();
         }
+
+        // ✅ **Log in Regular Users**
+        echo json_encode(['redirect' => 'dashboard/dashboard.php']); // Redirect to dynamic dashboard
+        exit();
     }
-} else {
-    echo json_encode(['sweetalert' => ["Error", "No data received.", "error"]]);
-    exit();
 }
 ?>
