@@ -30,7 +30,6 @@ session_start();
 
 <body>
 
-   <!-- Debugging: Print session data in the console -->
    <script>
         console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
     </script>
@@ -78,27 +77,24 @@ session_start();
 
         <div class="uk-section" id="section1">
 
-            <div class="" uk-grid style="margin-left: 0px;">
-                <div class="homepage-welcome uk-width-1-2@l uk-width-1-1@s uk-width-1-1@m">
+        <div class="" uk-grid style="margin-left: 0px;">
+            <div class="homepage-welcome uk-width-1-2@l uk-width-1-1@s uk-width-1-1@m">
 
-                    <div class="welcome-title">
+                <div class="welcome-title">
 
-                        Welcome to Little Wanderer's Therapy Center
-                    </div>
-
-                    <div class="welcome-description">
-                        At Little Wanderer's Therapy Center, we provide gentle and compassionate care in a warm, supportive environment. Here, every child is met with understanding and encouragement, creating a safe space where they can grow and flourish. You are not alone— together, we’ll nurture hope and possibilities.
-                    </div>
-
-                    <div>
-                        <button class="welcome-book">
-                            Book an Appointment
-                        </button>
-                    </div>
-
+                    Welcome to Little Wanderer's Therapy Center
                 </div>
 
+                <div class="welcome-description">
+                    At Little Wanderer's Therapy Center, we provide gentle and compassionate care in a warm, supportive environment. Here, every child is met with understanding and encouragement, creating a safe space where they can grow and flourish. You are not alone— together, we’ll nurture hope and possibilities.
+                </div>
 
+                <div>
+                    <button class="welcome-book">
+                        <a href="bookappointment.php" style="color: white ;">Book an Appointment</a>
+                        
+                    </button>
+                </div>
 
             </div>
 
