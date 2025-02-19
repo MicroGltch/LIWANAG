@@ -98,7 +98,7 @@
                 <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                 <div class="uk-flex uk-flex-center">
                     <div class="uk-width-1-4">
-                        <img class="uk-border-circle" src="CSS/default.jpg" alt="Profile Photo">
+                        <img class="uk-border-circle" src="../CSS/default.jpg" alt="Profile Photo">
                     </div>
                 </div>
             </div>
@@ -134,7 +134,7 @@
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <div class="uk-flex uk-flex-middle">
                         <div class="profile-upload-container">
-                            <img class="uk-border-circle profile-preview" src="CSS/default.jpg" alt="Profile Photo">
+                            <img class="uk-border-circle profile-preview" src="../CSS/default.jpg" alt="Profile Photo">
                             <div class="uk-flex uk-flex-column uk-margin-left">
                                 <input type="file" id="profileUpload" class="uk-hidden">
                                 <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
@@ -210,7 +210,7 @@ document.querySelector('.sidebar-toggle').addEventListener('click', function() {
         }
 
         function removeProfilePhoto() {
-            document.querySelector('.profile-preview').src = 'CSS/default.jpg';
+            document.querySelector('.profile-preview').src = '../CSS/default.jpg';
         }
     </script>
 

@@ -14,12 +14,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
 
     <!-- UIkit Library -->
-    <link rel="stylesheet" href="CSS/uikit-3.22.2/css/uikit.min.css" />
-    <script src="CSS/uikit-3.22.2/js/uikit.min.js"></script>
-    <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <link rel="stylesheet" href="../CSS/uikit-3.22.2/css/uikit.min.css" />
+    <script src="../CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
 
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="CSS/style.css" type="text/css" />
+    <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.uikit.min.js"></script>
@@ -41,7 +41,7 @@
                 <div class="uk-navbar-right">
                     <ul class="uk-navbar-nav">
                         <a href="#" class="uk-navbar-item">
-                            <img class="profile-image" src="CSS/default.jpg" alt="Profile Image" uk-img>
+                            <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
                         </a>
                         <li><a href="#">Logout</a></li>
                     </ul>
@@ -176,7 +176,7 @@
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <div class="uk-flex uk-flex-middle">
                         <div class="profile-upload-container">
-                            <img class="uk-border-circle profile-preview" src="CSS/default.jpg" alt="Profile Photo">
+                            <img class="uk-border-circle profile-preview" src="../CSS/default.jpg" alt="Profile Photo">
                             <div class="uk-flex uk-flex-column uk-margin-left">
                                 <input type="file" id="profileUpload" class="uk-hidden">
                                 <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
@@ -328,7 +328,7 @@
     }
 
     function removeProfilePhoto() {
-        document.querySelector('.profile-preview').src = 'CSS/default.jpg';
+        document.querySelector('.profile-preview').src = '../CSS/default.jpg';
     }
 
     $(document).ready(function() {

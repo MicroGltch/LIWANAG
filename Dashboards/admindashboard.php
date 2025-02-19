@@ -198,7 +198,7 @@
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <div class="uk-flex uk-flex-middle">
                         <div class="profile-upload-container">
-                            <img class="uk-border-circle profile-preview" src="CSS/default.jpg" alt="Profile Photo">
+                            <img class="uk-border-circle profile-preview" src="../CSS/default.jpg" alt="Profile Photo">
                             <div class="uk-flex uk-flex-column uk-margin-left">
                                 <input type="file" id="profileUpload" class="uk-hidden">
                                 <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
@@ -273,7 +273,7 @@
     }
 
     function removeProfilePhoto() {
-        document.querySelector('.profile-preview').src = 'CSS/default.jpg';
+        document.querySelector('.profile-preview').src = '../CSS/default.jpg';
     }
 
     document.getElementById('btnPatient').addEventListener('click', function() {

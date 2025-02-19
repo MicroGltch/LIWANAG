@@ -55,7 +55,8 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             $_SESSION['username'] = $row['account_FName'] . " " . $row['account_LName'];
             $_SESSION['account_ID'] = $accountID;
 
-            echo json_encode(['redirect' => '../Appointments/patient/register_patient.php']);
+            // echo json_encode(['redirect' => '../Appointments/patient/register_patient.php']); -- bat ako pupunta dto teka
+            echo json_encode(['redirect' => '../homepage.php']);
             exit();
         } elseif ($status === 'Pending') {
             // ✅ **ACCOUNT PENDING VERIFICATION**
