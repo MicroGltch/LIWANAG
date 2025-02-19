@@ -1,4 +1,6 @@
 <?php
+date_default_timezone_set('Asia/Manila'); 
+
 // Database configuration
 $servername = "153.92.15.39"; 
 $username = "u999302509_liwanag_user";
@@ -14,4 +16,5 @@ $connection = new mysqli($servername, $username, $password, $database);
 //     echo "<script>console.log('You are connected to the database.');</script>";
 // }
 
+$connection->query("SET time_zone = '+08:00'");
 ?>
