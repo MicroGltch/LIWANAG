@@ -1,3 +1,8 @@
+<?php
+include "../dbconfig.php";
+session_start();
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -23,20 +28,26 @@
 </head>
 
 <body>
+    <script>
+        console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
+    </script>
     <!-- Navbar -->
-    <nav class="uk-navbar-container logged-in">
+        <nav class="uk-navbar-container logged-in">
         <div class="uk-container">
             <div uk-navbar>
-
                 <div class="uk-navbar-center">
                     <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
                 </div>
                 <div class="uk-navbar-right">
                     <ul class="uk-navbar-nav">
-                        <a href="#" class="uk-navbar-item">
-                            <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
-                        </a>
-                        <li><a href="#">Logout</a></li>
+                        <li>
+                            <a href="#" class="uk-navbar-item">
+                                <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
+                            </a>
+                        </li>
+                        <li style="display: flex; align-items: center;">  <?php echo $_SESSION['username'];?>
+                        </li>
+                        <li><a href="../Accounts/logout.php">Logout</a></li>
                     </ul>
                 </div>
             </div>

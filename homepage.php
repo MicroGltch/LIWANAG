@@ -59,9 +59,15 @@ session_start();
                     <!-- Navbar Right -->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                            <?php if (isset($_SESSION['username'])): ?>
-                                <li><a href="#">Hi, <?php echo $_SESSION['username']; ?>!</a></li>
-                                <li><a href="Accounts/logout.php">Logout</a></li>
+                        <?php if (isset($_SESSION['account_ID'])): ?>                                
+                            <a href="#">Hi, <?php echo $_SESSION['username']; ?>!</a>
+                                <div class="uk-navbar-dropdown">
+                                    <ul class="uk-nav uk-navbar-dropdown-nav">
+                                        <li><a href="Dashboards/clientdashboard.php" style="color: black;">Dashboard</a></li>
+                                        <li><a href="Accounts/logout.php" style="color: black;">Logout</a></li>
+                                    </ul>
+                                </div>
+                            </li>
                             <?php else: ?>
                                 <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
                                 <li><a href="Accounts/loginpage.php">Login</a></li>

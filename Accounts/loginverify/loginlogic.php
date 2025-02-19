@@ -11,7 +11,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     $password = $_POST['password']; // Do NOT hash it yet!
 
     // 🔍 Fetch user details (including stored password)
-    $checkEmail = "SELECT account_ID, account_FName, account_LName, account_Status, account_PNum, created_at, account_Password 
+    $checkEmail = "SELECT account_ID, account_FName, account_LName, account_Status, account_PNum, account_Type, created_at, account_Password 
                    FROM users WHERE account_Email = ?";
     $stmt = $connection->prepare($checkEmail);
     $stmt->bind_param("s", $email);
@@ -30,6 +30,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         $phone = $row['account_PNum'];
         $accountID = $row['account_ID'];
         $storedPassword = $row['account_Password']; // Get stored password
+        $accountType = $row['account_Type']; // Get the account type
 
         $created_at = new DateTime($row['created_at']);
         $now = new DateTime();
@@ -55,8 +56,16 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             $_SESSION['username'] = $row['account_FName'] . " " . $row['account_LName'];
             $_SESSION['account_ID'] = $accountID;
 
-            // echo json_encode(['redirect' => '../Appointments/patient/register_patient.php']); -- bat ako pupunta dto teka
-            echo json_encode(['redirect' => '../homepage.php']);
+            // Redirect based on account type
+            $redirectURL = '../homepage.php'; // Default redirect
+
+            if ($accountType === 'Admin') {
+                $redirectURL = '../Dashboards/admindashboard.php';
+            } elseif ($accountType === 'Therapist') {
+                $redirectURL = '../Dashboards/therapistdashboard.php'; // Assuming you have a therapist dashboard
+            }
+
+            echo json_encode(['redirect' => $redirectURL]);
             exit();
         } elseif ($status === 'Pending') {
             // ✅ **ACCOUNT PENDING VERIFICATION**
