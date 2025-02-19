@@ -38,13 +38,9 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         $hours = $diff->h;
 
         // 🔑 **PASSWORD CHECK (Supports md5() & password_hash() Verification)**
-        $passwordCorrect = false;
-        if ($storedPassword === md5($password)) {
-            $passwordCorrect = true; // ✅ Matches md5 hashed password
-        } elseif (password_verify($password, $storedPassword)) {
-            $passwordCorrect = true; // ✅ Matches password_hash()
-        }
-
+        $passwordCorrect = false;// ✅ PASSWORD CHECK (Use only password_verify)
+        $passwordCorrect = password_verify($password, $storedPassword);
+        
         if (!$passwordCorrect) {
             echo json_encode(['sweetalert' => ["Invalid Password", "Please check your email or password.", "error"]]);
             exit();
