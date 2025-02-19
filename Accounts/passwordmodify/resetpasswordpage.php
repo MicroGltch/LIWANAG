@@ -1,27 +1,34 @@
 <?php
 require_once "../../dbconfig.php";
 
-if (!isset($_GET['token'])) {
-    die("Invalid request.");
+// Debugging: Check if token and email are present
+if (!isset($_GET['token']) || !isset($_GET['email'])) {
+    die("Invalid request. Debug Info: Token - " . ($_GET['token'] ?? "Missing") . " | Email - " . ($_GET['email'] ?? "Missing"));
 }
 
 $token = $_GET['token'];
+$email = $_GET['email'];
 
-// Check if token exists and is valid
-$query = "SELECT u.account_Email 
+// Retrieve the stored hashed token from the database
+$query = "SELECT s.reset_token 
           FROM security_tokens s
           INNER JOIN users u ON s.account_ID = u.account_ID
-          WHERE s.reset_token = ? 
+          WHERE u.account_Email = ? 
           AND s.reset_token_expiry > NOW()";
 
 $stmt = $connection->prepare($query);
-$stmt->bind_param("s", $token);
+$stmt->bind_param("s", $email);
 $stmt->execute();
 $result = $stmt->get_result();
 
 if ($result->num_rows == 1) {
     $row = $result->fetch_assoc();
-    $email = $row['account_Email'];
+    $storedHashedToken = $row['reset_token'];
+
+    // Verify the token using password_verify()
+    if (!password_verify($token, $storedHashedToken)) {
+        die("Invalid or expired token.");
+    }
 } else {
     die("Invalid or expired token.");
 }
@@ -47,7 +54,7 @@ if ($result->num_rows == 1) {
             <p class="uk-flex uk-flex-center uk-text-center">To finalize your password reset, please provide your new password below.</p>
 
             <form method="POST" action="resetpasswordprocess.php" class="uk-form-stacked uk-grid-medium" uk-grid>
-                <input type="hidden" name="email" value="<?php echo $email; ?>">
+                <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
                 <input type="hidden" name="token" value="<?php echo htmlspecialchars($token); ?>">
 
                 <!-- New Password -->
