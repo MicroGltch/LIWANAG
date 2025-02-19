@@ -10,7 +10,7 @@ echo "<script>
     localStorage.removeItem('rememberedEmail');
     localStorage.removeItem('rememberedPassword');
     localStorage.removeItem('remembered');
-    window.location.href = '../../Accounts/loginverify/loginlogic.php';
+    window.location.href = 'loginpage.php';
 </script>";
 exit();
 ?>
