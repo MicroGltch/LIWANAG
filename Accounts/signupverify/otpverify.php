@@ -35,15 +35,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify'])) {
     $accountID   = $row['account_ID'];
     $stmt->close();
 
-    // Ensure the phone number is in E.164 format (must start with '+').
+    // ✅ Ensure phone number is in E.164 format before verification
     if (substr($phoneNumber, 0, 1) !== '+') {
-        $phoneNumber = '+' . $phoneNumber;
+        $phoneNumber = '+63' . ltrim($phoneNumber, '0'); // Remove leading 0 and add +63
     }
 
     // Check the OTP using Twilio Verify API.
-    $sid        = "[SID]";
-    $token      = "[TOKEN]";
-    $serviceSid = "[SERVICEID]"; 
+    $sid        = "";
+    $token      = "";
+    $serviceSid = ""; 
     $twilio     = new Client($sid, $token);
 
     try {
@@ -77,4 +77,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['verify'])) {
 }
 
 $connection->close();
-?>
