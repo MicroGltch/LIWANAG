@@ -9,21 +9,33 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $email = $_POST['email'];
 
     // Check if email exists
-    $query = "SELECT * FROM users WHERE account_Email = ?";
+    $query = "SELECT account_ID FROM users WHERE account_Email = ?";
     $stmt = $connection->prepare($query);
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows == 1) {
-        $token = bin2hex(random_bytes(50)); // Generate a secure token
-        $expiry = date("Y-m-d H:i:s", strtotime("+15 minutes")); // Token valid for 15 mins
+        $row = $result->fetch_assoc();
+        $accountID = $row['account_ID'];
 
-        // Store token in database
-        $update_sql = "UPDATE users SET reset_token = ?, reset_token_expiry = ? WHERE account_Email = ?";
-        $stmt = $connection->prepare($update_sql);
-        $stmt->bind_param("sss", $token, $expiry, $email);
+        // Generate a secure token
+        $token = bin2hex(random_bytes(50));
+        $expiry = date("Y-m-d H:i:s", strtotime("+15 minutes")); // Token valid for 15 minutes
+
+        // Delete old token (Fix: No `token_type` in the table)
+        $delete_old_token = "DELETE FROM security_tokens WHERE account_ID = ? AND reset_token IS NOT NULL";
+        $stmt = $connection->prepare($delete_old_token);
+        $stmt->bind_param("i", $accountID);
         $stmt->execute();
+        $stmt->close();
+
+        // Store new reset token in `security_tokens`
+        $insert_token = "INSERT INTO security_tokens (account_ID, reset_token, reset_token_expiry) VALUES (?, ?, ?)";
+        $stmt = $connection->prepare($insert_token);
+        $stmt->bind_param("iss", $accountID, $token, $expiry);
+        $stmt->execute();
+        $stmt->close();
 
         // Send reset email
         $mail = new PHPMailer(true);
@@ -40,12 +52,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $mail->addAddress($email);
             $mail->isHTML(true);
             $mail->Subject = "Password Reset Request";
+
             $reset_link = "http://localhost:3000/LIWANAG/Accounts/passwordmodify/resetpasswordpage.php?token=$token";
             $mail->Body = "Hello,<br><br>Click the link below to reset your password:<br>
-                           <a href='$reset_link'>Reset Password Link</a><br><br>
+                           <a href='$reset_link'>Reset Password</a><br><br>
                            This link is valid for 15 minutes.<br><br>
                            If you didn't request this, you can ignore this email.<br><br>
-                            Best regards, <br> LIWANAG TeamLIWANAG Team";
+                           Best regards, <br> LIWANAG Team";
 
             $mail->send();
             echo json_encode(["status" => "success", "message" => "Password reset link sent to your email."]);
