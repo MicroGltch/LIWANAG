@@ -14,12 +14,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
 
     <!-- UIkit Library -->
-    <link rel="stylesheet" href="CSS/uikit-3.22.2/css/uikit.min.css" />
-    <script src="../../CSS/uikit-3.22.2/js/uikit.min.js"></script>
-    <script src="../../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <link rel="stylesheet" href="../CSS/uikit-3.22.2/css/uikit.min.css" />
+    <script src="../CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
 
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="../../CSS/style.css" type="text/css" />
+    <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 </head>
 
 <body>
@@ -29,12 +29,12 @@
             <div uk-navbar>
 
                 <div class="uk-navbar-center">
-                    <a class="uk-navbar-item uk-logo" href="hompage.php">Little Wanderer's Therapy Center</a>
+                    <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
                 </div>
                 <div class="uk-navbar-right">
                     <ul class="uk-navbar-nav">
                         <a href="#" class="uk-navbar-item">
-                            <img class="profile-image" src="CSS/default.jpg" alt="Profile Image" uk-img>
+                            <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
                         </a>
                         <li><a href="#">Logout</a></li>
                     </ul>

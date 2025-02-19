@@ -16,9 +16,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
     <!-- UIkit Library -->
-    <link rel="stylesheet" href="CSS/uikit-3.22.2/css/uikit.min.css" />
-    <script src="CSS/uikit-3.22.2/js/uikit.min.js"></script>
-    <script src="CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <link rel="stylesheet" href="../CSS/uikit-3.22.2/css/uikit.min.css" />
+    <script src="../CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
 
     <!-- Flatpickr Datepicker -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
@@ -27,7 +27,7 @@
 
 
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="CSS/style.css" type="text/css" />
+    <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 
 
 </head>

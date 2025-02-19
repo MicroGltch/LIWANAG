@@ -91,7 +91,7 @@ session_start();
 
                 <div>
                     <button class="welcome-book">
-                        <a href="bookappointment.php" style="color: white ;">Book an Appointment</a>
+                        <a href="Appointments/bookappointment.php" style="color: white ;">Book an Appointment</a>
                         
                     </button>
                 </div>
