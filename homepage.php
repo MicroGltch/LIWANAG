@@ -97,9 +97,11 @@ session_start();
                     </div>
 
                     <div>
-                    <button class="welcome-book">
-                        <a href="Appointments/bookappointment.php" style="color: white ;">Book an Appointment</a>  
-                    </button>
+                        <?php if (isset($_SESSION['account_ID'])): ?>
+                            <a href="Appointments/bookappointment.php" class="welcome-book" style="color: white;">Book an Appointment</a>
+                        <?php else: ?>
+                            <button class="welcome-book" style="color: white;">Book an Appointment</button>
+                        <?php endif; ?>
                     </div>
 
                 </div>
@@ -201,5 +203,33 @@ session_start();
         </footer>
     </body>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const bookAppointmentButton = document.querySelector('.welcome-book');
+
+            if (bookAppointmentButton && bookAppointmentButton.tagName === 'BUTTON') { // Check if it's a button
+                bookAppointmentButton.addEventListener('click', function(event) {
+                    event.preventDefault(); // Prevent form submission if it's a button
+
+                    Swal.fire({
+                        title: 'Do you Have an Account?',
+                        text: 'You need to be logged in to book an appointment.',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonText: 'Yes, Login',
+                        cancelButtonText: 'No, Sign Up'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            window.location.href = 'Accounts/loginpage.php';
+                        } else if (result.isDismissed) {
+                            window.location.href = 'Accounts/signuppage.php';
+                        }
+                    });
+                });
+            }
+        });
+    </script>
 
     </html>
+
