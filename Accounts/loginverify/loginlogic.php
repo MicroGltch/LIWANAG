@@ -1,4 +1,5 @@
 <?php
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 session_start();
@@ -11,7 +12,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     $password = $_POST['password']; // Do NOT hash it yet!
 
     // 🔍 Fetch user details (including stored password)
-    $checkEmail = "SELECT account_ID, account_FName, account_LName, account_Status, account_PNum, account_Type, created_at, account_Password 
+    $checkEmail = "SELECT account_ID, account_FName, account_LName, account_Status, account_PNum, account_Type, created_at, account_Password, login_attempts 
                    FROM users WHERE account_Email = ?";
     $stmt = $connection->prepare($checkEmail);
     $stmt->bind_param("s", $email);
@@ -31,12 +32,19 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         $accountID = $row['account_ID'];
         $storedPassword = $row['account_Password']; // Get stored password
         $accountType = $row['account_Type']; // Get the account type
+        $loginAttempts = $row['login_attempts'];
 
         $created_at = new DateTime($row['created_at']);
         $now = new DateTime();
         $diff = $now->diff($created_at);
         $days = $diff->days;
         $hours = $diff->h;
+
+        // Check if account is blocked
+        if ($loginAttempts >= 5) {
+            echo json_encode(['sweetalert' => ["Account Blocked", "Too many failed login attempts. Please contact support.", "error"]]);
+            exit();
+        }
 
         // 🔑 **PASSWORD CHECK (Supports md5() & password_hash() Verification)**
         $passwordCorrect = false;
@@ -47,9 +55,31 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         }
 
         if (!$passwordCorrect) {
+            // Increment login attempts
+            $newAttempts = $loginAttempts + 1;
+            $updateAttempts = "UPDATE users SET login_attempts = ? WHERE account_ID = ?";
+            $stmt = $connection->prepare($updateAttempts);
+            $stmt->bind_param("ii", $newAttempts, $accountID);
+            $stmt->execute();
+            
+            if ($newAttempts >= 5) {
+                $blockUser = "UPDATE users SET account_Status = 'block' WHERE account_ID = ?";
+                $stmt = $connection->prepare($blockUser);
+                $stmt->bind_param("i", $accountID);
+                $stmt->execute();
+                echo json_encode(['sweetalert' => ["Account Blocked", "Too many failed login attempts. Your account has been blocked.", "error"]]);
+                exit();
+            }
+
             echo json_encode(['sweetalert' => ["Invalid Password", "Please check your email or password.", "error"]]);
             exit();
         }
+
+        // Reset login attempts on successful login
+        $resetAttempts = "UPDATE users SET login_attempts = 0 WHERE account_ID = ?";
+        $stmt = $connection->prepare($resetAttempts);
+        $stmt->bind_param("i", $accountID);
+        $stmt->execute();
 
         if ($status === 'Active') {
             // ✅ **LOG IN USER**
@@ -102,4 +132,5 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     echo json_encode(['sweetalert' => ["Error", "No data received.", "error"]]);
     exit();
 }
+
 ?>

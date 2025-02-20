@@ -27,8 +27,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $row = $result->fetch_assoc();
         $accountID = $row['account_ID'];
 
-        // Update password
-        $update_sql = "UPDATE users SET account_Password = ? WHERE account_ID = ?";
+        // Update password and reset login attempts
+        $update_sql = "UPDATE users SET account_Password = ?, login_attempts = 0 WHERE account_ID = ?";
         $stmt = $connection->prepare($update_sql);
         $stmt->bind_param("si", $hashed_password, $accountID);
         if ($stmt->execute()) {
