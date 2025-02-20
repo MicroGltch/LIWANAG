@@ -35,7 +35,8 @@ $role = strtolower(trim($_SESSION['account_Type'])); // ✅ Convert to lowercase
             <h3>Admin Panel</h3>
             <ul class="uk-list uk-list-divider">
                 <li><a href="../../webpage_settings/frontend/timetable_settings.php">Manage Timetable Settings</a></li>
-                <li><a href="../appointments/manage_appointments.php">View & Manage Appointments</a></li>
+                <li><a href="../../appointments/frontend/manage_appointments.php">View & Manage Appointments 1</a></li>
+                <li><a href="../../appointments/frontend/validate_appointments.php">View & Manage Appointments 2</a></li>
                 <li><a href="../therapist/manage_therapists.php">Manage Therapists</a></li>
             </ul>
         <?php elseif ($role === 'therapist'): ?>
@@ -48,6 +49,7 @@ $role = strtolower(trim($_SESSION['account_Type'])); // ✅ Convert to lowercase
             <h3>Client Panel</h3>
             <ul class="uk-list uk-list-divider">
                 <li><a href="../../Appointments/patient/register_patient.php">Register a Patient</a></li>
+                <li><a href="../../Appointments/patient/edit_patient_form.php">View My Registered Patients</a></li>
                 <li><a href="../../Appointments/frontend/book_appointment_form.php">Book an Appointment</a></li>
                 <li><a href="../Appointments/view_appointments.php">View My Appointments</a></li>
             </ul>

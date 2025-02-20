@@ -45,30 +45,48 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
             <label>Business Hours Start:</label>
             <input class="uk-input" type="time" name="business_hours_start" value="<?= $settings['business_hours_start']; ?>" required>
 
+            <br/>
+
             <label>Business Hours End:</label>
             <input class="uk-input" type="time" name="business_hours_end" value="<?= $settings['business_hours_end']; ?>" required>
 
+            <br/>
+            
             <label>Max Booking Days (Advance):</label>
             <input class="uk-input" type="number" name="max_days_advance" value="<?= $settings['max_days_advance']; ?>" min="1" max="60" required>
 
+            <br/>
+            
             <label>Min Days Before Appointment (Required Advance Booking):</label>
             <input class="uk-input" type="number" name="min_days_advance" value="<?= $settings['min_days_advance']; ?>" min="0" max="30" required>
 
+            <br/>
+            
             <label>Blocked Dates:</label>
             <input class="uk-input" type="text" id="blocked_dates" name="blocked_dates" placeholder="Select dates..." required>
 
+            <br/>
+            
             <label>Initial Evaluation Duration (Minutes):</label>
             <input class="uk-input" type="number" name="initial_eval_duration" value="<?= $settings['initial_eval_duration']; ?>" min="30" max="180" required>
 
+            <br/>
+            
             <label>Playgroup Duration (Minutes):</label>
             <input class="uk-input" type="number" name="playgroup_duration" value="<?= $settings['playgroup_duration']; ?>" min="60" max="240" required>
 
+            <br/>
+            
             <label>Occupational Therapy Session Duration (Minutes):</label>
             <input class="uk-input" type="number" name="service_ot_duration" value="<?= $settings['service_ot_duration']; ?>" min="30" max="180" required>
 
+            <br/>
+            
             <label>Behavioral Therapy Session Duration (Minutes):</label>
             <input class="uk-input" type="number" name="service_bt_duration" value="<?= $settings['service_bt_duration']; ?>" min="30" max="180" required>
 
+            <br/>
+            
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Settings</button>
             <a href="../../Accounts/dashboard/dashboard.php">BACK TO DASHBOARD</a>
         </form>

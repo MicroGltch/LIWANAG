@@ -50,7 +50,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if (move_uploaded_file($file_tmp, $target_file)) {
             // Store file path in database
             $query = "INSERT INTO patients (account_id, first_name, last_name, age, gender, profile_picture, service_type) 
-                      VALUES (?, ?, ?, ?, ?, ?, 'Pending')";
+                      VALUES (?, ?, ?, ?, ?, ?, 'For Evaluation')";
             $stmt = $connection->prepare($query);
             $stmt->bind_param("isssss", $_SESSION['account_ID'], $first_name, $last_name, $age, $gender, $new_file_name);
 
@@ -87,7 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <p class="uk-alert-danger uk-padding-small"><?php echo $error; ?></p>
         <?php endif; ?>
 
-        <form action="register_patient.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked">
+        <form action="register_patient_form.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked">
             <label>First Name:</label>
             <input class="uk-input" type="text" name="patient_fname" required>
             <label>Last Name:</label>
@@ -106,7 +106,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
     </div>
-
     
     <a href="../frontend/book_appointment_form.php" class="uk-button uk-button-danger uk-margin-top">Book Appointment</a>
 

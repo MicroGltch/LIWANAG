@@ -17,17 +17,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $account_id = $_SESSION['account_ID'];
     $status = "Pending";
 
-    // ✅ Prevent Multiple Pending/Confirmed Appointments for the Selected Patient Only
-    $check_existing = "SELECT * FROM appointments WHERE patient_id = ? AND status IN ('Pending', 'Confirmed')";
+    // ✅ Prevent Same-Type Pending/Confirmed Appointments for the Selected Patient
+    $check_existing = "SELECT session_type FROM appointments WHERE patient_id = ? AND status IN ('Pending', 'Confirmed')";
     $stmt = $connection->prepare($check_existing);
     $stmt->bind_param("i", $patient_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
-        echo json_encode(["status" => "error", "message" => "This patient already has a pending or confirmed appointment."]);
-        exit();
+    while ($row = $result->fetch_assoc()) {
+        if ($row['session_type'] === $appointment_type) {
+            echo json_encode(["status" => "error", "message" => "This patient already has a pending or confirmed appointment for this session type."]);
+            exit();
+        }
     }
+
 
     // ✅ Restrict Initial Evaluation (IE) to be booked **at least** 3 days from today
     if ($appointment_type === "Initial Evaluation") {
@@ -77,7 +80,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         // File upload handling
-        $target_dir = "../uploads/doctors_referrals/";
+        $target_dir = "../../uploads/doctors_referrals/";
         $file_ext = strtolower(pathinfo($doctors_referral, PATHINFO_EXTENSION));
         $allowed_types = ["jpg", "jpeg", "png", "pdf"];
         $max_file_size = 5 * 1024 * 1024;
