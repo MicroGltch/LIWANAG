@@ -63,8 +63,8 @@ session_start();
                             <a href="#">Hi, <?php echo $_SESSION['username']; ?>!</a>
                                 <div class="uk-navbar-dropdown">
                                     <ul class="uk-nav uk-navbar-dropdown-nav">
-                                        <li><a href="Dashboards/clientdashboard.php" style="color: black;">Dashboard</a></li>
-                                        <li><a href="Accounts/logout.php" style="color: black;">Logout</a></li>
+                                        <li><a href="Dashboards/clientdashboard.php" style="color: black !important;">Dashboard</a></li>
+                                        <li><a href="Accounts/logout.php" style="color: black !important; ">Logout</a></li>
                                     </ul>
                                 </div>
                             </li>
