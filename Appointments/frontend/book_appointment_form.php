@@ -16,7 +16,7 @@ $settings = $settingsResult->fetch_assoc();
 $businessHoursStart = $settings["business_hours_start"] ?? "09:00:00";
 $businessHoursEnd = $settings["business_hours_end"] ?? "17:00:00";
 $maxDaysAdvance = $settings["max_days_advance"] ?? 30;
-$minDaysAdvance = $settings["min_days_advance"] ?? 4;
+$minDaysAdvance = $settings["min_days_advance"] ?? 3;
 $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["blocked_dates"], true) : []; // Ensure array
 $ieDuration = $settings["initial_eval_duration"] ?? 60;
 $pgDuration = $settings["playgroup_duration"] ?? 120;
@@ -117,7 +117,7 @@ $role = strtolower(trim($_SESSION['account_Type']));
     //for timetable
     document.addEventListener("DOMContentLoaded", function () {
         let blockedDates = <?= json_encode($blockedDates) ?>; //  Load blocked dates from PHP
-        let minDaysAdvance = <?= $minDaysAdvance ?> + 1; // Add 1 day to achieve the req. Ex: today is feb 20, the earliest is feb 24
+        let minDaysAdvance = <?= $minDaysAdvance ?>; 
         let maxDaysAdvance = <?= $maxDaysAdvance ?>;
         
         let today = new Date();

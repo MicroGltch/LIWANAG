@@ -1,6 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
 session_start();
 include "../../dbconfig.php";
 
@@ -49,11 +47,6 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         $_SESSION['account_ID'] = $accountID;
         $_SESSION['account_Type'] = $role; // ✅ Store as `account_Type`, matching database
 
-        // ✅ **Admin Bypass Verification**
-        if ($role === 'admin') {
-            echo json_encode(['redirect' => '../dashboard/dashboard.php']); // Redirect to dashboard
-            exit();
-        }
 
         // ✅ **Handle Pending Accounts**
         if ($status === 'Pending') {

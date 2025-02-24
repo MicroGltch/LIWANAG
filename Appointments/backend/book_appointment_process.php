@@ -17,7 +17,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $account_id = $_SESSION['account_ID'];
     $status = "Pending";
 
-    // ✅ Prevent Same-Type Pending/Confirmed Appointments for the Selected Patient
+    // ✅ Prevent Multiple Pending/Confirmed Appointments for the Same Session Type
     $check_existing = "SELECT session_type FROM appointments WHERE patient_id = ? AND status IN ('Pending', 'Confirmed')";
     $stmt = $connection->prepare($check_existing);
     $stmt->bind_param("i", $patient_id);
@@ -31,10 +31,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-
     // ✅ Restrict Initial Evaluation (IE) to be booked **at least** 3 days from today
     if ($appointment_type === "Initial Evaluation") {
-        $minDate = new DateTime(); 
+        $minDate = new DateTime();
         $minDate->modify('+3 days'); // Minimum allowed date (3 days from today)
         $minDateString = $minDate->format('Y-m-d');
 
@@ -50,11 +49,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // ✅ Ensure it does not exceed max allowed booking days
         if ($appointment_date > $maxDateString) {
-            echo json_encode(["status" => "error", "message" => "Initial Evaluation can only be booked up to $maxDaysAdvance days in advance. Max allowed date: $maxDateString"]);
+            echo json_encode(["status" => "error", "message" => "Initial Evaluation can only be booked up to 30 days in advance. Max allowed date: $maxDateString"]);
             exit();
         }
     }
-
 
     // ✅ Ensure Playgroup Sessions Don't Exceed 6 Patients
     if ($appointment_type === "Playgroup") {
@@ -118,7 +116,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if ($stmt->execute()) {
-        echo json_encode(["status" => "success", "message" => "Appointment booked successfully."]);
+        echo json_encode([
+            "status" => "success",
+            "message" => "Appointment booked successfully for " . htmlspecialchars($appointment_date) . " at " . htmlspecialchars($appointment_time) . "."
+        ]);
     } else {
         error_log("Database Error: " . $stmt->error);
         echo json_encode(["status" => "error", "message" => "Error booking appointment."]);
