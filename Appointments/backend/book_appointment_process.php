@@ -1,5 +1,8 @@
 <?php
-require_once "../../dbconfig.php";
+require_once "../../dbconfig.php"; // ✅ Uses existing connection
+require_once "../../Accounts/signupverify/vendor/autoload.php"; // ✅ Load PHPMailer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 session_start();
 
 if (!isset($_SESSION['account_ID'])) {
@@ -8,17 +11,37 @@ if (!isset($_SESSION['account_ID'])) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    global $connection; // ✅ Use the existing connection
+    $account_id = $_SESSION['account_ID'];
     $patient_id = $_POST['patient_id'];
     $appointment_type = $_POST['appointment_type'];
     $appointment_date = $_POST['appointment_date'];
     $appointment_time = $_POST['appointment_time'];
-    $doctors_referral = $_FILES['doctors_referral']['name'] ?? null;
+    $has_referral = $_POST['has_referral'] ?? null;
 
-    $account_id = $_SESSION['account_ID'];
+    $official_referral = $_FILES['official_referral']['name'] ?? null;
+    $proof_of_booking = $_FILES['proof_of_booking']['name'] ?? null;
+    
     $status = "Pending";
+    $referral_id = null; // Default: No referral
+
+    // ✅ Fetch Client Email & Name from `users` Table
+    $emailQuery = "SELECT account_Email, account_FName, account_LName FROM users WHERE account_ID = ?";
+    $stmt = $connection->prepare($emailQuery);
+    $stmt->bind_param("i", $account_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+    $client_email = $user['account_Email'] ?? null;
+    $client_name = $user['account_FName'] . " " . $user['account_LName'];
+
+    if (!$client_email) {
+        echo json_encode(["status" => "error", "message" => "Error: Unable to retrieve client email."]);
+        exit();
+    }
 
     // ✅ Prevent Multiple Pending/Confirmed Appointments for the Same Session Type
-    $check_existing = "SELECT session_type FROM appointments WHERE patient_id = ? AND status IN ('Pending', 'Confirmed')";
+    $check_existing = "SELECT session_type FROM appointments WHERE patient_id = ? AND status IN ('pending', 'approved', 'waitlisted')";
     $stmt = $connection->prepare($check_existing);
     $stmt->bind_param("i", $patient_id);
     $stmt->execute();
@@ -31,30 +54,27 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // ✅ Restrict Initial Evaluation (IE) to be booked **at least** 3 days from today
+    // ✅ Validate Initial Evaluation Booking Date
     if ($appointment_type === "Initial Evaluation") {
         $minDate = new DateTime();
-        $minDate->modify('+3 days'); // Minimum allowed date (3 days from today)
-        $minDateString = $minDate->format('Y-m-d');
-
+        $minDate->modify('+2 days');
         $maxDate = new DateTime();
-        $maxDate->modify('+30 days'); // Maximum allowed booking (30 days from today or as per settings)
-        $maxDateString = $maxDate->format('Y-m-d');
+        $maxDate->modify('+30 days');
 
-        // ✅ Ensure the appointment date is **at least 3 days ahead**
-        if ($appointment_date < $minDateString) {
-            echo json_encode(["status" => "error", "message" => "Initial Evaluation must be booked at least 3 days in advance. Minimum allowed date: $minDateString"]);
+        $selectedDate = new DateTime($appointment_date);
+        
+        if ($selectedDate < $minDate) {
+            echo json_encode(["status" => "error", "message" => "Initial Evaluation must be booked at least 3 days in advance."]);
             exit();
         }
 
-        // ✅ Ensure it does not exceed max allowed booking days
-        if ($appointment_date > $maxDateString) {
-            echo json_encode(["status" => "error", "message" => "Initial Evaluation can only be booked up to 30 days in advance. Max allowed date: $maxDateString"]);
+        if ($selectedDate > $maxDate) {
+            echo json_encode(["status" => "error", "message" => "Initial Evaluation can only be booked up to 30 days in advance."]);
             exit();
         }
     }
 
-    // ✅ Ensure Playgroup Sessions Don't Exceed 6 Patients
+    // ✅ Check Playgroup Session Capacity
     if ($appointment_type === "Playgroup") {
         $check_capacity = "SELECT COUNT(*) as count FROM appointments WHERE date = ? AND time = ? AND session_type = 'Playgroup'";
         $stmt = $connection->prepare($check_capacity);
@@ -69,62 +89,111 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
-    // ✅ Doctor’s Referral Requirement for IE
-    $target_file = null;
+    // ✅ Ensure Initial Evaluation has a referral
     if ($appointment_type === "Initial Evaluation") {
-        if (empty($doctors_referral)) {
+        if (empty($official_referral) && empty($proof_of_booking)) {
             echo json_encode(["status" => "error", "message" => "A doctor's referral or proof of booking is required for Initial Evaluation."]);
             exit();
         }
-
-        // File upload handling
-        $target_dir = "../../uploads/doctors_referrals/";
-        $file_ext = strtolower(pathinfo($doctors_referral, PATHINFO_EXTENSION));
-        $allowed_types = ["jpg", "jpeg", "png", "pdf"];
-        $max_file_size = 5 * 1024 * 1024;
-
-        if (!in_array($file_ext, $allowed_types)) {
-            echo json_encode(["status" => "error", "message" => "Invalid file type. Only JPG, JPEG, PNG, and PDF are allowed."]);
-            exit();
-        }
-
-        if ($_FILES['doctors_referral']['size'] > $max_file_size) {
-            echo json_encode(["status" => "error", "message" => "File is too large. Maximum size is 5MB."]);
-            exit();
-        }
-
-        $new_file_name = uniqid() . "." . $file_ext;
-        $target_file = $target_dir . $new_file_name;
-        move_uploaded_file($_FILES['doctors_referral']['tmp_name'], $target_file);
     }
 
-    // ✅ Insert Appointment Into Database
-    $query = "INSERT INTO appointments (account_id, patient_id, date, time, session_type, doctor_referral, status) 
-              VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $connection->prepare($query);
-    
+    // ✅ Handle Doctor’s Referral Upload
+    $uploadDir = "../../uploads/doctors_referrals/";
+    $officialFileName = null;
+    $proofFileName = null;
+
+    if (!empty($_FILES['official_referral']['name'])) {
+        $officialFileName = time() . "_official_" . basename($_FILES['official_referral']['name']);
+        $officialFilePath = $uploadDir . $officialFileName;
+        move_uploaded_file($_FILES['official_referral']['tmp_name'], $officialFilePath);
+    }
+
+    if (!empty($_FILES['proof_of_booking']['name'])) {
+        $proofFileName = time() . "_proof_" . basename($_FILES['proof_of_booking']['name']);
+        $proofFilePath = $uploadDir . $proofFileName;
+        move_uploaded_file($_FILES['proof_of_booking']['tmp_name'], $proofFilePath);
+    }
+
+    // ✅ Insert into `doctor_referrals` table if a referral exists
+    if ($officialFileName || $proofFileName) {
+        $insertReferralSQL = "INSERT INTO doctor_referrals (patient_id, official_referral_file, proof_of_booking_file, status) 
+                              VALUES (?, ?, ?, 'pending')";
+        $stmt = $connection->prepare($insertReferralSQL);
+        $stmt->bind_param("iss", $patient_id, $officialFileName, $proofFileName);
+        if ($stmt->execute()) {
+            $referral_id = $stmt->insert_id; // ✅ Get the new referral ID
+        }
+        $stmt->close();
+    }
+
+    // ✅ Insert Appointment Into `appointments` Table
+    $insertAppointmentSQL = "INSERT INTO appointments (account_id, patient_id, date, time, session_type, status, referral_id) 
+                             VALUES (?, ?, ?, ?, ?, 'Pending', ?)";
+    $stmt = $connection->prepare($insertAppointmentSQL);
+
     if ($stmt === false) {
         echo json_encode(["status" => "error", "message" => "SQL error: " . $connection->error]);
         exit();
     }
 
-    // ✅ Ensure doctor_referral is NULL-safe
-    if ($target_file === null) {
-        $stmt->bind_param("iisssss", $account_id, $patient_id, $appointment_date, $appointment_time, $appointment_type, $target_file, $status);
-    } else {
-        $stmt->bind_param("iisssss", $account_id, $patient_id, $appointment_date, $appointment_time, $appointment_type, $target_file, $status);
-    }
+    $stmt->bind_param("iisssi", $account_id, $patient_id, $appointment_date, $appointment_time, $appointment_type, $referral_id);
 
     if ($stmt->execute()) {
-        echo json_encode([
-            "status" => "success",
-            "message" => "Appointment booked successfully for " . htmlspecialchars($appointment_date) . " at " . htmlspecialchars($appointment_time) . "."
-        ]);
+        $appointment_id = $stmt->insert_id; // ✅ Get the newly inserted appointment ID
+
+        // ✅ Send Confirmation Email
+        if (send_email_notification($client_email, $client_name, $appointment_type, $appointment_date, $appointment_time)) {
+            echo json_encode(["status" => "success", "message" => "Appointment booked successfully. A confirmation email has been sent."]);
+        } else {
+            echo json_encode(["status" => "success", "message" => "Appointment booked successfully, but email notification failed."]);
+        }
     } else {
-        error_log("Database Error: " . $stmt->error);
         echo json_encode(["status" => "error", "message" => "Error booking appointment."]);
     }
-
+    
     $stmt->close();
+    $connection->close();
+}
+
+
+// ✅ Function to Send Email Notification for New Appointments
+function send_email_notification($email, $client_name, $session_type, $appointment_date, $appointment_time) {
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.hostinger.com'; // Change this to your SMTP host
+        $mail->SMTPAuth = true;
+        $mail->Username = 'no-reply@myliwanag.com'; // Change to your email
+        $mail->Password = '[l/+1V/B4'; // Change to your SMTP password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+
+        $mail->setFrom('no-reply@myliwanag.com', "Little Wanderer's Therapy Center");
+        $mail->addAddress($email, $client_name);
+        $mail->isHTML(true);
+        $mail->Subject = "Appointment Confirmation - Therapy Center";
+
+        $emailBody = "
+            <h3>Appointment Confirmation</h3>
+            <p>Dear <strong>$client_name</strong>,</p>
+            <p>Your appointment has been successfully booked with the following details:</p>
+            <ul>
+                <li><strong>Session Type:</strong> $session_type</li>
+                <li><strong>Date:</strong> $appointment_date</li>
+                <li><strong>Time:</strong> $appointment_time</li>
+                <li><strong>Status:</strong> Pending</li>
+            </ul>
+            <p>We will notify you once your appointment is confirmed.</p>
+            <p>Thank you for choosing our therapy center.</p>
+        ";
+
+        $mail->Body = $emailBody;
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
+
 }
 ?>

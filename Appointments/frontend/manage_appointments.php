@@ -1,27 +1,27 @@
 <?php
-require_once "../../dbconfig.php";
-session_start();
+    require_once "../../dbconfig.php";
+    session_start();
 
-// ✅ Restrict Access to Admins & Head Therapists Only
-if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
-    header("Location: ../../Accounts/loginpage.php");
-    exit();
-}
+    // ✅ Restrict Access to Admins & Head Therapists Only
+    if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
+        header("Location: ../../Accounts/loginpage.php");
+        exit();
+    }
 
-// Fetch pending appointment count
-$pendingCountQuery = "SELECT COUNT(*) as count FROM appointments WHERE status = 'Pending'";
-$result = $connection->query($pendingCountQuery);
-$pendingCount = $result->fetch_assoc()['count'];
+    // Fetch pending appointment count
+    $pendingCountQuery = "SELECT COUNT(*) as count FROM appointments WHERE status = 'Pending'";
+    $result = $connection->query($pendingCountQuery);
+    $pendingCount = $result->fetch_assoc()['count'];
 
-// Fetch total appointment count
-$totalCountQuery = "SELECT COUNT(*) as count FROM appointments";
-$result = $connection->query($totalCountQuery);
-$totalCount = $result->fetch_assoc()['count'];
+    // Fetch total appointment count
+    $totalCountQuery = "SELECT COUNT(*) as count FROM appointments";
+    $result = $connection->query($totalCountQuery);
+    $totalCount = $result->fetch_assoc()['count'];
 
-// Fetch upcoming appointments
-$upcomingQuery = "SELECT COUNT(*) as count FROM appointments WHERE date >= CURDATE()";
-$result = $connection->query($upcomingQuery);
-$upcomingCount = $result->fetch_assoc()['count'];
+    // Fetch upcoming appointments
+    $upcomingQuery = "SELECT COUNT(*) as count FROM appointments WHERE date >= CURDATE()";
+    $result = $connection->query($upcomingQuery);
+    $upcomingCount = $result->fetch_assoc()['count'];
 ?>
 
 <!DOCTYPE html>

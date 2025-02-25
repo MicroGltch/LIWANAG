@@ -9,11 +9,10 @@ if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !==
 }
 
 $therapistID = $_SESSION['account_ID'];
-$today = date("Y-m-d");
 
 // Fetch therapist's upcoming appointments
 $query = "SELECT a.appointment_id, a.date, a.time, a.session_type, a.status,
-                 p.first_name, p.last_name 
+                 p.patient_id, p.first_name, p.last_name 
           FROM appointments a
           JOIN patients p ON a.patient_id = p.patient_id
           WHERE a.therapist_id = ? AND a.status IN ('Approved', 'Pending')
@@ -37,8 +36,6 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 <body>
     <div class="uk-container uk-margin-top">
         <h2>Welcome, <?= htmlspecialchars($_SESSION['username']); ?></h2>
-        <p><strong>Today's Date:</strong> <?= date("F j, Y"); ?></p>
-
         <h3>Upcoming Appointments</h3>
         <table class="uk-table uk-table-striped">
             <thead>
@@ -61,43 +58,121 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                         <td><?= htmlspecialchars($appointment['status']); ?></td>
                         <td>
                             <button class="uk-button uk-button-primary complete-btn" data-id="<?= $appointment['appointment_id']; ?>">Complete</button>
-                            <button class="uk-button uk-button-default notes-btn" data-id="<?= $appointment['appointment_id']; ?>">Add Notes</button>
+                            <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
         </table>
+    </div>
 
-        <h3>Manage Your Availability Schedule</h3>
-        <a href="therapist/manage_availability.php" class="uk-button uk-button-secondary">Update Availability</a> <br/>
-        <a href="therapist/override_availability.php" class="uk-button uk-button-default">Block Specific Availability</a> <br/>
-        <a href="../logout.php" class="uk-button uk-button-default">Logout</a>
+    <br/>
+    <div>
+        <a href="therapist/rebook_patient.php" class="uk-button uk-button-secondary">Rebook a Previous Patient</a>
+    </div>
+
+    <div>
+    <br/>
+        <a href="therapist/manage_availability.php">Setup your default availability</a> <br/>
+        <a href="therapist/override_availability.php">Unavailable for a specific date? Block a date schedule here</a>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // ✅ Mark Session as Completed
+            // ✅ Complete Button - Ask if they want to rebook before marking as complete
             document.querySelectorAll(".complete-btn").forEach(button => {
                 button.addEventListener("click", function () {
                     let appointmentId = this.getAttribute("data-id");
 
                     Swal.fire({
-                        title: "Mark as Completed?",
-                        text: "This will mark the session as completed.",
+                        title: "Rebook Next Session?",
+                        text: "Would you like to rebook a follow-up session before marking this as completed?",
                         icon: "question",
-                        showCancelButton: true,
-                        confirmButtonText: "Yes, complete",
+                        showDenyButton: true,    // ✅ Adds "Skip Rebooking" as a middle button
+                        showCancelButton: true,  // ✅ Adds "Cancel" button
+                        confirmButtonText: "Rebook",  
+                        denyButtonText: "Skip Rebooking",  // ✅ This will mark as completed without rebooking
+                        cancelButtonText: "Cancel",  // ✅ This will close the modal
+                        allowOutsideClick: false, // ✅ Prevents accidental dismissals
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            fetch("../backend/update_appointment_status.php", {
+                            // ✅ Redirect to rebook page
+                            window.location.href = `therapist/rebook_appointment.php?appointment_id=${appointmentId}`;
+                        } else if (result.dismiss === Swal.DismissReason.cancel) {
+                            // ✅ Ensure confirmation before marking as complete
+                            Swal.fire({
+                                title: "Mark as Completed?",
+                                text: "Are you sure you want to mark this session as completed?",
+                                icon: "warning",
+                                showCancelButton: true,
+                                confirmButtonText: "Yes, Complete",
+                                cancelButtonText: "No",
+                                allowOutsideClick: false,
+                            }).then((confirmResult) => {
+                                if (confirmResult.isConfirmed) {
+                                    fetch("../../Appointments/backend/update_appointment_status.php", {
+                                        method: "POST",
+                                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                                        body: `appointment_id=${appointmentId}&status=Completed`
+                                    })
+                                    .then(response => response.json())
+                                    .then(data => {
+                                        if (data.status === "success") {
+                                            Swal.fire("Success!", data.message, "success").then(() => location.reload());
+                                        } else {
+                                            Swal.fire("Error!", data.message, "error");
+                                        }
+                                    })
+                                    .catch(error => console.error("Error:", error));
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+
+            // ✅ Cancel Button with Validation Note Requirement
+            document.querySelectorAll(".cancel-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    let appointmentId = this.getAttribute("data-id");
+
+                    Swal.fire({
+                        title: "Cancel Appointment",
+                        input: "textarea",
+                        inputPlaceholder: "Enter a reason for cancellation...",
+                        showCancelButton: true,
+                        confirmButtonText: "Confirm Cancel",
+                        allowOutsideClick: false,
+                        preConfirm: (note) => {
+                            if (!note) {
+                                Swal.showValidationMessage("A cancellation note is required.");
+                                return false;
+                            }
+                            return note;
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            fetch("../../Appointments/backend/update_appointment_status.php", {
                                 method: "POST",
-                                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                body: `appointment_id=${appointmentId}&status=Completed`
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    appointment_id: appointmentId,
+                                    status: "cancelled", // ✅ Changed to lowercase to match DB validation
+                                    validation_notes: result.value
+                                })
                             })
                             .then(response => response.json())
                             .then(data => {
                                 if (data.status === "success") {
-                                    Swal.fire("Success!", data.message, "success").then(() => location.reload());
+                                    Swal.fire({
+                                        title: "Cancelled!",
+                                        text: data.message,
+                                        icon: "success",
+                                        confirmButtonText: "Proceed to Rebooking"
+                                    }).then(() => {
+                                        // ✅ Redirect therapist to rebook page with patient_id
+                                        window.location.href = "therapist/rebook_appointment.php";
+                                    });
                                 } else {
                                     Swal.fire("Error!", data.message, "error");
                                 }
@@ -108,39 +183,11 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                 });
             });
 
-            // ✅ Add Session Notes
-            document.querySelectorAll(".notes-btn").forEach(button => {
-                button.addEventListener("click", function () {
-                    let appointmentId = this.getAttribute("data-id");
 
-                    Swal.fire({
-                        title: "Add Session Notes",
-                        input: "textarea",
-                        inputPlaceholder: "Enter notes here...",
-                        showCancelButton: true,
-                        confirmButtonText: "Save Notes",
-                        preConfirm: (notes) => {
-                            return fetch("../backend/save_session_notes.php", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                body: `appointment_id=${appointmentId}&notes=${encodeURIComponent(notes)}`
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.status !== "success") {
-                                    Swal.showValidationMessage(data.message);
-                                }
-                            })
-                            .catch(error => Swal.showValidationMessage("Request failed"));
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            Swal.fire("Saved!", "Session notes have been saved.", "success");
-                        }
-                    });
-                });
-            });
+
         });
+
+
     </script>
 </body>
 </html>

@@ -80,10 +80,10 @@ while ($row = $result->fetch_assoc()) {
 
             if ($appointmentTime >= $startTime && $appointmentTime < $endTime) {
                 $allTherapists[$row['therapist_id']]['available'] = true;
-                $allTherapists[$row['therapist_id']]['status'] = "Available (Custom)";
+                $allTherapists[$row['therapist_id']]['status'] = "Available (Custom Schedule)";
             } else {
                 $allTherapists[$row['therapist_id']]['available'] = false;
-                $allTherapists[$row['therapist_id']]['status'] = "Time Conflict (Custom)";
+                $allTherapists[$row['therapist_id']]['status'] = "Time Conflict (Custom Schedule)";
             }
         }
     }

@@ -1,36 +1,36 @@
 <?php
-require_once "../../dbconfig.php";
-session_start();
+    require_once "../../dbconfig.php";
+    session_start();
 
-if (!isset($_SESSION['account_ID'])) {
-    header("Location: ../../Accounts/loginpage.php");
-    exit();
-}
+    if (!isset($_SESSION['account_ID'])) {
+        header("Location: ../../Accounts/loginpage.php");
+        exit();
+    }
 
-// Fetch timetable settings safely
-$settingsQuery = "SELECT business_hours_start, business_hours_end, max_days_advance, min_days_advance, blocked_dates, initial_eval_duration, playgroup_duration 
-                  FROM settings LIMIT 1";
-$settingsResult = $connection->query($settingsQuery);
-$settings = $settingsResult->fetch_assoc();
+    // Fetch timetable settings safely
+    $settingsQuery = "SELECT business_hours_start, business_hours_end, max_days_advance, min_days_advance, blocked_dates, initial_eval_duration, playgroup_duration 
+                    FROM settings LIMIT 1";
+    $settingsResult = $connection->query($settingsQuery);
+    $settings = $settingsResult->fetch_assoc();
 
-$businessHoursStart = $settings["business_hours_start"] ?? "09:00:00";
-$businessHoursEnd = $settings["business_hours_end"] ?? "17:00:00";
-$maxDaysAdvance = $settings["max_days_advance"] ?? 30;
-$minDaysAdvance = $settings["min_days_advance"] ?? 3;
-$blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["blocked_dates"], true) : []; // Ensure array
-$ieDuration = $settings["initial_eval_duration"] ?? 60;
-$pgDuration = $settings["playgroup_duration"] ?? 120;
+    $businessHoursStart = $settings["business_hours_start"] ?? "09:00:00";
+    $businessHoursEnd = $settings["business_hours_end"] ?? "17:00:00";
+    $maxDaysAdvance = $settings["max_days_advance"] ?? 30;
+    $minDaysAdvance = $settings["min_days_advance"] ?? 3;
+    $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["blocked_dates"], true) : []; // Ensure array
+    $ieDuration = $settings["initial_eval_duration"] ?? 60;
+    $pgDuration = $settings["playgroup_duration"] ?? 120;
 
-// ✅ Fetch registered patients
-$patientsQuery = "SELECT patient_id, first_name, last_name FROM patients WHERE account_id = ?";
-$stmt = $connection->prepare($patientsQuery);
-$stmt->bind_param("i", $_SESSION['account_ID']);
-$stmt->execute();
-$result = $stmt->get_result();
-$patients = $result->fetch_all(MYSQLI_ASSOC);
-$stmt->close();
+    // ✅ Fetch registered patients
+    $patientsQuery = "SELECT patient_id, first_name, last_name FROM patients WHERE account_id = ?";
+    $stmt = $connection->prepare($patientsQuery);
+    $stmt->bind_param("i", $_SESSION['account_ID']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $patients = $result->fetch_all(MYSQLI_ASSOC);
+    $stmt->close();
 
-$role = strtolower(trim($_SESSION['account_Type']));
+    $role = strtolower(trim($_SESSION['account_Type']));
 ?>
 
 <!DOCTYPE html>
@@ -105,7 +105,9 @@ $role = strtolower(trim($_SESSION['account_Type']));
 
             <div id="referralUpload" style="display: none;">
                 <label id="referralLabel">Doctor's Referral:</label>
-                <input class="uk-input" type="file" name="doctors_referral" id="doctors_referral" accept=".jpg, .jpeg, .png, .pdf">
+                
+                <input class="uk-input" type="file" name="official_referral" id="official_referral" accept=".jpg, .jpeg, .png, .pdf">
+                <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking" accept=".jpg, .jpeg, .png, .pdf">
             </div>
 
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Book</button>
@@ -166,59 +168,118 @@ $role = strtolower(trim($_SESSION['account_Type']));
         document.addEventListener("DOMContentLoaded", function () {
         let appointmentType = document.getElementById("appointment_type");
         let referralQuestion = document.getElementById("referralQuestion");
-        let referralUpload = document.getElementById("referralUpload");
+        let referralSection = document.getElementById("referralUpload");
         let referralLabel = document.getElementById("referralLabel");
         let hasReferral = document.getElementById("has_referral");
         let doctorsReferral = document.getElementById("doctors_referral");
+        let appointmentTypeDropdown = document.getElementById("appointment_type");
         let patientDropdown = document.getElementById("patient_id");
+        let submitButton = document.querySelector("button[type='submit']");
+        let isChecking = false; // ✅ Prevent multiple alerts
+        let officialReferralInput = document.getElementById("official_referral");
+        let proofOfBookingInput = document.getElementById("proof_of_booking");
+
 
         // ✅ Show/Hide Doctor's Referral Question Based on Appointment Type
         appointmentType.addEventListener("change", function () {
             if (appointmentType.value === "Initial Evaluation") {
                 referralQuestion.style.display = "block";
-                referralUpload.style.display = "none";
+                referralSection.style.display = "none";
             } else {
                 referralQuestion.style.display = "none";
-                referralUpload.style.display = "none";
+                referralSection.style.display = "none";
             }
 
             // ✅ Check Pending Appointments on Change
-            checkPendingAppointments();
+            checkExistingAppointment();
         });
 
         // ✅ Show Referral Upload If Answer is "Yes" or "No"
         hasReferral.addEventListener("change", function () {
-            referralUpload.style.display = "block";
-            referralLabel.textContent = (hasReferral.value === "yes") 
-                ? "Upload Doctor's Referral:" 
-                : "Upload Proof of Booking for Doctor's Referral:";
+            if (hasReferral.value === "yes") {
+                referralUpload.style.display = "block";
+                referralLabel.textContent = "Upload Doctor's Referral:";
+                officialReferralInput.style.display = "block";
+                proofOfBookingInput.style.display = "none"; // Hide Proof of Booking
+            } else if (hasReferral.value === "no") {
+                referralUpload.style.display = "block";
+                referralLabel.textContent = "Upload Proof of Booking for Doctor's Referral:";
+                officialReferralInput.style.display = "none"; // Hide Doctor's Referral
+                proofOfBookingInput.style.display = "block";
+            } else {
+                referralUpload.style.display = "none"; // Hide both if no selection
+            }
         });
 
-        // ✅ Prevent Booking for Same Session Type & Reset Selection on Error
-        function checkPendingAppointments() {
+        function checkExistingAppointment() {
             let patientID = patientDropdown.value;
-            let selectedType = appointmentType.value;
+            let appointmentType = appointmentTypeDropdown.value;
 
-            if (!patientID || !selectedType) return; // Skip if nothing selected
+            if (!patientID || !appointmentType || isChecking) return;
 
-            fetch("../backend/check_pending_appointment.php?patient_id=" + patientID)
+            isChecking = true; // ✅ Prevent multiple calls until this completes
+
+            fetch(`../backend/check_existing_appointment.php?patient_id=${patientID}&appointment_type=${appointmentType}`)
                 .then(response => response.json())
                 .then(data => {
-                    if (data.status === "error" && data.existing_type === selectedType) {
-                        Swal.fire("Error!", "This patient already has a pending or confirmed appointment for this session type.", "error")
-                            .then(() => {
-                                // ✅ Reset Dropdown Selection on Error
-                                appointmentType.value = "";
-                                referralQuestion.style.display = "none";
-                                referralUpload.style.display = "none";
-                            });
+                    if (data.status === "error") {
+                        Swal.fire({
+                            title: "Booking Not Allowed",
+                            html: `
+                                <p>${data.message}</p>
+                                <p><strong>Existing Session:</strong> ${data.existing_session_type}</p>
+                                <p><strong>Status:</strong> ${data.existing_status}</p>
+                                <p><strong>Date:</strong> ${data.existing_date}</p>
+                                <p><strong>Time:</strong> ${data.existing_time}</p>
+                                <p>Your selections will be cleared.</p>
+                            `,
+                            icon: "warning"
+                        }).then(() => {
+                            // ✅ Reset the entire form
+                            document.getElementById("appointmentForm").reset();
+
+                            // ✅ Clear patient selection
+                            let patientDropdown = document.getElementById("patient_id");
+                            patientDropdown.value = "";
+
+                            // ✅ Hide and reset patient details
+                            let patientDetailsDiv = document.getElementById("patientDetails");
+                            let patientName = document.getElementById("patient_name");
+                            let patientAge = document.getElementById("patient_age");
+                            let patientGender = document.getElementById("patient_gender");
+                            let patientService = document.getElementById("patient_service");
+                            let patientProfile = document.getElementById("patient_profile");
+                            let editPatientBtn = document.getElementById("editPatientBtn");
+
+                            patientDetailsDiv.style.display = "none";
+                            patientName.textContent = "";
+                            patientAge.textContent = "";
+                            patientGender.textContent = "";
+                            patientService.textContent = "";
+                            patientProfile.src = "";
+                            patientProfile.style.display = "none";
+                            editPatientBtn.style.display = "none";
+
+                            // ✅ Hide dependent fields
+                            document.getElementById("referralQuestion").style.display = "none";
+                            document.getElementById("referralUpload").style.display = "none";
+                            document.getElementById("appointment_date").value = ""; 
+                            document.getElementById("appointment_time").innerHTML = "";
+                        });
                     }
                 })
-                .catch(error => console.error("Error checking pending appointments:", error));
+                .catch(error => {
+                    console.error("Error checking existing appointments:", error);
+                    Swal.fire("Error", "An error occurred while checking for existing appointments.", "error");
+                })
+                .finally(() => {
+                    isChecking = false; // ✅ Allow new checks
+                });
         }
 
-        // ✅ Trigger Check when Patient is Selected
-        patientDropdown.addEventListener("change", checkPendingAppointments);
+        // ✅ Ensure only **one check at a time**
+        appointmentTypeDropdown.addEventListener("change", checkExistingAppointment);
+        patientDropdown.addEventListener("change", checkExistingAppointment);
     });
 
 

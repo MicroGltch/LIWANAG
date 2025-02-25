@@ -12,8 +12,8 @@ $userId = $_SESSION['account_ID'];
 $userType = strtolower($_SESSION['account_Type']);
 
 // ✅ Check if user is authorized
-$accessQuery = "SELECT a.account_id, a.therapist_id
-                FROM appointments a
+$accessQuery = "SELECT a.account_id, a.therapist_id 
+                FROM appointments a 
                 WHERE a.appointment_id = ?";
 $stmt = $connection->prepare($accessQuery);
 $stmt->bind_param("i", $appointmentId);
@@ -35,14 +35,17 @@ if (!$isAuthorized) {
     exit();
 }
 
-// ✅ Fetch appointment details
-$query = "SELECT a.date, a.time, a.status, a.session_type, a.doctor_referral,
+// ✅ Fetch appointment details with updated referral information
+$query = "SELECT a.date, a.time, a.status, a.session_type, 
                  p.first_name AS patient_firstname, p.last_name AS patient_lastname, p.profile_picture AS patient_picture,
-                 u.account_FName AS client_firstname, u.account_LName AS client_lastname, u.profile_picture AS client_picture
+                 u.account_FName AS client_firstname, u.account_LName AS client_lastname, u.profile_picture AS client_picture,
+                 dr.official_referral_file, dr.proof_of_booking_file
           FROM appointments a
           JOIN patients p ON a.patient_id = p.patient_id
           JOIN users u ON a.account_id = u.account_ID
+          LEFT JOIN doctor_referrals dr ON a.referral_id = dr.referral_id -- ✅ Join doctor_referrals for updated referral structure
           WHERE a.appointment_id = ?";
+
 $stmt = $connection->prepare($query);
 $stmt->bind_param("i", $appointmentId);
 $stmt->execute();
@@ -50,6 +53,15 @@ $result = $stmt->get_result();
 
 if ($result->num_rows === 1) {
     $appointment = $result->fetch_assoc();
+
+    // ✅ Handle doctor referral links correctly
+    $officialReferral = !empty($appointment["official_referral_file"]) 
+        ? "<a href='../uploads/doctors_referrals/{$appointment["official_referral_file"]}' target='_blank'>View Official Referral</a>" 
+        : "Not Provided";
+
+    $proofOfBooking = !empty($appointment["proof_of_booking_file"]) 
+        ? "<a href='../uploads/doctors_referrals/{$appointment["proof_of_booking_file"]}' target='_blank'>View Proof of Booking</a>" 
+        : "Not Provided";
 
     echo json_encode([
         "status" => "success",
@@ -62,11 +74,12 @@ if ($result->num_rows === 1) {
             "time" => htmlspecialchars($appointment["time"]),
             "session_type" => htmlspecialchars($appointment["session_type"]),
             "status" => htmlspecialchars($appointment["status"]),
-            "doctor_referral" => $appointment["doctor_referral"] ? "<a href='../uploads/doctors_referrals/{$appointment["doctor_referral"]}' target='_blank'>View Document</a>" : "Not Provided"
+            "doctor_referral" => $officialReferral . " | " . $proofOfBooking
         ]
     ]);
 } else {
     echo json_encode(["status" => "error", "message" => "Appointment details not found."]);
 }
+
 $stmt->close();
 ?>
