@@ -1,6 +1,40 @@
 <?php
 include "../dbconfig.php";
 session_start();
+
+// Check if the user is logged in (basic check)
+if (!isset($_SESSION['account_ID'])) {
+    header("Location: ../Accounts/loginpage.php");
+    exit;
+}
+
+$userid = $_SESSION['account_ID'];
+
+// Fetch user data from the database
+$stmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
+$stmt->bind_param("s", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $userData = $result->fetch_assoc();
+    $firstName = $userData['account_FName'];
+    $lastName = $userData['account_LName'];
+    $email = $userData['account_Email'];
+    $phoneNumber = $userData['account_PNum'];
+    // Determine the profile picture path
+    if ($userData['profile_picture']) {
+        $profilePicture = '../Accounts/images/profilepictures/' . $userData['profile_picture']; // Corrected path
+    } else {
+        $profilePicture = '../CSS/default.jpg';
+    }
+    // $profilePicture = $userData['profile_picture'] ? '../uploads/' . $userData['profile_picture'] : '../CSS/default.jpg';
+} else {
+    echo "No Data Found.";
+}
+
+$stmt->close();
+$connection->close();
 ?>
 
 <!DOCTYPE html>
@@ -121,19 +155,19 @@ session_start();
                 <form class="uk-grid-small" uk-grid>
                     <div class="uk-width-1-2@s">
                         <label class="uk-form-label">First Name</label>
-                        <input class="uk-input" type="text" placeholder="Placeholder">
+                        <input class="uk-input" type="text" value="<?php echo $firstName; ?>" disabled>
                     </div>
                     <div class="uk-width-1-2@s">
                         <label class="uk-form-label">Last Name</label>
-                        <input class="uk-input" type="text" placeholder="Placeholder">
+                        <input class="uk-input" type="text" value="<?php echo $lastName; ?>" disabled>
                     </div>
                     <div class="uk-width-1-1">
                         <label class="uk-form-label">Email</label>
-                        <input class="uk-input" type="email" placeholder="Placeholder">
+                        <input class="uk-input" type="email" value="<?php echo $email; ?>" disabled>
                     </div>
                     <div class="uk-width-1-1">
                         <label class="uk-form-label">Phone Number</label>
-                        <input class="uk-input" type="tel" placeholder="Placeholder">
+                        <input class="uk-input" type="tel" value="<?php echo $phoneNumber; ?>" disabled>
                     </div>
                 </form>
             </div>
@@ -142,56 +176,62 @@ session_start();
               
             <!-- Settings -->
             <div id="settings" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Settings</h1>
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
+            <h1 class="uk-text-bold">Settings</h1>
+
+            <div class="uk-card uk-card-default uk-card-body uk-margin">
+                <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
+                <form action="settings.php" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="upload_profile_picture">
                     <div class="uk-flex uk-flex-middle">
                         <div class="profile-upload-container">
-                            <img class="uk-border-circle profile-preview" src="../CSS/default.jpg" alt="Profile Photo">
+                            <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                             <div class="uk-flex uk-flex-column uk-margin-left">
-                                <input type="file" id="profileUpload" class="uk-hidden">
+                                <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
                                 <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
                                 <div class="uk-text-center">
                                     <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
                                 </div>
-
                             </div>
                             <div class="uk-margin-large-left">
-                        <h4>Image requirements:</h4>
-                        <ul class="uk-list">
-                            <li>1. Min. 400 x 400px</li>
-                            <li>2. Max. 2MB</li>
-                            <li>3. Your face</li>
-                        </ul>
-                    </div>
+                                <h4>Image requirements:</h4>
+                                <ul class="uk-list">
+                                    <li>1. Min. 400 x 400px</li>
+                                    <li>2. Max. 2MB</li>
+                                    <li>3. Your face</li>
+                                </ul>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form class="uk-grid-small" uk-grid>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" placeholder="Placeholder">
-                        </div>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" placeholder="Placeholder">
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" placeholder="Placeholder">
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" placeholder="Placeholder">
-                        </div>
-                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
-                        </div>
-                    </form>
-                </div>
+                    <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
+                </form>
             </div>
+
+            <div class="uk-card uk-card-default uk-card-body">
+                <h3 class="uk-card-title uk-text-bold">User Details</h3>
+                <form action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
+                    <input type="hidden" name="action" value="update_user_details">
+                    <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">First Name</label>
+                        <input class="uk-input" type="text" name="firstName" value="<?php echo $firstName; ?>">
+                    </div>
+                    <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Last Name</label>
+                        <input class="uk-input" type="text" name="lastName" value="<?php echo $lastName; ?>">
+                    </div>
+                    <div class="uk-width-1-1">
+                        <label class="uk-form-label">Email</label>
+                        <input class="uk-input" type="email" name="email" value="<?php echo $email; ?>">
+                    </div>
+                    <div class="uk-width-1-1">
+                        <label class="uk-form-label">Phone Number</label>
+                        <input class="uk-input" type="tel" name="phoneNumber" value="<?php echo $phoneNumber; ?>">
+                    </div>
+                    <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                        <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
         </div>
     </div>
 
