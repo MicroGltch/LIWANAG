@@ -1,10 +1,10 @@
 <?php
-    require_once "../../../dbconfig.php";
+    require_once "../../../../dbconfig.php";
     session_start();
 
     // ✅ Restrict Access to Admins, Head Therapists, and Therapists
     if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist", "therapist"])) {
-        header("Location: ../../Accounts/loginpage.php");
+        header("Location: ../../../loginpage.php");
         exit();
     }
 
@@ -79,6 +79,8 @@
 </head>
 <body>
     <div class="uk-container uk-margin-top">
+
+        <a href="headtherapist_dashboard.php">Back to dashboard</a><br/>
         <h2>View All Appointments</h2>
 
         <!-- 🔹 Filters Section -->
@@ -89,8 +91,10 @@
                     <option value="">All</option>
                     <option value="Pending" <?= $statusFilter === "Pending" ? "selected" : "" ?>>Pending</option>
                     <option value="Approved" <?= $statusFilter === "Approved" ? "selected" : "" ?>>Approved</option>
+                    <option value="Waitlisted" <?= $statusFilter === "Waitlisted" ? "selected" : "" ?>>Waitlisted</option>
                     <option value="Completed" <?= $statusFilter === "Completed" ? "selected" : "" ?>>Completed</option>
                     <option value="Cancelled" <?= $statusFilter === "Cancelled" ? "selected" : "" ?>>Cancelled</option>
+                    <option value="Declined" <?= $statusFilter === "Declined" ? "selected" : "" ?>>Declined</option>
                 </select>
             </div>
 
@@ -144,12 +148,12 @@
                 <?php foreach ($appointments as $appointment): ?>
                     <tr>
                         <td>
-                            <img src="<?= !empty($appointment['patient_picture']) ? '../../../uploads/profile_pictures/' . $appointment['patient_picture'] : ''; ?>"
+                            <img src="<?= !empty($appointment['patient_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['patient_picture'] : ''; ?>"
                                  alt="Patient Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
                             <?= htmlspecialchars($appointment['patient_firstname'] . " " . $appointment['patient_lastname']); ?>
                         </td>
                         <td>
-                            <img src="<?= !empty($appointment['client_picture']) ? '../../../uploads/profile_pictures/' . $appointment['client_picture'] : ''; ?>"
+                            <img src="<?= !empty($appointment['client_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['client_picture'] : ''; ?>"
                                  alt="Client Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
                             <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
                         </td>

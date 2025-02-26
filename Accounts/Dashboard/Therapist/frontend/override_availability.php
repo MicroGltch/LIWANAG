@@ -1,10 +1,10 @@
 <?php
-require_once "../../../dbconfig.php";
+require_once "../../../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Therapists Only
 if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-    header("Location: ../../../Accounts/loginpage.php");
+    header("Location: ../../../loginpage.php");
     exit();
 }
 
@@ -82,7 +82,7 @@ $existingDates = array_column($overrides, 'date'); // Track already blocked date
     </div>
 
     <br/>
-    <a href="../dashboard.php">Go back to Therapist Dashboard</a>
+    <a href="therapist_dashboard.php">Go back to Therapist Dashboard</a>
 
     <script>
     document.addEventListener("DOMContentLoaded", function () {
@@ -188,7 +188,7 @@ $existingDates = array_column($overrides, 'date'); // Track already blocked date
                 }
             }
 
-            fetch("therapist_dashboard_backend/update_override_availability.php", {
+            fetch("../backend/update_override_availability.php", {
                 method: "POST",
                 body: formData
             })
@@ -221,7 +221,7 @@ $existingDates = array_column($overrides, 'date'); // Track already blocked date
                 cancelButtonText: "Cancel"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch("therapist_dashboard_backend/delete_override_availability.php", {
+                    fetch("../backend/delete_override_availability.php", {
                         method: "POST",
                         headers: { "Content-Type": "application/x-www-form-urlencoded" },
                         body: `override_id=${overrideId}`

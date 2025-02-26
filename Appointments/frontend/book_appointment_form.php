@@ -7,6 +7,11 @@
         exit();
     }
 
+    if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "client") {
+        header("Location: ../loginpage.php");
+        exit();
+    }
+    
     // Fetch timetable settings safely
     $settingsQuery = "SELECT business_hours_start, business_hours_end, max_days_advance, min_days_advance, blocked_dates, initial_eval_duration, playgroup_duration 
                     FROM settings LIMIT 1";
@@ -293,6 +298,7 @@
         let patientService = document.getElementById("patient_service");
         let patientProfile = document.getElementById("patient_profile");
         let editPatientBtn = document.getElementById("editPatientBtn");
+        let appointmentTypeDropdown = document.getElementById("appointment_type"); // ✅ Fixed dropdown reference
 
         patientDropdown.addEventListener("change", function () {
             let patientID = this.value;
@@ -302,7 +308,8 @@
                 return;
             }
 
-            fetch("../patient/fetch_patient_details.php?patient_id=" + patientID)
+            // ✅ Fetch patient details
+            fetch("../patient/backend/fetch_patient_details.php?patient_id=" + patientID)
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === "success") {
@@ -329,8 +336,27 @@
                     }
                 })
                 .catch(error => console.error("Error fetching patient details:", error));
+
+            // ✅ Check if the selected patient has completed Initial Evaluation
+            fetch(`../patient/backend/check_patient_history.php?patient_id=${patientID}`) // 🔹 Fixed patientID typo
+                .then(response => response.json())
+                .then(data => {
+                    let ieOption = appointmentTypeDropdown.querySelector("option[value='Initial Evaluation']");
+                    let playgroupOption = appointmentTypeDropdown.querySelector("option[value='Playgroup']");
+
+                    if (data.completed_ie) {
+                        // ✅ Disable Initial Evaluation, select Playgroup by default
+                        if (ieOption) ieOption.disabled = true;
+                        if (playgroupOption) appointmentTypeDropdown.value = "Playgroup"; // Select Playgroup
+                    } else {
+                        // ✅ Enable Initial Evaluation if not completed
+                        if (ieOption) ieOption.disabled = false;
+                    }
+                })
+                .catch(error => console.error("Error fetching patient history:", error));
         });
     });
+
 
 </script>
 
