@@ -69,16 +69,6 @@
                     </a>
                 </div>
                 <div>
-                    <a href="view_all_appointments.php" class="uk-button uk-button-secondary uk-width-1-1">
-                        View All Appointments
-                    </a>
-                </div>
-                <div>
-                    <a href="manage_timetable_settings.php" class="uk-button uk-button-default uk-width-1-1">
-                        Timetable Settings
-                    </a>
-                </div>
-                <div>
                     <a href="../dashboard/dashboard.php" class="uk-button uk-button-danger uk-width-1-1">
                         Back to Dashboard
                     </a>

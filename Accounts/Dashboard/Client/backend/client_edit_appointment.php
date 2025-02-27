@@ -1,6 +1,6 @@
 <?php
 require_once "../../../../dbconfig.php";
-require_once "../../../../Accounts/signupverify/vendor/autoload.php"; 
+require_once "../../../signupverify/vendor/autoload.php"; 
 use PHPMailer\PHPMailer\PHPMailer;
 
 session_start();
@@ -9,6 +9,9 @@ if (!isset($_SESSION['account_ID']) || $_SESSION['account_Type'] !== "client") {
     echo json_encode(["status" => "error", "title" => "Unauthorized", "message" => "Access denied."]);
     exit();
 }
+
+
+
 
 $requestData = json_decode(file_get_contents("php://input"), true);
 $appointment_id = $requestData['appointment_id'] ?? null;
@@ -23,8 +26,12 @@ if (empty($appointment_id) || empty($action)) {
     exit();
 }
 
-// ✅ Fetch the current appointment
-$query = "SELECT date, time, edit_count, session_type, status FROM appointments WHERE appointment_id = ? AND account_id = ?";
+// ✅ Fetch the current appointment and client email
+$query = "SELECT a.date, a.time, a.edit_count, a.session_type, a.status, u.account_Email 
+          FROM appointments a
+          JOIN users u ON a.account_id = u.account_ID
+          WHERE a.appointment_id = ? AND a.account_id = ?";
+
 $stmt = $connection->prepare($query);
 $stmt->bind_param("ii", $appointment_id, $client_id);
 $stmt->execute();
@@ -36,6 +43,9 @@ if (!$appointment) {
     exit();
 }
 
+$client_email = $appointment['account_Email']; // ✅ Get email from the database
+
+
 // ✅ Handle Cancellation
 if ($action === "cancel") {
     if (!in_array($appointment['status'], ["pending", "waitlisted"])) {
@@ -43,12 +53,23 @@ if ($action === "cancel") {
         exit();
     }
 
-    $updateQuery = "UPDATE appointments SET status = 'cancelled' WHERE appointment_id = ?";
-    $stmt = $connection->prepare($updateQuery);
-    $stmt->bind_param("i", $appointment_id);
+    $validation_notes = $requestData['validation_notes'] ?? null; // ✅ Extract from JSON
 
+    if (empty($validation_notes)) {
+        echo json_encode(["status" => "error", "title" => "Missing Information", "message" => "Please provide a reason for cancellation."]);
+        exit();
+    }
+
+    // ✅ Prepend "Client Cancelled: " to the notes
+    $formatted_notes = "Client Cancelled: " . trim($validation_notes);
+
+    $status = "cancelled"; // ✅ Define status before executing
+    $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
+    $stmt = $connection->prepare($updateQuery);
+    $stmt->bind_param("ssi", $status, $formatted_notes, $appointment_id);
+    
     if ($stmt->execute()) {
-        send_email_notification($_SESSION['email'], "cancelled", $appointment['session_type'], $appointment['date'], $appointment['time']);
+        send_email_notification($client_email, "cancelled", $appointment['session_type'], $appointment['date'], $appointment['time']);
         echo json_encode(["status" => "success", "title" => "Appointment Cancelled", "message" => "Your appointment has been cancelled."]);
         exit();
     } else {
