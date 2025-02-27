@@ -1,6 +1,6 @@
 <?php
-require_once "../../../dbconfig.php";
-require_once "../../../Accounts/signupverify/vendor/autoload.php"; // ✅ Load PHPMailer
+require_once "../../../../dbconfig.php";
+require_once "../../../../Accounts/signupverify/vendor/autoload.php"; // ✅ Load PHPMailer
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
@@ -13,7 +13,7 @@ if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !==
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $appointmentID = $_POST['appointment_id'];
+    $appointmentID = $_POST['appointment_id'] ?? null; // ✅ Make it optional
     $patientID = $_POST['patient_id'];
     $therapistID = $_SESSION['account_ID']; // Therapist doing the rebooking
     $newDate = $_POST['new_date'];
@@ -24,13 +24,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $connection->begin_transaction(); // Start transaction
 
     try {
-        // ✅ Check if patient already has a pending/approved appointment
+        // ✅ Check if patient already has a pending/approved appointment (excluding the one being completed)
         $checkExistingQuery = "SELECT appointment_id FROM appointments 
-                               WHERE patient_id = ? AND status IN ('Pending', 'Approved')";
+                            WHERE patient_id = ? 
+                            AND status IN ('Pending', 'Approved') 
+                            AND appointment_id != ?";
         $stmt = $connection->prepare($checkExistingQuery);
-        $stmt->bind_param("i", $patientID);
+        $stmt->bind_param("ii", $patientID, $appointmentID);
         $stmt->execute();
         $result = $stmt->get_result();
+
 
         if ($result->num_rows > 0) {
             throw new Exception("This patient already has a pending or approved appointment.");

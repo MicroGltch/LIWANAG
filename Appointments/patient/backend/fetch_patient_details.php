@@ -1,5 +1,5 @@
 <?php
-require_once "../../dbconfig.php";
+require_once "../../../dbconfig.php";
 session_start();
 
 if (!isset($_SESSION['account_ID']) || !isset($_GET['patient_id'])) {

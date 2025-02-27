@@ -1,10 +1,10 @@
 <?php
-require_once "../../../dbconfig.php";
+require_once "../../../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Therapists Only
 if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-    header("Location: ../loginpage.php");
+    header("Location: ../../../loginpage.php");
     exit();
 }
 
@@ -50,8 +50,9 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
 <body>
     <div class="uk-container uk-margin-top">
         <h2>Rebook a Previous Patient</h2>
-        <form id="rebookForm" action="process_rebook.php" method="POST" class="uk-form-stacked">
+        <form id="rebookForm" action="../backend/process_rebook.php" method="POST" class="uk-form-stacked">
             <label>Select Patient:</label>
+
             <select class="uk-select" name="patient_id" id="patient_id" required>
                 <option value="" disabled selected>Select a Patient</option>
                 <?php foreach ($patients as $patient): ?>
@@ -75,7 +76,7 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
             <select class="uk-select" name="new_time" id="new_time" required></select>
 
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Rebook Appointment</button>
-            <a href="../therapist_dashboard.php" class="uk-button uk-button-default">Cancel</a>
+            <a href="therapist_dashboard.php" class="uk-button uk-button-default">Cancel</a>
         </form>
     </div>
 
@@ -129,7 +130,7 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
                     let patientID = patientDropdown.value;
                     if (!patientID) return;
 
-                    fetch(`therapist_dashboard_backend/check_patient_appointment.php?patient_id=${patientID}`)
+                    fetch(`../backend/check_patient_appointment.php?patient_id=${patientID}`)
                         .then(response => response.json())
                         .then(data => {
                             if (data.status === "error") {
