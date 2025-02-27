@@ -106,7 +106,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
 
                 echo json_encode([
                     'sweetalert' => ["Pending Account", "Your account is pending verification. Please verify your phone number.", "info"],
-                    'redirect' => '../signupverify/verify.php',
+                    'redirect' => '../Accounts/signupverify/verify.php',
                     'pending' => true
                 ]);
                 exit();
@@ -127,7 +127,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         }
 
         // ✅ **Log in Regular Users**
-        echo json_encode(['redirect' => 'dashboard/redirect.php']); // Redirect to dynamic dashboard
+        echo json_encode(['redirect' => 'dashboard/dashboard.php']); // Redirect to dynamic dashboard
         exit();
     }
 }

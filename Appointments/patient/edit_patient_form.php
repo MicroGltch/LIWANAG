@@ -1,5 +1,5 @@
 <?php
-require_once "../../../dbconfig.php";
+require_once "../../dbconfig.php";
 session_start();
 
 if (!isset($_SESSION['account_ID'])) {
@@ -42,7 +42,7 @@ $stmt->close();
         </select>
 
         <!-- 🔹 Patient Details Form (Initially Hidden) -->
-        <form id="editPatientForm" action="../backend/update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
+        <form id="editPatientForm" action="update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
             <input type="hidden" name="patient_id" id="patient_id">
             <input type="hidden" name="existing_profile_picture" id="existing_profile_picture"> <!-- Store existing picture -->
 
@@ -92,7 +92,7 @@ $stmt->close();
                 return;
             }
 
-            fetch("../backend/fetch_patient_details.php?patient_id=" + patientID)
+            fetch("fetch_patient_details.php?patient_id=" + patientID)
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === "success") {

@@ -41,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // ✅ Ensure status is valid
-    $validStatuses = ["approved", "declined", "waitlisted", "cancelled", "completed", "pending"];
+    $validStatuses = ["approved", "declined", "waitlisted", "cancelled", "completed", "rebooked"];
     if (!in_array(strtolower($status), $validStatuses)) {
         echo json_encode(["status" => "error", "title" => "Invalid Status", "message" => "Invalid status update."]);
         exit();
@@ -65,18 +65,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     $appointment = $result->fetch_assoc();
-    $current_status = strtolower($appointment['status']);
     $email = $appointment['account_Email'];
     $session_type = $appointment['session_type'];
     $appointment_date = $appointment['date'];
     $appointment_time = $appointment['time'];
     $patient_name = $appointment['first_name'] . " " . $appointment['last_name'];
     $client_name = $appointment['client_fname'] . " " . $appointment['client_lname'];
-    $account_type = strtolower($_SESSION['account_Type']);
 
-
-    // ✅ Regular Approval Process (Pending → Approved)
-    if ($status === "approved" && $current_status === "pending") {
+    // ✅ Handle "Approved" Status
+    if ($status === "approved") {
         if (!$therapist_id) {
             echo json_encode(["status" => "error", "title" => "Validation Error", "message" => "A therapist must be assigned."]);
             exit();
@@ -93,58 +90,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // ✅ Reschedule Waitlisted Appointment (Waitlisted → Approved)
-    else if ($status === "approved" && $current_status === "waitlisted") {
-        if (empty($date) || empty($time) || empty($therapist_id)) {
-            echo json_encode(["status" => "error", "title" => "Missing Data", "message" => "Date, time, and therapist are required for rescheduling."]);
-            exit();
-        }
-
-        $updateQuery = "UPDATE appointments SET status = ?, date = ?, time = ?, therapist_id = ? WHERE appointment_id = ?";
-        $stmt = $connection->prepare($updateQuery);
-        $stmt->bind_param("sssii", $status, $date, $time, $therapist_id, $appointment_id);
-
-        if ($stmt->execute()) {
-            send_email_notification($email, $status, $session_type, $patient_name, $client_name, $date, $time, $therapist_id);
-            echo json_encode(["status" => "success", "title" => "Appointment Rescheduled", "message" => "Appointment for **$patient_name** has been rescheduled and assigned to a therapist."]);
-            exit();
-        } else {
-            echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to reschedule appointment."]);
-            exit();
-        }
-    }
-
-    // ✅ Therapist Cancelation for "Approved" Appointments
-    if ($status === "cancelled" && in_array($account_type, ["therapist", "head therapist", "admin"])) {
-        if (empty($validation_notes)) {
-            echo json_encode(["status" => "error", "title" => "Missing Information", "message" => "A reason is required for cancellation."]);
-            exit();
-        }
-
-        // ✅ Update the appointment to "Cancelled" and store validation notes
-        $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
-        $stmt = $connection->prepare($updateQuery);
-        $stmt->bind_param("ssi", $status, $validation_notes, $appointment_id);
-
-        if ($stmt->execute()) {
-            send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
-            echo json_encode(["status" => "success", "title" => "Appointment Cancelled", "message" => "Appointment for **$patient_name** has been **cancelled**. Email notification sent."]);
-            exit();
-        } else {
-            echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to cancel appointment."]);
-            exit();
-        }
-    }
-
-
-    // ✅ Error Handling: Prevent invalid transitions
-    else {
-        echo json_encode(["status" => "error", "title" => "Invalid Status Transition", "message" => "You cannot move from '$current_status' to '$status'."]);
-        exit();
-    }
-
     // ✅ Handle "Declined" & "Cancelled" Status (Both Require Validation Notes)
-    if ($status === "declined" || $status === "cancelled" && in_array($account_type, ["admin", "head therapist, therapist"])) {
+    if ($status === "declined" || $status === "cancelled") {
         if (empty($validation_notes)) {
             echo json_encode(["status" => "error", "title" => "Missing Information", "message" => "A reason is required."]);
             exit();
@@ -157,29 +104,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if ($stmt->execute()) {
             send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
             echo json_encode(["status" => "success", "title" => "Appointment $status", "message" => "Appointment for **$patient_name** has been **$status**. Email notification sent."]);
-            exit();
-        }
-    }
-
-    
-    // 🚀 **1️⃣ CLIENT CANCELLATION (NO REASON REQUIRED)**
-    if ($status === "cancelled" && $account_type === "client") {
-        // ✅ Allow Clients to Cancel Only These Statuses
-        if (!in_array($current_status, ["pending", "approved", "waitlisted"])) {
-            echo json_encode(["status" => "error", "title" => "Invalid Action", "message" => "You can only cancel pending, approved, or waitlisted appointments."]);
-            exit();
-        }
-
-        // ✅ Update the status to "Cancelled" without requiring a reason
-        $updateQuery = "UPDATE appointments SET status = ? WHERE appointment_id = ?";
-        $stmt = $connection->prepare($updateQuery);
-        $stmt->bind_param("si", $status, $appointment_id);
-
-        if ($stmt->execute()) {
-            echo json_encode(["status" => "success", "title" => "Appointment Cancelled", "message" => "Your appointment has been cancelled."]);
-            exit();
-        } else {
-            echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to cancel appointment."]);
             exit();
         }
     }
@@ -201,38 +125,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit();
         }
     }
-
-    // ✅ Handle "Waitlisted" Status
-    if ($status === "waitlisted") {
-        if (empty($validation_notes)) {
-            echo json_encode(["status" => "error", "title" => "Missing Information", "message" => "A reason is required for waitlisting."]);
-            exit();
-        }
-
-        $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
-        $stmt = $connection->prepare($updateQuery);
-        $stmt->bind_param("ssi", $status, $validation_notes, $appointment_id);
-
-        if ($stmt->execute()) {
-            // ✅ Send Email Notification to Client
-            send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
-
-            echo json_encode([
-                "status" => "success",
-                "title" => "Appointment Waitlisted",
-                "message" => "Appointment for **$patient_name** has been moved to **Waitlisted**. Email notification sent."
-            ]);
-            exit();
-        } else {
-            echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to update appointment to Waitlisted."]);
-            exit();
-        }
-    }
-
 }
 
 // ✅ Function to Send Email Notifications
-function send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, $current_status, $therapist_id = null, $isRebooked = false, $reason = null) {
+function send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, $therapist_id = null, $isRebooked = false, $reason = null) {
     global $connection;
     $mail = new PHPMailer(true);
 
@@ -258,24 +154,14 @@ function send_email_notification($email, $status, $session_type, $patient_name, 
                 <p><strong>Reason:</strong> $reason</p>
                 <p>If you have any concerns, please contact us.</p>
             ";
-        } // ✅ Special email if appointment was "Waitlisted" before
-        else if ($status === "approved" && $current_status === "waitlisted") {
-            $emailBody = "
-                <h3>Appointment Rescheduled</h3>
-                <p>Dear <strong>$client_name</strong>,</p>
-                <p>Your waitlisted appointment for <strong>$session_type</strong> with <strong>$patient_name</strong> has now been assigned a new date and time.</p>
-                <p><strong>New Schedule:</strong> $appointment_date at $appointment_time</p>
-                <p>If you have any concerns, please contact us.</p>
-            ";
-        } 
-        // ✅ Regular approval email
-        else {
+        } else {
             $emailBody = "
                 <h3>Appointment Status Update</h3>
                 <p>Dear <strong>$client_name</strong>,</p>
-                <p>Your <strong>$session_type</strong> appointment with <strong>$patient_name</strong> has been updated to <strong>$status</strong>.</p>
+                <p>Your appointment for <strong>$session_type</strong> with <strong>$patient_name</strong> has been updated to <strong>$status</strong>.</p>
             ";
         }
+
         $mail->Body = $emailBody;
         $mail->send();
         return true;

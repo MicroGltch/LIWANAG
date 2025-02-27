@@ -1,10 +1,10 @@
 <?php
-require_once "../../../../dbconfig.php";
+require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Therapists Only
 if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-    header("Location: ../../../loginpage.php");
+    header("Location: ../loginpage.php");
     exit();
 }
 
@@ -57,10 +57,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                         <td><?= htmlspecialchars($appointment['time']); ?></td>
                         <td><?= htmlspecialchars($appointment['status']); ?></td>
                         <td>
-                            <button class="uk-button uk-button-primary complete-btn"
-                                data-id="<?= $appointment['appointment_id']; ?>"
-                                data-patient-id="<?= $appointment['patient_id']; ?>">Complete
-                            </button>
+                            <button class="uk-button uk-button-primary complete-btn" data-id="<?= $appointment['appointment_id']; ?>">Complete</button>
                             <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
                         </td>
                     </tr>
@@ -71,14 +68,13 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 
     <br/>
     <div>
-        <a href="rebook_patient.php" class="uk-button uk-button-secondary">Rebook a Previous Patient</a>
+        <a href="therapist/rebook_patient.php" class="uk-button uk-button-secondary">Rebook a Previous Patient</a>
     </div>
 
     <div>
     <br/>
-        <a href="manage_availability.php">Setup your default availability</a> <br/>
-        <a href="override_availability.php">Unavailable for a specific date? Block a date schedule here</a> <br/>
-        <a href="../../../logout.php">LOGOUT</a>
+        <a href="therapist/manage_availability.php">Setup your default availability</a> <br/>
+        <a href="therapist/override_availability.php">Unavailable for a specific date? Block a date schedule here</a>
     </div>
 
     <script>
@@ -87,24 +83,23 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
             document.querySelectorAll(".complete-btn").forEach(button => {
                 button.addEventListener("click", function () {
                     let appointmentId = this.getAttribute("data-id");
-                    let patientId = this.getAttribute("data-patient-id"); // ✅ Fetch patient_id
 
                     Swal.fire({
                         title: "Rebook Next Session?",
                         text: "Would you like to rebook a follow-up session before marking this as completed?",
                         icon: "question",
-                        showDenyButton: true,   
-                        showCancelButton: true,  
+                        showDenyButton: true,    // ✅ Adds "Skip Rebooking" as a middle button
+                        showCancelButton: true,  // ✅ Adds "Cancel" button
                         confirmButtonText: "Rebook",  
-                        denyButtonText: "Skip Rebooking",  
-                        cancelButtonText: "Cancel",  
-                        allowOutsideClick: false,
+                        denyButtonText: "Skip Rebooking",  // ✅ This will mark as completed without rebooking
+                        cancelButtonText: "Cancel",  // ✅ This will close the modal
+                        allowOutsideClick: false, // ✅ Prevents accidental dismissals
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            // ✅ Redirect to `rebook_appointment.php` with `patient_id`
-                            window.location.href = `rebook_appointment.php?patient_id=${patientId}&appointment_id=${appointmentId}`;
+                            // ✅ Redirect to rebook page
+                            window.location.href = `therapist/rebook_appointment.php?appointment_id=${appointmentId}`;
                         } else if (result.dismiss === Swal.DismissReason.cancel) {
-                            // ✅ Confirmation before marking as complete
+                            // ✅ Ensure confirmation before marking as complete
                             Swal.fire({
                                 title: "Mark as Completed?",
                                 text: "Are you sure you want to mark this session as completed?",
@@ -115,7 +110,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                                 allowOutsideClick: false,
                             }).then((confirmResult) => {
                                 if (confirmResult.isConfirmed) {
-                                    fetch("../../../Appointments/backend/update_appointment_status.php", {
+                                    fetch("../../Appointments/backend/update_appointment_status.php", {
                                         method: "POST",
                                         headers: { "Content-Type": "application/x-www-form-urlencoded" },
                                         body: `appointment_id=${appointmentId}&status=Completed`
@@ -135,7 +130,6 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                     });
                 });
             });
-
 
             // ✅ Cancel Button with Validation Note Requirement
             document.querySelectorAll(".cancel-btn").forEach(button => {
@@ -158,7 +152,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            fetch("../../../../Appointments/backend/update_appointment_status.php", {
+                            fetch("../../Appointments/backend/update_appointment_status.php", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({
@@ -177,7 +171,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                                         confirmButtonText: "Proceed to Rebooking"
                                     }).then(() => {
                                         // ✅ Redirect therapist to rebook page with patient_id
-                                        window.location.href = `rebook_appointment.php?patient_id=${patientId}&appointment_id=${appointmentId}`;
+                                        window.location.href = "therapist/rebook_appointment.php";
                                     });
                                 } else {
                                     Swal.fire("Error!", data.message, "error");

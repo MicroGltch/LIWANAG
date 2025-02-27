@@ -1,17 +1,17 @@
 <?php
-require_once "../../../../../dbconfig.php";
+require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Check if user is logged in
 if (!isset($_SESSION['account_ID'])) {
-    header("Location: ../../../loginpage.php");
+    header("Location: ../../Accounts/loginpage.php");
     exit();
 }
 
 // ✅ Ensure only Admin/Head Therapist can access
 if (!isset($_SESSION['account_Type']) || strtolower($_SESSION['account_Type']) !== "admin") {
     $_SESSION['error'] = "Unauthorized access.";
-    header("Location: ../../../loginpage.php");
+    header("Location: ../../Accounts/loginpage.php");
     exit();
 }
 
@@ -88,7 +88,7 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
             <br/>
             
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Settings</button>
-            <a href="../../frontend/headtherapist_dashboard.php">BACK TO DASHBOARD</a>
+            <a href="../../Accounts/dashboard/dashboard.php">BACK TO DASHBOARD</a>
         </form>
     </div>
 

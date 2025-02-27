@@ -1,10 +1,10 @@
 <?php
-    require_once "../../../../dbconfig.php";
+    require_once "../../../dbconfig.php";
     session_start();
 
     // ✅ Restrict Access to Therapists Only
     if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-        header("Location: ../../../loginpage.php");
+        header("Location: ../../../Accounts/loginpage.php");
         exit();
     }
 
@@ -63,14 +63,14 @@
 
 
     <br/>
-    <a href="therapist_dashboard.php">Go back to Therapist Dashboard</a>
+    <a href="../dashboard.php">Go back to Therapist Dashboard</a>
 
     <script>
         document.getElementById("availabilityForm").addEventListener("submit", function (event) {
             event.preventDefault();
             let formData = new FormData(this);
 
-            fetch("../backend/update_default_availability.php", {
+            fetch("therapist_dashboard_backend/update_default_availability.php", {
                 method: "POST",
                 body: formData
             })

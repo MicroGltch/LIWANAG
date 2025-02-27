@@ -3,7 +3,7 @@
 
 <?php
 
-require_once "../../../dbconfig.php";
+require_once "../../dbconfig.php";
 
 session_start();
 
@@ -14,7 +14,7 @@ if (!isset($_SESSION)) {
 
 // Check if the user is logged in 
 if (!isset($_SESSION['username']) || !isset($_SESSION['account_ID'])) {
-    header("Location: ../../../Accounts/loginpage.php");
+    header("Location: ../../Accounts/loginpage.php");
     exit();
 }
 
@@ -28,7 +28,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $gender = $_POST['patient_gender'];
     
     // File upload handling
-    $target_dir = "../../../uploads/profile_pictures/";
+    $target_dir = "../../uploads/profile_pictures/";
     $file_name = $_FILES['profile_picture']['name'];
     $file_tmp = $_FILES['profile_picture']['tmp_name'];
     $file_size = $_FILES['profile_picture']['size'];
@@ -107,8 +107,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     </div>
     
-    <a href="../../frontend/book_appointment_form.php" class="uk-button uk-button-danger uk-margin-top">Book Appointment</a>
-    <a href="../../../Accounts/logout.php" class="uk-button uk-button-danger uk-margin-top">Back to Dashboard</a>
+    <a href="../frontend/book_appointment_form.php" class="uk-button uk-button-danger uk-margin-top">Book Appointment</a>
+
+    <a href="../../Accounts/logout.php" class="uk-button uk-button-danger uk-margin-top">Logout</a>
 
 </body>
 </html>
