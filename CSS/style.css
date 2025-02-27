@@ -436,3 +436,51 @@ background-color: #ffffff;
     }
 }
 
+
+.register-patient-card{
+    width: 1080px;
+    padding-left: 70px;
+    padding-right: 70px;
+    padding-top: 40px;
+    padding-bottom: 30px;
+    margin-top: 35px;
+    margin-bottom: 35px;
+  }
+  
+  .calendar-container {
+      display: flex;
+      gap: 20px;
+  }
+  .calendar-sidebar {
+      width: 250px;
+      background: #f8f8f8;
+      padding: 15px;
+      border-radius: 8px;
+  }
+  #calendar {
+      flex-grow: 1;
+      min-height: 600px;
+  }
+  
+  #rightSidebar {
+      border-left: 1px solid #e5e5e5;
+      min-width: 250px;
+  }
+  
+  #rightSidebar .uk-nav-header {
+      font-size: 16px;
+      font-weight: bold;
+      color: #333;
+  }
+  
+  .pending-appointments,
+  .upcoming-appointments {
+      padding: 10px 0;
+  }
+  
+  .appointment-item {
+      padding: 8px 15px;
+      margin: 5px 0;
+      background: #f8f8f8;
+      border-radius: 4px;
+  }
