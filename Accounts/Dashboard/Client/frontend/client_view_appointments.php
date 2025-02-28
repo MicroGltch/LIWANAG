@@ -81,35 +81,68 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
     <a href="../"></a>
 
     <script>
-document.addEventListener("DOMContentLoaded", function () {
-    // ✅ Cancel Appointment
-    document.querySelectorAll(".cancel-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            let appointmentId = this.getAttribute("data-id");
+    document.addEventListener("DOMContentLoaded", function () {
+            // ✅ Cancel Appointment
+        document.querySelectorAll(".cancel-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let appointmentId = this.getAttribute("data-id");
 
-            Swal.fire({
-                title: "Cancel Appointment?",
-                text: "Are you sure you want to cancel this appointment?",
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonText: "Yes, Cancel",
-                cancelButtonText: "No, Keep Appointment",
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch("../backend/client_edit_appointment.php", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ appointment_id: appointmentId, action: "cancel" })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        Swal.fire(data.title, data.message, data.status === "success" ? "success" : "error")
-                            .then(() => location.reload());
-                    });
-                }
+                Swal.fire({
+                    title: "Cancel Appointment?",
+                    text: "Please provide a reason for cancellation:",
+                    icon: "warning",
+                    input: "text",
+                    inputPlaceholder: "Enter cancellation reason",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, Cancel",
+                    cancelButtonText: "No, Keep Appointment",
+                    preConfirm: (reason) => {
+                        if (!reason) {
+                            Swal.showValidationMessage("A cancellation reason is required.");
+                        }
+                        return reason;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch("../backend/client_edit_appointment.php", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ 
+                                appointment_id: appointmentId, 
+                                action: "cancel",
+                                validation_notes: result.value 
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                Swal.fire({
+                                    title: data.title,
+                                    text: data.message,
+                                    icon: "success",
+                                    confirmButtonText: "OK"
+                                }).then(() => {
+                                    location.reload(); // ✅ Reload after user sees the message
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: data.title,
+                                    text: data.message,
+                                    icon: "error"
+                                });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                title: "Error",
+                                text: "Something went wrong. Please try again.",
+                                icon: "error"
+                            });
+                        });
+                    }
+                });
             });
         });
-    });
 
     // ✅ Edit Appointment (Reschedule)
     document.querySelectorAll(".edit-btn").forEach(button => {

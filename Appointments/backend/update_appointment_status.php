@@ -148,21 +148,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if (empty($validation_notes)) {
             echo json_encode(["status" => "error", "title" => "Missing Information", "message" => "A reason is required."]);
             exit();
-        }
-
-        $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
+        } else { $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
         $stmt = $connection->prepare($updateQuery);
         $stmt->bind_param("ssi", $status, $validation_notes, $appointment_id);
+        }
 
         if ($stmt->execute()) {
             send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
             echo json_encode(["status" => "success", "title" => "Appointment $status", "message" => "Appointment for **$patient_name** has been **$status**. Email notification sent."]);
             exit();
+        }else {
+            echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to decline/cancel appointment."]);
+            exit();
         }
     }
 
     
-    // 🚀 **1️⃣ CLIENT CANCELLATION (NO REASON REQUIRED)**
+    // 🚀 **1️⃣ CLIENT CANCELLATION (NOW REQUIRES A REASON)**
     if ($status === "cancelled" && $account_type === "client") {
         // ✅ Allow Clients to Cancel Only These Statuses
         if (!in_array($current_status, ["pending", "approved", "waitlisted"])) {
@@ -170,10 +172,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit();
         }
 
-        // ✅ Update the status to "Cancelled" without requiring a reason
-        $updateQuery = "UPDATE appointments SET status = ? WHERE appointment_id = ?";
-        $stmt = $connection->prepare($updateQuery);
-        $stmt->bind_param("si", $status, $appointment_id);
+        // ✅ Require a cancellation reason
+        if (empty($validation_notes)) {
+            echo json_encode(["status" => "error", "title" => "Missing Information", "message" => "Please provide a reason for cancellation."]);
+            exit();
+        } else {
+            // ✅ Prepend "Client Cancelled: " to the notes
+            $formatted_notes = "Client Cancelled: " . trim($validation_notes);
+    
+            // ✅ Update the status and validation notes in the database
+            $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
+            $stmt = $connection->prepare($updateQuery);
+            $stmt->bind_param("ssi", $status, $formatted_notes, $appointment_id);
+        }
 
         if ($stmt->execute()) {
             echo json_encode(["status" => "success", "title" => "Appointment Cancelled", "message" => "Your appointment has been cancelled."]);
@@ -184,20 +195,23 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
+
     // ✅ Handle "Completed" Status
     if ($status === "completed") {
         if ($appointment["status"] !== "approved") {
             echo json_encode(["status" => "error", "title" => "Invalid Action", "message" => "Only approved appointments can be marked as completed."]);
             exit();
+        } else {
+            $updateQuery = "UPDATE appointments SET status = ? WHERE appointment_id = ?";
+            $stmt = $connection->prepare($updateQuery);
+            $stmt->bind_param("si", $status, $appointment_id);
         }
-
-        $updateQuery = "UPDATE appointments SET status = ? WHERE appointment_id = ?";
-        $stmt = $connection->prepare($updateQuery);
-        $stmt->bind_param("si", $status, $appointment_id);
-
         if ($stmt->execute()) {
             send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time);
             echo json_encode(["status" => "success", "title" => "Appointment Completed", "message" => "Appointment for **$patient_name** has been marked as **Completed**. Email notification sent."]);
+            exit();
+        }else {
+            echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to cancel appointment."]);
             exit();
         }
     }
@@ -207,11 +221,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         if (empty($validation_notes)) {
             echo json_encode(["status" => "error", "title" => "Missing Information", "message" => "A reason is required for waitlisting."]);
             exit();
+        } else {
+            $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
+            $stmt = $connection->prepare($updateQuery);
+            $stmt->bind_param("ssi", $status, $validation_notes, $appointment_id);
         }
-
-        $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
-        $stmt = $connection->prepare($updateQuery);
-        $stmt->bind_param("ssi", $status, $validation_notes, $appointment_id);
 
         if ($stmt->execute()) {
             // ✅ Send Email Notification to Client
@@ -271,9 +285,11 @@ function send_email_notification($email, $status, $session_type, $patient_name, 
         // ✅ Regular approval email
         else {
             $emailBody = "
-                <h3>Appointment Status Update</h3>
+                <h3>Appointment Approved</h3>
                 <p>Dear <strong>$client_name</strong>,</p>
-                <p>Your <strong>$session_type</strong> appointment with <strong>$patient_name</strong> has been updated to <strong>$status</strong>.</p>
+                <p>Your <strong>$session_type</strong> appointment with <strong>$patient_name</strong> has been <strong>$status</strong>.</p>
+                <p><strong>Appointment time:</strong> $appointment_date at $appointment_time</p>
+                <p>If you have any concerns, please contact us.</p>
             ";
         }
         $mail->Body = $emailBody;
