@@ -24,7 +24,7 @@ if ($result->num_rows > 0) {
     $phoneNumber = $userData['account_PNum'];
     // Determine the profile picture path
     if ($userData['profile_picture']) {
-        $profilePicture = '../Accounts/images/profilepictures/' . $userData['profile_picture']; // Corrected path
+        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture']; // Corrected path
     } else {
         $profilePicture = '../CSS/default.jpg';
     }
@@ -123,7 +123,7 @@ $connection->close();
                     <!-- Temporary links lng based from Rap's code pra macustomize sa client dashboard-->
                     <li><a href="../Appointments/patient/frontend/register_patient_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Register Patient</a></li>
                     <li><a href="../Appointments/patient/frontend/edit_patient_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li> 
-                    <li><a href="../Appointments/frontend/book_appointment_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li> 
+                    <li><a href="../Appointments/book_appointment_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li> 
 
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
