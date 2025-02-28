@@ -332,7 +332,7 @@ $connection->close();
                         }
                         }).then((result) => {
                             if (result.isConfirmed) {
-                                fetch("../backend/client_edit_appointment.php", {
+                                fetch("../Appointments/app_manage/client_edit_appointment.php", {
                                     method: "POST",
                                     headers: { "Content-Type": "application/json" },
                                     body: JSON.stringify({
@@ -391,7 +391,7 @@ $connection->close();
                         };
                     }
                 }).then((result) => {
-                    fetch("../backend/client_edit_appointment.php", {
+                    fetch("../Appointments/app_manage/client_edit_appointment.php", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ appointment_id: appointmentId, action: "edit", new_date: result.value.newDate, new_time: result.value.newTime })
