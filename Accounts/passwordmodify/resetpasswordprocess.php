@@ -40,16 +40,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $stmt = $connection->prepare($delete_token_sql);
                 $stmt->bind_param("i", $accountID);
                 $stmt->execute();
-        // Update password and reset login attempts
-        $update_sql = "UPDATE users SET account_Password = ?, login_attempts = 0 WHERE account_ID = ?";
-        $stmt = $connection->prepare($update_sql);
-        $stmt->bind_param("si", $hashed_password, $accountID);
-        if ($stmt->execute()) {
-            // Delete the reset token after successful password update
-            $delete_token_sql = "DELETE FROM security_tokens WHERE account_ID = ? AND reset_token IS NOT NULL";
-            $stmt = $connection->prepare($delete_token_sql);
-            $stmt->bind_param("i", $accountID);
-            $stmt->execute();
 
                 // Redirect to login page after success
                 header("Location: ../loginpage.php?reset=success");

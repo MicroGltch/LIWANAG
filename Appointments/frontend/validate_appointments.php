@@ -89,23 +89,25 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                         <td><?= htmlspecialchars($appointment['time']); ?></td>
                         <td><?= htmlspecialchars($appointment['session_type']); ?></td>
 
-                        <td> 
-                                                    <!-- ✅ Display Official Referral if Available -->
-                        <?php if (!empty($appointment['official_referral_file'])): ?>
-                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>" 
-                            target="_blank" class="uk-button uk-button-secondary">
-                                View Official Referral
-                            </a>
-                        <?php endif; ?>
-
-                        <!-- ✅ Display Proof of Booking if Available -->
-                        <?php if (!empty($appointment['proof_of_booking_file'])): ?>
-                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_file']); ?>" 
-                            target="_blank" class="uk-button uk-button-warning">
-                                View Proof of Booking
-                            </a>
-                        <?php endif; ?>
+                        <td>
+                            <?php if (!empty($appointment['official_referral_file'])): ?>
+                                <!-- ✅ Show Official Referral (Priority) -->
+                                <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>" 
+                                target="_blank" class="uk-button uk-button-secondary">
+                                    View Official Referral
+                                </a>
+                            <?php elseif (!empty($appointment['proof_of_booking_file'])): ?>
+                                <!-- ✅ Show Proof of Booking ONLY if no Official Referral exists -->
+                                <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_file']); ?>" 
+                                target="_blank" class="uk-button uk-button-warning">
+                                    View Proof of Booking
+                                </a>
+                            <?php else: ?>
+                                <!-- ✅ No referral available -->
+                                <span class="uk-text-muted">Not Applicable</span>
+                            <?php endif; ?>
                         </td>
+
 
 
 

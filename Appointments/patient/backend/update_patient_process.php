@@ -1,9 +1,9 @@
 <?php
-require_once "../../dbconfig.php";
+require_once "../../../dbconfig.php";
 session_start();
 
 if (!isset($_SESSION['account_ID']) || $_SERVER["REQUEST_METHOD"] !== "POST") {
-    header("Location: ../../Accounts/loginpage.php");
+    header("Location: ../../../accounts/loginpage.php");
     exit();
 }
 
@@ -14,7 +14,7 @@ $age = $_POST['age'];
 $gender = $_POST['gender'];
 $existing_picture = $_POST['existing_profile_picture']; // Get the existing profile picture
 
-$target_dir = "../../uploads/profile_pictures/";
+$target_dir = "../../../uploads/profile_pictures/";
 $new_file_name = $existing_picture; // Default to existing picture
 
 // ✅ If a new profile picture is uploaded, process it
@@ -62,6 +62,6 @@ if ($stmt->execute()) {
 }
 
 $stmt->close();
-header("Location: edit_patient_form.php");
+header("Location: ../edit_patient_form.php");
 exit();
 ?>

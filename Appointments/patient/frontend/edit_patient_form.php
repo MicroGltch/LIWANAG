@@ -68,7 +68,40 @@ $stmt->close();
                 <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 100px; height: 100px; display: none;">
             </div>
 
-            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Changes</button>
+            <div class="uk-margin">
+                <label>Official Referral:</label>
+                <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+            </div>
+
+            <div class="uk-margin">
+                <label>Proof of Booking:</label>
+                <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+            </div>
+            
+
+            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
+
+            <hr>
+            <h4>Upload Doctor's Referral</h4>
+
+            <!-- Select Referral Type -->
+            <label>Referral Type:</label>
+            <select class="uk-select" name="referral_type" id="referral_type_select" required>
+                <option value="" disabled selected>Select Referral Type</option>
+                <option value="official">Official Referral</option>
+                <option value="proof_of_booking">Proof of Booking</option>
+            </select>
+
+            <!-- Upload Referral File -->
+            <label>Upload File:</label>
+            <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required>
+
+            <!-- Submit Button -->
+            <button class="uk-button uk-button-primary uk-margin-top" type="button" id="uploadReferralBtn">
+                Upload Referral
+            </button>
+
+
         </form>
     </div>
 
@@ -93,30 +126,47 @@ $stmt->close();
             }
 
             fetch("../backend/fetch_patient_details.php?patient_id=" + patientID)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        patientIDInput.value = data.patient.patient_id;
-                        firstNameInput.value = data.patient.first_name;
-                        lastNameInput.value = data.patient.last_name;
-                        ageInput.value = data.patient.age;
-                        genderInput.value = data.patient.gender;
-                        existingProfilePicInput.value = data.patient.profile_picture; // Store current picture filename
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    patientIDInput.value = data.patient.patient_id;
+                    firstNameInput.value = data.patient.first_name;
+                    lastNameInput.value = data.patient.last_name;
+                    ageInput.value = data.patient.age;
+                    genderInput.value = data.patient.gender;
+                    existingProfilePicInput.value = data.patient.profile_picture;
 
-                        if (data.patient.profile_picture) {
-                            profilePicPreview.src = "../../uploads/profile_pictures/" + data.patient.profile_picture;
-                            profilePicPreview.style.display = "block";
-                        } else {
-                            profilePicPreview.style.display = "none";
-                        }
-
-                        editForm.style.display = "block";
+                    if (data.patient.profile_picture) {
+                        profilePicPreview.src = "../../../uploads/profile_pictures/" + data.patient.profile_picture;
+                        profilePicPreview.style.display = "block";
                     } else {
-                        editForm.style.display = "none";
-                        Swal.fire("Error", "Patient details could not be loaded.", "error");
+                        profilePicPreview.style.display = "none";
                     }
-                })
-                .catch(error => console.error("Error fetching patient details:", error));
+
+                    // ✅ Display latest referral details
+                    if (data.latest_referrals.official) {
+                        document.getElementById("official_referral_link").href = "../../../uploads/doctors_referrals/" + data.latest_referrals.official.official_referral_file;
+                        document.getElementById("official_referral_link").style.display = "block";
+                    } else {
+                        document.getElementById("official_referral_link").style.display = "none";
+                    }
+
+                    if (data.latest_referrals.proof_of_booking) {
+                        document.getElementById("proof_of_booking_link").href = "../../../uploads/doctors_referrals/" + data.latest_referrals.proof_of_booking.proof_of_booking_referral_file;
+                        document.getElementById("proof_of_booking_link").style.display = "block";
+                    } else {
+                        document.getElementById("proof_of_booking_link").style.display = "none";
+                    }
+
+                    editForm.style.display = "block";
+                } else {
+                    editForm.style.display = "none";
+                    Swal.fire("Error", "Patient details could not be loaded.", "error");
+                }
+            })
+            .catch(error => console.error("Error fetching patient details:", error));
+
+
         });
 
         // ✅ Show preview when selecting a new profile picture
@@ -131,6 +181,39 @@ $stmt->close();
                 reader.readAsDataURL(file);
             }
         });
+    });
+
+
+    document.getElementById("uploadReferralBtn").addEventListener("click", function () {
+        let patientID = document.getElementById("patientDropdown").value;
+        let referralType = document.getElementById("referral_type_select").value;
+        let referralFile = document.getElementById("referral_file_input").files[0];
+
+        if (!patientID || !referralType || !referralFile) {
+            Swal.fire("Error", "Please select a patient, referral type, and upload a file.", "error");
+            return;
+        }
+
+        let formData = new FormData();
+        formData.append("patient_id", patientID);
+        formData.append("referral_type", referralType);
+        formData.append("referral_file", referralFile);
+
+        fetch("../backend/upload_referral.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                Swal.fire("Success!", data.message, "success").then(() => {
+                    location.reload(); // Reload page to update referral display
+                });
+            } else {
+                Swal.fire("Error!", data.message, "error");
+            }
+        })
+        .catch(error => console.error("Error:", error));
     });
     </script>
 </body>

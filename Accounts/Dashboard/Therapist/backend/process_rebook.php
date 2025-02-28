@@ -60,8 +60,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // ✅ Insert the new appointment with "Pending" status
         $query = "INSERT INTO appointments (account_id, patient_id, date, time, session_type, status, rebooked_by) 
-                  SELECT account_id, ?, ?, ?, ?, ?, ?
-                  FROM appointments WHERE appointment_id = ?";
+                SELECT account_id, ?, ?, ?, ?, ?, ?
+                FROM appointments WHERE appointment_id = ?";
+
+        $sessionType = $_POST['service_type'] ?? null;
+        if (!$sessionType) {
+            throw new Exception("Service type is missing.");
+        }
+
         $stmt = $connection->prepare($query);
         $stmt->bind_param("issssii", $patientID, $newDate, $newTime, $sessionType, $status, $therapistID, $appointmentID);
         $stmt->execute();

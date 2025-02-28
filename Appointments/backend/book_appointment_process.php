@@ -97,34 +97,46 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
     }
 
+    // ✅ Ensure Initial Evaluation has a referral
+    if ($appointment_type === "Initial Evaluation") {
+        if (empty($_FILES['official_referral']['name']) && empty($_FILES['proof_of_booking']['name'])) {
+            echo json_encode(["status" => "error", "message" => "A doctor's referral or proof of booking is required for Initial Evaluation."]);
+            exit();
+        }
+    }
+
     // ✅ Handle Doctor’s Referral Upload
     $uploadDir = "../../uploads/doctors_referrals/";
     $officialFileName = null;
     $proofFileName = null;
+    $referralType = null; // New variable to track referral type
 
     if (!empty($_FILES['official_referral']['name'])) {
         $officialFileName = time() . "_official_" . basename($_FILES['official_referral']['name']);
         $officialFilePath = $uploadDir . $officialFileName;
         move_uploaded_file($_FILES['official_referral']['tmp_name'], $officialFilePath);
+        $referralType = 'official'; // Set referral type as official
     }
 
-    if (!empty($_FILES['proof_of_booking']['name'])) {
+    if (!empty($_FILES['proof_of_booking']['name']) && empty($officialFileName)) {
         $proofFileName = time() . "_proof_" . basename($_FILES['proof_of_booking']['name']);
         $proofFilePath = $uploadDir . $proofFileName;
         move_uploaded_file($_FILES['proof_of_booking']['tmp_name'], $proofFilePath);
+        $referralType = 'proof of booking'; // Set referral type as proof only if official is not set
     }
 
     // ✅ Insert into `doctor_referrals` table if a referral exists
     if ($officialFileName || $proofFileName) {
-        $insertReferralSQL = "INSERT INTO doctor_referrals (patient_id, official_referral_file, proof_of_booking_file, status) 
-                              VALUES (?, ?, ?, 'pending')";
+        $insertReferralSQL = "INSERT INTO doctor_referrals (patient_id, official_referral_file, proof_of_booking_file, referral_type) 
+                      VALUES (?, ?, ?, ?)";
         $stmt = $connection->prepare($insertReferralSQL);
-        $stmt->bind_param("iss", $patient_id, $officialFileName, $proofFileName);
+        $stmt->bind_param("isss", $patient_id, $officialFileName, $proofFileName, $referralType);
         if ($stmt->execute()) {
             $referral_id = $stmt->insert_id; // ✅ Get the new referral ID
         }
         $stmt->close();
     }
+
 
     // ✅ Insert Appointment Into `appointments` Table
     $insertAppointmentSQL = "INSERT INTO appointments (account_id, patient_id, date, time, session_type, status, referral_id) 
