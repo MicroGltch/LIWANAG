@@ -1,4 +1,7 @@
 <?php
+
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 session_start();
 include "../../dbconfig.php";
 
@@ -9,7 +12,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
     $password = $_POST['password']; // Do NOT hash it yet!
 
     // 🔍 Fetch user details (including stored password)
-    $checkEmail = "SELECT account_ID, account_FName, account_LName, account_Status, account_PNum, created_at, account_Password, account_Type 
+    $checkEmail = "SELECT account_ID, account_FName, account_LName, account_Status, account_PNum, account_Type, created_at, account_Password, login_attempts 
                    FROM users WHERE account_Email = ?";
     $stmt = $connection->prepare($checkEmail);
     $stmt->bind_param("s", $email);
@@ -27,8 +30,9 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         $status = $row['account_Status'];
         $phone = $row['account_PNum'];
         $accountID = $row['account_ID'];
-        $role = $row['account_Type']; // ✅ Use correct database column
         $storedPassword = $row['account_Password']; // Get stored password
+        $accountType = $row['account_Type']; // Get the account type
+        $loginAttempts = $row['login_attempts'];
 
         $created_at = new DateTime($row['created_at']);
         $now = new DateTime();
@@ -36,27 +40,72 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
         $days = $diff->days;
         $hours = $diff->h;
 
-        // 🔑 **PASSWORD CHECK (Use only password_verify)**
-        if (!password_verify($password, $storedPassword)) {
+        // Check if account is blocked
+        if ($loginAttempts >= 5) {
+            echo json_encode(['sweetalert' => ["Account Blocked", "Too many failed login attempts. Please contact support.", "error"]]);
+            exit();
+        }
+
+        // 🔑 **PASSWORD CHECK (Supports md5() & password_hash() Verification)**
+        $passwordCorrect = false;
+        if ($storedPassword === md5($password)) {
+            $passwordCorrect = true; // ✅ Matches md5 hashed password
+        } elseif (password_verify($password, $storedPassword)) {
+            $passwordCorrect = true; // ✅ Matches password_hash()
+        }
+
+        if (!$passwordCorrect) {
+            // Increment login attempts
+            $newAttempts = $loginAttempts + 1;
+            $updateAttempts = "UPDATE users SET login_attempts = ? WHERE account_ID = ?";
+            $stmt = $connection->prepare($updateAttempts);
+            $stmt->bind_param("ii", $newAttempts, $accountID);
+            $stmt->execute();
+            
+            if ($newAttempts >= 5) {
+                $blockUser = "UPDATE users SET account_Status = 'block' WHERE account_ID = ?";
+                $stmt = $connection->prepare($blockUser);
+                $stmt->bind_param("i", $accountID);
+                $stmt->execute();
+                echo json_encode(['sweetalert' => ["Account Blocked", "Too many failed login attempts. Your account has been blocked.", "error"]]);
+                exit();
+            }
+
             echo json_encode(['sweetalert' => ["Invalid Password", "Please check your email or password.", "error"]]);
             exit();
         }
 
-        // ✅ **Store user details in session**
-        $_SESSION['username'] = $row['account_FName'] . " " . $row['account_LName'];
-        $_SESSION['account_ID'] = $accountID;
-        $_SESSION['account_Type'] = $role; // ✅ Store as `account_Type`, matching database
+        // Reset login attempts on successful login
+        $resetAttempts = "UPDATE users SET login_attempts = 0 WHERE account_ID = ?";
+        $stmt = $connection->prepare($resetAttempts);
+        $stmt->bind_param("i", $accountID);
+        $stmt->execute();
 
+        if ($status === 'Active') {
+            // ✅ **LOG IN USER**
+            $_SESSION['username'] = $row['account_FName'] . " " . $row['account_LName'];
+            $_SESSION['account_ID'] = $accountID;
 
-        // ✅ **Handle Pending Accounts**
-        if ($status === 'Pending') {
+            // Redirect based on account type
+            $redirectURL = '../homepage.php'; // Default redirect
+
+            if ($accountType === 'Admin') {
+                $redirectURL = '../Dashboards/admindashboard.php';
+            } elseif ($accountType === 'Therapist') {
+                $redirectURL = '../Dashboards/therapistdashboard.php'; // Assuming you have a therapist dashboard
+            }
+
+            echo json_encode(['redirect' => $redirectURL]);
+            exit();
+        } elseif ($status === 'Pending') {
+            // ✅ **ACCOUNT PENDING VERIFICATION**
             if ($days < 1 || ($days === 0 && $hours < 24)) {
                 $_SESSION['email'] = $email;
                 $_SESSION['phone'] = $phone;
 
                 echo json_encode([
                     'sweetalert' => ["Pending Account", "Your account is pending verification. Please verify your phone number.", "info"],
-                    'redirect' => '../signupverify/verify.php',
+                    'redirect' => '../Accounts/signupverify/verify.php',
                     'pending' => true
                 ]);
                 exit();
@@ -74,11 +123,14 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                 $stmt->close();
                 exit();
             }
+        } else {
+            echo json_encode(['sweetalert' => ["Error", "An error occurred. Please try again later.", "error"]]);
+            exit();
         }
-
-        // ✅ **Log in Regular Users**
-        echo json_encode(['redirect' => 'dashboard/redirect.php']); // Redirect to dynamic dashboard
-        exit();
     }
+} else {
+    echo json_encode(['sweetalert' => ["Error", "No data received.", "error"]]);
+    exit();
 }
+
 ?>
