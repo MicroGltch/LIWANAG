@@ -127,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // ✅ Insert into `doctor_referrals` table if a referral exists
     if ($officialFileName || $proofFileName) {
-        $insertReferralSQL = "INSERT INTO doctor_referrals (patient_id, official_referral_file, proof_of_booking_file, referral_type) 
+        $insertReferralSQL = "INSERT INTO doctor_referrals (patient_id, official_referral_file, proof_of_booking_referral_file, referral_type) 
                       VALUES (?, ?, ?, ?)";
         $stmt = $connection->prepare($insertReferralSQL);
         $stmt->bind_param("isss", $patient_id, $officialFileName, $proofFileName, $referralType);
@@ -155,9 +155,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // ✅ Send Confirmation Email
         if (send_email_notification($client_email, $client_name, $appointment_type, $appointment_date, $appointment_time)) {
-            echo json_encode(["status" => "success", "message" => "Appointment booked successfully. A confirmation email has been sent."]);
+            // echo json_encode(["status" => "success", "message" => "Appointment booked successfully. A confirmation email has been sent."]);
+            echo json_encode([
+                "status" => "success", 
+                "message" => "Appointment booked successfully. A confirmation email has been sent.",
+                "redirect" => "../Dashboards/clientdashboard.php" // Add the redirect URL 
+            ]);
         } else {
-            echo json_encode(["status" => "success", "message" => "Appointment booked successfully, but email notification failed."]);
+            // echo json_encode(["status" => "success", "message" => "Appointment booked successfully, but email notification failed."]);
+            echo json_encode([
+                "status" => "success", 
+                "message" => "Appointment booked successfully, but email notification failed.",
+                "redirect" => "../Dashboards/clientdashboard.php" // Add the redirect URL
+            ]);
         }
     } else {
         echo json_encode(["status" => "error", "message" => "Error booking appointment."]);
