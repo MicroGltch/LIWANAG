@@ -64,4 +64,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         die("Invalid or expired reset token.");
     }
 }
+}
 ?>
