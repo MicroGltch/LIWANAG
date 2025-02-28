@@ -33,6 +33,8 @@ session_start();
    <!-- Debugging: Print session data in the console -->
    <script>
         console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
+        console.log('Account Type:', <?php echo isset($_SESSION['account_Type']) ? json_encode($_SESSION['account_Type']) : 'null'; ?>);
+
     </script>
 
         <!-- Navbar Wrapper (Removes Absolute Positioning Issues) -->
@@ -98,7 +100,7 @@ session_start();
 
                     <div>
                         <?php if (isset($_SESSION['account_ID'])): ?>
-                            <a href="Appointments/bookappointment.php" class="welcome-book" style="color: white;">Book an Appointment</a>
+                            <a href="Appointments/book_appointment_form.php" class="welcome-book" style="color: white;">Book an Appointment</a>
                         <?php else: ?>
                             <button class="welcome-book" style="color: white;">Book an Appointment</button>
                         <?php endif; ?>

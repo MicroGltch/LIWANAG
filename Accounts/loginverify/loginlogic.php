@@ -85,14 +85,17 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             // ✅ **LOG IN USER**
             $_SESSION['username'] = $row['account_FName'] . " " . $row['account_LName'];
             $_SESSION['account_ID'] = $accountID;
+            $_SESSION['account_Type'] = $accountType;
 
             // Redirect based on account type
             $redirectURL = '../homepage.php'; // Default redirect
 
-            if ($accountType === 'Admin') {
+            if ($accountType === 'admin') {
                 $redirectURL = '../Dashboards/admindashboard.php';
-            } elseif ($accountType === 'Therapist') {
+            } elseif ($accountType === 'therapist') {
                 $redirectURL = '../Dashboards/therapistdashboard.php'; // Assuming you have a therapist dashboard
+            }elseif ($accountType === 'client'){
+                $redirectURL;
             }
 
             echo json_encode(['redirect' => $redirectURL]);

@@ -1,12 +1,14 @@
-<?php
-require_once "../../../../dbconfig.php";
-session_start();
+<!-- ALREADY REFERENCED IN CLIENTDASHBOARD PROPER -->
 
-// ✅ Restrict Access to Therapists Only
-if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "client") {
-    header("Location: ../../../loginpage.php");
-    exit();
-}
+<?php
+// require_once "../../../../dbconfig.php";
+// session_start();
+
+// // ✅ Restrict Access to Therapists Only
+// if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "client") {
+//     header("Location: ../../../loginpage.php");
+//     exit();
+// }
 ?>
 
 <div class="uk-container uk-margin-top">

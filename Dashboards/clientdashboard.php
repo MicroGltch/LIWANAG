@@ -34,6 +34,16 @@ if ($result->num_rows > 0) {
 }
 
 $stmt->close();
+
+// Fetch appointments for the logged-in client (from client_view_appointments.php)
+$client_id = $_SESSION['account_ID'];
+$query = "SELECT a.appointment_id, a.date, a.time, a.status, a.session_type, a.edit_count, p.first_name AS patient_name FROM appointments a JOIN patients p ON a.patient_id = p.patient_id WHERE a.account_id = ? ORDER BY a.date ASC, a.time ASC";
+$stmt = $connection->prepare($query);
+$stmt->bind_param("i", $client_id);
+$stmt->execute();
+$result = $stmt->get_result();
+$appointments = $result->fetch_all(MYSQLI_ASSOC);
+
 $connection->close();
 ?>
 
@@ -55,6 +65,7 @@ $connection->close();
     <link rel="stylesheet" href="../CSS/uikit-3.22.2/css/uikit.min.css" />
     <script src="../CSS/uikit-3.22.2/js/uikit.min.js"></script>
     <script src="../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
@@ -107,6 +118,13 @@ $connection->close();
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li><a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a></li>
+                    <!-- Reference code: client_view_appointments.php -->
+                    
+                    <!-- Temporary links lng based from Rap's code pra macustomize sa client dashboard-->
+                    <li><a href="../Appointments/patient/frontend/register_patient_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Register Patient</a></li>
+                    <li><a href="../Appointments/patient/frontend/edit_patient_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li> 
+                    <li><a href="../Appointments/frontend/book_appointment_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li> 
+
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
                 </ul>
@@ -116,24 +134,49 @@ $connection->close();
         <!-- Content Area -->
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
         <div id="appointments" class="section">
-                <h1 class="uk-text-bold">Appoinments</h1>
-                <p>Appointment table will be displayed here.</p>
+                <h1 class="uk-text-bold">Appointments</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <table id="appointmentsTable" class="display" style="width:100%">
+                    <table class="uk-table uk-table-striped">
                         <thead>
                             <tr>
-                                <th >Date</th>
-                                <th >Time</th>
-                                <th >Service</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Session Type</th>
+                                <th>Patient</th>
+                                <th>Status</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- population area -->
+                            <?php foreach ($appointments as $appointment): ?>
+                                <tr>
+                                    <td><?= htmlspecialchars($appointment['date']); ?></td>
+                                    <td><?= htmlspecialchars($appointment['time']); ?></td>
+                                    <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                                    <td><?= htmlspecialchars($appointment['patient_name']); ?></td>
+                                    <td><?= ucfirst($appointment['status']); ?></td>
+                                    <td>
+                                        <!-- ✅ Cancel button (Allowed only for "Pending" or "Waitlisted") -->
+                                        <?php if (in_array($appointment['status'], ["pending", "waitlisted"])): ?>
+                                            <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
+                                        <?php endif; ?>
+                                        
+                                        <!-- ✅ Edit button (Only for "Pending" & edit_count < 2) -->
+                                        <?php if ($appointment['status'] === "pending" && $appointment['edit_count'] < 2): ?>
+                                            <button class="uk-button uk-button-primary edit-btn" data-id="<?= $appointment['appointment_id']; ?>"
+                                                    data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
+                                                Edit (<?= 2 - $appointment['edit_count']; ?> left)
+                                            </button>
+                                        <?php else: ?>
+                                            <button class="uk-button uk-button-default" disabled>Editing Not Allowed</button>
+                                        <?php endif; ?>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
-
             </div>
             
 
@@ -241,7 +284,7 @@ $connection->close();
 
 <script>
 
-document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+        document.querySelector('.sidebar-toggle').addEventListener('click', function() {
             document.querySelector('.sidebar-nav').classList.toggle('uk-open');
         });
 
@@ -265,6 +308,103 @@ document.querySelector('.sidebar-toggle').addEventListener('click', function() {
         function removeProfilePhoto() {
             document.querySelector('.profile-preview').src = '../CSS/default.jpg';
         }
-    </script>
+
+        document.addEventListener("DOMContentLoaded", function () {
+            // ✅ Cancel Appointment
+            document.querySelectorAll(".cancel-btn").forEach(button => {
+                button.addEventListener("click", function () {
+                    let appointmentId = this.getAttribute("data-id");
+
+                    Swal.fire({
+                        title: "Cancel Appointment?",
+                        text: "Please provide a reason for cancellation:",
+                        icon: "warning",
+                        input: "text",
+                        inputPlaceholder: "Enter cancellation reason",
+                        showCancelButton: true,
+                        confirmButtonText: "Yes, Cancel",
+                        cancelButtonText: "No, Keep Appointment",
+                        preConfirm: (reason) => {
+                            if (!reason) {
+                                Swal.showValidationMessage("A cancellation reason is required.");
+                            }
+                            return reason;
+                        }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch("../backend/client_edit_appointment.php", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({
+                                        appointment_id: appointmentId,
+                                        action: "cancel",
+                                        validation_notes: result.value
+                                    })
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.status === "success") {
+                                        Swal.fire({
+                                            title: data.title,
+                                            text: data.message,
+                                            icon: "success",
+                                            confirmButtonText: "OK"
+                                        }).then(() => {
+                                            location.reload(); // Reload after user sees the message
+                                        });
+                                    } else {
+                                        Swal.fire({
+                                            title: data.title,
+                                            text: data.message,
+                                            icon: "error"
+                                        });
+                                    }
+                                })
+                                .catch(error => {
+                                    Swal.fire({
+                                        title: "Error",
+                                        text: "Something went wrong. Please try again.",
+                                        icon: "error"
+                                    });
+                                });
+                            }
+                        });
+                    });
+            });
+
+        // ✅ Edit Appointment (Reschedule)
+        document.querySelectorAll(".edit-btn").forEach(button => {
+            button.addEventListener("click", function () {
+                let appointmentId = this.getAttribute("data-id");
+                let currentStatus = this.getAttribute("data-status"); // Get status from dataset
+
+                Swal.fire({
+                    title: "Edit Appointment",
+                    html: `<label>New Date:</label> <input type="date" id="appointmentDate" class="swal2-input">
+                           <label>New Time:</label> <input type="time" id="appointmentTime" class="swal2-input">`,
+                    showCancelButton: true,
+                    confirmButtonText: "Save Changes",
+                    preConfirm: () => {
+                        return {
+                            newDate: document.getElementById("appointmentDate").value,
+                            newTime: document.getElementById("appointmentTime").value
+                        };
+                    }
+                }).then((result) => {
+                    fetch("../backend/client_edit_appointment.php", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ appointment_id: appointmentId, action: "edit", new_date: result.value.newDate, new_time: result.value.newTime })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        Swal.fire(data.title, data.message, data.status === "success" ? "success" : "error")
+                            .then(() => location.reload());
+                    });
+                });
+            });
+        });
+    });
+</script>
 
 </html>
