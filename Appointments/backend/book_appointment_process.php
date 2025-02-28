@@ -127,7 +127,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // ✅ Insert into `doctor_referrals` table if a referral exists
     if ($officialFileName || $proofFileName) {
-        $insertReferralSQL = "INSERT INTO doctor_referrals (patient_id, official_referral_file, proof_of_booking_file, referral_type) 
+        $insertReferralSQL = "INSERT INTO doctor_referrals (patient_id, official_referral_file, proof_of_booking_referral_file, referral_type) 
                       VALUES (?, ?, ?, ?)";
         $stmt = $connection->prepare($insertReferralSQL);
         $stmt->bind_param("isss", $patient_id, $officialFileName, $proofFileName, $referralType);
