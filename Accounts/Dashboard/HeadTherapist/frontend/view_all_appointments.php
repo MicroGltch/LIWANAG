@@ -1,0 +1,171 @@
+<?php
+    require_once "../../../../dbconfig.php";
+    session_start();
+
+    // ✅ Restrict Access to Admins, Head Therapists, and Therapists
+    if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist", "therapist"])) {
+        header("Location: ../../../loginpage.php");
+        exit();
+    }
+
+    // ✅ Fetch Filters
+    $statusFilter = $_GET['status'] ?? "";
+    $sessionTypeFilter = $_GET['session_type'] ?? "";
+    $therapistFilter = $_GET['therapist'] ?? "";
+    $startDate = $_GET['start_date'] ?? "";
+    $endDate = $_GET['end_date'] ?? "";
+
+    // ✅ Base Query
+    $query = "SELECT a.appointment_id, a.date, a.time, a.status, a.session_type,
+                    p.first_name AS patient_firstname, p.last_name AS patient_lastname, p.profile_picture AS patient_picture,
+                    u.account_FName AS client_firstname, u.account_LName AS client_lastname, u.profile_picture AS client_picture,
+                    t.account_FName AS therapist_firstname, t.account_LName AS therapist_lastname
+            FROM appointments a
+            JOIN patients p ON a.patient_id = p.patient_id
+            JOIN users u ON a.account_id = u.account_ID
+            LEFT JOIN users t ON a.therapist_id = t.account_ID
+            WHERE 1=1";
+
+    // ✅ Apply Filters
+    $params = [];
+    $types = "";
+
+    if (!empty($statusFilter)) {
+        $query .= " AND a.status = ?";
+        $params[] = $statusFilter;
+        $types .= "s";
+    }
+    if (!empty($sessionTypeFilter)) {
+        $query .= " AND a.session_type = ?";
+        $params[] = $sessionTypeFilter;
+        $types .= "s";
+    }
+    if (!empty($therapistFilter)) {
+        $query .= " AND a.therapist_id = ?";
+        $params[] = $therapistFilter;
+        $types .= "i";
+    }
+    if (!empty($startDate) && !empty($endDate)) {
+        $query .= " AND a.date BETWEEN ? AND ?";
+        $params[] = $startDate;
+        $params[] = $endDate;
+        $types .= "ss";
+    }
+    $query .= " ORDER BY a.date DESC, a.time DESC";
+
+    // ✅ Prepare and Execute Query
+    $stmt = $connection->prepare($query);
+    if (!empty($params)) {
+        $stmt->bind_param($types, ...$params);
+    }
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $appointments = $result->fetch_all(MYSQLI_ASSOC);
+
+    // ✅ Fetch Therapist List
+    $therapistQuery = "SELECT account_ID, account_FName, account_LName FROM users WHERE account_Type = 'therapist'";
+    $therapistResult = $connection->query($therapistQuery);
+    $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>View All Appointments</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.9.6/css/uikit.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <div class="uk-container uk-margin-top">
+
+        <a href="headtherapist_dashboard.php">Back to dashboard</a><br/>
+        <h2>View All Appointments</h2>
+
+        <!-- 🔹 Filters Section -->
+        <form method="GET" class="uk-grid-small" uk-grid>
+            <div class="uk-width-1-4">
+                <label>Status:</label>
+                <select class="uk-select" name="status">
+                    <option value="">All</option>
+                    <option value="Pending" <?= $statusFilter === "Pending" ? "selected" : "" ?>>Pending</option>
+                    <option value="Approved" <?= $statusFilter === "Approved" ? "selected" : "" ?>>Approved</option>
+                    <option value="Waitlisted" <?= $statusFilter === "Waitlisted" ? "selected" : "" ?>>Waitlisted</option>
+                    <option value="Completed" <?= $statusFilter === "Completed" ? "selected" : "" ?>>Completed</option>
+                    <option value="Cancelled" <?= $statusFilter === "Cancelled" ? "selected" : "" ?>>Cancelled</option>
+                    <option value="Declined" <?= $statusFilter === "Declined" ? "selected" : "" ?>>Declined</option>
+                </select>
+            </div>
+
+            <div class="uk-width-1-4">
+                <label>Session Type:</label>
+                <select class="uk-select" name="session_type">
+                    <option value="">All</option>
+                    <option value="Initial Evaluation" <?= $sessionTypeFilter === "Initial Evaluation" ? "selected" : "" ?>>Initial Evaluation</option>
+                    <option value="Playgroup" <?= $sessionTypeFilter === "Playgroup" ? "selected" : "" ?>>Playgroup</option>
+                </select>
+            </div>
+
+            <div class="uk-width-1-4">
+                <label>Therapist:</label>
+                <select class="uk-select" name="therapist">
+                    <option value="">All</option>
+                    <?php foreach ($therapists as $therapist): ?>
+                        <option value="<?= $therapist['account_ID']; ?>" <?= $therapistFilter == $therapist['account_ID'] ? "selected" : "" ?>>
+                            <?= htmlspecialchars($therapist['account_FName'] . " " . $therapist['account_LName']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="uk-width-1-4">
+                <label>Date Range:</label>
+                <input class="uk-input" type="date" name="start_date" value="<?= $startDate; ?>">
+                <input class="uk-input uk-margin-small-top" type="date" name="end_date" value="<?= $endDate; ?>">
+            </div>
+
+            <div class="uk-width-1-1 uk-margin-top">
+                <button class="uk-button uk-button-primary" type="submit">Apply Filters</button>
+                <a href="view_all_appointments.php" class="uk-button uk-button-default">Reset</a>
+            </div>
+        </form>
+
+        <!-- 🔹 Appointments Table -->
+        <table class="uk-table uk-table-striped uk-margin-top">
+            <thead>
+                <tr>
+                    <th>Patient</th>
+                    <th>Client</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Session Type</th>
+                    <th>Therapist</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($appointments as $appointment): ?>
+                    <tr>
+                        <td>
+                            <img src="<?= !empty($appointment['patient_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['patient_picture'] : ''; ?>"
+                                 alt="Patient Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                            <?= htmlspecialchars($appointment['patient_firstname'] . " " . $appointment['patient_lastname']); ?>
+                        </td>
+                        <td>
+                            <img src="<?= !empty($appointment['client_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['client_picture'] : ''; ?>"
+                                 alt="Client Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                            <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
+                        </td>
+                        <td><?= htmlspecialchars($appointment['date']); ?></td>
+                        <td><?= htmlspecialchars($appointment['time']); ?></td>
+                        <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                        <td><?= !empty($appointment['therapist_firstname']) ? htmlspecialchars($appointment['therapist_firstname'] . " " . $appointment['therapist_lastname']) : "Not Assigned"; ?></td>
+                        <td><?= htmlspecialchars($appointment['status']); ?></td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
