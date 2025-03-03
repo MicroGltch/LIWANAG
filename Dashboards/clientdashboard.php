@@ -44,18 +44,30 @@ $stmt->execute();
 $result = $stmt->get_result();
 $appointments = $result->fetch_all(MYSQLI_ASSOC);
 
+// EDIT PATIENT FORM PHP from edit_patient_form
+// Fetch patients for the dropdown
+$patientsQuery = "SELECT patient_id, first_name, last_name FROM patients WHERE account_id = ?";
+$stmt = $connection->prepare($patientsQuery);
+$stmt->bind_param("i", $_SESSION['account_ID']);
+$stmt->execute();
+$result = $stmt->get_result();
+$patients = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
+
 $connection->close();
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>LIWANAG - Dashboard</title>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
-    
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -69,6 +81,10 @@ $connection->close();
 
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
+
+    <!-- <script src="dashboardJS/client.js"></script>  -->
+</head>
+
 </head>
 
 <body>
@@ -90,18 +106,18 @@ $connection->close();
                 <div class="uk-navbar-center">
                     <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
                 </div>
-                    <div class="uk-navbar-right">
-                        <ul class="uk-navbar-nav">
-                            <li>
-                                <a href="#" class="uk-navbar-item">
-                                    <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
-                                </a>
-                            </li>
-                            <li style="display: flex; align-items: center;">  <?php echo $_SESSION['username'];?>
-                            </li>
-                            <li><a href="../Accounts/logout.php">Logout</a></li>
-                        </ul>
-                    </div>
+                <div class="uk-navbar-right">
+                    <ul class="uk-navbar-nav">
+                        <li>
+                            <a href="#" class="uk-navbar-item">
+                                <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
+                            </a>
+                        </li>
+                        <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
+                        </li>
+                        <li><a href="../Accounts/logout.php">Logout</a></li>
+                    </ul>
+                </div>
             </div>
         </div>
     </nav>
@@ -119,11 +135,16 @@ $connection->close();
                 <ul class="uk-nav uk-nav-default">
                     <li><a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a></li>
                     <!-- Reference code: client_view_appointments.php -->
-                    
-                    <!-- Temporary links lng based from Rap's code pra macustomize sa client dashboard-->
-                    <li><a href="../Appointments/patient/frontend/register_patient_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Register Patient</a></li>
-                    <li><a href="../Appointments/patient/frontend/edit_patient_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li> 
-                    <li><a href="../Appointments/book_appointment_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li> 
+
+                    <li><a href="#register-patient" onclick="showSection('register-patient')"><span class="uk-margin-small-right" uk-icon="user"></span> Register Patient</a></li>
+                    <!-- Reference code: register_patient_form.php -->
+
+                    <li><a href="#view-registered-patients" onclick="showSection('view-registered-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li>
+                    <!-- Reference code: edit_patient_form.php -->
+
+                    <!-- <li><a href="../Appointments/book_appointment_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li> -->
+                    <li><a href="#book-appointment" onclick="showSection('book-appointment')"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li>
+                    <!-- Reference code: book_appointment_form.php -->
 
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
@@ -133,7 +154,7 @@ $connection->close();
 
         <!-- Content Area -->
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
-        <div id="appointments" class="section">
+            <div id="appointments" class="section">
                 <h1 class="uk-text-bold">Appointments</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
@@ -161,15 +182,15 @@ $connection->close();
                                         <?php if (in_array($appointment['status'], ["pending", "waitlisted"])): ?>
                                             <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
                                         <?php endif; ?>
-                                        
+
                                         <!-- ✅ Edit button (Only for "Pending" & edit_count < 2) -->
                                         <?php if ($appointment['status'] === "pending" && $appointment['edit_count'] < 2): ?>
                                             <button class="uk-button uk-button-primary edit-btn" data-id="<?= $appointment['appointment_id']; ?>"
-                                                    data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
-                                                Edit (<?= 2 - $appointment['edit_count']; ?> left)
+                                                data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
+                                                Reschedule (<?= 2 - $appointment['edit_count']; ?> left)
                                             </button>
                                         <?php else: ?>
-                                            <button class="uk-button uk-button-default" disabled>Editing Not Allowed</button>
+                                            <button class="uk-button uk-button-default" disabled>Reschedule Is Not Allowed</button>
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -178,103 +199,241 @@ $connection->close();
                     </table>
                 </div>
             </div>
-            
 
-        <!--Account Details Card-->
-        <div id="account-details" style="display: none;" class="section uk-width-1-1 uk-width-4-5@m uk-padding">
-            <h1 class="uk-text-bold">Account Details</h1>
-            
-            <div class="uk-card uk-card-default uk-card-body uk-margin">
-                <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
-                <div class="uk-flex uk-flex-center">
-                    <div class="uk-width-1-4">
-                        <img class="uk-border-circle" src="../CSS/default.jpg" alt="Profile Photo">
-                    </div>
+
+            <!-- Register Patient -->
+            <div id="register-patient" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Patient Registration</h1>
+
+                <div class="uk-card uk-card-default uk-card-body">
+                    <h2 class="uk-card-title uk-text-bold">Patient Information</h2>
+
+                    <form id="patientRegistrationForm" enctype="multipart/form-data" class="uk-grid-small" uk-grid>
+                        <input type="hidden" name="action" value="update_user_details">
+
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">First Name</label>
+                            <input class="uk-input" type="text" name="patient_fname" required>
+                        </div>
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Last Name</label>
+                            <input class="uk-input" type="text" name="patient_lname" required>
+                        </div>
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Age</label>
+                            <input class="uk-input" type="number" name="patient_age" required>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Gender</label>
+                            <select class="uk-select" name="patient_gender">
+                                <option value="" disabled selected>Select Patient Gender</option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+
+                        <div class="uk-width-1@s uk-width-1-2@l">
+                            <label class="uk-form-label">Profile Picture</label>
+                            <div class="js-upload uk-placeholder uk-text-center" id="profile-picture-placeholder">
+                                <span uk-icon="icon: cloud-upload"></span>
+                                <span class="uk-text-middle">Drag and drop a file or</span>
+                                <div uk-form-custom>
+                                    <input type="file" multiple name="profile_picture" accept=".jpg, .jpeg, .png" required id="profile-picture-input">
+                                    <span class="uk-link">Browse</span>
+                                    <span class="uk-text-middle" id="file-name-display">to choose a file</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                            <button class="uk-button uk-button-primary" type="button" id="registerPatientButton">Register</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <div class="uk-card uk-card-default uk-card-body">
-                <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                <form class="uk-grid-small" uk-grid>
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label">First Name</label>
-                        <input class="uk-input" type="text" value="<?php echo $firstName; ?>" disabled>
-                    </div>
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label">Last Name</label>
-                        <input class="uk-input" type="text" value="<?php echo $lastName; ?>" disabled>
-                    </div>
-                    <div class="uk-width-1-1">
-                        <label class="uk-form-label">Email</label>
-                        <input class="uk-input" type="email" value="<?php echo $email; ?>" disabled>
-                    </div>
-                    <div class="uk-width-1-1">
-                        <label class="uk-form-label">Phone Number</label>
-                        <input class="uk-input" type="tel" value="<?php echo $phoneNumber; ?>" disabled>
-                    </div>
-                </form>
-            </div>
-        </div>
-    
-              
-            <!-- Settings -->
-            <div id="settings" class="section" style="display: none;">
-            <h1 class="uk-text-bold">Settings</h1>
 
-            <div class="uk-card uk-card-default uk-card-body uk-margin">
-                <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
-                <form action="settings.php" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="action" value="upload_profile_picture">
-                    <div class="uk-flex uk-flex-middle">
-                        <div class="profile-upload-container">
-                            <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
-                            <div class="uk-flex uk-flex-column uk-margin-left">
-                                <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
-                                <div class="uk-text-center">
-                                    <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
-                                </div>
-                            </div>
-                            <div class="uk-margin-large-left">
-                                <h4>Image requirements:</h4>
-                                <ul class="uk-list">
-                                    <li>1. Min. 400 x 400px</li>
-                                    <li>2. Max. 2MB</li>
-                                    <li>3. Your face</li>
-                                </ul>
-                            </div>
+            <!-- View Registered Patients -->
+            <div id="view-registered-patients" class="section" style="display: none;">
+                <h1 class="uk-text-bold">View Registered Patients</h1>
+
+                <div class="uk-card uk-card-default uk-card-body">
+                    <p>Choose a patient to view.</p>
+                    <select class="uk-select" id="patientDropdown">
+                        <option value="" disabled selected>Select a Patient</option>
+                        <?php foreach ($patients as $patient): ?>
+                            <option value="<?= $patient['patient_id']; ?>">
+                                <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+
+                    <!-- 🔹 Patient Details Form (Initially Hidden) -->
+                    <form id="editPatientForm" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
+                        <input type="hidden" name="patient_id" id="patient_id">
+                        <input type="hidden" name="existing_profile_picture" id="existing_profile_picture"> <!-- Store existing picture -->
+
+                        <label>First Name:</label>
+                        <input class="uk-input" type="text" name="first_name" id="first_name" required>
+
+                        <label>Last Name:</label>
+                        <input class="uk-input" type="text" name="last_name" id="last_name" required>
+
+                        <label>Age:</label>
+                        <input class="uk-input" type="number" name="age" id="age" required>
+
+                        <label>Gender:</label>
+                        <select class="uk-select" name="gender" id="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+
+                        <label>Profile Picture:</label>
+                        <input class="uk-input" type="file" name="profile_picture" id="profile_picture_input">
+
+                        <div class="uk-margin">
+                            <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 100px; height: 100px; display: none;">
+                        </div>
+
+                        <div class="uk-margin">
+                            <label>Official Referral:</label>
+                            <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+                        </div>
+
+                        <div class="uk-margin">
+                            <label>Proof of Booking:</label>
+                            <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+                        </div>
+
+
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
+
+                        <hr>
+                        <h4>Upload Doctor's Referral</h4>
+
+                        <!-- Select Referral Type -->
+                        <label>Referral Type:</label>
+                        <select class="uk-select" name="referral_type" id="referral_type_select" required>
+                            <option value="" disabled selected>Select Referral Type</option>
+                            <option value="official">Official Referral</option>
+                            <option value="proof_of_booking">Proof of Booking</option>
+                        </select>
+
+                        <!-- Upload Referral File -->
+                        <label>Upload File:</label>
+                        <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required>
+
+                        <!-- Submit Button -->
+                        <button class="uk-button uk-button-primary uk-margin-top" type="button" id="uploadReferralBtn">
+                            Upload Referral
+                        </button>
+
+                    </form>
+                </div>
+            </div>
+
+            <!-- Book Appointment -->
+            <div id="book-appointment" style="display: none;" class="section uk-width-1-1 uk-width-4-5@m uk-padding">
+                <h1 class="uk-text-bold">Book Appointment</h1>
+
+            </div>
+
+            <!--Account Details Card-->
+            <div id="account-details" style="display: none;" class="section uk-width-1-1 uk-width-4-5@m uk-padding">
+                <h1 class="uk-text-bold">Account Details</h1>
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
+                    <div class="uk-flex uk-flex-center">
+                        <div class="uk-width-1-4">
+                            <img class="uk-border-circle" src="../CSS/default.jpg" alt="Profile Photo">
                         </div>
                     </div>
-                    <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
-                </form>
+                </div>
+
+                <div class="uk-card uk-card-default uk-card-body">
+                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
+                    <form class="uk-grid-small" uk-grid>
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">First Name</label>
+                            <input class="uk-input" type="text" value="<?php echo $firstName; ?>" disabled>
+                        </div>
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Last Name</label>
+                            <input class="uk-input" type="text" value="<?php echo $lastName; ?>" disabled>
+                        </div>
+                        <div class="uk-width-1-1">
+                            <label class="uk-form-label">Email</label>
+                            <input class="uk-input" type="email" value="<?php echo $email; ?>" disabled>
+                        </div>
+                        <div class="uk-width-1-1">
+                            <label class="uk-form-label">Phone Number</label>
+                            <input class="uk-input" type="tel" value="<?php echo $phoneNumber; ?>" disabled>
+                        </div>
+                    </form>
+                </div>
             </div>
 
-            <div class="uk-card uk-card-default uk-card-body">
-                <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                <form action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
-                    <input type="hidden" name="action" value="update_user_details">
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label">First Name</label>
-                        <input class="uk-input" type="text" name="firstName" value="<?php echo $firstName; ?>">
-                    </div>
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label">Last Name</label>
-                        <input class="uk-input" type="text" name="lastName" value="<?php echo $lastName; ?>">
-                    </div>
-                    <div class="uk-width-1-1">
-                        <label class="uk-form-label">Email</label>
-                        <input class="uk-input" type="email" name="email" value="<?php echo $email; ?>">
-                    </div>
-                    <div class="uk-width-1-1">
-                        <label class="uk-form-label">Phone Number</label>
-                        <input class="uk-input" type="tel" name="phoneNumber" value="<?php echo $phoneNumber; ?>">
-                    </div>
-                    <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                        <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
-                    </div>
-                </form>
+
+            <!-- Settings -->
+            <div id="settings" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Settings</h1>
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
+                    <form action="settings.php" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="upload_profile_picture">
+                        <div class="uk-flex uk-flex-middle">
+                            <div class="profile-upload-container">
+                                <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
+                                <div class="uk-flex uk-flex-column uk-margin-left">
+                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
+                                    <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
+                                    <div class="uk-text-center">
+                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
+                                    </div>
+                                </div>
+                                <div class="uk-margin-large-left">
+                                    <h4>Image requirements:</h4>
+                                    <ul class="uk-list">
+                                        <li>1. Min. 400 x 400px</li>
+                                        <li>2. Max. 2MB</li>
+                                        <li>3. Your face</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
+                    </form>
+                </div>
+
+                <div class="uk-card uk-card-default uk-card-body">
+                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
+                    <form action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
+                        <input type="hidden" name="action" value="update_user_details">
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">First Name</label>
+                            <input class="uk-input" type="text" name="firstName" value="<?php echo $firstName; ?>">
+                        </div>
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Last Name</label>
+                            <input class="uk-input" type="text" name="lastName" value="<?php echo $lastName; ?>">
+                        </div>
+                        <div class="uk-width-1-1">
+                            <label class="uk-form-label">Email</label>
+                            <input class="uk-input" type="email" name="email" value="<?php echo $email; ?>">
+                        </div>
+                        <div class="uk-width-1-1">
+                            <label class="uk-form-label">Phone Number</label>
+                            <input class="uk-input" type="tel" name="phoneNumber" value="<?php echo $phoneNumber; ?>">
+                        </div>
+                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
         </div>
     </div>
 
@@ -283,98 +442,102 @@ $connection->close();
 </body>
 
 <script>
-
+        
         document.querySelector('.sidebar-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+        document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+    });
+
+    function showSection(sectionId) {
+        document.querySelectorAll('.section').forEach(section => {
+            section.style.display = 'none';
         });
+        document.getElementById(sectionId).style.display = 'block';
+    }
 
-
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(section => {
-                section.style.display = 'none';
-            });
-            document.getElementById(sectionId).style.display = 'block';
+    function previewProfilePhoto(event) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            const preview = document.querySelector('.profile-preview');
+            preview.src = reader.result;
         }
+        reader.readAsDataURL(event.target.files[0]);
+    }
 
-        function previewProfilePhoto(event) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const preview = document.querySelector('.profile-preview');
-                preview.src = reader.result;
-            }
-            reader.readAsDataURL(event.target.files[0]);
-        }
+    function removeProfilePhoto() {
+        document.querySelector('.profile-preview').src = '../CSS/default.jpg';
+    }
 
-        function removeProfilePhoto() {
-            document.querySelector('.profile-preview').src = '../CSS/default.jpg';
-        }
 
-        document.addEventListener("DOMContentLoaded", function () {
-            // ✅ Cancel Appointment
-            document.querySelectorAll(".cancel-btn").forEach(button => {
-                button.addEventListener("click", function () {
-                    let appointmentId = this.getAttribute("data-id");
+    // APPOINTMENTS SCRIPT
 
-                    Swal.fire({
-                        title: "Cancel Appointment?",
-                        text: "Please provide a reason for cancellation:",
-                        icon: "warning",
-                        input: "text",
-                        inputPlaceholder: "Enter cancellation reason",
-                        showCancelButton: true,
-                        confirmButtonText: "Yes, Cancel",
-                        cancelButtonText: "No, Keep Appointment",
-                        preConfirm: (reason) => {
-                            if (!reason) {
-                                Swal.showValidationMessage("A cancellation reason is required.");
-                            }
-                            return reason;
+        document.addEventListener("DOMContentLoaded", function() {
+        // ✅ Cancel Appointment
+        document.querySelectorAll(".cancel-btn").forEach(button => {
+            button.addEventListener("click", function() {
+                let appointmentId = this.getAttribute("data-id");
+
+                Swal.fire({
+                    title: "Cancel Appointment?",
+                    text: "Please provide a reason for cancellation:",
+                    icon: "warning",
+                    input: "text",
+                    inputPlaceholder: "Enter cancellation reason",
+                    showCancelButton: true,
+                    confirmButtonText: "Yes, Cancel",
+                    cancelButtonText: "No, Keep Appointment",
+                    preConfirm: (reason) => {
+                        if (!reason) {
+                            Swal.showValidationMessage("A cancellation reason is required.");
                         }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                fetch("../Appointments/app_manage/client_edit_appointment.php", {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({
-                                        appointment_id: appointmentId,
-                                        action: "cancel",
-                                        validation_notes: result.value
-                                    })
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.status === "success") {
-                                        Swal.fire({
-                                            title: data.title,
-                                            text: data.message,
-                                            icon: "success",
-                                            confirmButtonText: "OK"
-                                        }).then(() => {
-                                            location.reload(); // Reload after user sees the message
-                                        });
-                                    } else {
-                                        Swal.fire({
-                                            title: data.title,
-                                            text: data.message,
-                                            icon: "error"
-                                        });
-                                    }
-                                })
-                                .catch(error => {
-                                    Swal.fire({
-                                        title: "Error",
-                                        text: "Something went wrong. Please try again.",
-                                        icon: "error"
-                                    });
+                        return reason;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        fetch("../Appointments/app_manage/client_edit_appointment.php", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                appointment_id: appointmentId,
+                                action: "cancel",
+                                validation_notes: result.value
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
+                                Swal.fire({
+                                    title: data.title,
+                                    text: data.message,
+                                    icon: "success",
+                                    confirmButtonText: "OK"
+                                }).then(() => {
+                                    location.reload(); // Reload after user sees the message
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: data.title,
+                                    text: data.message,
+                                    icon: "error"
                                 });
                             }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                title: "Error",
+                                text: "Something went wrong. Please try again.",
+                                icon: "error"
+                            });
                         });
-                    });
+                    }
+                });
             });
+        });
 
         // ✅ Edit Appointment (Reschedule)
         document.querySelectorAll(".edit-btn").forEach(button => {
-            button.addEventListener("click", function () {
+            button.addEventListener("click", function() {
                 let appointmentId = this.getAttribute("data-id");
                 let currentStatus = this.getAttribute("data-status"); // Get status from dataset
 
@@ -393,8 +556,15 @@ $connection->close();
                 }).then((result) => {
                     fetch("../Appointments/app_manage/client_edit_appointment.php", {
                         method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ appointment_id: appointmentId, action: "edit", new_date: result.value.newDate, new_time: result.value.newTime })
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            appointment_id: appointmentId,
+                            action: "edit",
+                            new_date: result.value.newDate,
+                            new_time: result.value.newTime
+                        })
                     })
                     .then(response => response.json())
                     .then(data => {
@@ -404,7 +574,155 @@ $connection->close();
                 });
             });
         });
+
+    
+    // REGISTER PATIENT JS
+        
+        document.getElementById("profile-picture-input").addEventListener("change", function() {
+            if (this.files && this.files[0]) {
+                document.getElementById("profile-picture-placeholder").classList.remove("uk-placeholder");
+                document.getElementById("file-name-display").textContent = this.files[0].name;
+            } else {
+                document.getElementById("profile-picture-placeholder").classList.add("uk-placeholder");
+                document.getElementById("file-name-display").textContent = "to choose a file";
+            }
+        });
+
+        document.getElementById("registerPatientButton").addEventListener("click", function() {
+            let form = document.getElementById("patientRegistrationForm");
+            let formData = new FormData(form);
+
+            fetch("../Appointments/patient/patient_manage/register_patient_form.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json()) // Parse JSON
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire("Success!", data.message, "success").then(() => {
+                        form.reset();
+                        document.getElementById("file-name-display").textContent = "";
+                    });
+                } else {
+                    Swal.fire("Error!", data.message, "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire("Error!", "An unexpected error occurred.", "error");
+            });
+        });
+
+        
+        // VIEW AND EDIT PATIENT JS
+
+        let patientDropdown = document.getElementById("patientDropdown");
+        let editForm = document.getElementById("editPatientForm");
+        let patientIDInput = document.getElementById("patient_id");
+        let firstNameInput = document.getElementById("first_name");
+        let lastNameInput = document.getElementById("last_name");
+        let ageInput = document.getElementById("age");
+        let genderInput = document.getElementById("gender");
+        let profilePicPreview = document.getElementById("profile_picture_preview");
+        let profilePicInput = document.getElementById("profile_picture_input");
+        let existingProfilePicInput = document.getElementById("existing_profile_picture");
+
+        patientDropdown.addEventListener("change", function () {
+            let patientID = this.value;
+            if (!patientID) {
+                editForm.style.display = "none";
+                return;
+            }
+
+            fetch("../Appointments/patient/patient_data/fetch_patient_details.php?patient_id=" + patientID)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        patientIDInput.value = data.patient.patient_id;
+                        firstNameInput.value = data.patient.first_name;
+                        lastNameInput.value = data.patient.last_name;
+                        ageInput.value = data.patient.age;
+                        genderInput.value = data.patient.gender;
+                        existingProfilePicInput.value = data.patient.profile_picture;
+
+                        if (data.patient.profile_picture) {
+                            profilePicPreview.src = "../uploads/profile_pictures/" + data.patient.profile_picture;
+                            profilePicPreview.style.display = "block";
+                        } else {
+                            profilePicPreview.style.display = "none";
+                        }
+
+                        // Display latest referral details
+                        if (data.latest_referrals.official) {
+                            document.getElementById("official_referral_link").href = "../uploads/doctors_referrals/" + data.latest_referrals.official.official_referral_file;
+                            document.getElementById("official_referral_link").style.display = "block";
+                        } else {
+                            document.getElementById("official_referral_link").style.display = "none";
+                        }
+
+                        if (data.latest_referrals.proof_of_booking) {
+                            document.getElementById("proof_of_booking_link").href = "../uploads/doctors_referrals/" + data.latest_referrals.proof_of_booking.proof_of_booking_referral_file;
+                            document.getElementById("proof_of_booking_link").style.display = "block";
+                        } else {
+                            document.getElementById("proof_of_booking_link").style.display = "none";
+                        }
+
+                        editForm.style.display = "block";
+                    } else {
+                        editForm.style.display = "none";
+                        Swal.fire("Error", "Patient details could not be loaded.", "error");
+                    }
+                })
+                .catch(error => console.error("Error fetching patient details:", error));
+        });
+
+        // Show preview when selecting a new profile picture
+        profilePicInput.addEventListener("change", function () {
+            let file = this.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function (e) {
+                    profilePicPreview.src = e.target.result;
+                    profilePicPreview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Upload Referral Logic
+        document.getElementById("uploadReferralBtn").addEventListener("click", function () {
+            let patientID = document.getElementById("patientDropdown").value;
+            let referralType = document.getElementById("referral_type_select").value;
+            let referralFile = document.getElementById("referral_file_input").files[0];
+
+            if (!patientID|| !referralType || !referralFile) {
+                Swal.fire("Error", "Please select a patient, referral type, and upload a file.", "error");
+                return;
+            }
+
+            let formData = new FormData();
+            formData.append("patient_id", patientID);
+            formData.append("referral_type", referralType);
+            formData.append("referral_file", referralFile);
+
+            fetch("../Appointments/patient/patient_data/upload_referral.php", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire("Success!", data.message, "success").then(() => {
+                        location.reload(); // Reload page to update referral display
+                    });
+                } else {
+                    Swal.fire("Error!", data.message, "error");
+                }
+            })
+            .catch(error => console.error("Error:", error));
+        });
     });
+
 </script>
 
 </html>
