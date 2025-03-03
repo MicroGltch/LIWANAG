@@ -1,6 +1,34 @@
 <?php
 include "dbconfig.php";
 session_start();
+
+// Fetch user data from the database
+$stmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
+$stmt->bind_param("s", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+
+if ($result->num_rows > 0) {
+    $userData = $result->fetch_assoc();
+    $firstName = $userData['account_FName'];
+    $lastName = $userData['account_LName'];
+    $email = $userData['account_Email'];
+    $phoneNumber = $userData['account_PNum'];
+    // Determine the profile picture path
+    if ($userData['profile_picture']) {
+        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture']; // Corrected path
+    } else {
+        $profilePicture = '../CSS/default.jpg';
+    }
+    // $profilePicture = $userData['profile_picture'] ? '../uploads/' . $userData['profile_picture'] : '../CSS/default.jpg';
+} else {
+    echo "";
+}
+
+
+$stmt->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -61,12 +89,40 @@ session_start();
                     <!-- Navbar Right -->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                        <?php if (isset($_SESSION['account_ID'])): ?>                                
-                            <a href="#">Hi, <?php echo $_SESSION['username']; ?>!</a>
+                        <?php
+        if (isset($_SESSION['account_ID'])):
+           
+            $account_ID = $_SESSION['account_ID'];
+            $query = "SELECT account_FName, account_Type FROM users WHERE account_ID = ?";
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param("i", $account_ID);
+            $stmt->execute();
+            $stmt->bind_result($account_FN, $account_Type);
+            $stmt->fetch();
+            $stmt->close();
+            $connection->close();
+
+
+            // Determine the dashboard URL based on account type
+            switch ($account_Type) {
+                case 'admin':
+                    $dashboardURL = "Dashboards/admindashboard.php";
+                    break;
+                case 'therapist':
+                    $dashboardURL = "Dashboards/therapistdashboard.php";
+                    break;
+                case 'client':
+                default:
+                    $dashboardURL = "Dashboards/clientdashboard.php";
+                    break;
+            }
+        ?>
+            <li>
+                <a href="#">Hi, <?php echo htmlspecialchars($account_FN); ?>!</a>
                                 <div class="uk-navbar-dropdown">
                                     <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li><a href="Dashboards/clientdashboard.php" style="color: black !important;">Dashboard</a></li>
-                                    <li><a href="Accounts/logout.php" style="color: black !important; ">Logout</a></li>
+                                    <li><a href="<?php echo $dashboardURL; ?>" style="color: black !important;">Dashboard</a></li>
+                        <li><a href="Accounts/logout.php" style="color: black !important;">Logout</a></li>
                                     </ul>
                                 </div>
                             </li>

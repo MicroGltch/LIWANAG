@@ -1,6 +1,44 @@
 <?php
 include "../dbconfig.php";
 session_start();
+
+// Check if the user is logged in (basic check)
+if (!isset($_SESSION['account_ID'])) {
+    header("Location: ../Accounts/loginpage.php");
+    exit;
+}
+
+
+$userid = $_SESSION['account_ID'];
+
+
+// Fetch user data from the database
+$stmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
+$stmt->bind_param("s", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+
+if ($result->num_rows > 0) {
+    $userData = $result->fetch_assoc();
+    $firstName = $userData['account_FName'];
+    $lastName = $userData['account_LName'];
+    $email = $userData['account_Email'];
+    $phoneNumber = $userData['account_PNum'];
+    // Determine the profile picture path
+    if ($userData['profile_picture']) {
+        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture']; // Corrected path
+    } else {
+        $profilePicture = '../CSS/default.jpg';
+    }
+    // $profilePicture = $userData['profile_picture'] ? '../uploads/' . $userData['profile_picture'] : '../CSS/default.jpg';
+} else {
+    echo "No Data Found.";
+}
+
+
+$stmt->close();
+
 ?>
 
 <!DOCTYPE html>
@@ -43,7 +81,7 @@ session_start();
             <div class="uk-container">
                 <div uk-navbar>
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
+                    <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
                     </div>
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
@@ -52,9 +90,32 @@ session_start();
                                     <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
                                 </a>
                             </li>
-                            <li style="display: flex; align-items: center;">  <?php echo $_SESSION['username'];?>
+                            <li style="display: flex; align-items: center;">
+                        <?php
+                        if (isset($_SESSION['account_ID'])) {
+                           
+
+
+                            $account_ID = $_SESSION['account_ID'];
+                            $query = "SELECT account_FName FROM users WHERE account_ID = ?";
+                            $stmt = $connection->prepare($query);
+                            $stmt->bind_param("i", $account_ID);
+                            $stmt->execute();
+                            $stmt->bind_result($account_FN);
+                            $stmt->fetch();
+                            $stmt->close();
+                            $connection->close();
+
+
+                            echo htmlspecialchars($account_FN);
+                        } else {
+                            echo '<a href="../Accounts/loginpage.php">Login</a>';
+                        }
+                        ?>
                             </li>
+                            <?php if (isset($_SESSION['account_ID'])): ?>
                             <li><a href="../Accounts/logout.php">Logout</a></li>
+                            <?php endif; ?>
                         </ul>
                     </div>
                 </div>
@@ -185,11 +246,13 @@ session_start();
                 <h1 class="uk-text-bold">Settings</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
+                    <form action="settings.php" method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="action" value="upload_profile_picture">
                     <div class="uk-flex uk-flex-middle">
                         <div class="profile-upload-container">
-                            <img class="uk-border-circle profile-preview" src="../CSS/default.jpg" alt="Profile Photo">
+                        <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                             <div class="uk-flex uk-flex-column uk-margin-left">
-                                <input type="file" id="profileUpload" class="uk-hidden">
+                            <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
                                 <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
                                 <div class="uk-text-center">
                                     <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
@@ -206,26 +269,43 @@ session_start();
                             </div>
                         </div>
                     </div>
+                    <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
+                    </form>
                 </div>
                 <div class="uk-card uk-card-default uk-card-body">
                     <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form class="uk-grid-small" uk-grid>
+                    <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
+                    <input type="hidden" name="action" value="update_user_details">
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" placeholder="Placeholder">
+                            <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>">
+                        <span class="error" id="firstNameError" style="color: red;"></span>
                         </div>
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" placeholder="Placeholder">
-                        </div>
+                            <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>">
+                        <span class="error" id="lastNameError" style="color: red;"></span>
+                    </div>
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" placeholder="Placeholder">
+                            <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>">
+                        <span class="error" id="emailError" style="color: red;"></span>
                         </div>
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" placeholder="Placeholder">
+                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  value="<?php echo $phoneNumber; ?>" pattern="^\+63\d{10}$"
+                        required>
+                        <span class="error" id="mobileNumberError" style="color: red;"></span>
                         </div>
+                        <?php
+                if (isset($_SESSION['signup_error'])) {
+                    echo "<div class='uk-alert-danger' uk-alert>
+                            <a class='uk-alert-close' uk-close></a>
+                            <p>" . $_SESSION['signup_error'] . "</p>
+                          </div>";
+                    unset($_SESSION['signup_error']); // Remove the message after displaying it
+                }
+            ?>
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
                             <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
                         </div>
@@ -238,6 +318,10 @@ session_start();
     </div>
 
     </div>
+
+     <!-- Javascript -->
+     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- <script src="accountJS/settings.js"></script> -->
 
 </body>
 
@@ -365,6 +449,97 @@ session_start();
                 // cancellation logic here
             });
         });
+
+        //Settings Validation *Ayaw maging external* (settings.js)
+document.addEventListener("DOMContentLoaded", function () {
+    // Attach a blur event listener to reformat the mobile number when focus is lost.
+    let mobileNumberInput = document.getElementById("mobileNumber");
+    mobileNumberInput.addEventListener("blur", function() {
+        let phone = this.value.trim();
+        if (phone.length > 0) {
+            // If it starts with "0", replace it with "+63"
+            if (phone.startsWith("0")) {
+                phone = "+63" + phone.substring(1);
+            } else if (!phone.startsWith("+63")) {
+                // Otherwise, if it doesn't already start with +63, prepend +63.
+                phone = "+63" + phone;
+            }
+            this.value = phone;
+        }
+    });
+
+
+    document.getElementById("settingsvalidate").addEventListener("submit", function (event) {
+        let valid = true;
+
+
+        // First Name Validation
+        let firstName = document.getElementById("firstName").value.trim();
+        let firstNameError = document.getElementById("firstNameError");
+        let nameRegex = /^[A-Za-z ]{2,30}$/;
+        if (!nameRegex.test(firstName)) {
+            firstNameError.textContent = "Only letters allowed (2-30 characters).";
+            valid = false;
+        } else {
+            firstNameError.textContent = "";
+        }
+
+
+        // Last Name Validation
+        let lastName = document.getElementById("lastName").value.trim();
+        let lastNameError = document.getElementById("lastNameError");
+        if (!nameRegex.test(lastName)) {
+            lastNameError.textContent = "Only letters allowed (2-30 characters).";
+            valid = false;
+        } else {
+            lastNameError.textContent = "";
+        }
+
+
+        // Email Validation
+        let email = document.getElementById("email").value.trim();
+        let emailError = document.getElementById("emailError");
+        let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            emailError.textContent = "Invalid email format.";
+            valid = false;
+        } else {
+            emailError.textContent = "";
+        }
+
+
+        // Mobile Number Validation
+        let mobileNumber = mobileNumberInput.value.trim();
+        let mobileNumberError = document.getElementById("mobileNumberError");
+
+
+        // Reformat the mobile number if necessary
+        if (mobileNumber.length > 0) {
+            if (mobileNumber.startsWith("0")) {
+                mobileNumber = "+63" + mobileNumber.substring(1);
+                mobileNumberInput.value = mobileNumber;
+            } else if (!mobileNumber.startsWith("+63")) {
+                mobileNumber = "+63" + mobileNumber;
+                mobileNumberInput.value = mobileNumber;
+            }
+        }
+
+
+        // Validate: must be "+63" followed by exactly 10 digits.
+        let mobileRegex = /^\+63\d{10}$/;
+        if (!mobileRegex.test(mobileNumber)) {
+            mobileNumberError.textContent = "Phone number must be in the format +63XXXXXXXXXX.";
+            valid = false;
+        } else {
+            mobileNumberError.textContent = "";
+        }
+       
+        if (!valid) {
+            event.preventDefault();
+            return false;
+        }
+    });
+});
 </script>
 
 </html>

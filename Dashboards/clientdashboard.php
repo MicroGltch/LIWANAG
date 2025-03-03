@@ -54,8 +54,6 @@ $result = $stmt->get_result();
 $patients = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-$connection->close();
-
 ?>
 
 <!DOCTYPE html>
@@ -113,9 +111,30 @@ $connection->close();
                                 <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
                             </a>
                         </li>
-                        <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
+                        <li style="display: flex; align-items: center;">
+                        <?php
+                        if (isset($_SESSION['account_ID'])) {
+                        
+                            $account_ID = $_SESSION['account_ID'];
+                            $query = "SELECT account_FName FROM users WHERE account_ID = ?";
+                            $stmt = $connection->prepare($query);
+                            $stmt->bind_param("i", $account_ID);
+                            $stmt->execute();
+                            $stmt->bind_result($account_FN);
+                            $stmt->fetch();
+                            $stmt->close();
+                            $connection->close();
+
+
+                            echo htmlspecialchars($account_FN);
+                        } else {
+                            echo '<a href="../Accounts/loginpage.php">Login</a>';
+                        }
+                        ?>
                         </li>
+                        <?php if (isset($_SESSION['account_ID'])): ?>
                         <li><a href="../Accounts/logout.php">Logout</a></li>
+                    <?php endif; ?>
                     </ul>
                 </div>
             </div>
@@ -410,24 +429,38 @@ $connection->close();
 
                 <div class="uk-card uk-card-default uk-card-body">
                     <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
+                    <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
                         <input type="hidden" name="action" value="update_user_details">
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" name="firstName" value="<?php echo $firstName; ?>">
+                            <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>">
+                        <span class="error" id="firstNameError" style="color: red;"></span>
                         </div>
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" name="lastName" value="<?php echo $lastName; ?>">
+                            <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>">
+                        <span class="error" id="lastNameError" style="color: red;"></span>
                         </div>
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" name="email" value="<?php echo $email; ?>">
+                            <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>">
+                        <span class="error" id="emailError" style="color: red;"></span>
                         </div>
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" name="phoneNumber" value="<?php echo $phoneNumber; ?>">
+                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  value="<?php echo $phoneNumber; ?>" pattern="^\+63\d{10}$"
+                        required>
+                        <span class="error" id="mobileNumberError" style="color: red;"></span>
                         </div>
+                        <?php
+                if (isset($_SESSION['signup_error'])) {
+                    echo "<div class='uk-alert-danger' uk-alert>
+                            <a class='uk-alert-close' uk-close></a>
+                            <p>" . $_SESSION['signup_error'] . "</p>
+                          </div>";
+                    unset($_SESSION['signup_error']); // Remove the message after displaying it
+                }
+            ?>
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
                             <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
                         </div>
@@ -438,6 +471,10 @@ $connection->close();
     </div>
 
     </div>
+
+                <!-- Javascript -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- <script src="accountJS/settings.js"></script> -->
 
 </body>
 
@@ -722,6 +759,97 @@ $connection->close();
             .catch(error => console.error("Error:", error));
         });
     });
+
+     //Settings Validation *Ayaw maging external* (settings.js)
+document.addEventListener("DOMContentLoaded", function () {
+    // Attach a blur event listener to reformat the mobile number when focus is lost.
+    let mobileNumberInput = document.getElementById("mobileNumber");
+    mobileNumberInput.addEventListener("blur", function() {
+        let phone = this.value.trim();
+        if (phone.length > 0) {
+            // If it starts with "0", replace it with "+63"
+            if (phone.startsWith("0")) {
+                phone = "+63" + phone.substring(1);
+            } else if (!phone.startsWith("+63")) {
+                // Otherwise, if it doesn't already start with +63, prepend +63.
+                phone = "+63" + phone;
+            }
+            this.value = phone;
+        }
+    });
+
+
+    document.getElementById("settingsvalidate").addEventListener("submit", function (event) {
+        let valid = true;
+
+
+        // First Name Validation
+        let firstName = document.getElementById("firstName").value.trim();
+        let firstNameError = document.getElementById("firstNameError");
+        let nameRegex = /^[A-Za-z ]{2,30}$/;
+        if (!nameRegex.test(firstName)) {
+            firstNameError.textContent = "Only letters allowed (2-30 characters).";
+            valid = false;
+        } else {
+            firstNameError.textContent = "";
+        }
+
+
+        // Last Name Validation
+        let lastName = document.getElementById("lastName").value.trim();
+        let lastNameError = document.getElementById("lastNameError");
+        if (!nameRegex.test(lastName)) {
+            lastNameError.textContent = "Only letters allowed (2-30 characters).";
+            valid = false;
+        } else {
+            lastNameError.textContent = "";
+        }
+
+
+        // Email Validation
+        let email = document.getElementById("email").value.trim();
+        let emailError = document.getElementById("emailError");
+        let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            emailError.textContent = "Invalid email format.";
+            valid = false;
+        } else {
+            emailError.textContent = "";
+        }
+
+
+        // Mobile Number Validation
+        let mobileNumber = mobileNumberInput.value.trim();
+        let mobileNumberError = document.getElementById("mobileNumberError");
+
+
+        // Reformat the mobile number if necessary
+        if (mobileNumber.length > 0) {
+            if (mobileNumber.startsWith("0")) {
+                mobileNumber = "+63" + mobileNumber.substring(1);
+                mobileNumberInput.value = mobileNumber;
+            } else if (!mobileNumber.startsWith("+63")) {
+                mobileNumber = "+63" + mobileNumber;
+                mobileNumberInput.value = mobileNumber;
+            }
+        }
+
+
+        // Validate: must be "+63" followed by exactly 10 digits.
+        let mobileRegex = /^\+63\d{10}$/;
+        if (!mobileRegex.test(mobileNumber)) {
+            mobileNumberError.textContent = "Phone number must be in the format +63XXXXXXXXXX.";
+            valid = false;
+        } else {
+            mobileNumberError.textContent = "";
+        }
+       
+        if (!valid) {
+            event.preventDefault();
+            return false;
+        }
+    });
+});
 
 </script>
 
