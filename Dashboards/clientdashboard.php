@@ -329,7 +329,7 @@ $connection->close();
             </div>
 
             <!-- Book Appointment -->
-            <div id="account-details" style="display: none;" class="section uk-width-1-1 uk-width-4-5@m uk-padding">
+            <div id="book-appointment" style="display: none;" class="section uk-width-1-1 uk-width-4-5@m uk-padding">
                 <h1 class="uk-text-bold">Book Appointment</h1>
 
             </div>
