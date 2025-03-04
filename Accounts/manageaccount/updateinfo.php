@@ -3,6 +3,11 @@ include "../../dbconfig.php";
 session_start();
 $userid = $_SESSION['account_ID'];
 
+header('Content-Type: application/json');
+$errors = [];
+$_SESSION['update_errors'] = []; // Clear previous errors
+$_SESSION['update_success'] = "";
+
 // Fetch user account type
 $stmt = $connection->prepare("SELECT account_Type FROM users WHERE account_ID = ?");
 $stmt->bind_param("i", $userid);
@@ -61,34 +66,71 @@ if (isset($_POST['action']) && $_POST['action'] === 'upload_profile_picture' && 
     exit;
 }
 
-// Update User Details
+// ** Update User Details **
 if (isset($_POST['action']) && $_POST['action'] === 'update_user_details') {
-    $firstName = $_POST['firstName'];
-    $lastName = $_POST['lastName'];
-    $email = $_POST['email'];
-    $phoneNumber = $_POST['phoneNumber'];
+    $firstName = trim($_POST['firstName']);
+    $lastName = trim($_POST['lastName']);
+    $email = trim($_POST['email']);
+    $phoneNumber = trim($_POST['phoneNumber']);
 
-    $stmt = $connection->prepare("UPDATE users SET account_FName = ?, account_LName = ?, account_Email = ?, account_PNum = ? WHERE account_ID = ?");
-    $stmt->bind_param("ssssi", $firstName, $lastName, $email, $phoneNumber, $userid); // Corrected bind_param
-    $stmt->execute();
-    $stmt->close();
-    
-    // Check if email or phone number is already registered
-    $checkExisting = "SELECT * FROM users WHERE account_Email = ? OR account_PNum = ?";
-    $stmt = $connection->prepare($checkExisting);
-    $stmt->bind_param("ss", $email, $phoneNumber);
+    // ** Validate First Name **
+    if (!preg_match("/^[A-Za-z ]{2,30}$/", $firstName)) {
+        $_SESSION['update_errors']['firstName'] = "Only letters allowed (2-30 characters).";
+    }
+
+    // ** Validate Last Name **
+    if (!preg_match("/^[A-Za-z ]{2,30}$/", $lastName)) {
+        $_SESSION['update_errors']['lastName'] = "Only letters allowed (2-30 characters).";
+    }
+
+    // ** Validate Email **
+    if (!preg_match("/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/", $email)) {
+        $_SESSION['update_errors']['email'] = "Invalid email format.";
+    }
+
+    // ** Validate Mobile Number (Auto-convert format) **
+    $phoneNumber = preg_replace('/\s+/', '', $phoneNumber); // Remove spaces
+
+    if (preg_match("/^0\d{10}$/", $phoneNumber)) {
+        $phoneNumber = "+63" . substr($phoneNumber, 1);
+    } elseif (!preg_match("/^\+63\d{10}$/", $phoneNumber)) {
+        $_SESSION['update_errors']['phoneNumber'] = "Phone number must be in the format +63XXXXXXXXXX.";
+    }
+
+    // ** Store in Session to Preserve Data on Reload **
+    if (!isset($_SESSION['update_errors']['phoneNumber'])) {
+        $_SESSION['phoneNumber'] = $phoneNumber;
+    }
+
+
+
+    // ** Check if email or phone number already exists (excluding current user) **
+    $stmt = $connection->prepare("SELECT account_ID FROM users WHERE (account_Email = ? OR account_PNum = ?) AND account_ID != ?");
+    $stmt->bind_param("ssi", $email, $phoneNumber, $userid);
     $stmt->execute();
     $result = $stmt->get_result();
-
-
+    
     if ($result->num_rows > 0) {
-        $_SESSION['signup_error'] = "An account with this email or phone number already exists.";
-        header("Location: $dashboardURLSettings");
-        exit();
+        $_SESSION['update_errors']['duplicate'] = "An account with this email or phone number already exists.";
     }
     $stmt->close();
-    header("Location: $dashboardURL");
-    exit();
 
+    // ** If there are errors, return JSON response instead of redirecting **
+    if (!empty($_SESSION['update_errors'])) {
+        echo json_encode(['errors' => $_SESSION['update_errors']]);
+        exit();
+    }
+
+    // ** Update User Data if no errors **
+    $stmt = $connection->prepare("UPDATE users SET account_FName = ?, account_LName = ?, account_Email = ?, account_PNum = ? WHERE account_ID = ?");
+    $stmt->bind_param("ssssi", $firstName, $lastName, $email, $phoneNumber, $userid);
+    $stmt->execute();
+    $stmt->close();
+
+    // ** Set Success Message **
+    $_SESSION['update_success'] = "Profile updated successfully!";
+    echo json_encode(['success' => $_SESSION['update_success']]); 
+    exit();
+    
 }
 ?>
