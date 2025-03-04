@@ -3,12 +3,12 @@ require_once "../../../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Therapists Only
-if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-    header("Location: ../../../loginpage.php");
-    exit();
-}
+// if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
+//     header("Location: ../../../loginpage.php");
+//     exit();
+// }
 
-$therapistID = $_SESSION['account_ID'];
+// $therapistID = $_SESSION['account_ID'];
 
 // Fetch therapist's upcoming appointments
 $query = "SELECT a.appointment_id, a.date, a.time, a.session_type, a.status,
