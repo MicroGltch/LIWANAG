@@ -54,6 +54,9 @@ $result = $stmt->get_result();
 $patients = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
+// BOOK APPOINTMENT FORM PHP from book_appointment_form
+
+
 ?>
 
 <!DOCTYPE html>
@@ -80,7 +83,6 @@ $stmt->close();
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 
-    <!-- <script src="dashboardJS/client.js"></script>  -->
 </head>
 
 </head>
@@ -353,9 +355,12 @@ $stmt->close();
             </div>
 
             <!-- Book Appointment -->
-            <div id="book-appointment" style="display: none;" class="section uk-width-1-1 uk-width-4-5@m uk-padding">
+            <div id="book-appointment" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Book Appointment</h1>
-
+                <div class="uk-card uk-card-default uk-card-body">
+                    <iframe id="appointmentFormFrame" src="../Appointments/book_appointment_form.php" style="width: 100%; height: 800px; border: none;">
+                    </iframe>
+                </div>
             </div>
 
             <!--Account Details Card-->
@@ -637,6 +642,41 @@ $stmt->close();
                 });
             });
         });
+
+        // Book Appointment Form Submission Handling
+        let appointmentFormFrame = document.getElementById("appointmentFormFrame");
+
+        appointmentFormFrame.onload = function() {
+            let appointmentForm = appointmentFormFrame.contentDocument.getElementById("appointmentForm");
+
+            if (appointmentForm) {
+                appointmentForm.addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    let formData = new FormData(this);
+
+                    fetch("../Appointments/app_process/book_appointment_process.php", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.swal) {
+                            Swal.fire({
+                                title: data.swal.title,
+                                text: data.swal.text,
+                                icon: data.swal.icon,
+                            }).then(() => {
+                                if (data.reload) {
+                                    window.location.reload(true); // Hard reload the page
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                });
+            }
+        };
 
     
     // REGISTER PATIENT JS

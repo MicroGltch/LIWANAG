@@ -155,22 +155,39 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // ✅ Send Confirmation Email
         if (send_email_notification($client_email, $client_name, $appointment_type, $appointment_date, $appointment_time)) {
-            // echo json_encode(["status" => "success", "message" => "Appointment booked successfully. A confirmation email has been sent."]);
             echo json_encode([
-                "status" => "success", 
+                "status" => "success",
                 "message" => "Appointment booked successfully. A confirmation email has been sent.",
-                "redirect" => "../Dashboards/clientdashboard.php" // Add the redirect URL 
+                "swal" => [
+                    "title" => "Success!",
+                    "text" => "Appointment booked successfully. A confirmation email has been sent.",
+                    "icon" => "success",
+                ],
+                "reload" => true, // Indicate that the page should be reloaded
             ]);
         } else {
-            // echo json_encode(["status" => "success", "message" => "Appointment booked successfully, but email notification failed."]);
             echo json_encode([
-                "status" => "success", 
+                "status" => "success",
                 "message" => "Appointment booked successfully, but email notification failed.",
-                "redirect" => "../Dashboards/clientdashboard.php" // Add the redirect URL
+                "swal" => [
+                    "title" => "Success!",
+                    "text" => "Appointment booked successfully, but email notification failed.",
+                    "icon" => "success",
+                ],
+                "reload" => true, // Indicate that the page should be reloaded
             ]);
         }
     } else {
-        echo json_encode(["status" => "error", "message" => "Error booking appointment."]);
+        echo json_encode([
+            "status" => "error",
+            "message" => "Error booking appointment.",
+            "swal" => [
+                "title" => "Error!",
+                "text" => "Error booking appointment.",
+                "icon" => "error",
+            ],
+            "reload" => false, // No reload on error
+        ]);
     }
     
     $stmt->close();
