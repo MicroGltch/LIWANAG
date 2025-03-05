@@ -133,14 +133,28 @@ $stmt->close();
             <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
                 Menu <span uk-navbar-toggle-icon></span>
             </button>
+            
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li><a href="#dashboard" onclick="showSection('dashboard')"><span class="uk-margin-small-right" uk-icon="home"></span> Dashboard</a></li>
                     <li><a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a></li>
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a></li>
                     <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
+                    
+                    <!-- Current code redirect na nagbase muna ako kay Rap na provided codes : PAGE CHANGE SIMILAR TO HEADTHERAPISTDASHBOARD-->
+                    <li><a href="../Appointments/app_manage/upcoming_appointments.php"><span class="uk-margin-small-right" uk-icon="home"></span> Upcoming Appointments</a></li>
+                    <li><a href="../Appointments/app_process/rebook_appointment.php"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook Appointment</a></li>
+                    <li><a href="../Appointments/patient/patient_manage/rebook_patient.php"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook Patient</a></li>
+                    <li><a href="../Dashboards/forTherapist/manageSchedule/manage_availability.php"><span class="uk-margin-small-right" uk-icon="user"></span> Manage Availability</a></li>   
+                    <li><a href="../Dashboards/forTherapist/manageSchedule/override_availability.php"><span class="uk-margin-small-right" uk-icon="user"></span> Adjust Availability</a></li>              
                 </ul>
             </div>
+
+            <div class="sidebar-nav">
+                <ul class="uk-nav uk-nav-default">
+                    </ul>
+            </div>
+
         </div>
 
         <!-- Content Area -->
