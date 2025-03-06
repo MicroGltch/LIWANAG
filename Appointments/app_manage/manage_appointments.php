@@ -95,10 +95,8 @@ $upcomingCount = $result->fetch_assoc()['count'];
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li><a href="../../Dashboards/headtherapistdashboard.php">Dashboard</a></li>
-                    <li><a href="../../Dashboards/forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
                     <li class="uk-active"><a href="manage_appointments.php">View & Manage Appointments</a></li>
                     <li><a href="view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                 </ul>
             </div>
         </div>

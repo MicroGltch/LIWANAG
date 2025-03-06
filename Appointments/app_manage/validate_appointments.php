@@ -17,7 +17,7 @@ $query = "SELECT a.appointment_id, a.patient_id, a.date, a.time, a.status,
                  END AS session_type,
                  dr.referral_type, -- ✅ Fetch referral type
                  dr.official_referral_file, -- ✅ Fetch official referral file
-                 dr.proof_of_booking_file, -- ✅ Fetch proof of booking file
+                 dr.proof_of_booking_referral_file, -- ✅ Fetch proof of booking file
                  p.first_name, p.last_name, p.profile_picture AS patient_picture,
                  u.account_FName AS client_firstname, u.account_LName AS client_lastname, u.profile_picture AS client_picture
           FROM appointments a
@@ -162,7 +162,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
     </div>
 
     <!-- Recheck Dashboard Redirect -->
-    <a href="../../accounts/dashboard/headtherapist/frontend/headtherapist_dashboard.php">Back to Dashboard</a></li>
+    <a href="../../Dashboards/headtherapistdashboard.php">Back to Dashboard</a></li>
 </body>
 </html>
 
