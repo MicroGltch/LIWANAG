@@ -3,10 +3,10 @@ require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Admins & Head Therapists Only
-if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
-    header("Location: ../../Accounts/loginpage.php");
-    exit();
-}
+// if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
+//     header("Location: ../../Accounts/loginpage.php");
+//     exit();
+// }
 
 // ✅ Fetch appointments with referral information from `doctor_referrals`
 $query = "SELECT a.appointment_id, a.patient_id, a.date, a.time, a.status, 

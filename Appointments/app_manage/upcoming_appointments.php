@@ -1,14 +1,14 @@
 <?php
-require_once "../../../../dbconfig.php";
+require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Therapists Only
-if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-    header("Location: ../../../loginpage.php");
-    exit();
-}
+// if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
+//     header("Location: ../../../loginpage.php");
+//     exit();
+// }
 
-$therapistID = $_SESSION['account_ID'];
+// $therapistID = $_SESSION['account_ID'];
 
 // Fetch therapist's upcoming appointments
 $query = "SELECT a.appointment_id, a.date, a.time, a.session_type, a.status,
@@ -71,14 +71,12 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 
     <br/>
     <div>
-        <a href="rebook_patient.php" class="uk-button uk-button-secondary">Rebook a Previous Patient</a>
+        <a href="../patient/patient_manage/rebook_patient.php" class="uk-button uk-button-secondary">Rebook a Previous Patient</a>
     </div>
 
     <div>
     <br/>
-        <a href="manage_availability.php">Setup your default availability</a> <br/>
-        <a href="override_availability.php">Unavailable for a specific date? Block a date schedule here</a> <br/>
-        <a href="../../../logout.php">LOGOUT</a>
+        <a href="../../Dashboards/therapistdashboard.php">Back to Dashboard</a>
     </div>
 
     <script>
@@ -158,7 +156,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            fetch("../../../../Appointments/backend/update_appointment_status.php", {
+                            fetch("../app_process/update_appointment_status.php", {
                                 method: "POST",
                                 headers: { "Content-Type": "application/json" },
                                 body: JSON.stringify({

@@ -1,5 +1,5 @@
 <?php
-require_once "../../../../dbconfig.php";
+require_once "../../../dbconfig.php";
 
 if ($_SERVER["REQUEST_METHOD"] == "GET" && isset($_GET['patient_id'])) {
     $patientID = $_GET['patient_id'];
