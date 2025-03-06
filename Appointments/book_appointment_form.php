@@ -51,6 +51,21 @@
     <!-- Include Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- UIkit Library -->
+    <link rel="stylesheet" href="../CSS/uikit-3.22.2/css/uikit.min.css" />
+    <script src="../CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- LIWANAG CSS -->
+    <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
+
 </head>
 <body>
     <div class="uk-container uk-margin-top">
