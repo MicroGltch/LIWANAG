@@ -4,7 +4,7 @@ session_start();
 
 // ✅ Restrict Access to Admins & Head Therapists Only
 if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
-    header("Location: ../../Accounts/loginpage.php");
+    header("Location: ../../../loginpage.php");
     exit();
 }
 
@@ -53,7 +53,7 @@ $upcomingCount = $result->fetch_assoc()['count'];
 
     <!--SWAL-->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+
 </head>
 
 <body>
@@ -71,12 +71,12 @@ $upcomingCount = $result->fetch_assoc()['count'];
                     <ul class="uk-navbar-nav">
                         <li>
                             <a href="#" class="uk-navbar-item">
-                                <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
+                                <img class="profile-image" src="../../CSS/default.jpg" alt="Profile Image" uk-img>
                             </a>
                         </li>
                         <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
                         </li>
-                        <li><a href="../../../logout.php">Logout</a></li>
+                        <li><a href="../../Accounts/logout.php">Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -94,9 +94,9 @@ $upcomingCount = $result->fetch_assoc()['count'];
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li><a href="../../HeadTherapist/frontend/headtherapist_dashboard.php">Dashboard</a></li>
-                    <li><a href="../webpage_settings/frontend/timetable_settings.php">Manage Timetable Settings</a></li>
-                    <li class="uk-active"><a href="../../../../Appointments/app_manage/manage_appointments.php">View & Manage Appointments</a></li>
+                    <li><a href="../../Dashboards/headtherapistdashboard.php">Dashboard</a></li>
+                    <li><a href="../../Dashboards/forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
+                    <li class="uk-active"><a href="manage_appointments.php">View & Manage Appointments</a></li>
                     <li><a href="view_all_appointments.php">View All Appointments</a></li>
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                 </ul>

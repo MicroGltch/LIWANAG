@@ -1,10 +1,10 @@
 <?php
-require_once "../../../../dbconfig.php";
+require_once "../dbconfig.php";
 session_start();
 
 // ✅ Ensure only Admins & Head Therapists can access
 if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
-    header("Location: ../../../loginpage.php");
+    header("Location: ../Accounts/loginpage.php");
     exit();
 }
 
@@ -61,12 +61,12 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
 
     <!-- UIkit Library -->
-    <link rel="stylesheet" href="../../../../CSS/uikit-3.22.2/css/uikit.min.css" />
-    <script src="../../../../CSS/uikit-3.22.2/js/uikit.min.js"></script>
-    <script src="../../../../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <link rel="stylesheet" href="../CSS/uikit-3.22.2/css/uikit.min.css" />
+    <script src="../CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
 
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="../../../../CSS/style.css" type="text/css" />
+    <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.uikit.min.js"></script>
@@ -85,7 +85,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         <div class="uk-container">
             <div uk-navbar>
                 <div class="uk-navbar-center">
-                    <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
+                    <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
                 </div>
                 <div class="uk-navbar-right">
                     <ul class="uk-navbar-nav">
@@ -96,7 +96,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         </li>
                         <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
                         </li>
-                        <li><a href="../../../logout.php">Logout</a></li>
+                        <li><a href="../Accounts/logout.php">Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -114,10 +114,10 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="../../HeadTherapist/frontend/headtherapist_dashboard.php">Dashboard</a></li>
-                    <li><a href="../webpage_settings/frontend/timetable_settings.php">Manage Timetable Settings</a></li>
-                    <li><a href="../../../../Appointments/app_manage/manage_appointments.php">View & Manage Appointments</a></li>
-                    <li><a href="view_all_appointments.php">View All Appointments</a></li>
+                    <li class="uk-active"><a href="headtherapistdashboard.php">Dashboard</a></li>
+                    <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
+                    <li><a href="../Appointments/app_manage/manage_appointments.php">View & Manage Appointments</a></li>
+                    <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                 </ul>
             </div>

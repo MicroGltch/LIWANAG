@@ -1,5 +1,5 @@
 <?php
-require_once "../../../../dbconfig.php";
+require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Admins, Head Therapists, and Therapists
@@ -77,7 +77,7 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
     <title>View All Appointments</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="">
+    <link rel="icon" type="image/x-icon" href="../../assets/favicon.ico">
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -85,12 +85,12 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
 
     <!-- UIkit Library -->
-    <link rel="stylesheet" href="../../../../CSS/uikit-3.22.2/css/uikit.min.css" />
-    <script src="../../../../CSS/uikit-3.22.2/js/uikit.min.js"></script>
-    <script src="../../../../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <link rel="stylesheet" href="../../CSS/uikit-3.22.2/css/uikit.min.css" />
+    <script src="../../CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="../../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
 
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="../../../../CSS/style.css" type="text/css" />
+    <link rel="stylesheet" href="../../CSS/style.css" type="text/css" />
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.uikit.min.js"></script>
@@ -115,12 +115,12 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
                     <ul class="uk-navbar-nav">
                         <li>
                             <a href="#" class="uk-navbar-item">
-                                <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
+                            <img class="profile-image" src="../../CSS/default.jpg" alt="Profile Image" uk-img>
                             </a>
                         </li>
                         <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
                         </li>
-                        <li><a href="../Accounts/logout.php">Logout</a></li>
+                        <li><a href="../../Accounts/logout.php">Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -138,9 +138,9 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li><a href="../../HeadTherapist/frontend/headtherapist_dashboard.php">Dashboard</a></li>
-                    <li><a href="../webpage_settings/frontend/timetable_settings.php">Manage Timetable Settings</a></li>
-                    <li><a href="../../../../appointments/frontend/manage_appointments.php">View & Manage Appointments</a></li>
+                    <li><a href="../../Dashboards/headtherapistdashboard.php">Dashboard</a></li>
+                    <li><a href="../../Dashboards/forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
+                    <li><a href="manage_appointments.php">View & Manage Appointments</a></li>
                     <li class="uk-active"><a href="view_all_appointments.php">View All Appointments</a></li>
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                 </ul>

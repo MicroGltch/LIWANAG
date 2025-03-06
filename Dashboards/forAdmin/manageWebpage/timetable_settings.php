@@ -1,17 +1,17 @@
 <?php
-require_once "../../../../../dbconfig.php";
+require_once "../../../dbconfig.php";
 session_start();
 
 // ✅ Check if user is logged in
 if (!isset($_SESSION['account_ID'])) {
-    header("Location: ../../../loginpage.php");
+    header("Location: ../../../Accounts/loginpage.php");
     exit();
 }
 
 // ✅ Ensure only Admin/Head Therapist can access
-if (!isset($_SESSION['account_Type']) || strtolower($_SESSION['account_Type']) !== "admin") {
+if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
     $_SESSION['error'] = "Unauthorized access.";
-    header("Location: ../../../loginpage.php");
+    header("Location: ../../../Accounts/loginpage.php");
     exit();
 }
 
@@ -39,12 +39,12 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
 
     <!-- UIkit Library -->
-    <link rel="stylesheet" href="../../../../../CSS/uikit-3.22.2/css/uikit.min.css" />
-    <script src="../../../../../CSS/uikit-3.22.2/js/uikit.min.js"></script>
-    <script src="../../../../../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <link rel="stylesheet" href="../../../CSS/uikit-3.22.2/css/uikit.min.css" />
+    <script src="../../../CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="../../../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
 
     <!-- LIWANAG CSS -->
-    <link rel="stylesheet" href="../../../../../CSS/style.css" type="text/css" />
+    <link rel="stylesheet" href="../../../CSS/style.css" type="text/css" />
     <script src="https://code.jquery.com/jquery-3.7.0.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.uikit.min.js"></script>
@@ -72,12 +72,12 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
                     <ul class="uk-navbar-nav">
                         <li>
                             <a href="#" class="uk-navbar-item">
-                                <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
+                                <img class="profile-image" src="../../../CSS/default.jpg" alt="Profile Image" uk-img>
                             </a>
                         </li>
                         <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
                         </li>
-                        <li><a href="../Accounts/logout.php">Logout</a></li>
+                        <li><a href="../../../Accounts/logout.php">Logout</a></li>
                     </ul>
                 </div>
             </div>
@@ -95,10 +95,10 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li><a href="../../../HeadTherapist/frontend/headtherapist_dashboard.php">Dashboard</a></li>
+                    <li><a href="../../headtherapistdashboard.php">Dashboard</a></li>
                     <li class="uk-active"><a href="timetable_settings.php">Manage Timetable Settings</a></li>
-                    <li><a href="../../../appointments/frontend/manage_appointments.php">View & Manage Appointments</a></li>
-                    <li><a href="../../../HeadTherapist/frontend/view_all_appointments.php">View All Appointments</a></li>
+                    <li><a href="../../../Appointments/app_manage/manage_appointments.php">View & Manage Appointments</a></li>
+                    <li><a href="../../../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                 </ul>
             </div>
@@ -181,7 +181,7 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
                 event.preventDefault();
                 let formData = new FormData(this);
 
-                fetch("../backend/update_timetable_settings.php", {
+                fetch("update_timetable_settings.php", {
                         method: "POST",
                         body: formData
                     })

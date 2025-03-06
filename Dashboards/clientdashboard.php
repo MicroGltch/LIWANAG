@@ -54,6 +54,9 @@ $result = $stmt->get_result();
 $patients = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
+// BOOK APPOINTMENT FORM PHP from book_appointment_form
+
+
 ?>
 
 <!DOCTYPE html>
@@ -80,7 +83,6 @@ $stmt->close();
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 
-    <!-- <script src="dashboardJS/client.js"></script>  -->
 </head>
 
 </head>
@@ -112,29 +114,29 @@ $stmt->close();
                             </a>
                         </li>
                         <li style="display: flex; align-items: center;">
-                            <?php
-                            if (isset($_SESSION['account_ID'])) {
+                        <?php
+                        if (isset($_SESSION['account_ID'])) {
+                        
+                            $account_ID = $_SESSION['account_ID'];
+                            $query = "SELECT account_FName FROM users WHERE account_ID = ?";
+                            $stmt = $connection->prepare($query);
+                            $stmt->bind_param("i", $account_ID);
+                            $stmt->execute();
+                            $stmt->bind_result($account_FN);
+                            $stmt->fetch();
+                            $stmt->close();
+                            $connection->close();
 
-                                $account_ID = $_SESSION['account_ID'];
-                                $query = "SELECT account_FName FROM users WHERE account_ID = ?";
-                                $stmt = $connection->prepare($query);
-                                $stmt->bind_param("i", $account_ID);
-                                $stmt->execute();
-                                $stmt->bind_result($account_FN);
-                                $stmt->fetch();
-                                $stmt->close();
-                                $connection->close();
 
-
-                                echo htmlspecialchars($account_FN);
-                            } else {
-                                echo '<a href="../Accounts/loginpage.php">Login</a>';
-                            }
-                            ?>
+                            echo htmlspecialchars($account_FN);
+                        } else {
+                            echo '<a href="../Accounts/loginpage.php">Login</a>';
+                        }
+                        ?>
                         </li>
                         <?php if (isset($_SESSION['account_ID'])): ?>
-                            <li><a href="../Accounts/logout.php">Logout</a></li>
-                        <?php endif; ?>
+                        <li><a href="../Accounts/logout.php">Logout</a></li>
+                    <?php endif; ?>
                     </ul>
                 </div>
             </div>
@@ -279,8 +281,6 @@ $stmt->close();
 
                 <div class="uk-card uk-card-default uk-card-body">
                     <p>Choose a patient to view.</p>
-
-
                     <select class="uk-select" id="patientDropdown">
                         <option value="" disabled selected>Select a Patient</option>
                         <?php foreach ($patients as $patient): ?>
@@ -290,152 +290,77 @@ $stmt->close();
                         <?php endforeach; ?>
                     </select>
 
-
-
                     <!-- 🔹 Patient Details Form (Initially Hidden) -->
-                    <form id="editPatientForm" class="uk-grid-small uk-grid" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" style="display: none;" uk-grid>
-
-
-
-
+                    <form id="editPatientForm" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
                         <input type="hidden" name="patient_id" id="patient_id">
-
-
-
                         <input type="hidden" name="existing_profile_picture" id="existing_profile_picture"> <!-- Store existing picture -->
 
+                        <label>First Name:</label>
+                        <input class="uk-input" type="text" name="first_name" id="first_name" required>
 
+                        <label>Last Name:</label>
+                        <input class="uk-input" type="text" name="last_name" id="last_name" required>
 
-                        <div class="uk-flex uk-flex-middle">
+                        <label>Age:</label>
+                        <input class="uk-input" type="number" name="age" id="age" required>
 
-                            <div class="profile-upload-container uk-width-1@s " style="padding: 25px; ">
+                        <label>Gender:</label>
+                        <select class="uk-select" name="gender" id="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
 
+                        <label>Profile Picture:</label>
+                        <input class="uk-input" type="file" name="profile_picture" id="profile_picture_input">
 
-                                <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 150px; height: 150px; display: none;" alt="Profile Photo">
-
-
-                                <div class="uk-flex uk-flex-column uk-margin-left">
-
-                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-
-
-                                    <!-- onclick="document.getElementById('profileUpload').click();" -->
-                                    <button id="profile_picture_input" class="uk-button uk-button-primary uk-margin-small-bottom">Upload Photo</button>
-
-                                    <div class="uk-text-center">
-                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
-                                    </div>
-                                </div>
-
-                                <div class="uk-margin-large-left">
-                                    <h4>Image requirements:</h4>
-                                    <ul class="uk-list">
-                                        <li>1. Min. 400 x 400px</li>
-                                        <li>2. Max. 2MB</li>
-                                        <li>3. Your child's face.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="uk-grid-small" uk-grid>
-
-                            <!--
                         <div class="uk-margin">
                             <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 100px; height: 100px; display: none;">
                         </div>
 
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Profile Picture</label>
-                            <input class="uk-input" type="file" name="profile_picture" id="profile_picture_input">
+                        <div class="uk-margin">
+                            <label>Official Referral:</label>
+                            <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
                         </div>
-                        -->
 
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">First Name</label>
-                                <input class="uk-input" type="text" name="first_name" id="first_name" required>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Last Name</label>
-                                <input class="uk-input" type="text" name="last_name" id="last_name" required>
-                            </div>
-
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Age</label>
-                                <input class="uk-input" type="number" name="age" id="age" required>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Gender</label>
-                                <select class="uk-select" name="gender" id="gender">
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Official Referral</label>
-                                <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Proof of Booking</label>
-                                <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
-
-                            </div>
-
-                            <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                                <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
-                            </div>
-
-
-                            
-                        <div class="uk-width-1@s">
-                            <hr>
-                            <h4>Upload Doctor's Referral </h4>
-                        </div>
-                            
-
-                            <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Referral Type</label>
-                                <select class="uk-select" name="referral_type" id="referral_type_select" required>
-                                    <option value="" disabled selected>Select Referral Type</option>
-                                    <option value="official">Official Referral</option>
-                                    <option value="proof_of_booking">Proof of Booking</option>
-                                </select>
-                            </div>
-
-                            <div class="uk-width-1@s">
-                            <label class="uk-form-label">Upload File</label>
-                            <input  type="file" name="referral_file" id="referral_file_input" required>
-                            </div>
-
-
+                        <div class="uk-margin">
+                            <label>Proof of Booking:</label>
+                            <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
                         </div>
 
 
-                        
-                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
+
+                        <hr>
+                        <h4>Upload Doctor's Referral</h4>
+
+                        <!-- Select Referral Type -->
+                        <label>Referral Type:</label>
+                        <select class="uk-select" name="referral_type" id="referral_type_select" required>
+                            <option value="" disabled selected>Select Referral Type</option>
+                            <option value="official">Official Referral</option>
+                            <option value="proof_of_booking">Proof of Booking</option>
+                        </select>
+
+                        <!-- Upload Referral File -->
+                        <label>Upload File:</label>
+                        <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required>
+
+                        <!-- Submit Button -->
                         <button class="uk-button uk-button-primary uk-margin-top" type="button" id="uploadReferralBtn">
                             Upload Referral
                         </button>
 
-                        </div>
                     </form>
-
-
                 </div>
             </div>
 
-
-
             <!-- Book Appointment -->
-            <div id="book-appointment" style="display: none;" class="section uk-width-1-1 uk-width-4-5@m uk-padding">
+            <div id="book-appointment" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Book Appointment</h1>
-
+                <div class="uk-card uk-card-default uk-card-body">
+                    <iframe id="appointmentFormFrame" src="../Appointments/book_appointment_form.php" style="width: 100%; height: 800px; border: none;">
+                    </iframe>
+                </div>
             </div>
 
             <!--Account Details Card-->
@@ -453,7 +378,6 @@ $stmt->close();
 
                 <div class="uk-card uk-card-default uk-card-body">
                     <h3 class="uk-card-title uk-text-bold">User Details</h3>
-
                     <form class="uk-grid-small" uk-grid>
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">First Name</label>
@@ -472,7 +396,6 @@ $stmt->close();
                             <input class="uk-input" type="tel" value="<?php echo $phoneNumber; ?>" disabled>
                         </div>
                     </form>
-
                 </div>
             </div>
 
@@ -485,8 +408,6 @@ $stmt->close();
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="upload_profile_picture">
-
-                        <!---->
                         <div class="uk-flex uk-flex-middle">
                             <div class="profile-upload-container">
                                 <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
@@ -507,8 +428,6 @@ $stmt->close();
                                 </div>
                             </div>
                         </div>
-
-                        <!---->
                         <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
                     </form>
                 </div>
@@ -534,9 +453,9 @@ $stmt->close();
                         </div>
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"
-                                value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>">
-                            <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
+                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
+       value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>"  >
+                        <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
                         </div>
                         <small style="color: red;" class="error-message" data-error="duplicate"></small>
                         <small style="color: green;" class="error-message" id="successMessage"></small>
@@ -544,10 +463,8 @@ $stmt->close();
                             <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
                         </div>
                     </form>
-                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying 
-                    ?>
-                    <?php unset($_SESSION['update_success']); // Clear success message 
-                    ?>
+                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying ?>
+                    <?php unset($_SESSION['update_success']); // Clear success message ?>
                 </div>
             </div>
         </div>
@@ -555,46 +472,46 @@ $stmt->close();
 
     </div>
 
-    <!-- Javascript -->
+                <!-- Javascript -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
+    
 
 </body>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        document.getElementById("settingsvalidate").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent default form submission
+    document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("settingsvalidate").addEventListener("submit", function (event) {
+        event.preventDefault(); // Prevent default form submission
 
-            let formData = new FormData(this);
+        let formData = new FormData(this);
 
-            fetch("../Accounts/manageaccount/updateinfo.php", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    // Clear previous error messages
-                    document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Clear previous error messages
+            document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
 
-                    if (data.errors) {
-                        // Show errors under respective inputs
-                        Object.keys(data.errors).forEach(key => {
-                            let errorElement = document.querySelector(`small[data-error="${key}"]`);
-                            if (errorElement) {
-                                errorElement.textContent = data.errors[key];
-                            }
-                        });
-                    } else if (data.success) {
-                        alert(data.success);
-                        location.reload(); // Reload page on success
+            if (data.errors) {
+                // Show errors under respective inputs
+                Object.keys(data.errors).forEach(key => {
+                    let errorElement = document.querySelector(`small[data-error="${key}"]`);
+                    if (errorElement) {
+                        errorElement.textContent = data.errors[key];
                     }
-                })
-                .catch(error => console.error("Error:", error));
-        });
+                });
+            } else if (data.success) {
+                alert(data.success);
+                location.reload(); // Reload page on success
+            }
+        })
+        .catch(error => console.error("Error:", error));
     });
-
-    document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+});
+        
+        document.querySelector('.sidebar-toggle').addEventListener('click', function() {
         document.querySelector('.sidebar-nav').classList.toggle('uk-open');
     });
 
@@ -621,7 +538,7 @@ $stmt->close();
 
     // APPOINTMENTS SCRIPT
 
-    document.addEventListener("DOMContentLoaded", function() {
+        document.addEventListener("DOMContentLoaded", function() {
         // ✅ Cancel Appointment
         document.querySelectorAll(".cancel-btn").forEach(button => {
             button.addEventListener("click", function() {
@@ -645,42 +562,42 @@ $stmt->close();
                 }).then((result) => {
                     if (result.isConfirmed) {
                         fetch("../Appointments/app_manage/client_edit_appointment.php", {
-                                method: "POST",
-                                headers: {
-                                    "Content-Type": "application/json"
-                                },
-                                body: JSON.stringify({
-                                    appointment_id: appointmentId,
-                                    action: "cancel",
-                                    validation_notes: result.value
-                                })
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                appointment_id: appointmentId,
+                                action: "cancel",
+                                validation_notes: result.value
                             })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.status === "success") {
-                                    Swal.fire({
-                                        title: data.title,
-                                        text: data.message,
-                                        icon: "success",
-                                        confirmButtonText: "OK"
-                                    }).then(() => {
-                                        location.reload(); // Reload after user sees the message
-                                    });
-                                } else {
-                                    Swal.fire({
-                                        title: data.title,
-                                        text: data.message,
-                                        icon: "error"
-                                    });
-                                }
-                            })
-                            .catch(error => {
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === "success") {
                                 Swal.fire({
-                                    title: "Error",
-                                    text: "Something went wrong. Please try again.",
+                                    title: data.title,
+                                    text: data.message,
+                                    icon: "success",
+                                    confirmButtonText: "OK"
+                                }).then(() => {
+                                    location.reload(); // Reload after user sees the message
+                                });
+                            } else {
+                                Swal.fire({
+                                    title: data.title,
+                                    text: data.message,
                                     icon: "error"
                                 });
+                            }
+                        })
+                        .catch(error => {
+                            Swal.fire({
+                                title: "Error",
+                                text: "Something went wrong. Please try again.",
+                                icon: "error"
                             });
+                        });
                     }
                 });
             });
@@ -706,29 +623,64 @@ $stmt->close();
                     }
                 }).then((result) => {
                     fetch("../Appointments/app_manage/client_edit_appointment.php", {
-                            method: "POST",
-                            headers: {
-                                "Content-Type": "application/json"
-                            },
-                            body: JSON.stringify({
-                                appointment_id: appointmentId,
-                                action: "edit",
-                                new_date: result.value.newDate,
-                                new_time: result.value.newTime
-                            })
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            appointment_id: appointmentId,
+                            action: "edit",
+                            new_date: result.value.newDate,
+                            new_time: result.value.newTime
                         })
-                        .then(response => response.json())
-                        .then(data => {
-                            Swal.fire(data.title, data.message, data.status === "success" ? "success" : "error")
-                                .then(() => location.reload());
-                        });
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        Swal.fire(data.title, data.message, data.status === "success" ? "success" : "error")
+                            .then(() => location.reload());
+                    });
                 });
             });
         });
 
+        // Book Appointment Form Submission Handling
+        let appointmentFormFrame = document.getElementById("appointmentFormFrame");
 
-        // REGISTER PATIENT JS
+        appointmentFormFrame.onload = function() {
+            let appointmentForm = appointmentFormFrame.contentDocument.getElementById("appointmentForm");
 
+            if (appointmentForm) {
+                appointmentForm.addEventListener("submit", function (e) {
+                    e.preventDefault();
+
+                    let formData = new FormData(this);
+
+                    fetch("../Appointments/app_process/book_appointment_process.php", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.swal) {
+                            Swal.fire({
+                                title: data.swal.title,
+                                text: data.swal.text,
+                                icon: data.swal.icon,
+                            }).then(() => {
+                                if (data.reload) {
+                                    window.location.reload(true); // Hard reload the page
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+                });
+            }
+        };
+
+    
+    // REGISTER PATIENT JS
+        
         document.getElementById("profile-picture-input").addEventListener("change", function() {
             if (this.files && this.files[0]) {
                 document.getElementById("profile-picture-placeholder").classList.remove("uk-placeholder");
@@ -744,27 +696,27 @@ $stmt->close();
             let formData = new FormData(form);
 
             fetch("../Appointments/patient/patient_manage/register_patient_form.php", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => response.json()) // Parse JSON
-                .then(data => {
-                    if (data.status === "success") {
-                        Swal.fire("Success!", data.message, "success").then(() => {
-                            form.reset();
-                            document.getElementById("file-name-display").textContent = "";
-                        });
-                    } else {
-                        Swal.fire("Error!", data.message, "error");
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    Swal.fire("Error!", "An unexpected error occurred.", "error");
-                });
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json()) // Parse JSON
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire("Success!", data.message, "success").then(() => {
+                        form.reset();
+                        document.getElementById("file-name-display").textContent = "";
+                    });
+                } else {
+                    Swal.fire("Error!", data.message, "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire("Error!", "An unexpected error occurred.", "error");
+            });
         });
 
-
+        
         // VIEW AND EDIT PATIENT JS
 
         let patientDropdown = document.getElementById("patientDropdown");
@@ -778,7 +730,7 @@ $stmt->close();
         let profilePicInput = document.getElementById("profile_picture_input");
         let existingProfilePicInput = document.getElementById("existing_profile_picture");
 
-        patientDropdown.addEventListener("change", function() {
+        patientDropdown.addEventListener("change", function () {
             let patientID = this.value;
             if (!patientID) {
                 editForm.style.display = "none";
@@ -828,11 +780,11 @@ $stmt->close();
         });
 
         // Show preview when selecting a new profile picture
-        profilePicInput.addEventListener("change", function() {
+        profilePicInput.addEventListener("change", function () {
             let file = this.files[0];
             if (file) {
                 let reader = new FileReader();
-                reader.onload = function(e) {
+                reader.onload = function (e) {
                     profilePicPreview.src = e.target.result;
                     profilePicPreview.style.display = "block";
                 };
@@ -841,12 +793,12 @@ $stmt->close();
         });
 
         // Upload Referral Logic
-        document.getElementById("uploadReferralBtn").addEventListener("click", function() {
+        document.getElementById("uploadReferralBtn").addEventListener("click", function () {
             let patientID = document.getElementById("patientDropdown").value;
             let referralType = document.getElementById("referral_type_select").value;
             let referralFile = document.getElementById("referral_file_input").files[0];
 
-            if (!patientID || !referralType || !referralFile) {
+            if (!patientID|| !referralType || !referralFile) {
                 Swal.fire("Error", "Please select a patient, referral type, and upload a file.", "error");
                 return;
             }
@@ -857,22 +809,23 @@ $stmt->close();
             formData.append("referral_file", referralFile);
 
             fetch("../Appointments/patient/patient_data/upload_referral.php", {
-                    method: "POST",
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        Swal.fire("Success!", data.message, "success").then(() => {
-                            location.reload(); // Reload page to update referral display
-                        });
-                    } else {
-                        Swal.fire("Error!", data.message, "error");
-                    }
-                })
-                .catch(error => console.error("Error:", error));
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    Swal.fire("Success!", data.message, "success").then(() => {
+                        location.reload(); // Reload page to update referral display
+                    });
+                } else {
+                    Swal.fire("Error!", data.message, "error");
+                }
+            })
+            .catch(error => console.error("Error:", error));
         });
     });
+
 </script>
 
 </html>

@@ -92,6 +92,8 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
 
             if ($accountType === 'admin') {
                 $redirectURL = '../Dashboards/admindashboard.php';
+            } elseif($accountType === 'head therapist'){
+                $redirectURL = '../Dashboards/headtherapistdashboard.php';
             } elseif ($accountType === 'therapist') {
                 $redirectURL = '../Dashboards/therapistdashboard.php'; // Assuming you have a therapist dashboard
             }elseif ($accountType === 'client'){

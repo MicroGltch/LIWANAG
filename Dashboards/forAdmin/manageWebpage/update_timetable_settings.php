@@ -1,5 +1,5 @@
 <?php
-require_once "../../dbconfig.php";
+require_once "../../../dbconfig.php";
 session_start();
 
 // ✅ Use correct session variable for role

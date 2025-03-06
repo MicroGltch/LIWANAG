@@ -1,12 +1,12 @@
 <?php
-require_once "../../../../dbconfig.php";
+require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Therapists Only
-if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-    header("Location: ../../../loginpage.php");
-    exit();
-}
+// if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
+//     header("Location: ../../../loginpage.php");
+//     exit();
+// }
 
 // ✅ Get `patient_id` from URL instead of `appointment_id`
 $patientID = $_GET['patient_id'] ?? null;
@@ -69,7 +69,7 @@ $service_type = htmlspecialchars($patient['service_type']);
 <body>
     <div class="uk-container uk-margin-top">
         <h2>Rebook Appointment for <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']); ?></h2>
-        <form id="rebookForm" action="../backend/process_rebook.php" method="POST" class="uk-form-stacked">
+        <form id="rebookForm" action="process_rebook.php" method="POST" class="uk-form-stacked">
             <input type="hidden" name="appointment_id" value="<?= $appointmentID; ?>">
             <input type="hidden" name="patient_id" value="<?= $patientID; ?>">
 
@@ -90,7 +90,7 @@ $service_type = htmlspecialchars($patient['service_type']);
 
 
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Rebook Appointment</button>
-            <a href="therapist_dashboard.php" class="uk-button uk-button-default">Cancel</a>
+            <a href="../../Dashboards/therapistdashboard.php" class="uk-button uk-button-default">Cancel</a>
         </form>
     </div>
 
@@ -100,7 +100,7 @@ $service_type = htmlspecialchars($patient['service_type']);
             event.preventDefault();
             let formData = new FormData(this);
 
-            fetch("../backend/process_rebook.php", {
+            fetch("process_rebook.php", {
                 method: "POST",
                 body: formData
             })
