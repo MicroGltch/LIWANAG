@@ -47,24 +47,93 @@ function getDashboardURLSettings($account_Type) {
 
 $dashboardURLSettings = getDashboardURLSettings($account_Type);
 
-// Profile Picture Upload
+// ** Upload Profile Picture **
 if (isset($_POST['action']) && $_POST['action'] === 'upload_profile_picture' && isset($_FILES['profile_picture'])) {
     $file = $_FILES['profile_picture'];
     $filename = uniqid() . '_' . basename($file['name']);
-    $destination = "../../images/profilepictures/" . $filename; // Corrected path
 
+
+    // Define upload path
+    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "/LIWANAG/LIWANAG/uploads/profile_pictures/";
+    $destination = $uploadDir . $filename;
+
+
+    // Ensure directory exists
+    if (!is_dir($uploadDir)) {
+        mkdir($uploadDir, 0777, true);
+    }
+    chmod($uploadDir, 0777);
+
+
+    // Validate file
+    $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif'];
+    $fileExtension = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+
+    if (!in_array($fileExtension, $allowedExtensions)) {
+        echo json_encode(["success" => false, "error" => "Invalid file type."]);
+        exit;
+    }
+
+
+    if ($file['size'] > 2 * 1024 * 1024) { // 2MB limit
+        echo json_encode(["success" => false, "error" => "File size must be < 2MB."]);
+        exit;
+    }
+
+
+    // Move uploaded file
     if (move_uploaded_file($file['tmp_name'], $destination)) {
         $stmt = $connection->prepare("UPDATE users SET profile_picture = ? WHERE account_ID = ?");
         $stmt->bind_param("si", $filename, $userid);
         $stmt->execute();
         $stmt->close();
-        // Success message can be added here.
+
+
+        echo json_encode(["success" => true, "imagePath" => "/LIWANAG/LIWANAG/uploads/profile_pictures/" . $filename]);
     } else {
-        // Error handling can be added here.
+        echo json_encode(["success" => false, "error" => "File upload failed."]);
     }
-    header("Location: ../../Dashboards/clientdashboard.php");
     exit;
 }
+
+
+// ** Remove Profile Picture **
+$data = json_decode(file_get_contents("php://input"), true);
+if (isset($data['action']) && $data['action'] === 'remove_profile_picture') {
+    // Fetch existing profile picture
+    $stmt = $connection->prepare("SELECT profile_picture FROM users WHERE account_ID = ?");
+    $stmt->bind_param("i", $userid);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $stmt->close();
+
+
+    if ($result->num_rows > 0) {
+        $userData = $result->fetch_assoc();
+        $profilePicture = $userData['profile_picture'];
+
+
+        // Delete file if it exists
+        if ($profilePicture && file_exists($_SERVER['DOCUMENT_ROOT'] . "/LIWANAG/LIWANAG/uploads/profile_pictures/" . $profilePicture)) {
+            unlink($_SERVER['DOCUMENT_ROOT'] . "/LIWANAG/LIWANAG/uploads/profile_pictures/" . $profilePicture);
+        }
+
+
+        // Reset profile picture to NULL in the database
+        $stmt = $connection->prepare("UPDATE users SET profile_picture = NULL WHERE account_ID = ?");
+        $stmt->bind_param("i", $userid);
+        $stmt->execute();
+        $stmt->close();
+
+
+        echo json_encode(["success" => true, "imagePath" => "../CSS/default.jpg"]);
+    } else {
+        echo json_encode(["success" => false, "error" => "User not found."]);
+    }
+    exit;
+}
+
 
 // ** Update User Details **
 if (isset($_POST['action']) && $_POST['action'] === 'update_user_details') {
