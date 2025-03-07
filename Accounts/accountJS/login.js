@@ -59,7 +59,7 @@ function validate_password() {
 
 document.addEventListener('DOMContentLoaded', function () {
     const form = document.getElementById('login-form');
-    //const rememberMeCheckbox = document.getElementById('rememberMe'); 
+    const rememberMeCheckbox = document.getElementById('rememberMe'); 
     const emailInput = document.getElementById('login-email'); 
     const passwordInputRemember = document.getElementById('login-pass'); 
 
@@ -106,23 +106,23 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // ✅ Remember Me Functionality (Restored)
-    // rememberMeCheckbox.addEventListener('change', function () {
-    //     if (this.checked) {
-    //         localStorage.setItem('rememberedEmail', emailInput.value);
-    //         localStorage.setItem('rememberedPassword', passwordInputRemember.value);
-    //         localStorage.setItem('remembered', 'true');
-    //     } else {
-    //         localStorage.removeItem('rememberedEmail');
-    //         localStorage.removeItem('rememberedPassword');
-    //         localStorage.removeItem('remembered');
-    //     }
-    // });
+    rememberMeCheckbox.addEventListener('change', function () {
+        if (this.checked) {
+            localStorage.setItem('rememberedEmail', emailInput.value);
+            localStorage.setItem('rememberedPassword', passwordInputRemember.value);
+            localStorage.setItem('remembered', 'true');
+        } else {
+            localStorage.removeItem('rememberedEmail');
+            localStorage.removeItem('rememberedPassword');
+            localStorage.removeItem('remembered');
+        }
+    });
 
-    // // ✅ Load Saved Credentials If "Remember Me" was checked
-    // const isRemembered = localStorage.getItem('remembered');
-    // if (isRemembered === 'true') {
-    //     rememberMeCheckbox.checked = true;
-    //     emailInput.value = localStorage.getItem('rememberedEmail');
-    //     passwordInputRemember.value = localStorage.getItem('rememberedPassword');
-    // }
+    // ✅ Load Saved Credentials If "Remember Me" was checked
+    const isRemembered = localStorage.getItem('remembered');
+    if (isRemembered === 'true') {
+        rememberMeCheckbox.checked = true;
+        emailInput.value = localStorage.getItem('rememberedEmail');
+        passwordInputRemember.value = localStorage.getItem('rememberedPassword');
+    }
 });

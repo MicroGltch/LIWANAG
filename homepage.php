@@ -156,7 +156,7 @@ $stmt->close();
 
                     <div>
                         <?php if (isset($_SESSION['account_ID'])): ?>
-                            <a href="Appointments/book_appointment_form.php" class="welcome-book" style="color: white;">Book an Appointment</a>
+                            <a href="Dashboards/clientdashboard.php#book-appointment" class="welcome-book" style="color: white;">Book an Appointment</a>
                         <?php else: ?>
                             <button class="welcome-book" style="color: white;">Book an Appointment</button>
                         <?php endif; ?>
