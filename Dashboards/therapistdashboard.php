@@ -27,7 +27,7 @@ if ($result->num_rows > 0) {
     $phoneNumber = $userData['account_PNum'];
     // Determine the profile picture path
     if ($userData['profile_picture']) {
-        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture']; // Corrected path
+        $profilePicture = '../uploads/profile_pictures/' . $userData['profile_picture']; // Corrected path
     } else {
         $profilePicture = '../CSS/default.jpg';
     }
@@ -88,9 +88,9 @@ $stmt->close();
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
                             <li>
-                                <a href="#" class="uk-navbar-item">
-                                    <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
-                                </a>
+                             <a href="#" class="uk-navbar-item">
+                                <img src="<?php echo $profilePicture . '?t=' . time(); ?>" alt="Profile" class="navbar-profile-pic profile-image">                               
+                             </a>
                             </li>
                             <li style="display: flex; align-items: center;">
                         <?php
@@ -269,11 +269,11 @@ $stmt->close();
                         <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                             <div class="uk-flex uk-flex-column uk-margin-left">
                             <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
-                                <div class="uk-text-center">
+                            <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton">
+    Upload Photo
+</button>                                <div class="uk-text-center">
                                     <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
                                 </div>
-
                             </div>
                             <div class="uk-margin-large-left">
                                 <h4>Image requirements:</h4>
@@ -285,7 +285,6 @@ $stmt->close();
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
                     </form>
                 </div>
                 <div class="uk-card uk-card-default uk-card-body">
@@ -337,6 +336,61 @@ $stmt->close();
 </body>
 
 <script>
+function removeProfilePhoto() {
+    if (confirm("Are you sure you want to remove your profile picture?")) {
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: JSON.stringify({ action: "remove_profile_picture" }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector('.profile-preview').src = '../CSS/default.jpg'; // Set to default image
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let profileUploadInput = document.getElementById("profileUpload");
+    let uploadButton = document.getElementById("uploadButton");
+
+
+    // Click event to open file dialog
+    uploadButton.addEventListener("click", function () {
+        profileUploadInput.click();
+    });
+
+
+    // Auto-upload when a file is selected
+    profileUploadInput.addEventListener("change", function () {
+        let formData = new FormData();
+        formData.append("action", "upload_profile_picture");
+        formData.append("profile_picture", profileUploadInput.files[0]);
+
+
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(".profile-preview").src = data.imagePath; // Update profile image
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+});
+
+
     document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("settingsvalidate").addEventListener("submit", function (event) {
         event.preventDefault(); // Prevent default form submission
@@ -462,10 +516,6 @@ $stmt->close();
             preview.src = reader.result;
         }
         reader.readAsDataURL(event.target.files[0]);
-    }
-
-    function removeProfilePhoto() {
-        document.querySelector('.profile-preview').src = '../CSS/default.jpg';
     }
 
     $(document).ready(function() {

@@ -39,7 +39,7 @@ if (!$isAuthorized) {
 $query = "SELECT a.date, a.time, a.status, a.session_type, 
                  p.first_name AS patient_firstname, p.last_name AS patient_lastname, p.profile_picture AS patient_picture,
                  u.account_FName AS client_firstname, u.account_LName AS client_lastname, u.profile_picture AS client_picture,
-                 dr.official_referral_file, dr.proof_of_booking_file
+                 dr.official_referral_file, dr.proof_of_booking_referral_file
           FROM appointments a
           JOIN patients p ON a.patient_id = p.patient_id
           JOIN users u ON a.account_id = u.account_ID
@@ -59,8 +59,8 @@ if ($result->num_rows === 1) {
         ? "<a href='../uploads/doctors_referrals/{$appointment["official_referral_file"]}' target='_blank'>View Official Referral</a>" 
         : "Not Provided";
 
-    $proofOfBooking = !empty($appointment["proof_of_booking_file"]) 
-        ? "<a href='../uploads/doctors_referrals/{$appointment["proof_of_booking_file"]}' target='_blank'>View Proof of Booking</a>" 
+    $proofOfBooking = !empty($appointment["proof_of_booking_referral_file"]) 
+        ? "<a href='../uploads/doctors_referrals/{$appointment["proof_of_booking_referral_file"]}' target='_blank'>View Proof of Booking</a>" 
         : "Not Provided";
 
     echo json_encode([

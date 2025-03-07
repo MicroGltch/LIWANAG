@@ -139,10 +139,16 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li><a href="../../Dashboards/headtherapistdashboard.php">Dashboard</a></li>
+                    <?php if (strtolower($_SESSION['account_Type']) !== "head therapist") : ?>
                     <li><a href="../../Dashboards/forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
+                    <?php endif; ?>                    
+                    <?php if (strtolower($_SESSION['account_Type']) !== "admin") : ?>
                     <li><a href="manage_appointments.php">View & Manage Appointments</a></li>
+                    <?php endif; ?>                    
                     <li class="uk-active"><a href="view_all_appointments.php">View All Appointments</a></li>
+                    <?php if (strtolower($_SESSION['account_Type']) !== "head therapist") : ?>
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
+                    <?php endif; ?>                    
                 </ul>
             </div>
         </div>
