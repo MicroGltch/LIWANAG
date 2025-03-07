@@ -2,11 +2,11 @@
 require_once "../../dbconfig.php";
 session_start();
 
-// ✅ Restrict Access to Admins & Head Therapists Only
-// if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
-//     header("Location: ../../Accounts/loginpage.php");
-//     exit();
-// }
+//✅ Restrict Access to Admins & Head Therapists Only
+if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
+    header("Location: ../../Accounts/loginpage.php");
+    exit();
+}
 
 // ✅ Fetch appointments with referral information from `doctor_referrals`
 $query = "SELECT a.appointment_id, a.patient_id, a.date, a.time, a.status, 
@@ -17,7 +17,7 @@ $query = "SELECT a.appointment_id, a.patient_id, a.date, a.time, a.status,
                  END AS session_type,
                  dr.referral_type, -- ✅ Fetch referral type
                  dr.official_referral_file, -- ✅ Fetch official referral file
-                 dr.proof_of_booking_file, -- ✅ Fetch proof of booking file
+                 dr.proof_of_booking_referral_file, -- ✅ Fetch proof of booking file
                  p.first_name, p.last_name, p.profile_picture AS patient_picture,
                  u.account_FName AS client_firstname, u.account_LName AS client_lastname, u.profile_picture AS client_picture
           FROM appointments a
@@ -96,9 +96,9 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                 target="_blank" class="uk-button uk-button-secondary">
                                     View Official Referral
                                 </a>
-                            <?php elseif (!empty($appointment['proof_of_booking_file'])): ?>
+                            <?php elseif (!empty($appointment['proof_of_booking_referral_file'])): ?>
                                 <!-- ✅ Show Proof of Booking ONLY if no Official Referral exists -->
-                                <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_file']); ?>" 
+                                <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>" 
                                 target="_blank" class="uk-button uk-button-warning">
                                     View Proof of Booking
                                 </a>
