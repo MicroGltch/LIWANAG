@@ -115,10 +115,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li class="uk-active"><a href="headtherapistdashboard.php">Dashboard</a></li>
-                    <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
                     <li><a href="../Appointments/app_manage/manage_appointments.php">View & Manage Appointments</a></li>
                     <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                 </ul>
             </div>
         </div>
@@ -127,25 +125,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
             <!-- Dashboard Section -->
             <div id="dashboard" class="section">
-                <h1 class="uk-text-bold">Admin Panel</h1>
+                <h1 class="uk-text-bold">Head Therapist Panel</h1>
             </div>
-
-
-            <!--   <div> 
-        <h3>Admin Panel</h3>
-
-            <ul class="uk-list uk-list-divider">
-                <li><a href="../webpage_settings/frontend/timetable_settings.php">Manage Timetable Settings</a></li>
-                <li><a href="../../../../appointments/frontend/manage_appointments.php">View & Manage Appointments</a></li>
-                <li><a href="view_all_appointments.php">View All Appointments</a></li>
-                <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
-            </ul>
-
-        <a href="../../../logout.php" class="uk-button uk-button-danger uk-margin-top">Logout</a>
-    </div>
-
-    <div class="uk-container uk-margin-top">
-        <h2>Appointment Overview</h2> -->
 
             <!-- ✅ Total Appointments Card -->
             <div class="uk-margin-bottom">

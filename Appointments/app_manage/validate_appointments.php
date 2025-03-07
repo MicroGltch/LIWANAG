@@ -162,7 +162,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
     </div>
 
     <!-- Recheck Dashboard Redirect -->
-    <a href="../../accounts/dashboard/headtherapist/frontend/headtherapist_dashboard.php">Back to Dashboard</a></li>
+    <a href="../../Dashboards/headtherapistdashboard.php">Back to Dashboard</a></li>
 </body>
 </html>
 
