@@ -281,8 +281,6 @@ $stmt->close();
 
                 <div class="uk-card uk-card-default uk-card-body">
                     <p>Choose a patient to view.</p>
-
-
                     <select class="uk-select" id="patientDropdown">
                         <option value="" disabled selected>Select a Patient</option>
                         <?php foreach ($patients as $patient): ?>
@@ -292,146 +290,69 @@ $stmt->close();
                         <?php endforeach; ?>
                     </select>
 
-
-
                     <!-- 🔹 Patient Details Form (Initially Hidden) -->
-                    <form id="editPatientForm" class="uk-grid-small uk-grid" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" style="display: none;" uk-grid>
-
-
-
-
+                    <form id="editPatientForm" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
                         <input type="hidden" name="patient_id" id="patient_id">
-
-
-
                         <input type="hidden" name="existing_profile_picture" id="existing_profile_picture"> <!-- Store existing picture -->
 
+                        <label>First Name:</label>
+                        <input class="uk-input" type="text" name="first_name" id="first_name" required>
 
+                        <label>Last Name:</label>
+                        <input class="uk-input" type="text" name="last_name" id="last_name" required>
 
-                        <div class="uk-flex uk-flex-middle">
+                        <label>Age:</label>
+                        <input class="uk-input" type="number" name="age" id="age" required>
 
-                            <div class="profile-upload-container uk-width-1@s " style="padding: 25px; ">
+                        <label>Gender:</label>
+                        <select class="uk-select" name="gender" id="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
 
+                        <label>Profile Picture:</label>
+                        <input class="uk-input" type="file" name="profile_picture" id="profile_picture_input">
 
-                                <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 150px; height: 150px; display: none;" alt="Profile Photo">
-
-
-                                <div class="uk-flex uk-flex-column uk-margin-left">
-
-                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-
-
-                                    <!-- onclick="document.getElementById('profileUpload').click();" -->
-                                    <button id="profile_picture_input" class="uk-button uk-button-primary uk-margin-small-bottom">Upload Photo</button>
-
-                                    <div class="uk-text-center">
-                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
-                                    </div>
-                                </div>
-
-                                <div class="uk-margin-large-left">
-                                    <h4>Image requirements:</h4>
-                                    <ul class="uk-list">
-                                        <li>1. Min. 400 x 400px</li>
-                                        <li>2. Max. 2MB</li>
-                                        <li>3. Your child's face.</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="uk-grid-small" uk-grid>
-
-                            <!--
                         <div class="uk-margin">
                             <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 100px; height: 100px; display: none;">
                         </div>
 
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Profile Picture</label>
-                            <input class="uk-input" type="file" name="profile_picture" id="profile_picture_input">
+                        <div class="uk-margin">
+                            <label>Official Referral:</label>
+                            <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
                         </div>
-                        -->
 
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">First Name</label>
-                                <input class="uk-input" type="text" name="first_name" id="first_name" required>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Last Name</label>
-                                <input class="uk-input" type="text" name="last_name" id="last_name" required>
-                            </div>
-
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Age</label>
-                                <input class="uk-input" type="number" name="age" id="age" required>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Gender</label>
-                                <select class="uk-select" name="gender" id="gender">
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Official Referral</label>
-                                <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Proof of Booking</label>
-                                <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
-
-                            </div>
-
-                            <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                                <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
-                            </div>
-
-
-                            
-                        <div class="uk-width-1@s">
-                            <hr>
-                            <h4>Upload Doctor's Referral </h4>
-                        </div>
-                            
-
-                            <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Referral Type</label>
-                                <select class="uk-select" name="referral_type" id="referral_type_select" required>
-                                    <option value="" disabled selected>Select Referral Type</option>
-                                    <option value="official">Official Referral</option>
-                                    <option value="proof_of_booking">Proof of Booking</option>
-                                </select>
-                            </div>
-
-                            <div class="uk-width-1@s">
-                            <label class="uk-form-label">Upload File</label>
-                            <input  type="file" name="referral_file" id="referral_file_input" required>
-                            </div>
-
-
+                        <div class="uk-margin">
+                            <label>Proof of Booking:</label>
+                            <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
                         </div>
 
 
-                        
-                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
+
+                        <hr>
+                        <h4>Upload Doctor's Referral</h4>
+
+                        <!-- Select Referral Type -->
+                        <label>Referral Type:</label>
+                        <select class="uk-select" name="referral_type" id="referral_type_select" required>
+                            <option value="" disabled selected>Select Referral Type</option>
+                            <option value="official">Official Referral</option>
+                            <option value="proof_of_booking">Proof of Booking</option>
+                        </select>
+
+                        <!-- Upload Referral File -->
+                        <label>Upload File:</label>
+                        <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required>
+
+                        <!-- Submit Button -->
                         <button class="uk-button uk-button-primary uk-margin-top" type="button" id="uploadReferralBtn">
                             Upload Referral
                         </button>
 
-                        </div>
                     </form>
-
-
                 </div>
             </div>
-
 
             <!-- Book Appointment -->
             <div id="book-appointment" class="section" style="display: none;">

@@ -51,8 +51,22 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Validate Appointments</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.9.6/css/uikit.min.css">
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+        <!-- Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- UIkit Library -->
+    <link rel="stylesheet" href="../../CSS/uikit-3.22.2/css/uikit.min.css" />
+    <script src="../../CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="../../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- LIWANAG CSS -->
+    <link rel="stylesheet" href="../../CSS/style.css" type="text/css" />
 </head>
 <body>
     <div class="uk-container uk-margin-top">
