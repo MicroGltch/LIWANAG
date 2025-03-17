@@ -288,39 +288,43 @@ $stmt->close();
                     </form>
                 </div>
                 <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
+                <h3 class="uk-card-title uk-text-bold">User Details</h3>
+                <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
                     <input type="hidden" name="action" value="update_user_details">
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>">
-                            <small style="color: red;" class="error-message" data-error="firstName"></small>
-                        </div>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>">
-                            <small style="color: red;" class="error-message" data-error="lastName"></small>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>">
-                            <small style="color: red;" class="error-message" data-error="email"></small>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
-       value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>"  >
+                    
+                    <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">First Name</label>
+                        <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>" disabled>
+                        <small style="color: red;" class="error-message" data-error="firstName"></small>
+                    </div>
+                    <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Last Name</label>
+                        <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>" disabled>
+                        <small style="color: red;" class="error-message" data-error="lastName"></small>
+                    </div>
+                    <div class="uk-width-1-1">
+                        <label class="uk-form-label">Email</label>
+                        <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>" disabled>
+                        <small style="color: red;" class="error-message" data-error="email"></small>
+                    </div>
+                    <div class="uk-width-1-1">
+                        <label class="uk-form-label">Phone Number</label>
+                        <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
+                        value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>" disabled>
                         <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
-                        </div>
-                        <small style="color: red;" class="error-message" data-error="duplicate"></small>
-                        <small style="color: green;" class="error-message" id="successMessage"></small>
-                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
-                        </div>
-                    </form>
-                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying ?>
-                    <?php unset($_SESSION['update_success']); // Clear success message ?>
-                </div>
+                    </div>
+
+                    <small style="color: red;" class="error-message" data-error="duplicate"></small>
+                    <small style="color: green;" class="error-message" id="successMessage"></small>
+
+                    <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                        <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                        <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
+                    </div>
+                </form>
+                <?php unset($_SESSION['update_errors']); ?>
+                <?php unset($_SESSION['update_success']); ?>
+            </div>
             </div>
         
             <div id="tablePagination" class="uk-margin uk-flex uk-flex-center"></div> <!-- Pagination -->
@@ -336,6 +340,35 @@ $stmt->close();
 </body>
 
 <script>
+   document.addEventListener("DOMContentLoaded", function () {
+        const editButton = document.getElementById("editButton");
+        const saveButton = document.getElementById("saveButton");
+        const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
+
+        // Store initial values
+        let originalValues = {};
+        inputs.forEach(input => originalValues[input.id] = input.value);
+
+        editButton.addEventListener("click", function () {
+            const isDisabled = inputs[0].disabled;
+
+            if (isDisabled) {
+                // Enable inputs for editing
+                inputs.forEach(input => input.disabled = false);
+                saveButton.disabled = false;
+                editButton.textContent = "Cancel";
+            } else {
+                // Reset inputs to original values and disable editing
+                inputs.forEach(input => {
+                    input.value = originalValues[input.id];
+                    input.disabled = true;
+                });
+                saveButton.disabled = true;
+                editButton.textContent = "Edit";
+            }
+        });
+    });
+
 function removeProfilePhoto() {
     if (confirm("Are you sure you want to remove your profile picture?")) {
         fetch("../Accounts/manageaccount/updateinfo.php", {

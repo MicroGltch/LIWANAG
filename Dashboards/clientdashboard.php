@@ -24,7 +24,7 @@ if ($result->num_rows > 0) {
     $phoneNumber = $userData['account_PNum'];
     // Determine the profile picture path
     if ($userData['profile_picture']) {
-        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture']; // Corrected path
+        $profilePicture = '../uploads/profile_pictures/' . $userData['profile_picture']; // Corrected path
     } else {
         $profilePicture = '../CSS/default.jpg';
     }
@@ -91,7 +91,6 @@ $stmt->close();
     <script>
         console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
     </script>
-
     <!-- Navbar -->
     <nav class="uk-navbar-container logged-in">
         <div class="uk-container">
@@ -110,7 +109,7 @@ $stmt->close();
                     <ul class="uk-navbar-nav">
                         <li>
                             <a href="#" class="uk-navbar-item">
-                                <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
+                            <img src="<?php echo $profilePicture . '?t=' . time(); ?>" alt="Profile" class="navbar-profile-pic profile-image">                               
                             </a>
                         </li>
                         <li style="display: flex; align-items: center;">
@@ -399,75 +398,75 @@ $stmt->close();
             </div>
 
 
-            <!-- Settings -->
-            <div id="settings" class="section" style="display: none;">
+             <!-- Settings -->
+             <div id="settings" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Settings</h1>
-
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="action" value="upload_profile_picture">
-                        <div class="uk-flex uk-flex-middle">
-                            <div class="profile-upload-container">
-                                <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
-                                <div class="uk-flex uk-flex-column uk-margin-left">
-                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                    <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
-                                    <div class="uk-text-center">
-                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
-                                    </div>
-                                </div>
-                                <div class="uk-margin-large-left">
-                                    <h4>Image requirements:</h4>
-                                    <ul class="uk-list">
-                                        <li>1. Min. 400 x 400px</li>
-                                        <li>2. Max. 2MB</li>
-                                        <li>3. Your face</li>
-                                    </ul>
+                    <input type="hidden" name="action" value="upload_profile_picture">
+                    <div class="uk-flex uk-flex-middle">
+                        <div class="profile-upload-container">
+                        <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
+                            <div class="uk-flex uk-flex-column uk-margin-left">
+                            <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
+                            <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton">
+    Upload Photo
+</button>                                <div class="uk-text-center">
+                                    <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
                                 </div>
                             </div>
+                            <div class="uk-margin-large-left">
+                                <h4>Image requirements:</h4>
+                                <ul class="uk-list">
+                                    <li>1. Min. 400 x 400px</li>
+                                    <li>2. Max. 2MB</li>
+                                    <li>3. Your face</li>
+                                </ul>
+                            </div>
                         </div>
-                        <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
+                    </div>
                     </form>
                 </div>
 
                 <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
-                        <input type="hidden" name="action" value="update_user_details">
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>">
-                            <small style="color: red;" class="error-message" data-error="firstName"></small>
-                        </div>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>">
-                            <small style="color: red;" class="error-message" data-error="lastName"></small>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>">
-                            <small style="color: red;" class="error-message" data-error="email"></small>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
-                            value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>"  >
+                <h3 class="uk-card-title uk-text-bold">User Details</h3>
+                <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
+                    <input type="hidden" name="action" value="update_user_details">
+                    
+                    <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">First Name</label>
+                        <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>" disabled>
+                        <small style="color: red;" class="error-message" data-error="firstName"></small>
+                    </div>
+                    <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Last Name</label>
+                        <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>" disabled>
+                        <small style="color: red;" class="error-message" data-error="lastName"></small>
+                    </div>
+                    <div class="uk-width-1-1">
+                        <label class="uk-form-label">Email</label>
+                        <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>" disabled>
+                        <small style="color: red;" class="error-message" data-error="email"></small>
+                    </div>
+                    <div class="uk-width-1-1">
+                        <label class="uk-form-label">Phone Number</label>
+                        <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
+                        value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>" disabled>
                         <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
-                        </div>
-                        <small style="color: red;" class="error-message" data-error="duplicate"></small>
-                        <small style="color: green;" class="error-message" id="successMessage"></small>
-                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
-                        </div>
-                    </form>
-                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying ?>
-                    <?php unset($_SESSION['update_success']); // Clear success message ?>
-                </div>
+                    </div>
+
+                    <small style="color: red;" class="error-message" data-error="duplicate"></small>
+                    <small style="color: green;" class="error-message" id="successMessage"></small>
+
+                    <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                        <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                        <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
+                    </div>
+                </form>
+                <?php unset($_SESSION['update_errors']); ?>
+                <?php unset($_SESSION['update_success']); ?>
             </div>
-        </div>
-    </div>
 
     </div>
 
@@ -478,6 +477,89 @@ $stmt->close();
 </body>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const editButton = document.getElementById("editButton");
+        const saveButton = document.getElementById("saveButton");
+        const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
+
+        // Store initial values
+        let originalValues = {};
+        inputs.forEach(input => originalValues[input.id] = input.value);
+
+        editButton.addEventListener("click", function () {
+            const isDisabled = inputs[0].disabled;
+
+            if (isDisabled) {
+                // Enable inputs for editing
+                inputs.forEach(input => input.disabled = false);
+                saveButton.disabled = false;
+                editButton.textContent = "Cancel";
+            } else {
+                // Reset inputs to original values and disable editing
+                inputs.forEach(input => {
+                    input.value = originalValues[input.id];
+                    input.disabled = true;
+                });
+                saveButton.disabled = true;
+                editButton.textContent = "Edit";
+            }
+        });
+    });
+
+    function removeProfilePhoto() {
+    if (confirm("Are you sure you want to remove your profile picture?")) {
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: JSON.stringify({ action: "remove_profile_picture" }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector('.profile-preview').src = '../CSS/default.jpg'; // Set to default image
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    }
+}
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    let profileUploadInput = document.getElementById("profileUpload");
+    let uploadButton = document.getElementById("uploadButton");
+
+
+    // Click event to open file dialog
+    uploadButton.addEventListener("click", function () {
+        profileUploadInput.click();
+    });
+
+
+    // Auto-upload when a file is selected
+    profileUploadInput.addEventListener("change", function () {
+        let formData = new FormData();
+        formData.append("action", "upload_profile_picture");
+        formData.append("profile_picture", profileUploadInput.files[0]);
+
+
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector(".profile-preview").src = data.imagePath; // Update profile image
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
+});
+
     document.addEventListener("DOMContentLoaded", function () {
     document.getElementById("settingsvalidate").addEventListener("submit", function (event) {
         event.preventDefault(); // Prevent default form submission
