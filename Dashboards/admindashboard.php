@@ -140,12 +140,13 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                    <li><a href="#Accounts" onclick="showSection('Accounts')">Accounts</a></li>
                     <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
                     <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                     <li><a href="">System Analytics</a></li>
                     <li><a href="">Manage Website Contents</a></li>
-                    <li><a href="#account-details" onclick="showSection('account-details')">Account</a></li>
+                    <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
             </div>
@@ -237,6 +238,57 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </script>
             </div>
 
+            <!-- Accounts Section -->
+            <div id="Accounts" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Accounts</h1>
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <div class="uk-overflow-auto">
+                        <table id="accountsTable" class="uk-table uk-table-striped uk-table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="uk-table-shrink">Name <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Service Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Assigned Therapist <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Guardian <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Content -->
+                            </tbody>
+                        </table>
+
+                        <script>
+                            $(document).ready(function() {
+                                $('#accountsTable').DataTable({
+                                    pageLength: 10,
+                                    lengthMenu: [10, 25, 50],
+                                    order: [
+                                        [0, 'asc']
+                                    ], // Sort by name column by default
+                                    language: {
+                                        lengthMenu: "Show _MENU_ entries per page",
+                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                        search: "Search:",
+                                        paginate: {
+                                            first: "First",
+                                            last: "Last",
+                                            next: "Next",
+                                            previous: "Previous"
+                                        }
+                                    },
+                                    columnDefs: [{
+                                            orderable: true,
+                                            targets: '_all'
+                                        } // Make all columns sortable
+                                    ]
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
 
             <!-- Account Details Section -->
             <div id="account-details" class="section" style="display: none;">

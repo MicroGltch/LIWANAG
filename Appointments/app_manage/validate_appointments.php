@@ -76,17 +76,57 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        .action-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 10px; /* Add spacing between buttons */
-        }
-
         .action-btn {
             width: 120px; /* Set a fixed width for consistency */
             text-align: center; /* Center the text */
             margin: 0 auto; /* Center the button within the container */
             border-radius: 8px; /* Make the buttons rounded */
+        }
+
+        .uk-button-secondary,
+        .uk-button-warning {
+            border-radius: 8px;
+            padding: 0 15px;
+            min-width: 160px;
+            margin: 5px 0;
+        }
+
+        .uk-button-secondary:hover,
+        .uk-button-warning:hover {
+            transform: translateY(-1px);
+            transition: transform 0.2s;
+        }
+
+        /* Updated action button styles */
+        .action-btn {
+            width: 120px;
+            text-align: center;
+            margin: 5px 0;
+            border-radius: 8px;
+            display: block;
+        }
+
+        td .action-btn:first-child {
+            margin-top: 0;
+        }
+
+        td .action-btn:last-child {
+            margin-bottom: 0;
+        }
+
+        /* Keep existing referral button styles */
+        .uk-button-secondary,
+        .uk-button-warning {
+            border-radius: 8px;
+            padding: 0 15px;
+            min-width: 160px;
+            margin: 5px 0;
+        }
+
+        .uk-button-secondary:hover,
+        .uk-button-warning:hover {
+            transform: translateY(-1px);
+            transition: transform 0.2s;
         }
     </style>
 </head>
@@ -178,7 +218,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                         </a>
                                     <?php elseif (!empty($appointment['proof_of_booking_referral_file'])): ?>
                                         <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>"
-                                            target="_blank" class="uk-button uk-button-warning">
+                                            target="_blank" class="uk-button uk-button-secondary">
                                             View Proof of Booking
                                         </a>
                                     <?php else: ?>
