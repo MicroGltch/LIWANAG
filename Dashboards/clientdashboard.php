@@ -44,7 +44,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $appointments = $result->fetch_all(MYSQLI_ASSOC);
 
-// EDIT PATIENT FORM PHP from edit_patient_form
+// EDIT PATIENT FORM
 // Fetch patients for the dropdown
 $patientsQuery = "SELECT patient_id, first_name, last_name FROM patients WHERE account_id = ?";
 $stmt = $connection->prepare($patientsQuery);
@@ -241,8 +241,8 @@ $stmt->close();
                             <input class="uk-input" type="text" name="patient_lname" required>
                         </div>
                         <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Age</label>
-                            <input class="uk-input" type="number" name="patient_age" required>
+                            <label class="uk-form-label">Birthday</label>
+                            <input class="uk-input" type="date" name="patient_birthday" id="patient_birthday" min="2008-01-01" max="2024-12-31" required>
                         </div>
 
                         <div class="uk-width-1-2@s">
@@ -289,7 +289,7 @@ $stmt->close();
                             </option>
                         <?php endforeach; ?>
                     </select>
-
+                    <hr>
                     <!-- 🔹 Patient Details Form (Initially Hidden) -->
                     <form id="editPatientForm" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
                         <input type="hidden" name="patient_id" id="patient_id">
@@ -301,8 +301,8 @@ $stmt->close();
                         <label>Last Name:</label>
                         <input class="uk-input" type="text" name="last_name" id="last_name" required>
 
-                        <label>Age:</label>
-                        <input class="uk-input" type="number" name="age" id="age" required>
+                        <label>Birthday:</label>
+                        <input class="uk-input" type="date" name="bday" id="bday" min="2008-01-01" max="2024-12-31" required>
 
                         <label>Gender:</label>
                         <select class="uk-select" name="gender" id="gender">
@@ -312,10 +312,33 @@ $stmt->close();
 
                         <label>Profile Picture:</label>
                         <input class="uk-input" type="file" name="profile_picture" id="profile_picture_input">
-
+                        
                         <div class="uk-margin">
                             <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 100px; height: 100px; display: none;">
                         </div>
+
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Changes</button>
+                        <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button">Edit</button>
+                    </form>
+
+                    <!-- 🔹 Referral Upload Form -->
+                    <form id="uploadReferralForm" action="../Appointments/patient/patient_data/upload_referral_process.php" method="POST" enctype="multipart/form-data">
+                        <input type="hidden" name="patient_id" id="referral_patient_id">
+                        <h4>Upload Doctor's Referral</h4>
+
+                        <label>Referral Type:</label>
+                        <select class="uk-select" name="referral_type" id="referral_type_select" required>
+                            <option value="" disabled selected>Select Referral Type</option>
+                            <option value="official">Official Referral</option>
+                            <option value="proof_of_booking">Proof of Booking</option>
+                        </select>
+
+                        <label>Upload File:</label>
+                        <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required>
+
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">
+                            Upload Referral
+                        </button>
 
                         <div class="uk-margin">
                             <label>Official Referral:</label>
@@ -326,30 +349,6 @@ $stmt->close();
                             <label>Proof of Booking:</label>
                             <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
                         </div>
-
-
-                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
-
-                        <hr>
-                        <h4>Upload Doctor's Referral</h4>
-
-                        <!-- Select Referral Type -->
-                        <label>Referral Type:</label>
-                        <select class="uk-select" name="referral_type" id="referral_type_select" required>
-                            <option value="" disabled selected>Select Referral Type</option>
-                            <option value="official">Official Referral</option>
-                            <option value="proof_of_booking">Proof of Booking</option>
-                        </select>
-
-                        <!-- Upload Referral File -->
-                        <label>Upload File:</label>
-                        <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required>
-
-                        <!-- Submit Button -->
-                        <button class="uk-button uk-button-primary uk-margin-top" type="button" id="uploadReferralBtn">
-                            Upload Referral
-                        </button>
-
                     </form>
                 </div>
             </div>
@@ -454,7 +453,7 @@ $stmt->close();
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Phone Number</label>
                             <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
-       value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>"  >
+                            value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>"  >
                         <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
                         </div>
                         <small style="color: red;" class="error-message" data-error="duplicate"></small>
@@ -695,89 +694,157 @@ $stmt->close();
             let form = document.getElementById("patientRegistrationForm");
             let formData = new FormData(form);
 
-            fetch("../Appointments/patient/patient_manage/register_patient_form.php", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json()) // Parse JSON
-            .then(data => {
-                if (data.status === "success") {
-                    Swal.fire("Success!", data.message, "success").then(() => {
-                        form.reset();
-                        document.getElementById("file-name-display").textContent = "";
+            let firstName = formData.get("patient_fname");
+            let lastName = formData.get("patient_lname");
+            let birthday = formData.get("patient_birthday");
+            let gender = formData.get("patient_gender");
+            let file = formData.get("profile_picture") ? formData.get("profile_picture").name : "No file selected";
+
+            Swal.fire({
+                title: "Confirm Registration",
+                html: `
+                    <strong>First Name:</strong> ${firstName} <br/>
+                    <strong>Last Name:</strong> ${lastName} <br/>
+                    <strong>Birthday:</strong> ${birthday} <br/>
+                    <strong>Gender:</strong> ${gender} <br/>
+                    <strong>Profile Picture:</strong> ${file} <br/>
+                `,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Submit",
+                cancelButtonText: "Cancel",
+                confirmButtonColor: "#28a745", 
+                cancelButtonColor: "#dc3545" 
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with form submission
+                    fetch("../Appointments/patient/patient_manage/register_patient_form.php", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json()) // Parse JSON
+                    .then(data => {
+                        if (data.status === "success") {
+                            Swal.fire("Success!", data.message, "success").then(() => {
+                                form.reset();
+                                document.getElementById("file-name-display").textContent = "";
+
+                                // Hard reload the page
+                                location.reload(true);
+
+                                // Optional: Scroll to the registered patients section after reload
+                                setTimeout(() => {
+                                    window.location.href = "#view-registered-patients"; // Adjust the ID accordingly
+                                }, 500);
+                            });
+                        } else {
+                            Swal.fire("Error!", data.message, "error");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        Swal.fire("Error!", "An unexpected error occurred.", "error");
                     });
-                } else {
-                    Swal.fire("Error!", data.message, "error");
                 }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                Swal.fire("Error!", "An unexpected error occurred.", "error");
             });
         });
 
-        
-        // VIEW AND EDIT PATIENT JS
+    // VIEW AND EDIT PATIENT JS
 
         let patientDropdown = document.getElementById("patientDropdown");
         let editForm = document.getElementById("editPatientForm");
         let patientIDInput = document.getElementById("patient_id");
         let firstNameInput = document.getElementById("first_name");
         let lastNameInput = document.getElementById("last_name");
-        let ageInput = document.getElementById("age");
+        let birthdayInput = document.getElementById("bday");
         let genderInput = document.getElementById("gender");
         let profilePicPreview = document.getElementById("profile_picture_preview");
         let profilePicInput = document.getElementById("profile_picture_input");
         let existingProfilePicInput = document.getElementById("existing_profile_picture");
+        let editPatientBtn = document.getElementById("editPatientBtn");
+        let saveProfileChangesBtn = document.querySelector("#editPatientForm button[type='submit']");
+        
+        // Referral Section
+        let uploadReferralSection = document.getElementById("uploadReferralForm");
+        // Initially hide referral section
+        uploadReferralSection.style.display = "none";
 
+        // Initially disable form fields
+        function toggleFormInputs(disable) {
+            firstNameInput.disabled = disable;
+            lastNameInput.disabled = disable;
+            birthdayInput.disabled = disable;
+            genderInput.disabled = disable;
+            profilePicInput.disabled = disable;
+            saveProfileChangesBtn.style.display = disable ? "none" : "inline-block"; // Hide "Save" when disabled
+        }
+        
+        // Load patient details when selecting from dropdown
         patientDropdown.addEventListener("change", function () {
             let patientID = this.value;
             if (!patientID) {
                 editForm.style.display = "none";
+                uploadReferralSection.style.display = "none"; // Hide referral section when no patient is selected
                 return;
             }
 
             fetch("../Appointments/patient/patient_data/fetch_patient_details.php?patient_id=" + patientID)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        patientIDInput.value = data.patient.patient_id;
-                        firstNameInput.value = data.patient.first_name;
-                        lastNameInput.value = data.patient.last_name;
-                        ageInput.value = data.patient.age;
-                        genderInput.value = data.patient.gender;
-                        existingProfilePicInput.value = data.patient.profile_picture;
+            .then(response => response.json())
+            .then(data => {
+                console.log("Fetched Data:", data); // Debugging
+                if (data.status === "success") {
 
-                        if (data.patient.profile_picture) {
-                            profilePicPreview.src = "../uploads/profile_pictures/" + data.patient.profile_picture;
-                            profilePicPreview.style.display = "block";
-                        } else {
-                            profilePicPreview.style.display = "none";
-                        }
-
-                        // Display latest referral details
-                        if (data.latest_referrals.official) {
-                            document.getElementById("official_referral_link").href = "../uploads/doctors_referrals/" + data.latest_referrals.official.official_referral_file;
-                            document.getElementById("official_referral_link").style.display = "block";
-                        } else {
-                            document.getElementById("official_referral_link").style.display = "none";
-                        }
-
-                        if (data.latest_referrals.proof_of_booking) {
-                            document.getElementById("proof_of_booking_link").href = "../uploads/doctors_referrals/" + data.latest_referrals.proof_of_booking.proof_of_booking_referral_file;
-                            document.getElementById("proof_of_booking_link").style.display = "block";
-                        } else {
-                            document.getElementById("proof_of_booking_link").style.display = "none";
-                        }
-
-                        editForm.style.display = "block";
+                    console.log("Received birthday:", data.patient.bday); // Debugging
+                    if (!data.patient.bday || data.patient.bday.trim() === "" || data.patient.bday === "0000-00-00") {
+                        birthdayInput.value = ""; // Ensure it's empty
+                        birthdayInput.placeholder = "mm/dd/yyyy"; // Set a placeholder
                     } else {
-                        editForm.style.display = "none";
-                        Swal.fire("Error", "Patient details could not be loaded.", "error");
+                        birthdayInput.value = data.patient.bday;
                     }
-                })
-                .catch(error => console.error("Error fetching patient details:", error));
+
+                    patientIDInput.value = data.patient.patient_id;
+                    firstNameInput.value = data.patient.first_name;
+                    lastNameInput.value = data.patient.last_name;
+                    genderInput.value = data.patient.gender;
+                    existingProfilePicInput.value = data.patient.profile_picture;
+
+                    if (data.patient.profile_picture) {
+                        profilePicPreview.src = "../uploads/profile_pictures/" + data.patient.profile_picture;
+                        profilePicPreview.style.display = "block";
+                    } else {
+                        profilePicPreview.style.display = "none";
+                    }
+
+                    // Disable form inputs initially
+                    toggleFormInputs(true);
+                    editForm.style.display = "block";
+                    uploadReferralSection.style.display = "block"; 
+                } else {
+                    editForm.style.display = "none";
+                    uploadReferralSection.style.display = "none"; 
+                    Swal.fire("Error", "Patient details could not be loaded.", "error");
+                }
+            })
+            .catch(error => console.error("Error fetching patient details:", error));
         });
+
+        // Toggle edit mode when clicking "Edit" button
+        editPatientBtn.addEventListener("click", function () {
+            let isDisabled = firstNameInput.disabled;
+            toggleFormInputs(!isDisabled);
+            
+            // Change button text to "Save" if enabling edit mode
+            editPatientBtn.textContent = isDisabled ? "Cancel" : "Edit";
+            
+            // Show/hide "Save" button
+            saveProfileChangesBtn.style.display = isDisabled ? "inline-block" : "none";
+
+            // If canceling, reload patient details to reset changes
+            if (!isDisabled) {
+                patientDropdown.dispatchEvent(new Event("change"));
+            }
+        });
+
 
         // Show preview when selecting a new profile picture
         profilePicInput.addEventListener("change", function () {

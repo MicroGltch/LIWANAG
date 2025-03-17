@@ -3,7 +3,7 @@ require_once "../dbconfig.php";
 session_start();
 
 // ✅ Ensure only Admins & Head Therapists can access
-if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
+if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin"])) {
     header("Location: ../Accounts/loginpage.php");
     exit();
 }
@@ -117,7 +117,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <li class="uk-active"><a href="admindashboard.php">Dashboard</a></li>
                     <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
                     <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
+                    <li><a href="forAdmin/add_therapist.php">Manage Therapists (Adding Only)</a></li>
                 </ul>
             </div>
         </div>

@@ -10,8 +10,14 @@ if (!isset($_SESSION['account_ID']) || !isset($_GET['patient_id'])) {
 $patientID = $_GET['patient_id'];
 $accountID = $_SESSION['account_ID'];
 
-// ✅ Fetch patient details
-$query = "SELECT patient_id, first_name, last_name, age, gender, profile_picture FROM patients WHERE patient_id = ? AND account_id = ?";
+// ✅ Fetch patient details (Fixes `0000-00-00` issue)
+$query = "SELECT patient_id, first_name, last_name, 
+          CASE 
+              WHEN bday = '0000-00-00' THEN NULL 
+              ELSE bday 
+          END AS bday, 
+          gender, profile_picture 
+          FROM patients WHERE patient_id = ? AND account_id = ?";
 $stmt = $connection->prepare($query);
 $stmt->bind_param("ii", $patientID, $accountID);
 $stmt->execute();
@@ -24,6 +30,9 @@ if ($result->num_rows !== 1) {
 
 $patient = $result->fetch_assoc();
 $stmt->close();
+
+// ✅ Convert `0000-00-00` or `NULL` birthdays to an empty string
+$patient['bday'] = (!isset($patient['bday']) || $patient['bday'] === "0000-00-00") ? "" : date('Y-m-d', strtotime($patient['bday']));
 
 // ✅ Fetch latest official referral
 $officialReferralQuery = "SELECT referral_id, official_referral_file, created_at 

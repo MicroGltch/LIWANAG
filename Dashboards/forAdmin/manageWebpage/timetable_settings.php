@@ -98,7 +98,7 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
                     <li><a href="../../admindashboard.php">Dashboard</a></li>
                     <li class="uk-active"><a href="timetable_settings.php">Manage Timetable Settings</a></li>
                     <li><a href="../../../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
+                    <li><a href="../add_therapist.php">Manage Therapists (Adding Only)</a></li>
                 </ul>
             </div>
         </div>

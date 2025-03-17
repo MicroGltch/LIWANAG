@@ -3,7 +3,7 @@ require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Admins, Head Therapists, and Therapists
-if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist", "therapist"])) {
+if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
     header("Location: ../../../loginpage.php");
     exit();
 }
@@ -138,7 +138,17 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li><a href="../../Dashboards/headtherapistdashboard.php">Dashboard</a></li>
+                    <?php
+                    if (isset($_SESSION['account_Type'])) {
+                        $accountType = strtolower($_SESSION['account_Type']);
+                        if ($accountType === "admin") {
+                            $dashboardLink = "../../Dashboards/admindashboard.php";
+                        } elseif ($accountType === "head therapist") {
+                            $dashboardLink = "../../Dashboards/headtherapistdashboard.php";
+                        }
+                    }
+                    ?>
+                    <li><a href="<?= $dashboardLink ?>">Dashboard</a></li>
                     <?php if (strtolower($_SESSION['account_Type']) !== "head therapist") : ?>
                     <li><a href="../../Dashboards/forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
                     <?php endif; ?>                    
@@ -147,7 +157,7 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
                     <?php endif; ?>                    
                     <li class="uk-active"><a href="view_all_appointments.php">View All Appointments</a></li>
                     <?php if (strtolower($_SESSION['account_Type']) !== "head therapist") : ?>
-                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
+                    <li><a href="../../Dashboards/forAdmin/add_therapist.php">Manage Therapists (Adding Only)</a></li>
                     <?php endif; ?>                    
                 </ul>
             </div>
