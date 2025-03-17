@@ -235,6 +235,6 @@ while ($row = $appointment_result->fetch_assoc()) {
 }
 
 // Output PDF
-$pdf->Output('D', "System_Analytics_Report_$start_date$end_date.pdf");
+$pdf->Output('D', "System_Analytics_Report_{$start_date}_to_{$end_date}.pdf");
 
 ?>
