@@ -8,6 +8,31 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
     exit();
 }
 
+$userid = $_SESSION['account_ID'];
+
+$stmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
+$stmt->bind_param("s", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $userData = $result->fetch_assoc();
+    $firstName = $userData['account_FName'];
+    $lastName = $userData['account_LName'];
+    $email = $userData['account_Email'];
+    $phoneNumber = $userData['account_PNum'];
+    
+    if ($userData['profile_picture']) {
+        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture'];
+    } else {
+        $profilePicture = '../CSS/default.jpg';
+    }
+} else {
+    echo "No Data Found.";
+}
+
+$stmt->close();
+
 // Define all possible status types
 $allStatuses = ['pending', 'approved', 'waitlisted', 'completed', 'cancelled', 'declined', 'others'];
 
@@ -114,10 +139,14 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="admindashboard.php">Dashboard</a></li>
+                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
                     <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
                     <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
+                    <li><a href="">System Analytics</a></li>
+                    <li><a href="">Manage Website Contents</a></li>
+                    <li><a href="#account-details" onclick="showSection('account-details')">Account</a></li>
+                    <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
             </div>
         </div>
@@ -127,95 +156,219 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <!-- Dashboard Section -->
             <div id="dashboard" class="section">
                 <h1 class="uk-text-bold">Admin Panel</h1>
+
+                <!-- ✅ Total Appointments Card -->
+                <div class="uk-margin-bottom">
+                    <div class="uk-card uk-card-primary uk-card-body">
+                        <h3 class="uk-card-title">Total Appointments</h3>
+                        <p>Total: <?= $totalAppointments ?></p>
+                    </div>
+                </div>
+
+                <!-- ✅ Appointment Summary Cards -->
+                <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
+                    <?php foreach ($appointmentCounts as $status => $count): ?>
+                        <div>
+                            <div class="uk-card uk-card-default uk-card-body">
+                                <h3 class="uk-card-title"><?= ucfirst($status) ?></h3>
+                                <p>Total: <?= $count ?></p>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                </div>
+
+                <hr>
+
+                <!-- ✅ Appointments List -->
+                <h3>All Appointments</h3>
+                <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover">
+                    <thead>
+                        <tr>
+                            <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                            <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                            <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                            <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                            <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($appointments as $appointment): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
+                                <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
+                                <td><?= htmlspecialchars($appointment['date']); ?></td>
+                                <td><?= htmlspecialchars($appointment['time']); ?></td>
+                                <td><?= htmlspecialchars(ucfirst($appointment['status'])); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+
+                <script>
+                    $(document).ready(function() {
+                        $('#appointmentsTable').DataTable({
+                            pageLength: 10,
+                            lengthMenu: [10, 25, 50],
+                            order: [
+                                [2, 'asc']
+                            ], // Sort by date column by default
+                            language: {
+                                lengthMenu: "Show _MENU_ entries per page",
+                                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                search: "Search:",
+                                paginate: {
+                                    first: "First",
+                                    last: "Last",
+                                    next: "Next",
+                                    previous: "Previous"
+                                }
+                            },
+                            columnDefs: [{
+                                    orderable: true,
+                                    targets: '_all'
+                                }, // Make all columns sortable
+                                {
+                                    type: 'date',
+                                    targets: 2
+                                } // Specify date type for date column
+                            ]
+                        });
+                    });
+                </script>
             </div>
 
-            <!-- ✅ Total Appointments Card -->
-            <div class="uk-margin-bottom">
-                <div class="uk-card uk-card-primary uk-card-body">
-                    <h3 class="uk-card-title">Total Appointments</h3>
-                    <p>Total: <?= $totalAppointments ?></p>
+
+            <!-- Account Details Section -->
+            <div id="account-details" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Account Details</h1>
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
+                    <div class="uk-flex uk-flex-center">
+                        <div class="uk-width-1-4">
+                            <img class="uk-border-circle" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="uk-card uk-card-default uk-card-body">
+                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
+                    <form class="uk-grid-small" uk-grid>
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">First Name</label>
+                            <input class="uk-input" type="text" value="<?php echo $firstName; ?>" disabled>
+                        </div>
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Last Name</label>
+                            <input class="uk-input" type="text" value="<?php echo $lastName; ?>" disabled>
+                        </div>
+                        <div class="uk-width-1-1">
+                            <label class="uk-form-label">Email</label>
+                            <input class="uk-input" type="email" value="<?php echo $email; ?>" disabled>
+                        </div>
+                        <div class="uk-width-1-1">
+                            <label class="uk-form-label">Phone Number</label>
+                            <input class="uk-input" type="tel" value="<?php echo $phoneNumber; ?>" disabled>
+                        </div>
+                    </form>
                 </div>
             </div>
 
-            <!-- ✅ Appointment Summary Cards -->
-            <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
-                <?php foreach ($appointmentCounts as $status => $count): ?>
-                    <div>
-                        <div class="uk-card uk-card-default uk-card-body">
-                            <h3 class="uk-card-title"><?= ucfirst($status) ?></h3>
-                            <p>Total: <?= $count ?></p>
+            <!-- Settings Section -->
+            <div id="settings" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Settings</h1>
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
+                    <form action="settings.php" method="post" enctype="multipart/form-data">
+                        <input type="hidden" name="action" value="upload_profile_picture">
+                        <div class="uk-flex uk-flex-middle">
+                            <div class="profile-upload-container">
+                                <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
+                                <div class="uk-flex uk-flex-column uk-margin-left">
+                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden" onchange="previewProfilePhoto(event)">
+                                    <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
+                                    <div class="uk-text-center">
+                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
+                                    </div>
+                                </div>
+                                <div class="uk-margin-large-left">
+                                    <h4>Image requirements:</h4>
+                                    <ul class="uk-list">
+                                        <li>1. Min. 400 x 400px</li>
+                                        <li>2. Max. 2MB</li>
+                                        <li>3. Your face</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                <?php endforeach; ?>
+                        <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
+                    </form>
+                </div>
+
+                <div class="uk-card uk-card-default uk-card-body">
+                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
+                    <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
+                        <input type="hidden" name="action" value="update_user_details">
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">First Name</label>
+                            <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>">
+                            <small style="color: red;" class="error-message" data-error="firstName"></small>
+                        </div>
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Last Name</label>
+                            <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>">
+                            <small style="color: red;" class="error-message" data-error="lastName"></small>
+                        </div>
+                        <div class="uk-width-1-1">
+                            <label class="uk-form-label">Email</label>
+                            <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>">
+                            <small style="color: red;" class="error-message" data-error="email"></small>
+                        </div>
+                        <div class="uk-width-1-1">
+                            <label class="uk-form-label">Phone Number</label>
+                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"
+                                value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>">
+                            <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
+                        </div>
+                        <small style="color: red;" class="error-message" data-error="duplicate"></small>
+                        <small style="color: green;" class="error-message" id="successMessage"></small>
+                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
+                        </div>
+                    </form>
+                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying 
+                    ?>
+                    <?php unset($_SESSION['update_success']); // Clear success message 
+                    ?>
+                </div>
             </div>
-
-            <hr>
-
-            <!-- ✅ Appointments List -->
-            <h3>All Appointments</h3>
-            <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover">
-                <thead>
-                    <tr>
-                        <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($appointments as $appointment): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
-                            <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
-                            <td><?= htmlspecialchars($appointment['date']); ?></td>
-                            <td><?= htmlspecialchars($appointment['time']); ?></td>
-                            <td><?= htmlspecialchars(ucfirst($appointment['status'])); ?></td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
-
-            <script>
-                $(document).ready(function() {
-                    $('#appointmentsTable').DataTable({
-                        pageLength: 10,
-                        lengthMenu: [10, 25, 50],
-                        order: [
-                            [2, 'asc']
-                        ], // Sort by date column by default
-                        language: {
-                            lengthMenu: "Show _MENU_ entries per page",
-                            info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                            search: "Search:",
-                            paginate: {
-                                first: "First",
-                                last: "Last",
-                                next: "Next",
-                                previous: "Previous"
-                            }
-                        },
-                        columnDefs: [{
-                                orderable: true,
-                                targets: '_all'
-                            }, // Make all columns sortable
-                            {
-                                type: 'date',
-                                targets: 2
-                            } // Specify date type for date column
-                        ]
-                    });
-                });
-            </script>
-
-            <hr>
-
         </div>
 
-
-
         <script>
+            document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+                document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+            });
 
+            function showSection(sectionId) {
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                document.getElementById(sectionId).style.display = 'block';
+            }
+
+            function previewProfilePhoto(event) {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    const preview = document.querySelector('.profile-preview');
+                    preview.src = reader.result;
+                }
+                reader.readAsDataURL(event.target.files[0]);
+            }
+
+            function removeProfilePhoto() {
+                document.querySelector('.profile-preview').src = '../CSS/default.jpg';
+            }
         </script>
 
 </body>
