@@ -65,7 +65,13 @@
 
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
+    
+    <style>
+    html, body {
+    background-color: #ffffff !important;
+}
 
+</style>
 </head>
 <body>
     <div class="uk-container uk-margin-top">

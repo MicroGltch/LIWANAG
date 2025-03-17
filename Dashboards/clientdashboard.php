@@ -85,7 +85,7 @@ $stmt->close();
 
 </head>
 
-</head>
+
 
 <body>
     <script>
@@ -152,26 +152,50 @@ $stmt->close();
             <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
                 Menu <span uk-navbar-toggle-icon></span>
             </button>
+
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li><a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a></li>
-                    <!-- Reference code: client_view_appointments.php -->
 
-                    <li><a href="#register-patient" onclick="showSection('register-patient')"><span class="uk-margin-small-right" uk-icon="user"></span> Register Patient</a></li>
-                    <!-- Reference code: register_patient_form.php -->
+                <li class="uk-parent">
+                <a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a>
+                <!-- Reference code: client_view_appointments.php -->
 
-                    <li><a href="#view-registered-patients" onclick="showSection('view-registered-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li>
-                    <!-- Reference code: edit_patient_form.php -->
+                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
+                            
+                        <li style="padding:0px 0px 15px 0px"><a href="#book-appointment" onclick="showSection('book-appointment')"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li>
+                        <!-- Reference code: book_appointment_form.php -->
+
+                        </ul>
+                    </li>
+                <hr>
+                    
+                <li class="uk-parent">
+                <a href="#register-patient" onclick="showSection('register-patient')"><span class="uk-margin-small-right" uk-icon="user"></span> Register a Patient</a>
+                <!-- Reference code: register_patient_form.php -->
+
+                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
+                            
+                        <li style="padding:0px 0px 15px 0px"><a href="#view-registered-patients" onclick="showSection('view-registered-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li>
+                        <!-- Reference code: edit_patient_form.php -->
+
+                        </ul>
+                    </li>                    
+
+                    <hr>
+                    
 
                     <!-- <li><a href="../Appointments/book_appointment_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li> -->
-                    <li><a href="#book-appointment" onclick="showSection('book-appointment')"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li>
-                    <!-- Reference code: book_appointment_form.php -->
-
+                    
+                    
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
+
+                    <hr>
+                    
                     <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
                 </ul>
             </div>
         </div>
+
 
         <!-- Content Area -->
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">

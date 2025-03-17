@@ -40,18 +40,49 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rebook Patient</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.9.6/css/uikit.min.css">
     
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- UIkit Library -->
+    <link rel="stylesheet" href="/LIWANAG/CSS/uikit-3.22.2/css/uikit.min.css">
+<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit.min.js"></script>
+<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+
+
+    <!-- LIWANAG CSS -->
+    <link rel="stylesheet" href="/LIWANAG/CSS/style.css" type="text/css" >
+
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.uikit.min.js"></script>
+
     <!-- Include Flatpickr -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<style>
+    html, body {
+    background-color: #ffffff !important;
+}
+
+</style>
+
 </head>
+
 <body>
+
     <div class="uk-container uk-margin-top">
-        <h2>Rebook a Previous Patient</h2>
+        <h2 class="uk-text-bold" >Rebook a Previous Patient</h2>
+
+
         <form id="rebookForm" action="../../app_process/process_rebook.php" method="POST" class="uk-form-stacked">
-            <label>Select Patient:</label>
+            
+        <label class="uk-form-label">Select Patient:</label>
 
             <select class="uk-select" name="patient_id" id="patient_id" required>
                 <option value="" disabled selected>Select a Patient</option>
@@ -62,22 +93,27 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
                 <?php endforeach; ?>
             </select>
 
-            <label>Service Type:</label>
+            <label class="uk-form-label">Service Type:</label>
             <select class="uk-select" name="service_type" id="service_type" required>
                 <option value="" disabled selected>Select Service Type</option>
                 <option value="Occupational Therapy">Occupational Therapy</option>
                 <option value="Behavioral Therapy">Behavioral Therapy</option>
             </select>
 
-            <label>Date for next session:</label>
+            <label class="uk-form-label">Date for next session:</label>
             <input class="uk-input" type="text" name="new_date" id="new_date" required>
 
-            <label>Time for next session:</label>
+            <label class="uk-form-label">Time for next session:</label>
             <select class="uk-select" name="new_time" id="new_time" required></select>
 
+            
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Rebook Appointment</button>
-            <a href="../../../Dashboards/therapistdashboard.php" class="uk-button uk-button-default">Cancel</a>
+
+            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Cancel</button>
+
         </form>
+        
+ 
     </div>
 
     <script>
