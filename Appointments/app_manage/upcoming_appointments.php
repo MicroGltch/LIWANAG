@@ -8,7 +8,7 @@ session_start();
 //     exit();
 // }
 
-// $therapistID = $_SESSION['account_ID'];
+$therapistID = $_SESSION['account_ID'];
 
 // Fetch therapist's upcoming appointments
 $query = "SELECT a.appointment_id, a.date, a.time, a.session_type, a.status,
