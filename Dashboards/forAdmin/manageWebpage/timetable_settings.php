@@ -124,15 +124,11 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
                     <li><a href="#accounts" onclick="showSection('accounts')">Accounts</a></li>
                     <li class="uk-active"><a href="timetable_settings.php">Manage Timetable Settings</a></li>
                     <li><a href="../../../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-<<<<<<< HEAD
-                    <li><a href="../add_therapist.php">Manage Therapists (Adding Only)</a></li>
-=======
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                     <li><a href="">System Analytics</a></li>
                     <li><a href="">Manage Website Contents</a></li>
                     <li><a href="#account-details" onclick="showSection('account-details')">Profile</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
->>>>>>> origin/FINAL-FRONT-END
                 </ul>
             </div>
         </div>
