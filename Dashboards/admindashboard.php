@@ -144,6 +144,11 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <!-- Show tables for all Users in this section-->
                     <li><a href="#Accounts" onclick="showSection('Accounts')">Accounts</a></li>
 
+
+                    <!-- Adding Therapist to be deleted after ACCOUNTS section finished -->
+                    <li><a href="forAdmin/add_therapist.php">Add Therapist</a></li>
+
+
                     <!-- TO BE SECTIONED - Reference File: -->
                     <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
 

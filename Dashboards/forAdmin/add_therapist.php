@@ -1,10 +1,13 @@
 <?php
 require_once "../../dbconfig.php";
+require_once "../../Accounts/signupverify/vendor/autoload.php"; // ✅ Load PHPMailer
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 session_start();
 
-// ✅ Restrict Access to Admins, Head Therapists, and Therapists
+// ✅ Restrict Access to Admins
 if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin"])) {
-    header("Location: ../../../loginpage.php");
+    header("Location: ../../Accounts/loginpage.php");
     exit();
 }
 
@@ -115,7 +118,7 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
 
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                            <button class="uk-button uk-button-primary" type="button" id="registerTherapist">Register</button>
+                            <button class="uk-button uk-button-primary" type="submit" id="registerTherapist">Register</button>
                         </div>
                     </form>
 
@@ -128,34 +131,40 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
 <?php
 // Handle Form Submission
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    global $connection; // ✅ Use the existing connection
     date_default_timezone_set('Asia/Manila');
 
-    $firstName = trim($_POST["therapist_fname"]);
-    $lastName = trim($_POST["therapist_lname"]);
+    $firstName = ucfirst(strtolower($_POST["therapist_fname"]));
+    $lastName = ucfirst(strtolower($_POST["therapist_lname"]));
+    $therapist_name = $firstName . " " . $lastName;
     $email = trim($_POST["therapist_email"]);
     $phone = trim($_POST["therapist_phone"]);
     $created  = date("Y-m-d H:i:s");
 
+    // ✅ Secure Default Password
+    $defaultPassword = password_hash("Liwanag@2025", PASSWORD_DEFAULT);
 
-    // Check for empty fields
+    $accountAddress = "Admin Office";
+    $accountType = "therapist";
+    $accountStatus = "Pending";
+
     if (empty($firstName) || empty($lastName) || empty($email) || empty($phone)) {
         echo "<script>Swal.fire('Error', 'All fields are required.', 'error');</script>";
     } else {
-        // Check if email already exists
-        $checkEmail = $conn->prepare("SELECT * FROM users WHERE account_Email = ?");
+        $checkEmail = $connection->prepare("SELECT * FROM users WHERE account_Email = ?");
         $checkEmail->bind_param("s", $email);
         $checkEmail->execute();
         $result = $checkEmail->get_result();
-        
+
         if ($result->num_rows > 0) {
             echo "<script>Swal.fire('Error', 'Email is already registered.', 'error');</script>";
         } else {
-            // Insert into database
-            $stmt = $conn->prepare("INSERT INTO users (account_FName, account_LName, account_Email, account_Address, account_PNum, account_Type, account_Status, created_at, update_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-            $stmt->bind_param("sssssssss", $firstName, $lastName, $email, "Admin Office", $phone, "therapist", "Pending", $created, $created);
-            
+            $stmt = $connection->prepare("INSERT INTO users (account_FName, account_LName, account_Email, account_Password, account_Address, account_PNum, account_Type, account_Status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            $stmt->bind_param("ssssssssss", $firstName, $lastName, $email, $defaultPassword, $accountAddress, $phone, $accountType, $accountStatus, $created, $created);
+
             if ($stmt->execute()) {
-                echo "<script>Swal.fire('Success', 'Therapist added successfully!', 'success');</script>";
+                send_email_notification($email, $therapist_name);
+                echo "<script>Swal.fire('Success', 'Therapist added and emailed successfully!', 'success');</script>";
             } else {
                 echo "<script>Swal.fire('Error', 'Failed to add therapist.', 'error');</script>";
             }
@@ -163,6 +172,61 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
         $checkEmail->close();
     }
-    $conn->close();
+    $connection->close();
 }
+
+// ✅ Function to Send Email Notification for New Appointments
+function send_email_notification($email, $therapist_name) {
+    $mail = new PHPMailer(true);
+
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.hostinger.com'; // Change this to your SMTP host
+        $mail->SMTPAuth = true;
+        $mail->Username = 'no-reply@myliwanag.com'; // Change to your email
+        $mail->Password = '[l/+1V/B4'; // Change to your SMTP password
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+
+        $mail->setFrom('no-reply@myliwanag.com', "Little Wanderer's Therapy Center");
+        $mail->addAddress($email, $therapist_name);
+        $mail->isHTML(true);
+        $mail->Subject = "Welcome to Little Wanderer's Therapy Center - Therapist Account Created";
+
+        $emailBody = "
+            <h3>Welcome to Little Wanderer's Therapy Center</h3>
+            <p>Dear <strong>$therapist_name</strong>,</p>
+            <p>We are excited to welcome you as a therapist at <strong>Little Wanderer's Therapy Center</strong>. Your account has been successfully created and is currently <strong>pending approval</strong>.</p>
+
+            <h4>Login Credentials:</h4>
+            <ul>
+                <li><strong>Email:</strong> $email</li>
+                <li><strong>Temporary Password:</strong> Liwanag@2025</li>
+            </ul>
+
+            <p>To activate your account, please log in using the credentials above and change your password immediately.</p>
+
+            <h4>Next Steps:</h4>
+            <ol>
+                <li>Go to the website to Login</li>
+                <li>Enter your email and temporary password.</li>
+                <li>Follow the prompts to update your password.</li>
+            </ol>
+
+            <p>If you encounter any issues, please reach out to our support team.</p>
+
+            <p>We look forward to working with you in providing quality therapy services.</p>
+
+            <p>Best Regards,<br>
+            <strong>Little Wanderer's Therapy Center Team</strong></p>
+        ";
+
+        $mail->Body = $emailBody;
+        $mail->send();
+        return true;
+    } catch (Exception $e) {
+        return false;
+    }
+}
+
 ?>

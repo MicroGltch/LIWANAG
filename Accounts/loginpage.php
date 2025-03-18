@@ -10,6 +10,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
     <!-- UIkit Library -->
@@ -91,10 +92,13 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label uk-text-left" for="login-pass">Password</label>
                     <div class="uk-form-controls">
-                        <input class="uk-input" id="login-pass" type="password" placeholder="Input your Password..." name="password">
+                        <div style="position: relative; display: flex; align-items: center;">
+                        <input class="uk-input" id="login-pass" type="password" placeholder="Input your Password..." name="password" style="width: 100%; padding-right: 40px;">
                         <span style="position: absolute; right: 10px; cursor: pointer;" onclick="togglePassword()">
                             <i class="fas fa-eye" id="togglePasswordIcon"></i>  </span>
                         <span class="invalid-feedback" id="pass-error"></span>  </div>
+
+                    </div>
                 </div>
 
                 <!-- Add function -->

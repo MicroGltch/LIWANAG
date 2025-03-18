@@ -95,13 +95,27 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             } elseif($accountType === 'head therapist'){
                 $redirectURL = '../Dashboards/headtherapistdashboard.php';
             } elseif ($accountType === 'therapist') {
-                $redirectURL = '../Dashboards/therapistdashboard.php'; // Assuming you have a therapist dashboard
+                $redirectURL = '../Dashboards/therapistdashboard.php';
             }elseif ($accountType === 'client'){
+                $redirectURL = '../Dashboards/clientdashboard.php';
+            }else{
                 $redirectURL;
             }
 
             echo json_encode(['redirect' => $redirectURL]);
             exit();
+        } 
+        
+        if ($status === 'Pending' && $accountType ==='therapist' && $passwordCorrect) {
+            // Check if the entered password is the default one
+            if (password_verify("Liwanag@2025", $storedPassword)) {
+                echo json_encode([
+                    'sweetalert' => ["Change Password", "You are using the default password. Please update it now.", "warning"],
+                    'showChangePassword' => true, 
+                    'account_ID' => $accountID
+                ]);
+                exit();
+            }
         } elseif ($status === 'Pending') {
             // ✅ **ACCOUNT PENDING VERIFICATION**
             if ($days < 1 || ($days === 0 && $hours < 24)) {
