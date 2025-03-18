@@ -21,7 +21,7 @@ if ($result->num_rows > 0) {
     $lastName = $userData['account_LName'];
     $email = $userData['account_Email'];
     $phoneNumber = $userData['account_PNum'];
-    
+
     if ($userData['profile_picture']) {
         $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture'];
     } else {
@@ -139,14 +139,14 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
-                    <li><a href="#Accounts" onclick="showSection('Accounts')">Accounts</a></li>
+                    <li class="uk-active"><a href="../Dashboards/admindashboard.php">Dashboard</a></li>
+                    <li><a href="#accounts" onclick="showSection('accounts')">Accounts</a></li>
                     <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
                     <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
+                    <li><a href="#manage-therapist" onclick="showSection('manage-therapist')">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                     <li><a href="">System Analytics</a></li>
                     <li><a href="">Manage Website Contents</a></li>
-                    <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
+                    <li><a href="#account-details" onclick="showSection('account-details')">Profile</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
             </div>
@@ -239,7 +239,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </div>
 
             <!-- Accounts Section -->
-            <div id="Accounts" class="section" style="display: none;">
+            <div id="accounts" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Accounts</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
@@ -262,6 +262,64 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         <script>
                             $(document).ready(function() {
                                 $('#accountsTable').DataTable({
+                                    pageLength: 10,
+                                    lengthMenu: [10, 25, 50],
+                                    order: [
+                                        [0, 'asc']
+                                    ], // Sort by name column by default
+                                    language: {
+                                        lengthMenu: "Show _MENU_ entries per page",
+                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                        search: "Search:",
+                                        paginate: {
+                                            first: "First",
+                                            last: "Last",
+                                            next: "Next",
+                                            previous: "Previous"
+                                        }
+                                    },
+                                    columnDefs: [{
+                                            orderable: true,
+                                            targets: '_all'
+                                        },
+                                        {
+                                            orderable: false,
+                                            targets: 4
+                                        }
+                                    ]
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Therapists -->
+
+            <div id="manage-therapist" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Manage Therapists</h1>
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <div class="uk-overflow-auto">
+                        <table id="managetherapistTable" class="uk-table uk-table-striped uk-table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="uk-table-shrink">First Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Last Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Email<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Phone Number<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Account Status<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Appointments<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Content -->
+                            </tbody>
+                        </table>
+
+                        <script>
+                            $(document).ready(function() {
+                                $('#managetherapistTable').DataTable({
                                     pageLength: 10,
                                     lengthMenu: [10, 25, 50],
                                     order: [
