@@ -91,7 +91,7 @@ include "../dbconfig.php"
             ?>
             <!-- First Name -->
             <div class="uk-width-1@s uk-width-1-2@l">
-                <label class="uk-form-label" for="firstName">First Name</label>
+                <label class="uk-form-label uk-text-left" for="firstName">First Name</label>
                 <div class="uk-form-controls">
                     <input class="uk-input" id="firstName" name="fname" type="text" placeholder="Input your First Name..." value="<?php echo isset($_POST['fname']) ? htmlspecialchars($_POST['fname']) : ''; ?>">
                     <span class="error" id="firstNameError" style="color: red;"></span>
@@ -100,7 +100,7 @@ include "../dbconfig.php"
 
             <!-- Last Name -->
             <div class="uk-width-1@s uk-width-1-2@l">
-                <label class="uk-form-label" for="lastName">Last Name</label>
+                <label class="uk-form-label uk-text-left" for="lastName">Last Name</label>
                 <div class="uk-form-controls">
                     <input class="uk-input" id="lastName" name="lname" type="text" placeholder="Input your Last Name..." value="<?php echo isset($_POST['lname']) ? htmlspecialchars($_POST['lname']) : ''; ?>">
                     <span class="error" id="lastNameError" style="color: red;"></span>
@@ -109,7 +109,7 @@ include "../dbconfig.php"
 
             <!-- Email -->
             <div class="uk-width-1@s uk-width-1@l">
-                <label class="uk-form-label" for="email">Email</label>
+                <label class="uk-form-label uk-text-left" for="email">Email</label>
                 <div class="uk-form-controls">
                     <input class="uk-input" id="email" name="email" type="email" placeholder="Input your Email..." value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                     <span class="error" id="emailError" style="color: red;"></span>
@@ -118,7 +118,7 @@ include "../dbconfig.php"
 
             <!-- Password Field -->
             <div class="uk-width-1@s uk-width-1-2@l">
-                <label class="uk-form-label" for="password">Password</label>
+                <label class="uk-form-label uk-text-left" for="password">Password</label>
                 <div class="uk-form-controls">
                     <div style="position: relative; display: flex; align-items: center;">
                         <input class="uk-input password-input" id="password" name="password" type="password" 
@@ -134,7 +134,7 @@ include "../dbconfig.php"
 
             <!-- Confirm Password Field -->
             <div class="uk-width-1@s uk-width-1-2@l">
-                <label class="uk-form-label" for="confirmPassword">Confirm Password</label>
+                <label class="uk-form-label uk-text-left" for="confirmPassword">Confirm Password</label>
                 <div class="uk-form-controls">
                     <div style="position: relative; display: flex; align-items: center;">
                         <input class="uk-input password-input" id="confirmPassword" name="confirmPassword" type="password" 
@@ -150,7 +150,7 @@ include "../dbconfig.php"
 
             <!-- Address -->
             <div class="uk-width-1@s uk-width-1@l">
-                <label class="uk-form-label" for="address">Address</label>
+                <label class="uk-form-label uk-text-left" for="address">Address</label>
                 <div class="uk-form-controls">
                     <input class="uk-input" id="address" name="address" type="text" placeholder="Input your Address..." value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>">
                     <span class="error" id="addressError" style="color: red;"></span>
@@ -159,7 +159,7 @@ include "../dbconfig.php"
 
                 <!-- Phone Number -->
                 <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label" for="mobileNumber">Phone Number</label>
+                    <label class="uk-form-label uk-text-left" for="mobileNumber">Phone Number</label>
                     <div class="uk-form-controls">
                         <input 
                             class="uk-input" 

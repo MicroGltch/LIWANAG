@@ -80,7 +80,7 @@
 
                 <!-- Email -->
                 <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label" for="login-email">Email</label>
+                    <label class="uk-form-label uk-text-left" for="login-email">Email</label>
                     <div class="uk-form-controls">
                     <input class="uk-input" id="login-email" type="text" placeholder="Input your Email..." name="email">
                     <span class="invalid-feedback" id="email-error"></span> 
@@ -89,7 +89,7 @@
             
                 <!-- Password -->
                 <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label" for="login-pass">Password</label>
+                    <label class="uk-form-label uk-text-left" for="login-pass">Password</label>
                     <div class="uk-form-controls">
                         <input class="uk-input" id="login-pass" type="password" placeholder="Input your Password..." name="password">
                         <span style="position: absolute; right: 10px; cursor: pointer;" onclick="togglePassword()">

@@ -8,7 +8,7 @@ session_start();
 //     exit();
 // }
 
-$therapistID = $_SESSION['account_ID'];
+// $therapistID = $_SESSION['account_ID'];
 
 // Fetch therapist's upcoming appointments
 $query = "SELECT a.appointment_id, a.date, a.time, a.session_type, a.status,
@@ -30,8 +30,36 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Therapist Dashboard</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.9.6/css/uikit.min.css">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- UIkit Library -->
+    <link rel="stylesheet" href="/LIWANAG/CSS/uikit-3.22.2/css/uikit.min.css">
+<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit.min.js"></script>
+<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+
+
+    <!-- LIWANAG CSS -->
+    <link rel="stylesheet" href="/LIWANAG/CSS/style.css" type="text/css" >
+
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.uikit.min.js"></script>
+
+    <!-- Include Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+    html, body {
+    background-color: #ffffff !important;
+}
+
+</style>
 </head>
 <body>
     <div class="uk-container uk-margin-top">
@@ -67,16 +95,11 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                 <?php endforeach; ?>
             </tbody>
         </table>
-    </div>
+    
+    <div class="uk-width-1-1 uk-text-right uk-margin-top">
+    <button class="uk-button uk-button-primary" onclick="redirectIframe()">Rebook a Previous Patient</button>
 
-    <br/>
-    <div>
-        <a href="../patient/patient_manage/rebook_patient.php" class="uk-button uk-button-secondary">Rebook a Previous Patient</a>
     </div>
-
-    <div>
-    <br/>
-        <a href="../../Dashboards/therapistdashboard.php">Back to Dashboard</a>
     </div>
 
     <script>

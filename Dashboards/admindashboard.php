@@ -8,6 +8,31 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
     exit();
 }
 
+$userid = $_SESSION['account_ID'];
+
+$stmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
+$stmt->bind_param("s", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $userData = $result->fetch_assoc();
+    $firstName = $userData['account_FName'];
+    $lastName = $userData['account_LName'];
+    $email = $userData['account_Email'];
+    $phoneNumber = $userData['account_PNum'];
+    
+    if ($userData['profile_picture']) {
+        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture'];
+    } else {
+        $profilePicture = '../CSS/default.jpg';
+    }
+} else {
+    echo "No Data Found.";
+}
+
+$stmt->close();
+
 // Define all possible status types
 $allStatuses = ['pending', 'approved', 'waitlisted', 'completed', 'cancelled', 'declined', 'others'];
 
@@ -114,10 +139,15 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="admindashboard.php">Dashboard</a></li>
+                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                    <li><a href="#Accounts" onclick="showSection('Accounts')">Accounts</a></li>
                     <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
                     <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
+                    <li><a href="">System Analytics</a></li>
+                    <li><a href="">Manage Website Contents</a></li>
+                    <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
+                    <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
             </div>
         </div>
@@ -127,57 +157,55 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <!-- Dashboard Section -->
             <div id="dashboard" class="section">
                 <h1 class="uk-text-bold">Admin Panel</h1>
-            </div>
 
-            <!-- ✅ Total Appointments Card -->
-            <div class="uk-margin-bottom">
-                <div class="uk-card uk-card-primary uk-card-body">
-                    <h3 class="uk-card-title">Total Appointments</h3>
-                    <p>Total: <?= $totalAppointments ?></p>
-                </div>
-            </div>
-
-            <!-- ✅ Appointment Summary Cards -->
-            <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
-                <?php foreach ($appointmentCounts as $status => $count): ?>
-                    <div>
-                        <div class="uk-card uk-card-default uk-card-body">
-                            <h3 class="uk-card-title"><?= ucfirst($status) ?></h3>
-                            <p>Total: <?= $count ?></p>
-                        </div>
+                <!-- ✅ Total Appointments Card -->
+                <div class="uk-margin-bottom">
+                    <div class="uk-card uk-card-primary uk-card-body">
+                        <h3 class="uk-card-title">Total Appointments</h3>
+                        <p>Total: <?= $totalAppointments ?></p>
                     </div>
-                <?php endforeach; ?>
-            </div>
+                </div>
 
-            <hr>
-
-            <!-- ✅ Appointments List -->
-            <h3>All Appointments</h3>
-            <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover">
-                <thead>
-                    <tr>
-                        <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($appointments as $appointment): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
-                            <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
-                            <td><?= htmlspecialchars($appointment['date']); ?></td>
-                            <td><?= htmlspecialchars($appointment['time']); ?></td>
-                            <td><?= htmlspecialchars(ucfirst($appointment['status'])); ?></td>
-                        </tr>
+                <!-- ✅ Appointment Summary Cards -->
+                <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
+                    <?php foreach ($appointmentCounts as $status => $count): ?>
+                        <div>
+                            <div class="uk-card uk-card-default uk-card-body">
+                                <h3 class="uk-card-title"><?= ucfirst($status) ?></h3>
+                                <p>Total: <?= $count ?></p>
+                            </div>
+                        </div>
                     <?php endforeach; ?>
-                </tbody>
-            </table>
+                </div>
+
+                <hr>
+
+                <!-- ✅ Appointments List -->
+                <h3>All Appointments</h3>
+                <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover">
+                    <thead>
+                        <tr>
+                            <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                            <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                            <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                            <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                            <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($appointments as $appointment): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
+                                <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
+                                <td><?= htmlspecialchars($appointment['date']); ?></td>
+                                <td><?= htmlspecialchars($appointment['time']); ?></td>
+                                <td><?= htmlspecialchars(ucfirst($appointment['status'])); ?></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
 
             <script>
-                
                 $(document).ready(function() {
                     $('#appointmentsTable').DataTable({
                         pageLength: 10,
@@ -213,10 +241,30 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
         </div>
 
-
-
         <script>
+            document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+                document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+            });
 
+            function showSection(sectionId) {
+                document.querySelectorAll('.section').forEach(section => {
+                    section.style.display = 'none';
+                });
+                document.getElementById(sectionId).style.display = 'block';
+            }
+
+            function previewProfilePhoto(event) {
+                const reader = new FileReader();
+                reader.onload = function() {
+                    const preview = document.querySelector('.profile-preview');
+                    preview.src = reader.result;
+                }
+                reader.readAsDataURL(event.target.files[0]);
+            }
+
+            function removeProfilePhoto() {
+                document.querySelector('.profile-preview').src = '../CSS/default.jpg';
+            }
         </script>
 
 </body>
