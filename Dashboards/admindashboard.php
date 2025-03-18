@@ -140,12 +140,27 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                    
+                    <!-- Show tables for all Users in this section-->
                     <li><a href="#Accounts" onclick="showSection('Accounts')">Accounts</a></li>
+
+                    <!-- TO BE SECTIONED - Reference File: -->
                     <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
+
+                    <!-- TO BE SECTIONED - Reference File: -->
                     <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
+                    <!-- Actually parang nasa dashboard na to so lipat nlng -->
+
+                    <!-- Disregard muna -->
                     <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
-                    <li><a href="">System Analytics</a></li>
+
+                    <!-- TO BE SECTIONED - Reference File: -->
+                    <li><a href="forAdmin/systemAnalytics/system_analytics.php">System Analytics</a></li>
+
+                    <!-- To follow -->
                     <li><a href="">Manage Website Contents</a></li>
+
+                    <!-- To follow -->
                     <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
