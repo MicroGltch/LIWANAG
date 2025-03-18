@@ -21,7 +21,7 @@ if ($result->num_rows > 0) {
     $lastName = $userData['account_LName'];
     $email = $userData['account_Email'];
     $phoneNumber = $userData['account_PNum'];
-    
+
     if ($userData['profile_picture']) {
         $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture'];
     } else {
