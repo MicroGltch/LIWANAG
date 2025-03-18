@@ -3,7 +3,7 @@ require_once "../dbconfig.php";
 session_start();
 
 // ✅ Ensure only Admins & Head Therapists can access
-if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
+if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["head therapist"])) {
     header("Location: ../Accounts/loginpage.php");
     exit();
 }

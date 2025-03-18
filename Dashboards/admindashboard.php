@@ -139,14 +139,29 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="../Dashboards/admindashboard.php">Dashboard</a></li>
-                    <li><a href="#accounts" onclick="showSection('accounts')">Accounts</a></li>
+                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                    
+                    <!-- Show tables for all Users in this section-->
+                    <li><a href="#Accounts" onclick="showSection('Accounts')">Accounts</a></li>
+
+                    <!-- TO BE SECTIONED - Reference File: -->
                     <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
+
+                    <!-- TO BE SECTIONED - Reference File: -->
                     <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="#manage-therapist" onclick="showSection('manage-therapist')">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
-                    <li><a href="">System Analytics</a></li>
+                    <!-- Actually parang nasa dashboard na to so lipat nlng -->
+
+                    <!-- Disregard muna -->
+                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
+
+                    <!-- TO BE SECTIONED - Reference File: -->
+                    <li><a href="forAdmin/systemAnalytics/system_analytics.php">System Analytics</a></li>
+
+                    <!-- To follow -->
                     <li><a href="">Manage Website Contents</a></li>
-                    <li><a href="#account-details" onclick="showSection('account-details')">Profile</a></li>
+
+                    <!-- To follow -->
+                    <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
             </div>
@@ -205,254 +220,40 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     </tbody>
                 </table>
 
-                <script>
-                    $(document).ready(function() {
-                        $('#appointmentsTable').DataTable({
-                            pageLength: 10,
-                            lengthMenu: [10, 25, 50],
-                            order: [
-                                [2, 'asc']
-                            ], // Sort by date column by default
-                            language: {
-                                lengthMenu: "Show _MENU_ entries per page",
-                                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                search: "Search:",
-                                paginate: {
-                                    first: "First",
-                                    last: "Last",
-                                    next: "Next",
-                                    previous: "Previous"
-                                }
-                            },
-                            columnDefs: [{
-                                    orderable: true,
-                                    targets: '_all'
-                                }, // Make all columns sortable
-                                {
-                                    type: 'date',
-                                    targets: 2
-                                } // Specify date type for date column
-                            ]
-                        });
+            <script>
+                $(document).ready(function() {
+                    $('#appointmentsTable').DataTable({
+                        pageLength: 10,
+                        lengthMenu: [10, 25, 50],
+                        order: [
+                            [2, 'asc']
+                        ], // Sort by date column by default
+                        language: {
+                            lengthMenu: "Show _MENU_ entries per page",
+                            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                            search: "Search:",
+                            paginate: {
+                                first: "First",
+                                last: "Last",
+                                next: "Next",
+                                previous: "Previous"
+                            }
+                        },
+                        columnDefs: [{
+                                orderable: true,
+                                targets: '_all'
+                            }, // Make all columns sortable
+                            {
+                                type: 'date',
+                                targets: 2
+                            } // Specify date type for date column
+                        ]
                     });
-                </script>
-            </div>
+                });
+            </script>
 
-            <!-- Accounts Section -->
-            <div id="accounts" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Accounts</h1>
+            <hr>
 
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <div class="uk-overflow-auto">
-                        <table id="accountsTable" class="uk-table uk-table-striped uk-table-hover">
-                            <thead>
-                                <tr>
-                                    <th class="uk-table-shrink">Name <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Service Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Assigned Therapist <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Guardian <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Content -->
-                            </tbody>
-                        </table>
-
-                        <script>
-                            $(document).ready(function() {
-                                $('#accountsTable').DataTable({
-                                    pageLength: 10,
-                                    lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ], // Sort by name column by default
-                                    language: {
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        search: "Search:",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [{
-                                            orderable: true,
-                                            targets: '_all'
-                                        },
-                                        {
-                                            orderable: false,
-                                            targets: 4
-                                        }
-                                    ]
-                                });
-                            });
-                        </script>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Manage Therapists -->
-
-            <div id="manage-therapist" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Manage Therapists</h1>
-
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <div class="uk-overflow-auto">
-                        <table id="managetherapistTable" class="uk-table uk-table-striped uk-table-hover">
-                            <thead>
-                                <tr>
-                                    <th class="uk-table-shrink">First Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Last Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Email<span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Phone Number<span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Account Status<span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Appointments<span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Content -->
-                            </tbody>
-                        </table>
-
-                        <script>
-                            $(document).ready(function() {
-                                $('#managetherapistTable').DataTable({
-                                    pageLength: 10,
-                                    lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ], // Sort by name column by default
-                                    language: {
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        search: "Search:",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [{
-                                            orderable: true,
-                                            targets: '_all'
-                                        } // Make all columns sortable
-                                    ]
-                                });
-                            });
-                        </script>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Account Details Section -->
-            <div id="account-details" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Account Details</h1>
-
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
-                    <div class="uk-flex uk-flex-center">
-                        <div class="uk-width-1-4">
-                            <img class="uk-border-circle" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form class="uk-grid-small" uk-grid>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" value="<?php echo $firstName; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" value="<?php echo $lastName; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" value="<?php echo $email; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" value="<?php echo $phoneNumber; ?>" disabled>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Settings Section -->
-            <div id="settings" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Settings</h1>
-
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
-                    <form action="settings.php" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="action" value="upload_profile_picture">
-                        <div class="uk-flex uk-flex-middle">
-                            <div class="profile-upload-container">
-                                <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
-                                <div class="uk-flex uk-flex-column uk-margin-left">
-                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden" onchange="previewProfilePhoto(event)">
-                                    <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
-                                    <div class="uk-text-center">
-                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
-                                    </div>
-                                </div>
-                                <div class="uk-margin-large-left">
-                                    <h4>Image requirements:</h4>
-                                    <ul class="uk-list">
-                                        <li>1. Min. 400 x 400px</li>
-                                        <li>2. Max. 2MB</li>
-                                        <li>3. Your face</li>
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
-                    </form>
-                </div>
-
-                <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
-                        <input type="hidden" name="action" value="update_user_details">
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>">
-                            <small style="color: red;" class="error-message" data-error="firstName"></small>
-                        </div>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>">
-                            <small style="color: red;" class="error-message" data-error="lastName"></small>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>">
-                            <small style="color: red;" class="error-message" data-error="email"></small>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"
-                                value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>">
-                            <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
-                        </div>
-                        <small style="color: red;" class="error-message" data-error="duplicate"></small>
-                        <small style="color: green;" class="error-message" id="successMessage"></small>
-                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
-                        </div>
-                    </form>
-                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying 
-                    ?>
-                    <?php unset($_SESSION['update_success']); // Clear success message 
-                    ?>
-                </div>
-            </div>
         </div>
 
         <script>
