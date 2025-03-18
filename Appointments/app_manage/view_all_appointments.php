@@ -183,17 +183,12 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
                     <?php endif; ?>
                     <li class="uk-active"><a href="view_all_appointments.php">View All Appointments</a></li>
                     <?php if (strtolower($_SESSION['account_Type']) !== "head therapist") : ?>
-<<<<<<< HEAD
-                    <li><a href="../../Dashboards/forAdmin/add_therapist.php">Manage Therapists (Adding Only)</a></li>
-                    <?php endif; ?>                    
-=======
                         <li><a href="#manage-therapist" onclick="showSection('manage-therapist')">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
                     <?php endif; ?>
                     <li><a href="">System Analytics</a></li>
                     <li><a href="">Manage Website Contents</a></li>
                     <li><a href="#account-details" onclick="showSection('account-details')">Profile</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
->>>>>>> origin/FINAL-FRONT-END
                 </ul>
             </div>
         </div>
