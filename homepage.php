@@ -26,6 +26,16 @@ if ($result->num_rows > 0) {
     echo "";
 }
 
+// Fetch dynamic content from the database
+$stmt = $connection->prepare("SELECT section_name, content FROM webpage_content");
+$stmt->execute();
+$result = $stmt->get_result();
+
+$content = [];
+while ($row = $result->fetch_assoc()) {
+    $content[$row['section_name']] = $row['content'];
+}
+
 
 $stmt->close();
 
@@ -77,8 +87,8 @@ $stmt->close();
                         <ul class="uk-navbar-nav">
                             <li class="uk-active"><a href="#section2">Services</a></li>
                             <li class="uk-active"><a href="#section3">About Us</a></li>
-                            <li class="uk-active"><a href="#">Terms and Conditions</a></li>
-                            <li class="uk-active"><a href="#">FAQs</a></li>
+                            <li class="uk-active"><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
+                            <li class="uk-active"><a href="#faqs-modal" uk-toggle>FAQs</a></li>
 
                         </ul>
                     </div>
@@ -143,7 +153,6 @@ $stmt->close();
     <!---------------- Welcome Section ---------------->
 
     <div class="uk-section" id="section1">
-
         <div class="" uk-grid style="margin-left: 0px;">
             <div class="homepage-welcome uk-width-1-2@l uk-width-1-1@s uk-width-1-1@m">
 
@@ -165,85 +174,226 @@ $stmt->close();
                 </div>
 
             </div>
-
-
-
         </div>
-
     </div>
+
+
+    <!---------------- Services Section ---------------->
 
     <div id="section2" class="uk-section">
         <div class="uk-container">
-
-
-            <h2 class="service-title">
+            <h2 class="service-title uk-text-center">
                 Therapy Services Offered
             </h2>
 
-            <div class="uk-grid-match uk-child-width-1-2@m" uk-grid>
+            <div class="uk-grid-match uk-child-width-1-2@m uk-grid" uk-height-match="target: > div > .service-content">
 
-                
+                <!-- Initial Evaluation Service -->
                 <div>
-                    <div class="ie-img">
-                        <img src="CSS/ie.png" alt="Initial Evaluation" style="height: 350px;">
+                    <div class="service-content uk-flex uk-flex-column">
+                        <div class="ie-img uk-flex uk-flex-center">
+                            <img src="CSS/ie.png" alt="Initial Evaluation" style="height: 350px;">
+                        </div>
+
+                        <div class="service-content uk-flex uk-flex-column">
+                            <h4 class="service uk-text-center">Initial Evaluation</h4>
+
+                            <div class="service-description uk-flex-1">
+                                <p>
+                                    Our welcoming initial evaluation is a gentle way for us to get to know your child and understand their unique strengths and needs. Through playful interaction and observation, we craft a personalized plan that nurtures their growth.
+                                </p>
+                            </div>
+
+                            <div class="uk-flex uk-flex-column">
+                                <div class="service-description"><strong>This includes:</strong></div>
+                                <ul class="service-description uk-list uk-list-disc">
+                                    <li>1-hour evaluation session which includes interview, assessment, and discussion of findings.</li>
+                                    <li>Parent's interview including review of history and discussion of findings, recommendations, and goals.</li>
+                                    <li>Assessment, Functional Assessment, and Child Observation.</li>
+                                    <li>Review of records and latest progress reports from Developmental Pediatrician, schools, and other practitioners.</li>
+                                    <li>Assessment is recorded for documentation but is strictly for clinician's use only and cannot be given to the parents.</li>
+                                    <li>Comprehensive written reports will be given 4-6 weeks after the date of assessment.</li>
+                                    <li>All incoming students, whether the child underwent or is still undergoing therapy from another therapy center, will undergo assessment at Little Wanderer Therapy Center.</li>
+                                </ul>
+                            </div>
+                        </div>
+
                     </div>
-                    <h4 class="service">
-                        Initial Evaluation
-                    </h4>
-                    <p class="service-description">
-                        Our welcoming initial evaluation is a gentle way for us to get to know your child and understand their unique strengths and needs. Through playful interaction and observation, we craft a personalized plan that nurtures their growth. This first step ensures we build a supportive and effective therapy journey together.
-                    </p>
                 </div>
 
-                
+                <!-- Play Group Service -->
                 <div>
-                    <div class="ie-img">
-                        <img src="CSS/playgroup.png" alt="Playgroup" style="height: 350px;">
-                    </div>
-                    <h4 class="service">
-                        Playgroup
-                    </h4>
-                    <p class="service-description">
+                    <div class="service-content uk-flex uk-flex-column">
+                        <div class="ie-img uk-flex uk-flex-center">
+                            <img src="CSS/playgroup.png" alt="Playgroup" style="height: 350px;">
+                        </div>
 
-                        Our delightful playgroup offers a safe and cheerful space where children can laugh, play, and make new friends. With a mix of guided activities and free play, kids naturally develop social skills, cooperation, and emotional expression. Each session is a joyful adventure that fosters friendships and self-confidence in a nurturing atmosphere.
-                    </p>
+                        <div class="service-content uk-flex uk-flex-column">
+
+                            <h4 class="service uk-text-center">Play Group Session</h4>
+
+                            <div class="service-description uk-flex-1">
+                                <p>
+                                    Our delightful playgroup offers a safe and cheerful space where children can laugh, play, and make new friends.
+                                    With a mix of guided activities and free play, kids naturally develop social skills, cooperation, and emotional expression.
+                                </p>
+                            </div>
+
+                            <div class="uk-flex uk-flex-column">
+                                <div class="service-description"><strong>This includes:</strong></div>
+                                <ul class="service-description uk-list uk-list-disc">
+                                    <li>2-hour playgroup program Thursday to Saturday 1-3 PM.</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
 
-                
+                <!-- Applied Behavioral Therapy -->
                 <div>
-                    <div class="ie-img">
-                        <img src="CSS/behavioral.png" alt="Behavioral" style="height: 350px;">
+                    <div class="service-content uk-flex uk-flex-column">
+                        <div class="ie-img uk-flex uk-flex-center">
+                            <img src="CSS/behavioral.png" alt="Behavioral Therapy" style="height: 350px;">
+                        </div>
+
+                        <div class="service-content uk-flex uk-flex-column">
+                            <h4 class="service uk-text-center">Applied Behavioral Therapy</h4>
+
+                            <div class="service-description uk-flex-1">
+                                <p>
+                                    In our compassionate behavioral therapy sessions, we empower children to develop positive behaviors and emotional balance. Together, we explore gentle strategies that address challenges like anxiety, tantrums, or focus difficulties.
+                                </p>
+                            </div>
+
+                            <div class="uk-flex uk-flex-column">
+                                <div class="service-description"><strong>This includes:</strong></div>
+                                <ul class="service-description uk-list uk-list-disc">
+                                    <li>50 minutes of intervention (Face to Face).</li>
+                                    <li>5 minutes of note-taking.</li>
+                                    <li>5 minutes giving feedback to the parents.</li>
+                                </ul>
+                            </div>
+
+                        </div>
                     </div>
-                    <h4 class="service">
-                        Behavioral
-                    </h4>
-                    <p class="service-description">
-                        In our compassionate behavioral therapy sessions, we empower children to develop positive behaviors and emotional balance. Together, we explore gentle strategies that address challenges like anxiety, tantrums, or focus difficulties. Our supportive environment helps your child thrive, building resilience and joyful connections at home and beyond.
-                    </p>
                 </div>
 
-                
+                <!-- Occupational Therapy -->
                 <div>
-                    <div class="ie-img">
-                        <img src="CSS/speech.png" alt="Speech" style="height: 350px;">
+                    <div class="service-content uk-flex uk-flex-column">
+                        <div class="ie-img uk-flex uk-flex-center">
+                            <img src="CSS/speech.png" alt="Speech Therapy" style="height: 350px;">
+                        </div>
+
+                        <div class="service-content uk-flex uk-flex-column">
+                        <h4 class="service uk-text-center">Occupational Therapy</h4>
+
+                        <div class="service-description uk-flex-1">
+                        <p>
+                            Our engaging occupational therapy sessions are designed to help your child find their voice and express themselves with confidence. Through fun activities and loving encouragement, we work on speech clarity, language skills, and social communication.
+                        </p>
+                        </div>
+
+                        <div class="uk-flex uk-flex-column">
+                            <div class="service-description"><strong>This includes:</strong></div>
+                            <ul class="service-description uk-list uk-list-disc">
+                                <li>55 minutes of intervention (Face to Face) with note-taking.</li>
+                                <li>5 minutes giving feedback to parents or significant others regarding the child's performance during the session and necessary home instructions.</li>
+                            </ul>
+                        </div>
+
                     </div>
-                    <h4 class="service">
-                        Speech
-                    </h4>
-                    <p class="service-description">
-                        Our engaging speech therapy sessions are designed to help your child find their voice and express themselves with confidence. Through fun activities and loving encouragement, we work on speech clarity, language skills, and social communication. Every milestone celebrated brings your child closer to sharing their thoughts and feelings with ease.
-                    </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <!--About Us Section-->
+    <div id="section3" class="uk-section">
+        <h2 class="about-us-title">
+            About Us
+        </h2>
+        <div class="about-us uk-grid uk-flex-middle" uk-grid style="margin-left: 0px;">
+
+            <!-- Description Section -->
+            <div class="uk-width-1-2@l uk-width-1-1@s uk-width-1-2@m">
+
+                <div class="about-us-quote">
+                    Nurturing Wander and Wonders
+                </div>
+                
+                <!-- TESTING FOR MANAGE CONTENT -->
+                <div class="about-us-description">
+                    <!-- Wanderer Therapy Center, located in Makati City, is committed to improving the lives of children by offering accessible, high-quality therapy services. Our mission is to identify special needs early, provide the necessary support, and implement effective interventions, ensuring that young people can fully participate and thrive. We aim to make a positive difference in the lives of the children and families in our community by nurturing wander and wonder. -->
+                    <?php echo $content['about_us'] ?? ''; ?>
+
+                </div>
+            </div>
+
+            <!-- Slideshow Section -->
+            <div class="uk-width-1-2@l uk-width-1-1@s uk-width-1-2@m">
+                <div class="" uk-slideshow="finite: true; pause-on-hover: true; autoplay: true; autoplay-interval: 6000">
+                    <ul class="about-us-slideshow uk-slideshow-items" style="aspect-ratio: 16 / 12; width: 100%;">
+                        <li>
+                            <img src="CSS/building.png" alt="" uk-cover>
+                        </li>
+                        <li>
+                            <img src="CSS/lobby.png" alt="" uk-cover>
+                        </li>
+                        <li>
+                            <img src="CSS/session-room.png" alt="" uk-cover>
+                        </li>
+                        <li>
+                            <img src="CSS/middle-table.png" alt="" uk-cover>
+                        </li>
+                        <li>
+                            <img src="CSS/play-area.png" alt="" uk-cover>
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!---------------- About Us  ---------------->
-    <div id="section3" class="uk-section">
-        <div class="uk-container">
-            <div class="uk-grid-match uk-child-width-1-2@m" uk-grid>
-                testing tetsing
-            </div>
+    <!-- Terms and Conditions Modal -->
+    <div id="tnc-modal" uk-modal>
+        <div class="uk-modal-dialog uk-modal-body">
+            <h2 class="uk-modal-title">Terms and Conditions</h2>
+            <!-- TESTING FOR MANAGE CONTENT -->
+            <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
+
+                Donec vehicula, augue non mattis venenatis, nisl quam tincidunt velit, id mattis quam quam nec justo. Nullam efficitur tempor volutpat. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque gravida elit non libero porta, in euismod arcu aliquet. Praesent posuere posuere dolor. Nullam mattis lectus nisl, at aliquam urna interdum vitae. Etiam non lobortis urna. Donec elementum, urna sed lobortis maximus, nulla metus elementum nibh, sit amet egestas libero tellus vel nibh. Sed sapien ex, tincidunt pellentesque magna a, condimentum lobortis ante. Quisque sed sollicitudin arcu, a congue elit. Vestibulum dictum elit vitae eleifend gravida. Nulla suscipit felis at eros dignissim convallis. Mauris ut tincidunt justo. Vivamus velit leo, ornare vitae nibh eget, congue tempus quam. Duis vehicula eu erat ac fringilla.
+
+                Vivamus eleifend, risus sed iaculis tincidunt, urna dui hendrerit lacus, et pharetra nulla massa a urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi pretium eget turpis id pulvinar. Nullam in imperdiet sem, et consectetur dui. Pellentesque mattis ex in feugiat tempus. In at nunc orci. Sed accumsan scelerisque ipsum, vel lobortis sem gravida non. Curabitur facilisis, felis molestie ornare consectetur, nibh ex congue nisi, in mattis erat leo at nisi. Vestibulum et lorem nec lorem elementum eleifend. </p>
+             -->
+                <p><?php echo $content['terms'] ?? ''; ?></p>
+                <p class="uk-text-right">
+                <button class="uk-button uk-button-primary uk-modal-close" type="button">Close</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- FAQs Modal -->
+    <div id="faqs-modal" uk-modal>
+        <div class="uk-modal-dialog uk-modal-body">
+            <h2 class="uk-modal-title">FAQs</h2>
+            <!-- TESTING FOR MANAGE CONTENT -->
+            <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
+
+                Donec vehicula, augue non mattis venenatis, nisl quam tincidunt velit, id mattis quam quam nec justo. Nullam efficitur tempor volutpat. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque gravida elit non libero porta, in euismod arcu aliquet. Praesent posuere posuere dolor. Nullam mattis lectus nisl, at aliquam urna interdum vitae. Etiam non lobortis urna. Donec elementum, urna sed lobortis maximus, nulla metus elementum nibh, sit amet egestas libero tellus vel nibh. Sed sapien ex, tincidunt pellentesque magna a, condimentum lobortis ante. Quisque sed sollicitudin arcu, a congue elit. Vestibulum dictum elit vitae eleifend gravida. Nulla suscipit felis at eros dignissim convallis. Mauris ut tincidunt justo. Vivamus velit leo, ornare vitae nibh eget, congue tempus quam. Duis vehicula eu erat ac fringilla.
+
+                Vivamus eleifend, risus sed iaculis tincidunt, urna dui hendrerit lacus, et pharetra nulla massa a urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi pretium eget turpis id pulvinar. Nullam in imperdiet sem, et consectetur dui. Pellentesque mattis ex in feugiat tempus. In at nunc orci. Sed accumsan scelerisque ipsum, vel lobortis sem gravida non. Curabitur facilisis, felis molestie ornare consectetur, nibh ex congue nisi, in mattis erat leo at nisi. Vestibulum et lorem nec lorem elementum eleifend. </p>
+             -->
+                <p><?php echo $content['faqs'] ?? ''; ?></p>
+                <p class="uk-text-right">
+                <button class="uk-button uk-button-primary uk-modal-close" type="button">Close</button>
+            </p>
         </div>
     </div>
 
