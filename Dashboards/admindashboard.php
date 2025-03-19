@@ -145,8 +145,12 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <li><a href="#Accounts" onclick="showSection('Accounts')">Accounts</a></li>
 
 
-                    <!-- Adding Therapist to be deleted after ACCOUNTS section finished -->
+                    <!-- **** Adding Therapist to be deleted after ACCOUNTS section finished ****-->
                     <li><a href="forAdmin/add_therapist.php">Add Therapist</a></li>
+
+                    <!-- **** View Present Users to be deleted after ACCOUNTS section finished ****-->
+                    <li><a href="forAdmin/users.php">Users (Accounts)</a></li>
+
 
 
                     <!-- TO BE SECTIONED - Reference File: -->
