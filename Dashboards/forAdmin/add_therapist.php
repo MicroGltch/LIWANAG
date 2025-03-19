@@ -20,7 +20,7 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Add Therapist - Test</title>
+    <title>Add Therapist</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="../../assets/favicon.ico">
@@ -44,60 +44,20 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
     <!--SWAL-->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <style>
+        html,
+        body {
+            background-color: #ffffff !important;
+        }
+    </style>
+
 </head>
 
 <body>
-    <script>
-        console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
-    </script>
-    <!-- Navbar -->
-    <nav class="uk-navbar-container logged-in">
-        <div class="uk-container">
-            <div uk-navbar>
-                <div class="uk-navbar-center">
-                    <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
-                </div>
-                <div class="uk-navbar-right">
-                    <ul class="uk-navbar-nav">
-                        <li>
-                            <a href="#" class="uk-navbar-item">
-                            <img class="profile-image" src="../../CSS/default.jpg" alt="Profile Image" uk-img>
-                            </a>
-                        </li>
-                        <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
-                        </li>
-                        <li><a href="../../Accounts/logout.php">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <hr class="solid">
-
-    <!-- Main Content -->
-    <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport">
-        <!--Sidebar-->
-        <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
-            <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
-                Menu <span uk-navbar-toggle-icon></span>
-            </button>
-            <div class="sidebar-nav">
-                <ul class="uk-nav uk-nav-default">
-                    <li><a href="../admindashboard.php">Dashboard</a></li>
-                    <li><a href="manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
-                    <li><a href="../../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-                    <li class="uk-active"><a href="add_therapist.php">Manage Therapists (Adding Only)</a></li>
-                </ul>
-            </div>
-        </div>
-
         <!-- Content Area -->
-        <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
-            <div class="uk-width-1-1">
-                <h2>Add Therapist Form</h2>
+                <h2>Add a New Therapist Form</h2>
 
-                <form id="addTherapist" class="uk-form-stacked uk-grid-medium" uk-grid method="POST" action="add_therapist.php">
+                <form id="addTherapist" class="uk-form-s tacked" method="POST" action="add_therapist.php">
 
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">First Name</label>
@@ -122,8 +82,6 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
                         </div>
                     </form>
 
-            </div>
-        </div>
 </body>
 
 </html>
@@ -149,7 +107,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $accountStatus = "Pending";
 
     if (empty($firstName) || empty($lastName) || empty($email) || empty($phone)) {
-        echo "<script>Swal.fire('Error', 'All fields are required.', 'error');</script>";
+        echo "<script>
+            window.parent.postMessage({
+                'type': 'swal',
+                'title': 'Error',
+                'text': 'All fields are required.',
+                'icon': 'error'
+            }, '*');
+        </script>";
     } else {
         $checkEmail = $connection->prepare("SELECT * FROM users WHERE account_Email = ?");
         $checkEmail->bind_param("s", $email);
@@ -164,9 +129,24 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             if ($stmt->execute()) {
                 send_email_notification($email, $therapist_name);
-                echo "<script>Swal.fire('Success', 'Therapist added and emailed successfully!', 'success');</script>";
+                echo "<script>
+                    console.log('postMessage sent: Success'); // ADD THIS LINE
+                    window.parent.postMessage({
+                        'type': 'swal',
+                        'title': 'Success',
+                        'text': 'Therapist added and emailed successfully!',
+                        'icon': 'success'
+                    }, '*');
+                </script>";
             } else {
-                echo "<script>Swal.fire('Error', 'Failed to add therapist.', 'error');</script>";
+                echo "<script>
+                    window.parent.postMessage({
+                        'type': 'swal',
+                        'title': 'Error',
+                        'text': 'Failed to add therapist.',
+                        'icon': 'error'
+                    }, '*');
+                </script>";
             }
             $stmt->close();
         }
@@ -196,7 +176,7 @@ function send_email_notification($email, $therapist_name) {
         $emailBody = "
             <h3>Welcome to Little Wanderer's Therapy Center</h3>
             <p>Dear <strong>$therapist_name</strong>,</p>
-            <p>We are excited to welcome you as a therapist at <strong>Little Wanderer's Therapy Center</strong>. Your account has been successfully created and is currently <strong>pending approval</strong>.</p>
+            <p>We are excited to welcome you as a therapist at <strong>Little Wanderer's Therapy Center</strong>. Your account has been successfully created and is currently <strong>not yet activated</strong>.</p>
 
             <h4>Login Credentials:</h4>
             <ul>

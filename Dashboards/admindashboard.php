@@ -10,6 +10,7 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
 
 $userid = $_SESSION['account_ID'];
 
+// ✅ Fetch user profile data (admin/head therapist)
 $stmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
 $stmt->bind_param("s", $userid);
 $stmt->execute();
@@ -21,27 +22,89 @@ if ($result->num_rows > 0) {
     $lastName = $userData['account_LName'];
     $email = $userData['account_Email'];
     $phoneNumber = $userData['account_PNum'];
-
-    if ($userData['profile_picture']) {
-        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture'];
-    } else {
-        $profilePicture = '../CSS/default.jpg';
-    }
+    $profilePicture = $userData['profile_picture'] ? '../uploads/client_profile_pictures/' . $userData['profile_picture'] : '../CSS/default.jpg';
 } else {
     echo "No Data Found.";
 }
 
 $stmt->close();
 
-// Define all possible status types
-$allStatuses = ['pending', 'approved', 'waitlisted', 'completed', 'cancelled', 'declined', 'others'];
+// ✅ Fetch clients data for the table
+try {
+    $stmt = $connection->prepare("
+        SELECT account_ID, account_FName, account_LName, account_Email, account_PNum, account_status
+        FROM users WHERE account_Type = 'client'
+    ");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $clients = $result->fetch_all(MYSQLI_ASSOC);
 
-// Initialize counts for all status types with 0
+    // Fetch appointment counts for each client
+    foreach ($clients as &$client) {
+        $clientId = $client['account_ID'];
+        $countStmt = $connection->prepare("
+            SELECT COUNT(*) AS appointment_count
+            FROM appointments
+            WHERE account_id = ?
+        ");
+        $countStmt->bind_param("s", $clientId);
+        $countStmt->execute();
+        $countResult = $countStmt->get_result();
+        $countRow = $countResult->fetch_assoc();
+        $client['appointment_count'] = $countRow['appointment_count'];
+        $countStmt->close();
+    }
+} catch (Exception $e) {
+    $client_error = $e->getMessage();
+} finally {
+    if (isset($stmt)) {
+        $stmt->close();
+    }
+}
+
+// ✅ Fetch patients data for the table
+try {
+    $stmt = $connection->prepare(" SELECT p.patient_id, p.account_id, 
+        p.first_name AS patient_fname, p.last_name AS patient_lname, 
+        p.bday, p.gender, p.profile_picture, 
+        u.account_FName AS client_fname, u.account_LName AS client_lname
+        FROM patients p
+        INNER JOIN users u ON p.account_id = u.account_ID;
+    ");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $patients = $result->fetch_all(MYSQLI_ASSOC);
+} catch (Exception $e) {
+    $patient_error = $e->getMessage();
+} finally {
+    if (isset($stmt)) {
+        $stmt->close();
+    }
+}
+
+// ✅ Fetch therapists data for the table
+try {
+    $stmt = $connection->prepare(" SELECT account_FName, account_LName, account_Email, account_PNum, account_status
+        FROM users WHERE account_Type = 'therapist'
+    ");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $therapists = $result->fetch_all(MYSQLI_ASSOC);
+} catch (Exception $e) {
+    $therapist_error = $e->getMessage();
+} finally {
+    if (isset($stmt)) {
+        $stmt->close();
+    }
+}
+
+// ✅ Appointment summary (Dashboard)
+$allStatuses = ['pending', 'approved', 'waitlisted', 'completed', 'cancelled', 'declined', 'others'];
 $appointmentCounts = array_fill_keys($allStatuses, 0);
 
-// ✅ Query to count appointments by type
 $countQuery = "SELECT status, COUNT(*) as count FROM appointments GROUP BY status";
 $result = $connection->query($countQuery);
+
 while ($row = $result->fetch_assoc()) {
     $status = strtolower($row['status']);
     if (in_array($status, $allStatuses)) {
@@ -51,21 +114,20 @@ while ($row = $result->fetch_assoc()) {
     }
 }
 
-// ✅ Query to get all appointments
+// ✅ Get all appointments (Dashboard)
 $appointmentQuery = "SELECT a.appointment_id, a.patient_id, a.date, a.time, a.status, 
-                            p.first_name, p.last_name,
-                            u.account_FName AS client_firstname, u.account_LName AS client_lastname 
-                    FROM appointments a
-                    JOIN patients p ON a.patient_id = p.patient_id
-                    JOIN users u ON a.account_id = u.account_ID
-                    ORDER BY a.date ASC, a.time ASC";
+    p.first_name, p.last_name,
+    u.account_FName AS client_firstname, u.account_LName AS client_lastname 
+    FROM appointments a
+    JOIN patients p ON a.patient_id = p.patient_id
+    JOIN users u ON a.account_id = u.account_ID
+    ORDER BY a.date ASC, a.time ASC";
 $appointments = $connection->query($appointmentQuery)->fetch_all(MYSQLI_ASSOC);
 
-// Get total count of all appointments
+// ✅ Get total count of all appointments (Dashboard)
 $totalQuery = "SELECT COUNT(*) as total FROM appointments";
 $totalResult = $connection->query($totalQuery);
 $totalAppointments = $totalResult->fetch_assoc()['total'];
-
 ?>
 
 
@@ -140,40 +202,32 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                    
+                    <li><a href="#view-appointments" onclick="showSection('view-appointments')">View All Appointments</a></li>
+                    
+                    <li class="uk-parent">
+                        <a>Accounts</a>
+                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
+                            <li style="padding:0px 0px 15px 0px"><a href="#clients" onclick="showSection('clients')"> Clients</a></li>
+                            <li style="padding:0px 0px 15px 0px"><a href="#patients" onclick="showSection('patients')"> Patients</a></li>
+                        </ul>
+                    </li>
 
-                    <!-- Show tables for all Users in this section-->
-                    <li><a href="#accounts" onclick="showSection('accounts')">Accounts</a></li>
+                    <li class="uk-parent">
+                        <a href="#manage-therapist" onclick="showSection('manage-therapist')"> Manage Therapists</a>
+                            <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
+                            <li style="padding:0px 0px 15px 0px"><a href="#add-therapist" onclick="showSection('add-therapist')"> Add Therapist</a></li>
+                        </ul>
+                    </li>
 
-                    <!-- TO BE SECTIONED - Reference File:  -->
-                    <!-- <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li> -->
+
+                    <li><a href="#system-analytics" onclick="showSection('system-analytics')">System Analytics</a></li>
+                    
                     <li><a href="#timetable-settings" onclick="showSection('timetable-settings')">Manage Timetable Settings</a></li>
 
+                    <li><a href="#manage-content" onclick="showSection('manage-content')">Manage Webpage Contents</a></li>
 
-                    <!-- **** Adding Therapist to be deleted after ACCOUNTS section finished ****-->
-                    <li><a href="forAdmin/add_therapist.php">Add Therapist</a></li>
-
-                    <!-- **** View Present Users to be deleted after ACCOUNTS section finished ****-->
-                    <li><a href="forAdmin/users.php">Users (Accounts)</a></li>
-
-
-
-                    <!-- TO BE SECTIONED - Reference File: -->
-                    <!-- <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li> -->
-                    <li><a href="#view-appointments" onclick="showSection('view-appointments')">View All Appointments</a></li>
-                    <!-- Actually parang nasa dashboard na to so lipat nlng -->
-
-                    <!-- Disregard muna -->
-                    <!-- <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li> -->
-                    <li><a href="#manage-therapist" onclick="showSection('manage-therapist')">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
-
-                    <!-- TO BE SECTIONED - Reference File: -->
-                    <!-- <li><a href="forAdmin/systemAnalytics/system_analytics.php">System Analytics</a></li> -->
-                    <li><a href="#system-analytics" onclick="showSection('system-analytics')">System Analytics</a></li>
-
-                    <!-- To follow -->
-                    <li><a href="">Manage Website Contents</a></li>
-
-                    <!-- To follow -->
+                    <!-- To follow & confirm-->
                     <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
@@ -208,94 +262,72 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
 
                 <hr>
-
-                <!-- ✅ Appointments List -->
-                <h3>All Appointments</h3>
-                <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover">
-                    <thead>
-                        <tr>
-                            <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($appointments as $appointment): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
-                                <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
-                                <td><?= htmlspecialchars($appointment['date']); ?></td>
-                                <td><?= htmlspecialchars($appointment['time']); ?></td>
-                                <td><?= htmlspecialchars(ucfirst($appointment['status'])); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-
-                <script>
-                    $(document).ready(function() {
-                        $('#appointmentsTable').DataTable({
-                            pageLength: 10,
-                            lengthMenu: [10, 25, 50],
-                            order: [
-                                [2, 'asc']
-                            ], // Sort by date column by default
-                            language: {
-                                lengthMenu: "Show _MENU_ entries per page",
-                                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                search: "Search:",
-                                paginate: {
-                                    first: "First",
-                                    last: "Last",
-                                    next: "Next",
-                                    previous: "Previous"
-                                }
-                            },
-                            columnDefs: [{
-                                    orderable: true,
-                                    targets: '_all'
-                                }, // Make all columns sortable
-                                {
-                                    type: 'date',
-                                    targets: 2
-                                } // Specify date type for date column
-                            ]
-                        });
-                    });
-                </script>
             </div>
 
+            <!-- View All Appointments Section 📑-->
+            <div id="view-appointments" class="section" style="display: none;">
+                <h1 class="uk-text-bold">View All Appointments</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="viewAppointmentsFrame" src="../Appointments/app_manage/view_all_appointments.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
+
             <!-- Accounts Section 📑 -->
-            <div id="accounts" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Accounts</h1>
+            <!-- Clients -->
+            <div id="clients" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Clients</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <div class="uk-overflow-auto">
-                        <table id="accountsTable" class="uk-table uk-table-striped uk-table-hover">
-                            <thead>
-                                <tr>
-                                    <th class="uk-table-shrink">Name <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Service Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Assigned Therapist <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Guardian <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Content -->
-                            </tbody>
+                        <table id="clientsTable" class="uk-table uk-table-striped uk-table-hover">
+                        <thead>
+                            <tr>
+                                <th class="uk-table-shrink">Account ID<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th class="uk-table-shrink">First Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th class="uk-table-shrink">Last Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th class="uk-table-shrink">Email<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th class="uk-table-shrink">Phone Number<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th class="uk-table-shrink">Account Status<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th class="uk-table-shrink">Appointments<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th class="uk-table-shrink">Actions<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (isset($clients) && !empty($clients)) : ?>
+                                <?php foreach ($clients as $client) : ?>
+                                    <tr>
+                                    <td><?= htmlspecialchars($client['account_ID']); ?></td>
+                                    <td><?= htmlspecialchars($client['account_FName']); ?></td>
+                                    <td><?= htmlspecialchars($client['account_LName']); ?></td>
+                                    <td><?= htmlspecialchars($client['account_Email']); ?></td>
+                                    <td><?= htmlspecialchars($client['account_PNum']); ?></td>
+                                    <td><?= htmlspecialchars($client['account_status']); ?></td>
+                                    <td><?= htmlspecialchars($client['appointment_count']); ?></td>
+                                    <td><?php if ($client['account_status'] != 'Archived') { ?>
+                                        <button class="uk-button uk-button-danger archive-user" data-account-id="<?= $client['account_ID']; ?>">Archive</button>
+                                        <?php } ?>
+                                        </td>
+                                        <!-- Activate account logic to follow
+                                        <button class="uk-button uk-button-danger activate-user" data-account-id=">Activate</button>
+                                         -->
+                                        
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php elseif (isset($client_error)) : ?>
+                                <tr><td colspan="7"><?= htmlspecialchars($client_error); ?></td></tr>
+                            <?php else : ?>
+                                <tr><td colspan="7">No clients found.</td></tr>
+                            <?php endif; ?>
+                        </tbody>
                         </table>
 
                         <script>
                             $(document).ready(function() {
-                                $('#accountsTable').DataTable({
+                                $('#clientsTable').DataTable({
                                     pageLength: 10,
                                     lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ], // Sort by name column by default
+                                    order: [[0, 'asc']],
                                     language: {
                                         lengthMenu: "Show _MENU_ entries per page",
                                         info: "Showing _START_ to _END_ of _TOTAL_ entries",
@@ -307,15 +339,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                             previous: "Previous"
                                         }
                                     },
-                                    columnDefs: [{
-                                            orderable: true,
-                                            targets: '_all'
-                                        },
-                                        {
-                                            orderable: false,
-                                            targets: 4
-                                        }
-                                    ]
+                                    columnDefs: [{ orderable: true, targets: '_all' }]
                                 });
                             });
                         </script>
@@ -323,25 +347,75 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
             </div>
 
-            <!-- Manage Timetable Settings Section 📑-->
-            <div id="timetable-settings" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Manage Timetable Settings</h1>
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <iframe id="manageTimetableSettingsFrame" src="forAdmin/manageWebpage/timetable_settings.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
-                </div>
-            </div>
+            <!-- Patients -->
+            <div id="patients" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Patients</h1>
 
-            <!-- View All Appointments Section 📑-->
-
-            <div id="view-appointments" class="section" style="display: none;">
-                <h1 class="uk-text-bold">View All Appointments</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <iframe id="viewAppointmentsFrame" src="../Appointments/app_manage/view_all_appointments.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                    <div class="uk-overflow-auto">
+                        <table id="patientsTable" class="uk-table uk-table-striped uk-table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="uk-table-shrink">First Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Last Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Birthday<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Gender<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Parent/Guardian<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Profile Picture<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (isset($patients) && !empty($patients)) : ?>
+                                    <?php foreach ($patients as $patient) : ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($patient['patient_fname']); ?></td>
+                                            <td><?= htmlspecialchars($patient['patient_lname']); ?></td>
+                                            <td><?= htmlspecialchars($patient['bday']); ?></td>
+                                            <td><?= htmlspecialchars($patient['gender']); ?></td>
+                                            <td><?= htmlspecialchars($patient['client_fname'] . ' ' . $patient['client_lname']); ?></td>
+                                            <td>
+                                                <?php if (!empty($patient['profile_picture'])) : ?>
+                                                    <img src="../uploads/profile_pictures/<?= htmlspecialchars($patient['profile_picture']); ?>" alt="Patient Profile" style="max-width: 50px; max-height: 50px;">
+                                                <?php else : ?>
+                                                    No Picture
+                                                <?php endif; ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php elseif (isset($patient_error)) : ?>
+                                    <tr><td colspan="6"><?= htmlspecialchars($patient_error); ?></td></tr>
+                                <?php else : ?>
+                                    <tr><td colspan="6">No patients found.</td></tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+
+                        <script>
+                            $(document).ready(function() {
+                                $('#patientsTable').DataTable({
+                                    pageLength: 10,
+                                    lengthMenu: [10, 25, 50],
+                                    order: [[0, 'asc']],
+                                    language: {
+                                        lengthMenu: "Show _MENU_ entries per page",
+                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                        search: "Search:",
+                                        paginate: {
+                                            first: "First",
+                                            last: "Last",
+                                            next: "Next",
+                                            previous: "Previous"
+                                        }
+                                    },
+                                    columnDefs: [{ orderable: true, targets: '_all' }]
+                                });
+                            });
+                        </script>
+                    </div>
                 </div>
             </div>
 
             <!-- Manage Therapists Section 📑-->
-
             <div id="manage-therapist" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Manage Therapists</h1>
 
@@ -359,7 +433,29 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Content -->
+                                <?php if (isset($therapists) && !empty($therapists)) : ?>
+                                    <?php foreach ($therapists as $therapist) : ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($therapist['account_FName']); ?></td>
+                                            <td><?= htmlspecialchars($therapist['account_LName']); ?></td>
+                                            <td><?= htmlspecialchars($therapist['account_Email']); ?></td>
+                                            <td><?= htmlspecialchars($therapist['account_PNum']); ?></td>
+                                            <td><?= htmlspecialchars($therapist['account_status']); ?></td>
+                                            <td>
+                                                <?php
+                                                // Add logic here to count and display appointments
+                                                // Example: You'll need to fetch appointment counts based on therapist IDs
+                                                // $appointmentCount = getAppointmentCount($therapist['account_ID']);
+                                                // echo htmlspecialchars($appointmentCount);
+                                                ?>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php elseif (isset($therapist_error)) : ?>
+                                    <tr><td colspan="6"><?= htmlspecialchars($therapist_error); ?></td></tr>
+                                <?php else : ?>
+                                    <tr><td colspan="6">No therapists found.</td></tr>
+                                <?php endif; ?>
                             </tbody>
                         </table>
 
@@ -368,9 +464,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 $('#managetherapistTable').DataTable({
                                     pageLength: 10,
                                     lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ], // Sort by name column by default
+                                    order: [[0, 'asc']],
                                     language: {
                                         lengthMenu: "Show _MENU_ entries per page",
                                         info: "Showing _START_ to _END_ of _TOTAL_ entries",
@@ -382,17 +476,23 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                             previous: "Previous"
                                         }
                                     },
-                                    columnDefs: [{
-                                            orderable: true,
-                                            targets: '_all'
-                                        } // Make all columns sortable
-                                    ]
+                                    columnDefs: [{ orderable: true, targets: '_all' }]
                                 });
                             });
                         </script>
                     </div>
                 </div>
+            
             </div>
+
+            <!-- Add Therapist -->
+            <div id="add-therapist" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Add Therapist</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="addTherapistFrame" src="forAdmin/add_therapist.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
 
             <!-- System Analytics Section 📑-->
             <div id="system-analytics" class="section" style="display: none;">
@@ -402,7 +502,22 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
             </div>
 
+            <!-- Manage Timetable Settings Section 📑-->
+            <div id="timetable-settings" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Manage Timetable Settings</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="manageTimetableSettingsFrame" src="forAdmin/manageWebpage/timetable_settings.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
             <!-- Manage Website Contents Section 📑-->
+            <div id="manage-content" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Manage Website Contents</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="manageWebsiteContentsFrame" src="forAdmin/manageWebpage/webpage_content.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
 
             <!-- Account Details Section 📑-->
             <div id="account-details" class="section" style="display: none;">
@@ -512,7 +627,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
             </div>
 
-            <script>
+    <script>
                 function resizeIframe(iframe) {
                     iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
                 }
@@ -557,6 +672,49 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 function removeProfilePhoto() {
                     document.querySelector('.profile-preview').src = '../CSS/default.jpg';
                 }
+
+                // Archive User
+                document.querySelectorAll('.archive-user').forEach(button => {
+                    button.addEventListener('click', function() {
+                        const accountId = this.dataset.accountId;
+
+                        Swal.fire({
+                            title: 'Are you sure?',
+                            text: "This user will be archived and unable to access their Account!",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#d33',
+                            cancelButtonColor: '#3085d6',
+                            confirmButtonText: 'Yes'
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch('../Accounts/manageaccount/archive_account.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded'
+                                    },
+                                    body: 'account_id=' + accountId
+                                }).then(response => {
+                                    if (response.ok) {
+                                        Swal.fire(
+                                            'Archived!',
+                                            'The account has been archived.',
+                                            'success'
+                                        ).then(() => {
+                                            location.reload();
+                                        });
+                                    } else {
+                                        Swal.fire(
+                                            'Error!',
+                                            'Failed to archive the account.',
+                                            'error'
+                                        );
+                                    }
+                                });
+                            }
+                        });
+                    });
+                });
 
                 // Manage Timetable Settings Frame
                 let manageTimetableSettingsFrame = document.getElementById("manageTimetableSettingsFrame");
@@ -629,6 +787,45 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         });
                     }
                 };
+
+                // Add Therapist Frame
+                let addTherapistFrame = document.getElementById("addTherapistFrame");
+
+                addTherapistFrame.onload = function() {
+                    resizeIframe(addTherapistFrame);
+                    let addTherapistForm = addTherapistFrame.contentDocument.getElementById("addTherapist"); // Match the form ID
+
+                    if (addTherapistForm) {
+                        addTherapistForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("forAdmin/add_therapist.php", { // Correct path
+                                method: "POST",
+                                body: formData
+                            })
+                            .then(response => response.text()) // Expecting HTML response
+                            .then(data => {
+                                addTherapistFrame.contentDocument.body.innerHTML = data; // Replace iframe content
+                                resizeIframe(addTherapistFrame); // Resize after content change
+                            })
+                            .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
+
+                window.addEventListener('message', function(event) {
+                    if (event.data.type === 'swal') {
+                        console.log('Message received:', event.data); // ADD THIS LINE
+                        Swal.fire({
+                            title: event.data.title,
+                            text: event.data.text,
+                            icon: event.data.icon
+                        });
+                    }
+                });
+
 
                 // System Analytics Frame
                 let systemAnalyticsFrame = document.getElementById("systemAnalyticsFrame");
@@ -794,10 +991,11 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     document.querySelectorAll('.section').forEach(section => {
                         section.style.display = 'none';
                     });
-                    document.getElementById(sectionId).style.display = 'block';
+                    const section = document.getElementById(sectionId);
+                    section.style.display = 'block';
 
                     // Resize iframe if present in the section
-                    const iframe = document.getElementById(sectionId).querySelector('iframe');
+                    const iframe = section.querySelector('iframe');
                     if (iframe) {
                         resizeIframe(iframe);
                     }
@@ -807,7 +1005,24 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         link.parentElement.classList.remove('uk-active');
                     });
                     document.querySelector(`.sidebar-nav a[href="#${sectionId}"]`).parentElement.classList.add('uk-active');
+
+                    // Add hash to URL if accounts section is shown
+                    if (sectionId === 'accounts') {
+                        window.location.hash = 'accounts';
+                    } else {
+                        // Remove hash if other sections are shown
+                        if (window.location.hash) {
+                            history.replaceState('', document.title, window.location.pathname + window.location.search);
+                        }
+                    }
                 }
+
+                window.onload = function() {
+                    if (window.location.hash) {
+                        const hash = window.location.hash.substring(1);
+                        showSection(hash);
+                    }
+                };
 
                 function previewProfilePhoto(event) {
                     const reader = new FileReader();
@@ -821,7 +1036,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 function removeProfilePhoto() {
                     document.querySelector('.profile-preview').src = '../CSS/default.jpg';
                 }
-            </script>
+    </script>
 
 </body>
 

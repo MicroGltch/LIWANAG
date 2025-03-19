@@ -134,8 +134,6 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
 
 <body>
     <!-- Main Content -->
-    <h2>View All Appointments</h2>
-
     <!-- 🔹 Filters Section -->
     <form method="GET" class="uk-width-1-1">
         <div class="uk-grid-small uk-flex uk-flex-middle uk-grid-match" uk-grid>
