@@ -69,76 +69,90 @@ $stmt->close();
     <div uk-sticky="start: 200; animation: uk-animation-slide-top; sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; cls-inactive: uk-navbar-transparent uk-light">
 
         <!-- Navbar -->
-        <nav class="uk-navbar-container uk-light uk-navbar-transparent logged-out">
+        <nav class=" uk-navbar-container uk-light uk-navbar-transparent logged-out">
             <div class="uk-container">
-                <div uk-navbar>
-                    <!-- Navbar Left -->
-                    <div class="uk-navbar-left" style="padding: right 10px;">
-                        <ul class="uk-navbar-nav">
-                            <li class="uk-active"><a href="#section2">Services</a></li>
-                            <li class="uk-active"><a href="#section3">About Us</a></li>
-                            <li class="uk-active"><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
-                            <li class="uk-active"><a href="#faqs-modal" uk-toggle>FAQs</a></li>
+        <div uk-navbar>
 
-                        </ul>
-                    </div>
-
-                    <!-- Navbar Center -->
-                    <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
-                    </div>
-
-                    <!-- Navbar Right -->
-                    <div class="uk-navbar-right">
-                        <ul class="uk-navbar-nav">
-                            <?php
-                            if (isset($_SESSION['account_ID'])):
-
-                                $account_ID = $_SESSION['account_ID'];
-                                $query = "SELECT account_FName, account_Type FROM users WHERE account_ID = ?";
-                                $stmt = $connection->prepare($query);
-                                $stmt->bind_param("i", $account_ID);
-                                $stmt->execute();
-                                $stmt->bind_result($account_FN, $account_Type);
-                                $stmt->fetch();
-                                $stmt->close();
-                                $connection->close();
-
-
-                                // Determine the dashboard URL based on account type
-                                switch ($account_Type) {
-                                    case 'admin':
-                                        $dashboardURL = "Dashboards/admindashboard.php";
-                                        break;
-                                    case 'therapist':
-                                        $dashboardURL = "Dashboards/therapistdashboard.php";
-                                        break;
-                                    case 'client':
-                                    default:
-                                        $dashboardURL = "Dashboards/clientdashboard.php";
-                                        break;
-                                }
-                            ?>
-                                <li>
-                                    <a href="#">Hi, <?php echo htmlspecialchars($account_FN); ?>!</a>
-                                    <div class="uk-navbar-dropdown">
-                                        <ul class="uk-nav uk-navbar-dropdown-nav">
-                                            <li><a href="<?php echo $dashboardURL; ?>" style="color: black !important;">Dashboard</a></li>
-                                            <li><a href="Accounts/logout.php" style="color: black !important;">Logout</a></li>
-                                        </ul>
-                                    </div>
-                                </li>
-                            <?php else: ?>
-                                <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
-                                <li><a href="Accounts/loginpage.php">Login</a></li>
-                            <?php endif; ?>
-                        </ul>
-                    </div>
-                </div>
-
+            <!-- Navbar Left (Mobile: Offcanvas Trigger) -->
+            <div class="menu-div uk-navbar-left uk-hidden@s">
+                <a href="#offcanvas-slide" class="menu-button uk-button uk-button-default" uk-toggle>Menu</a>
             </div>
+
+            <!-- Navbar Left (Desktop) -->
+            <div class="uk-navbar-left uk-visible@s">
+                <ul class="uk-navbar-nav">
+                    <li class="uk-active"><a href="#section2">Services</a></li>
+                    <li class="uk-active"><a href="#section3">About Us</a></li>
+                    <li class="uk-active"><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
+                    <li class="uk-active"><a href="#faqs-modal" uk-toggle>FAQs</a></li>
+                </ul>
+            </div>
+
+            <!-- Navbar Center -->
+            <div class="logo-center-div uk-navbar-center">
+                <a class="logo-navbar uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
+            </div>
+
+            <!-- Navbar Right -->
+            <div class="uk-navbar-right">
+                <ul class="uk-navbar-nav">
+                    <?php if (isset($_SESSION['account_ID'])): ?>
+                        <?php
+                        $account_ID = $_SESSION['account_ID'];
+                        $query = "SELECT account_FName, account_Type FROM users WHERE account_ID = ?";
+                        $stmt = $connection->prepare($query);
+                        $stmt->bind_param("i", $account_ID);
+                        $stmt->execute();
+                        $stmt->bind_result($account_FN, $account_Type);
+                        $stmt->fetch();
+                        $stmt->close();
+                        $connection->close();
+
+                        switch ($account_Type) {
+                            case 'admin':
+                                $dashboardURL = "Dashboards/admindashboard.php";
+                                break;
+                            case 'therapist':
+                                $dashboardURL = "Dashboards/therapistdashboard.php";
+                                break;
+                            case 'client':
+                            default:
+                                $dashboardURL = "Dashboards/clientdashboard.php";
+                                break;
+                        }
+                        ?>
+                        <li>
+                            <a class="username-nav" href="#">Hi, <?php echo htmlspecialchars($account_FN); ?>!</a>
+                            <div class="uk-navbar-dropdown">
+                                <ul class="uk-nav uk-navbar-dropdown-nav">
+                                    <li><a href="<?php echo $dashboardURL; ?>" style="color: black !important;">Dashboard</a></li>
+                                    <li><a href="Accounts/logout.php" style="color: black !important;">Logout</a></li>
+                                </ul>
+                            </div>
+                        </li>
+                    <?php else: ?>
+                        <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
+                        <li><a href="Accounts/loginpage.php">Login</a></li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        </div>
     </div>
-    </nav>
+</nav>
+
+<!-- Offcanvas Menu (Mobile) -->
+<div id="offcanvas-slide" uk-offcanvas="mode: slide; overlay: true">
+    <div class="uk-offcanvas-bar">
+        <button class="uk-offcanvas-close" type="button" uk-close></button>
+        <ul class="uk-nav uk-nav-default">
+            <li class="uk-active" ><a href="#section2" style="color:black; margin-top:25px; border-radius: 15px;">Services</a></li>
+            <li class="uk-active" ><a href="#section3" style="color:black; border-radius: 15px;">About Us</a></li>
+            <li class="uk-active" ><a href="#tnc-modal" uk-toggle style="color:black; border-radius: 15px;">Terms and Conditions</a></li>
+            <li class="uk-active" ><a href="#faqs-modal" uk-toggle style="color:black; border-radius: 15px;">FAQs</a></li>
+        </ul>
+    </div>
+</div>
+
 
     <!---------------- Welcome Section ---------------->
 
@@ -182,7 +196,7 @@ $stmt->close();
                 <div>
                     <div class="service-content uk-flex uk-flex-column">
                         <div class="ie-img uk-flex uk-flex-center">
-                            <img src="CSS/ie.png" alt="Initial Evaluation" style="height: 350px;">
+                            <img id="ie-img" src="CSS/ie.png" alt="Initial Evaluation" style="height: 350px;">
                         </div>
 
                         <div class="service-content uk-flex uk-flex-column">
@@ -215,7 +229,7 @@ $stmt->close();
                 <div>
                     <div class="service-content uk-flex uk-flex-column">
                         <div class="ie-img uk-flex uk-flex-center">
-                            <img src="CSS/playgroup.png" alt="Playgroup" style="height: 350px;">
+                            <img id="ie-img" src="CSS/playgroup.png" alt="Playgroup" style="height: 350px;">
                         </div>
 
                         <div class="service-content uk-flex uk-flex-column">
@@ -244,11 +258,11 @@ $stmt->close();
                 <div>
                     <div class="service-content uk-flex uk-flex-column">
                         <div class="ie-img uk-flex uk-flex-center">
-                            <img src="CSS/behavioral.png" alt="Behavioral Therapy" style="height: 350px;">
+                            <img id="ie-img" src="CSS/behavioral.png" alt="Behavioral Therapy" style="height: 350px;">
                         </div>
 
                         <div class="service-content uk-flex uk-flex-column">
-                            <h4 class="service uk-text-center">Applied Behavioral Therapy</h4>
+                            <h4  class="service uk-text-center">Applied Behavioral Therapy</h4>
 
                             <div class="service-description uk-flex-1">
                                 <p>
@@ -273,11 +287,11 @@ $stmt->close();
                 <div>
                     <div class="service-content uk-flex uk-flex-column">
                         <div class="ie-img uk-flex uk-flex-center">
-                            <img src="CSS/speech.png" alt="Speech Therapy" style="height: 350px;">
+                            <img id="ie-img" src="CSS/speech.png" alt="Speech Therapy" style="height: 350px;">
                         </div>
 
                         <div class="service-content uk-flex uk-flex-column">
-                        <h4 class="service uk-text-center">Occupational Therapy</h4>
+                        <h4  class="service uk-text-center">Occupational Therapy</h4>
 
                         <div class="service-description uk-flex-1">
                         <p>
@@ -314,7 +328,7 @@ $stmt->close();
 
 
             <!-- Description Section -->
-            <div class="uk-width-1-2@l uk-width-1-1@s uk-width-1-2@m">
+            <div class="description-div uk-width-1-2@l uk-width-1-1@s uk-width-1-2@m">
 
                 <div class="about-us-quote">
                     Nurturing Wander and Wonders
@@ -326,7 +340,7 @@ $stmt->close();
             </div>
 
             <!-- Slideshow Section -->
-            <div class="uk-width-1-2@l uk-width-1-1@s uk-width-1-2@m">
+            <div class="slideshow-div uk-width-1-2@l uk-width-1-1@s uk-width-1-2@m">
                 <div class="" uk-slideshow="finite: true; pause-on-hover: true; autoplay: true; autoplay-interval: 6000">
                     <ul class="about-us-slideshow uk-slideshow-items" style="aspect-ratio: 16 / 12; width: 100%;">
                         <li>
