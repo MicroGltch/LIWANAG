@@ -54,95 +54,52 @@ $upcomingCount = $result->fetch_assoc()['count'];
     <!--SWAL-->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <style>
+        html,
+        body {
+            background-color: #ffffff !important;
+        }
+    </style>
 </head>
 
 <body>
-    <script>
-        console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
-    </script>
-    <!-- Navbar -->
-    <nav class="uk-navbar-container logged-in">
-        <div class="uk-container">
-            <div uk-navbar>
-                <div class="uk-navbar-center">
-                    <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
-                </div>
-                <div class="uk-navbar-right">
-                    <ul class="uk-navbar-nav">
-                        <li>
-                            <a href="#" class="uk-navbar-item">
-                                <img class="profile-image" src="../../CSS/default.jpg" alt="Profile Image" uk-img>
-                            </a>
-                        </li>
-                        <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
-                        </li>
-                        <li><a href="../../Accounts/logout.php">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <hr class="solid">
-
     <!-- Main Content -->
-    <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport">
-        <!--Sidebar-->
-        <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
-            <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
-                Menu <span uk-navbar-toggle-icon></span>
-            </button>
-            <div class="sidebar-nav">
-                <ul class="uk-nav uk-nav-default">
-                    <li><a href="../../Dashboards/headtherapistdashboard.php">Dashboard</a></li>
-                    <li class="uk-active"><a href="manage_appointments.php">View & Manage Appointments</a></li>
-                    <li><a href="view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="../../Dashboards/forAdmin/add_therapist.php">Manage Therapists (Adding Only)</a></li>
-                </ul>
+    <h1 class="uk-text-bold">Appointment Management Dashboard</h1>
+
+    <!-- ✅ Quick Statistics -->
+    <div class="uk-grid-small uk-child-width-1-3@s uk-text-center" uk-grid>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <h3><?= $totalCount; ?></h3>
+                <p>Total Appointments</p>
             </div>
         </div>
-
-        <!-- Content Area -->
-        <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
-            <!-- Dashboard Section -->
-            <div id="dashboard" class="section">
-                <h1 class="uk-text-bold">Appointment Management Dashboard</h1>
-            </div>
-
-            <!-- ✅ Quick Statistics -->
-            <div class="uk-grid-small uk-child-width-1-3@s uk-text-center" uk-grid>
-                <div>
-                    <div class="uk-card uk-card-default uk-card-body">
-                        <h3><?= $totalCount; ?></h3>
-                        <p>Total Appointments</p>
-                    </div>
-                </div>
-                <div>
-                    <div class="uk-card uk-card-default uk-card-body">
-                        <h3><?= $pendingCount; ?></h3>
-                        <p>Pending Appointments</p>
-                    </div>
-                </div>
-                <div>
-                    <div class="uk-card uk-card-default uk-card-body">
-                        <h3><?= $upcomingCount; ?></h3>
-                        <p>Upcoming Appointments</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ✅ Dashboard Navigation -->
-            <div class="uk-margin-large-top">
-                <h3>Manage Appointments</h3>
-                <div class="uk-grid-small uk-child-width-1-1" uk-grid>
-                    <div>
-                        <a href="validate_appointments.php" class="uk-button uk-button-primary uk-width-1-1">
-                            Validate Appointments (<?= $pendingCount; ?>)
-                        </a>
-                    </div>
-                </div>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <h3><?= $pendingCount; ?></h3>
+                <p>Pending Appointments</p>
             </div>
         </div>
+        <div>
+            <div class="uk-card uk-card-default uk-card-body">
+                <h3><?= $upcomingCount; ?></h3>
+                <p>Upcoming Appointments</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ✅ Dashboard Navigation -->
+    <div class="uk-margin-large-top">
+        <h3>Manage Appointments</h3>
+        <div class="uk-grid-small uk-child-width-1-1" uk-grid>
+            <div>
+                <a href="validate_appointments.php" class="uk-button uk-button-primary uk-width-1-1">
+                    Validate Appointments (<?= $pendingCount; ?>)
+                </a>
+            </div>
+        </div>
+    </div>
+    </div>
     </div>
 </body>
 
