@@ -393,7 +393,7 @@ $stmt->close();
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <div class="uk-flex uk-flex-center">
                         <div class="uk-width-1-4">
-                            <img class="uk-border-circle" src="../CSS/default.jpg" alt="Profile Photo">
+                            <img class="uk-border-circle" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                         </div>
                     </div>
                 </div>
@@ -415,7 +415,7 @@ $stmt->close();
                         </div>
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" value="<?php echo $phoneNumber; ?>" disabled>
+                            <input class="uk-input" type="tel"  value="<?php echo '0' . $phoneNumber; ?>" disabled>
                         </div>
                     </form>
                 </div>
@@ -476,7 +476,7 @@ $stmt->close();
                     <div class="uk-width-1-1">
                         <label class="uk-form-label">Phone Number</label>
                         <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
-                        value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>" disabled>
+                        value="<?php echo '0' . $phoneNumber; ?>" disabled>
                         <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
                     </div>
 
@@ -634,10 +634,6 @@ document.addEventListener("DOMContentLoaded", function () {
             preview.src = reader.result;
         }
         reader.readAsDataURL(event.target.files[0]);
-    }
-
-    function removeProfilePhoto() {
-        document.querySelector('.profile-preview').src = '../CSS/default.jpg';
     }
 
 

@@ -160,10 +160,10 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_user_details') {
     // ** Validate Mobile Number (Auto-convert format) **
     $phoneNumber = preg_replace('/\s+/', '', $phoneNumber); // Remove spaces
 
-    if (preg_match("/^0\d{10}$/", $phoneNumber)) {
-        $phoneNumber = "+63" . substr($phoneNumber, 1);
-    } elseif (!preg_match("/^\+63\d{10}$/", $phoneNumber)) {
-        $_SESSION['update_errors']['phoneNumber'] = "Phone number must be in the format +63XXXXXXXXXX.";
+    if (!preg_match("/^09\d{9}$/", $phoneNumber)) {  
+        $_SESSION['update_errors']['phoneNumber'] = "Phone number must be in the format 09XXXXXXXXX.";  
+    } else {
+        $phoneNumber = (int) $phoneNumber; // Convert to integer (removes leading 0 when stored)
     }
 
     // ** Store in Session to Preserve Data on Reload **
