@@ -24,7 +24,7 @@ if ($result->num_rows > 0) {
     $phoneNumber = $userData['account_PNum'];
     // Determine the profile picture path
     if ($userData['profile_picture']) {
-        $profilePicture = '../uploads/profile_pictures/' . $userData['profile_picture']; // Corrected path
+        $profilePicture = '/LIWANAG/uploads/profile_pictures/' . $userData['profile_picture']; // Corrected path
     } else {
         $profilePicture = '../CSS/default.jpg';
     }
@@ -89,7 +89,7 @@ $stmt->close();
 
 <body>
     <script>
-        console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
+        console.log('Session Username:', <?php echo isset($_SESSION['account_ID']) ? json_encode($_SESSION['account_ID']) : 'null'; ?>);
     </script>
     <!-- Navbar -->
     <nav class="uk-navbar-container logged-in">
@@ -428,107 +428,395 @@ $stmt->close();
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
-                    <input type="hidden" name="action" value="upload_profile_picture">
-                    <div class="uk-flex uk-flex-middle">
-                        <div class="profile-upload-container">
-                        <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
-                            <div class="uk-flex uk-flex-column uk-margin-left">
-                            <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                            <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton">
-    Upload Photo
-</button>                                <div class="uk-text-center">
-                                    <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
+                        <input type="hidden" name="action" value="upload_profile_picture">
+                        <div class="uk-flex uk-flex-middle">
+                            <div class="profile-upload-container">
+                                <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
+                                <div class="uk-flex uk-flex-column uk-margin-left">
+                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
+                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" disabled>
+                                        Upload Photo
+                                    </button>
+                                    <div class="uk-text-center">
+                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();" id="removePhotoButton" style="pointer-events: none; color: grey;">remove</a>
+                                    </div>
+                                </div>
+                                <div class="uk-margin-large-left">
+                                    <h4>Image requirements:</h4>
+                                    <ul class="uk-list">
+                                        <li>1. Min. 400 x 400px</li>
+                                        <li>2. Max. 2MB</li>
+                                        <li>3. Your face</li>
+                                    </ul>
                                 </div>
                             </div>
-                            <div class="uk-margin-large-left">
-                                <h4>Image requirements:</h4>
-                                <ul class="uk-list">
-                                    <li>1. Min. 400 x 400px</li>
-                                    <li>2. Max. 2MB</li>
-                                    <li>3. Your face</li>
-                                </ul>
-                            </div>
                         </div>
-                    </div>
                     </form>
                 </div>
 
-                <div class="uk-card uk-card-default uk-card-body">
-                <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
-                    <input type="hidden" name="action" value="update_user_details">
-                    
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label">First Name</label>
-                        <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>" disabled>
-                        <small style="color: red;" class="error-message" data-error="firstName"></small>
-                    </div>
-                    <div class="uk-width-1-2@s">
-                        <label class="uk-form-label">Last Name</label>
-                        <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>" disabled>
-                        <small style="color: red;" class="error-message" data-error="lastName"></small>
-                    </div>
-                    <div class="uk-width-1-1">
-                        <label class="uk-form-label">Email</label>
-                        <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>" disabled>
-                        <small style="color: red;" class="error-message" data-error="email"></small>
-                    </div>
-                    <div class="uk-width-1-1">
-                        <label class="uk-form-label">Phone Number</label>
-                        <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
-                        value="<?php echo '0' . $phoneNumber; ?>" disabled>
-                        <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
-                    </div>
+            <div class="uk-card uk-card-default uk-card-body">
+        <h3 class="uk-card-title uk-text-bold">User Details</h3>
+        <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
+            <input type="hidden" name="action" id="formAction" value="update_user_details">
 
-                    <small style="color: red;" class="error-message" data-error="duplicate"></small>
-                    <small style="color: green;" class="error-message" id="successMessage"></small>
-
-                    <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                        <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
-                        <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
-                    </div>
-                </form>
-                <?php unset($_SESSION['update_errors']); ?>
-                <?php unset($_SESSION['update_success']); ?>
+            <div class="uk-width-1-2@s">
+                <label class="uk-form-label">First Name</label>
+                <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>" disabled>
+                <small style="color: red;" class="error-message" data-error="firstName"></small>
+            </div>
+            <div class="uk-width-1-2@s">
+                <label class="uk-form-label">Last Name</label>
+                <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>" disabled>
+                <small style="color: red;" class="error-message" data-error="lastName"></small>
+            </div>
+            <div class="uk-width-1-1">
+                <label class="uk-form-label">Email</label>
+                <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>" disabled>
+                <small style="color: red;" class="error-message" data-error="email"></small>
+            </div>
+            <div class="uk-width-1-1">
+                <label class="uk-form-label">Phone Number</label>
+                <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber" value="<?php echo '0' . $phoneNumber; ?>" disabled>
+                <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
             </div>
 
+            <small style="color: red;" class="error-message" data-error="duplicate"></small>
+            <small style="color: green;" class="error-message" id="successMessage"></small>
+
+            <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
+            </div>
+
+            <div id="otpSection" class="uk-width-1-1" style="display: none;">
+                <h3 class="uk-card-title uk-text-bold">Enter OTP</h3>
+                <p class="uk-text-muted">A verification code has been sent to your new email address. Please enter it below to complete the change.</p>
+                <div class="uk-margin">
+                    <input class="uk-input" type="text" name="otp" id="otp" placeholder="Enter OTP">
+                    <small style="color: red;" class="error-message" data-error="otp"></small>
+                </div>
+                <!-- The buttons will be dynamically added here by JavaScript -->
+            </div>
+        </form>
+
+        <?php unset($_SESSION['update_errors']); ?>
+        <?php unset($_SESSION['update_success']); ?>
     </div>
 
-                <!-- Javascript -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 </body>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const editButton = document.getElementById("editButton");
-        const saveButton = document.getElementById("saveButton");
-        const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
+     document.addEventListener("DOMContentLoaded", function () {
+    // Select elements
+    const editButton = document.getElementById("editButton");
+    const saveButton = document.getElementById("saveButton");
+    const form = document.getElementById("settingsvalidate");
+    const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
+    const otpSection = document.getElementById("otpSection");
+    const otpInput = document.getElementById("otp");
+    const successMessage = document.getElementById("successMessage");
+    const profileUploadInput = document.getElementById("profileUpload");
+    const uploadButton = document.getElementById("uploadButton");
+    const emailInput = document.getElementById("email"); // Select the email input
+    const removePhotoButton = document.getElementById("removePhotoButton");
+    
+    // Add new elements
+    const editEmailButton = document.createElement("button");
+    editEmailButton.id = "editEmailButton";
+    editEmailButton.textContent = "Edit Email";
+    editEmailButton.className = "uk-button uk-button-secondary";  // Using UK button classes for consistency
+    editEmailButton.style.marginRight = "15px";
+    editEmailButton.style.fontSize = "16px";
+    editEmailButton.style.padding = "8px 20px";
+    editEmailButton.style.fontWeight = "bold";
+    
+    const cancelVerificationButton = document.createElement("button");
+    cancelVerificationButton.id = "cancelVerificationButton";
+    cancelVerificationButton.textContent = "Cancel Verification";
+    cancelVerificationButton.className = "uk-button uk-button-danger";  // Using UK button classes for consistency
+    cancelVerificationButton.style.fontSize = "16px";
+    cancelVerificationButton.style.padding = "8px 20px";
+    cancelVerificationButton.style.fontWeight = "bold";
+    
+    // Create a container for the buttons
+    const buttonContainer = document.createElement("div");
+    buttonContainer.className = "uk-margin-medium-top";  // Using UK margin class
+    buttonContainer.style.display = "flex";
+    buttonContainer.style.justifyContent = "flex-start";
+    buttonContainer.style.marginTop = "20px";
+    buttonContainer.appendChild(editEmailButton);
+    buttonContainer.appendChild(cancelVerificationButton);
+    
+    // Insert these buttons after the OTP input
+    if (otpSection) {
+        // Append the button container to the OTP section (after all existing elements)
+        otpSection.appendChild(buttonContainer);
+    }
 
-        // Store initial values
-        let originalValues = {};
-        inputs.forEach(input => originalValues[input.id] = input.value);
+    let originalValues = {};
+    inputs.forEach(input => originalValues[input.id] = input.value);
+    
+    // Original email value to restore if verification is canceled
+    let originalEmail = emailInput ? emailInput.value : '';
 
+    // Edit Button Click Event
+    if (editButton) {
         editButton.addEventListener("click", function () {
-            const isDisabled = inputs[0].disabled;
-
-            if (isDisabled) {
-                // Enable inputs for editing
+            if (editButton.textContent === "Edit") {
                 inputs.forEach(input => input.disabled = false);
                 saveButton.disabled = false;
                 editButton.textContent = "Cancel";
+                uploadButton.disabled = false; // Enable upload button
+                removePhotoButton.style.pointerEvents = "auto";
+                removePhotoButton.style.color = "";
             } else {
-                // Reset inputs to original values and disable editing
                 inputs.forEach(input => {
                     input.value = originalValues[input.id];
                     input.disabled = true;
                 });
                 saveButton.disabled = true;
                 editButton.textContent = "Edit";
+                otpSection.style.display = "none"; // Hide OTP section on cancel
+                uploadButton.disabled = true; // Disable upload button
+                removePhotoButton.style.pointerEvents = "none";
+                removePhotoButton.style.color = "grey";
+                
+                // Reset save button state
+                saveButton.textContent = "Save";
+                saveButton.dataset.step = "";
             }
         });
+    }
+
+    // Save Button Click Event
+    if (saveButton) {
+        saveButton.addEventListener("click", function (event) {
+            if (saveButton.dataset.step === "verify") {
+                event.preventDefault();
+                verifyOTP();
+            } else {
+                event.preventDefault();
+                saveChanges();
+            }
+        });
+    }
+    
+    // Edit Email Button Click Event - Allows user to go back and edit their email
+    if (editEmailButton) {
+        editEmailButton.addEventListener("click", function(event) {
+            event.preventDefault();
+            
+            // Hide OTP section
+            otpSection.style.display = "none";
+            
+            // Enable email input
+            emailInput.disabled = false;
+            
+            // Reset save button state
+            saveButton.textContent = "Save";
+            saveButton.dataset.step = "";
+        });
+    }
+    
+    // Cancel Verification Button Click Event - Cancels email verification and restores original email
+    if (cancelVerificationButton) {
+        cancelVerificationButton.addEventListener("click", function(event) {
+            event.preventDefault();
+            
+            // Confirm cancellation
+            if (confirm("Are you sure you want to cancel? Your email will not be changed.")) {
+                // Restore original email
+                emailInput.value = originalEmail;
+                
+                // Hide OTP section
+                otpSection.style.display = "none";
+                
+                // Reset save button state
+                saveButton.textContent = "Save";
+                saveButton.dataset.step = "";
+                
+                // Disable inputs if we're not in edit mode
+                if (editButton.textContent === "Edit") {
+                    inputs.forEach(input => input.disabled = true);
+                }
+            }
+        });
+    }
+
+    // Function to Save Changes
+    function saveChanges() {
+        let firstName = document.getElementById("firstName").value.trim();
+        let lastName = document.getElementById("lastName").value.trim();
+        let email = emailInput.value.trim(); // Use the selected email input
+        let phoneNumber = document.getElementById("mobileNumber").value.trim();
+
+        document.querySelectorAll(".error-message").forEach(error => error.textContent = "");
+
+        if (!firstName || !lastName || !email || !phoneNumber) {
+            alert("All fields are required.");
+            return;
+        }
+
+        // Store the original email in case user cancels verification later
+        originalEmail = emailInput.value;
+
+        let formData = new URLSearchParams({
+            action: "update_user_details",
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phoneNumber: phoneNumber
+        });
+
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: formData,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.errors) {
+                    Object.entries(data.errors).forEach(([key, message]) => {
+                        let errorElement = document.querySelector(`[data-error="${key}"]`);
+                        if (errorElement) errorElement.textContent = message;
+                    });
+                } else if (data.otp_required) {
+                    alert("OTP sent to your new email. Please enter the OTP to verify.");
+                    otpSection.style.display = "block";
+                    saveButton.textContent = "Verify OTP";
+                    saveButton.dataset.step = "verify";
+                } else if (data.success) {
+                    alert(data.success);
+                    location.reload();
+                } else {
+                    alert("Something went wrong.");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                alert("An error occurred. Please try again.");
+            });
+    }
+
+    // Function to Verify OTP
+    function verifyOTP() {
+        let otp = otpInput.value.trim();
+        if (!otp) {
+            alert("Please enter OTP.");
+            return;
+        }
+
+        // Get the user details to update along with the OTP
+        let firstName = document.getElementById("firstName").value.trim();
+        let lastName = document.getElementById("lastName").value.trim();
+        let phoneNumber = document.getElementById("mobileNumber").value.trim();
+
+        // Create form data with all necessary information
+        let formData = new URLSearchParams({
+            action: "verify_otp",
+            otp: otp,
+            firstName: firstName,
+            lastName: lastName,
+            phoneNumber: phoneNumber
+        });
+
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: formData
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert("Email updated successfully!");
+                location.reload();
+            } else if (data.error) {
+                alert(data.error);
+            } else {
+                alert("Invalid OTP. Please try again.");
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            alert("An error occurred during OTP verification.");
+        });
+    }
+
+
+
+        // Profile Picture Upload Handling
+        if (uploadButton && profileUploadInput) {
+            uploadButton.addEventListener("click", function () {
+                profileUploadInput.click();
+            });
+
+            profileUploadInput.addEventListener("change", function () {
+                let formData = new FormData();
+                formData.append("action", "upload_profile_picture");
+                formData.append("profile_picture", profileUploadInput.files[0]);
+
+                fetch("../Accounts/manageaccount/updateinfo.php", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.querySelector(".profile-preview").src = data.imagePath;
+                        } else {
+                            alert("Error: " + data.error);
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        }
+
+        // Form Submission Event (For Validation)
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                let formData = new FormData(this);
+
+                fetch("../Accounts/manageaccount/updateinfo.php", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
+
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(key => {
+                                let errorElement = document.querySelector(`small[data-error="${key}"]`);
+                                if (errorElement) {
+                                    errorElement.textContent = data.errors[key];
+                                }
+                            });
+                        } else if (data.success) {
+                            alert(data.success);
+                            location.reload();
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        }
+
+        // Initialize OTP section to be hidden
+        otpSection.style.display = "none";
     });
+
+
+
 
     function removeProfilePhoto() {
     if (confirm("Are you sure you want to remove your profile picture?")) {
@@ -549,72 +837,6 @@ $stmt->close();
     }
 }
 
-
-document.addEventListener("DOMContentLoaded", function () {
-    let profileUploadInput = document.getElementById("profileUpload");
-    let uploadButton = document.getElementById("uploadButton");
-
-
-    // Click event to open file dialog
-    uploadButton.addEventListener("click", function () {
-        profileUploadInput.click();
-    });
-
-
-    // Auto-upload when a file is selected
-    profileUploadInput.addEventListener("change", function () {
-        let formData = new FormData();
-        formData.append("action", "upload_profile_picture");
-        formData.append("profile_picture", profileUploadInput.files[0]);
-
-
-        fetch("../Accounts/manageaccount/updateinfo.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.querySelector(".profile-preview").src = data.imagePath; // Update profile image
-            } else {
-                alert("Error: " + data.error);
-            }
-        })
-        .catch(error => console.error("Error:", error));
-    });
-});
-
-    document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("settingsvalidate").addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevent default form submission
-
-        let formData = new FormData(this);
-
-        fetch("../Accounts/manageaccount/updateinfo.php", {
-            method: "POST",
-            body: formData
-        })
-        .then(response => response.json())
-        .then(data => {
-            // Clear previous error messages
-            document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
-
-            if (data.errors) {
-                // Show errors under respective inputs
-                Object.keys(data.errors).forEach(key => {
-                    let errorElement = document.querySelector(`small[data-error="${key}"]`);
-                    if (errorElement) {
-                        errorElement.textContent = data.errors[key];
-                    }
-                });
-            } else if (data.success) {
-                alert(data.success);
-                location.reload(); // Reload page on success
-            }
-        })
-        .catch(error => console.error("Error:", error));
-    });
-});
         
         document.querySelector('.sidebar-toggle').addEventListener('click', function() {
         document.querySelector('.sidebar-nav').classList.toggle('uk-open');

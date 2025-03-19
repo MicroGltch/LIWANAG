@@ -1,18 +1,21 @@
 <?php
-include "../../dbconfig.php";
+require_once "../../dbconfig.php";
+require_once "../../Accounts/signupverify/vendor/autoload.php";
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 session_start();
 $userid = $_SESSION['account_ID'];
 
 header('Content-Type: application/json');
 $errors = [];
-$_SESSION['update_errors'] = []; // Clear previous errors
+$_SESSION['update_errors'] = [];
 $_SESSION['update_success'] = "";
 
 // Fetch user account type
-$stmt = $connection->prepare("SELECT account_Type FROM users WHERE account_ID = ?");
+$stmt = $connection->prepare("SELECT account_Type, account_Email FROM users WHERE account_ID = ?");
 $stmt->bind_param("i", $userid);
 $stmt->execute();
-$stmt->bind_result($account_Type);
+$stmt->bind_result($account_Type, $currentEmail);
 $stmt->fetch();
 $stmt->close();
 
@@ -54,7 +57,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'upload_profile_picture' && 
 
 
     // Define upload path
-    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "/LIWANAG/LIWANAG/uploads/profile_pictures/";
+    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "/LIWANAG/uploads/profile_pictures/";
     $destination = $uploadDir . $filename;
 
 
@@ -90,7 +93,7 @@ if (isset($_POST['action']) && $_POST['action'] === 'upload_profile_picture' && 
         $stmt->close();
 
 
-        echo json_encode(["success" => true, "imagePath" => "/LIWANAG/LIWANAG/uploads/profile_pictures/" . $filename]);
+        echo json_encode(["success" => true, "imagePath" => "/LIWANAG/uploads/profile_pictures/" . $filename]);
     } else {
         echo json_encode(["success" => false, "error" => "File upload failed."]);
     }
@@ -115,8 +118,8 @@ if (isset($data['action']) && $data['action'] === 'remove_profile_picture') {
 
 
         // Delete file if it exists
-        if ($profilePicture && file_exists($_SERVER['DOCUMENT_ROOT'] . "/LIWANAG/LIWANAG/uploads/profile_pictures/" . $profilePicture)) {
-            unlink($_SERVER['DOCUMENT_ROOT'] . "/LIWANAG/LIWANAG/uploads/profile_pictures/" . $profilePicture);
+        if ($profilePicture && file_exists($_SERVER['DOCUMENT_ROOT'] . "/LIWANAG/uploads/profile_pictures/" . $profilePicture)) {
+            unlink($_SERVER['DOCUMENT_ROOT'] . "/LIWANAG/uploads/profile_pictures/" . $profilePicture);
         }
 
 
@@ -171,8 +174,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_user_details') {
         $_SESSION['phoneNumber'] = $phoneNumber;
     }
 
-
-
     // ** Check if email or phone number already exists (excluding current user) **
     $stmt = $connection->prepare("SELECT account_ID FROM users WHERE (account_Email = ? OR account_PNum = ?) AND account_ID != ?");
     $stmt->bind_param("ssi", $email, $phoneNumber, $userid);
@@ -190,16 +191,111 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_user_details') {
         exit();
     }
 
-    // ** Update User Data if no errors **
-    $stmt = $connection->prepare("UPDATE users SET account_FName = ?, account_LName = ?, account_Email = ?, account_PNum = ? WHERE account_ID = ?");
-    $stmt->bind_param("ssssi", $firstName, $lastName, $email, $phoneNumber, $userid);
-    $stmt->execute();
-    $stmt->close();
-
-    // ** Set Success Message **
-    $_SESSION['update_success'] = "Profile updated successfully!";
-    echo json_encode(['success' => $_SESSION['update_success']]); 
-    exit();
+    // Check if the email was changed
+    if ($email !== $currentEmail) {
+        $otp = rand(100000, 999999);
+        $_SESSION['email_otp'] = password_hash($otp, PASSWORD_DEFAULT); // Securely store OTP
+        $_SESSION['new_email'] = $email;
     
+        $mail = new PHPMailer(true);
+        try {
+            $mail->isSMTP();
+            $mail->Host = 'smtp.hostinger.com';
+            $mail->SMTPAuth = true;
+            $mail->Username = 'no-reply@myliwanag.com';
+            $mail->Password = '[l/+1V/B4'; // Store this securely, e.g., in an env file
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port = 465;
+    
+            $mail->setFrom('no-reply@myliwanag.com', "Little Wanderer's Therapy Center");
+            $mail->addAddress($email);
+            $mail->Subject = 'Email Verification Code';
+            $mail->Body = "Your OTP code is: $otp";
+    
+            $mail->send();
+            echo json_encode(['otp_required' => true]);
+        } catch (Exception $e) {
+            error_log("OTP email error: " . $mail->ErrorInfo); // Log error instead of exposing it
+            echo json_encode(['error' => "Failed to send OTP. Please try again later."]);
+        }
+        exit();
+    } else {
+        // If email wasn't changed, update other user details directly
+        $stmt = $connection->prepare("UPDATE users SET account_FName = ?, account_LName = ?, account_PNum = ? WHERE account_ID = ?");
+        $stmt->bind_param("ssii", $firstName, $lastName, $phoneNumber, $userid);
+        
+        if ($stmt->execute()) {
+            echo json_encode(['success' => 'Profile updated successfully']);
+        } else {
+            echo json_encode(['error' => 'Failed to update profile']);
+        }
+        $stmt->close();
+        exit();
+    }
+}
+
+// ** Verify OTP and update email - MOVED OUTSIDE THE PREVIOUS CONDITIONAL BLOCK **
+if (isset($_POST['action']) && $_POST['action'] === 'verify_otp') {
+    $enteredOtp = $_POST['otp'] ?? '';
+
+    error_log("Entered OTP: " . $enteredOtp);
+    error_log("email_otp: " . $_SESSION['email_otp']);
+    error_log("new_email: " . $_SESSION['new_email']);
+
+    if (!isset($_SESSION['email_otp']) || !isset($_SESSION['new_email'])) {
+        error_log("Session expired.");
+        $response = ['error' => 'Session expired. Please request a new OTP.'];
+        error_log("Sending JSON response: " . json_encode($response));
+        echo json_encode($response);
+        error_log("JSON response sent.");
+        exit();
+    }
+
+    if (password_verify($enteredOtp, $_SESSION['email_otp'])) {
+        $newEmail = $_SESSION['new_email'];
+        $firstName = trim($_POST['firstName'] ?? '');
+        $lastName = trim($_POST['lastName'] ?? '');
+        $phoneNumber = trim($_POST['phoneNumber'] ?? '');
+        
+        // Convert phone number if provided
+        if (!empty($phoneNumber)) {
+            $phoneNumber = preg_replace('/\s+/', '', $phoneNumber);
+            $phoneNumber = (int) $phoneNumber;
+        }
+
+        // Update user details with new email and other fields if provided
+        if (!empty($firstName) && !empty($lastName) && !empty($phoneNumber)) {
+            $stmt = $connection->prepare("UPDATE users SET account_Email = ?, account_FName = ?, account_LName = ?, account_PNum = ? WHERE account_ID = ?");
+            $stmt->bind_param("sssii", $newEmail, $firstName, $lastName, $phoneNumber, $userid);
+        } else {
+            // Update just the email if other fields weren't provided
+            $stmt = $connection->prepare("UPDATE users SET account_Email = ? WHERE account_ID = ?");
+            $stmt->bind_param("si", $newEmail, $userid);
+        }
+
+        if ($stmt->execute()) {
+            unset($_SESSION['email_otp'], $_SESSION['new_email']);
+            error_log("Email updated successfully.");
+            $response = ['success' => 'Email updated successfully!'];
+            error_log("Sending JSON response: " . json_encode($response));
+            echo json_encode($response);
+            error_log("JSON response sent.");
+        } else {
+            error_log("Failed to update email: " . $stmt->error);
+            $response = ['error' => 'Failed to update email. Please try again.'];
+            error_log("Sending JSON response: " . json_encode($response));
+            echo json_encode($response);
+            error_log("JSON response sent.");
+        }
+
+        $stmt->close();
+    } else {
+        error_log("Incorrect OTP.");
+        $response = ['error' => 'Incorrect OTP.'];
+        error_log("Sending JSON response: " . json_encode($response));
+        echo json_encode($response);
+        error_log("JSON response sent.");
+    }
+    exit();
 }
 ?>
