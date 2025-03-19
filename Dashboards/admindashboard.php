@@ -21,7 +21,7 @@ if ($result->num_rows > 0) {
     $lastName = $userData['account_LName'];
     $email = $userData['account_Email'];
     $phoneNumber = $userData['account_PNum'];
-    
+
     if ($userData['profile_picture']) {
         $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture'];
     } else {
@@ -140,12 +140,31 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
-                    <li><a href="#Accounts" onclick="showSection('Accounts')">Accounts</a></li>
-                    <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
-                    <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
-                    <li><a href="">System Analytics</a></li>
+
+                    <!-- Show tables for all Users in this section-->
+                    <li><a href="#accounts" onclick="showSection('accounts')">Accounts</a></li>
+
+                    <!-- TO BE SECTIONED - Reference File:  -->
+                    <!-- <li><a href="forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li> -->
+                    <li><a href="#timetable-settings" onclick="showSection('timetable-settings')">Manage Timetable Settings</a></li>
+
+                    <!-- TO BE SECTIONED - Reference File: -->
+                    <!-- <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li> -->
+                    <li><a href="#view-appointments" onclick="showSection('view-appointments')">View All Appointments</a></li>
+                    <!-- Actually parang nasa dashboard na to so lipat nlng -->
+
+                    <!-- Disregard muna -->
+                    <!-- <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li> -->
+                    <li><a href="#manage-therapist" onclick="showSection('manage-therapist')">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
+
+                    <!-- TO BE SECTIONED - Reference File: -->
+                    <!-- <li><a href="forAdmin/systemAnalytics/system_analytics.php">System Analytics</a></li> -->
+                    <li><a href="#system-analytics" onclick="showSection('system-analytics')">System Analytics</a></li>
+
+                    <!-- To follow -->
                     <li><a href="">Manage Website Contents</a></li>
+
+                    <!-- To follow -->
                     <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
@@ -154,7 +173,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
         <!-- Content Area -->
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
-            <!-- Dashboard Section -->
+
+            <!-- Dashboard Section 📑 -->
             <div id="dashboard" class="section">
                 <h1 class="uk-text-bold">Admin Panel</h1>
 
@@ -238,8 +258,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </script>
             </div>
 
-            <!-- Accounts Section -->
-            <div id="Accounts" class="section" style="display: none;">
+            <!-- Accounts Section 📑 -->
+            <div id="accounts" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Accounts</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
@@ -281,6 +301,81 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                     columnDefs: [{
                                             orderable: true,
                                             targets: '_all'
+                                        },
+                                        {
+                                            orderable: false,
+                                            targets: 4
+                                        }
+                                    ]
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Manage Timetable Settings Section 📑-->
+            <div id="timetable-settings" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Manage Timetable Settings</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="manageTimetableSettingsFrame" src="forAdmin/manageWebpage/timetable_settings.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
+            <!-- View All Appointments Section 📑-->
+
+            <div id="view-appointments" class="section" style="display: none;">
+                <h1 class="uk-text-bold">View All Appointments</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="viewAppointmentsFrame" src="../Appointments/app_manage/view_all_appointments.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
+            <!-- Manage Therapists Section 📑-->
+
+            <div id="manage-therapist" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Manage Therapists</h1>
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <div class="uk-overflow-auto">
+                        <table id="managetherapistTable" class="uk-table uk-table-striped uk-table-hover">
+                            <thead>
+                                <tr>
+                                    <th class="uk-table-shrink">First Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Last Name<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Email<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Phone Number<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Account Status<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                    <th class="uk-table-shrink">Appointments<span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Content -->
+                            </tbody>
+                        </table>
+
+                        <script>
+                            $(document).ready(function() {
+                                $('#managetherapistTable').DataTable({
+                                    pageLength: 10,
+                                    lengthMenu: [10, 25, 50],
+                                    order: [
+                                        [0, 'asc']
+                                    ], // Sort by name column by default
+                                    language: {
+                                        lengthMenu: "Show _MENU_ entries per page",
+                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                        search: "Search:",
+                                        paginate: {
+                                            first: "First",
+                                            last: "Last",
+                                            next: "Next",
+                                            previous: "Previous"
+                                        }
+                                    },
+                                    columnDefs: [{
+                                            orderable: true,
+                                            targets: '_all'
                                         } // Make all columns sortable
                                     ]
                                 });
@@ -290,7 +385,17 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
             </div>
 
-            <!-- Account Details Section -->
+            <!-- System Analytics Section 📑-->
+            <div id="system-analytics" class="section" style="display: none;">
+                <h1 class="uk-text-bold">System Analytics</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="systemAnalyticsFrame" src="forAdmin/systemAnalytics/system_analytics.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
+            <!-- Manage Website Contents Section 📑-->
+
+            <!-- Account Details Section 📑-->
             <div id="account-details" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Account Details</h1>
 
@@ -298,7 +403,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <div class="uk-flex uk-flex-center">
                         <div class="uk-width-1-4">
-                            <img class="uk-border-circle" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
+                            <img class="uk-border-circle" src="../CSS/default.jpg" alt="Profile Photo">
                         </div>
                     </div>
                 </div>
@@ -326,10 +431,9 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
             </div>
 
-            <!-- Settings Section -->
+            <!-- Settings Section 📑-->
             <div id="settings" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Settings</h1>
-
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
@@ -338,8 +442,10 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                             <div class="profile-upload-container">
                                 <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                                 <div class="uk-flex uk-flex-column uk-margin-left">
-                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden" onchange="previewProfilePhoto(event)">
-                                    <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
+                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
+                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton">
+                                        Upload Photo
+                                    </button>
                                     <div class="uk-text-center">
                                         <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
                                     </div>
@@ -354,7 +460,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
                     </form>
                 </div>
 
@@ -362,66 +467,352 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <h3 class="uk-card-title uk-text-bold">User Details</h3>
                     <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
                         <input type="hidden" name="action" value="update_user_details">
+
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>">
+                            <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>" disabled>
                             <small style="color: red;" class="error-message" data-error="firstName"></small>
                         </div>
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>">
+                            <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>" disabled>
                             <small style="color: red;" class="error-message" data-error="lastName"></small>
                         </div>
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>">
+                            <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>" disabled>
                             <small style="color: red;" class="error-message" data-error="email"></small>
                         </div>
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Phone Number</label>
                             <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"
-                                value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>">
+                                value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>" disabled>
                             <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
                         </div>
+
                         <small style="color: red;" class="error-message" data-error="duplicate"></small>
                         <small style="color: green;" class="error-message" id="successMessage"></small>
+
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
+                            <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
                         </div>
                     </form>
-                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying 
-                    ?>
-                    <?php unset($_SESSION['update_success']); // Clear success message 
-                    ?>
+                    <?php unset($_SESSION['update_errors']); ?>
+                    <?php unset($_SESSION['update_success']); ?>
                 </div>
             </div>
-        </div>
 
-        <script>
-            document.querySelector('.sidebar-toggle').addEventListener('click', function() {
-                document.querySelector('.sidebar-nav').classList.toggle('uk-open');
-            });
-
-            function showSection(sectionId) {
-                document.querySelectorAll('.section').forEach(section => {
-                    section.style.display = 'none';
-                });
-                document.getElementById(sectionId).style.display = 'block';
-            }
-
-            function previewProfilePhoto(event) {
-                const reader = new FileReader();
-                reader.onload = function() {
-                    const preview = document.querySelector('.profile-preview');
-                    preview.src = reader.result;
+            <script>
+                function resizeIframe(iframe) {
+                    iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
                 }
-                reader.readAsDataURL(event.target.files[0]);
-            }
 
-            function removeProfilePhoto() {
-                document.querySelector('.profile-preview').src = '../CSS/default.jpg';
-            }
-        </script>
+                // Sidebar Toggle
+                document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+                    document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+                });
+
+                // Show Section
+                function showSection(sectionId) {
+                    document.querySelectorAll('.section').forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    const section = document.getElementById(sectionId);
+                    section.style.display = 'block';
+
+                    // Resize iframe if present in the section
+                    const iframe = section.querySelector('iframe');
+                    if (iframe) {
+                        resizeIframe(iframe);
+                    }
+
+                    // Set active class on the sidebar link
+                    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+                        link.parentElement.classList.remove('uk-active');
+                    });
+                    document.querySelector(`.sidebar-nav a[href="#${sectionId}"]`).parentElement.classList.add('uk-active');
+                }
+
+                // Preview Profile Photo
+                function previewProfilePhoto(event) {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        const preview = document.querySelector('.profile-preview');
+                        preview.src = reader.result;
+                    }
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+
+                // Remove Profile Photo
+                function removeProfilePhoto() {
+                    document.querySelector('.profile-preview').src = '../CSS/default.jpg';
+                }
+
+                // Manage Timetable Settings Frame
+                let manageTimetableSettingsFrame = document.getElementById("manageTimetableSettingsFrame");
+
+                manageTimetableSettingsFrame.onload = function() {
+                    resizeIframe(manageTimetableSettingsFrame);
+                    let manageTimetableSettingsForm = manageTimetableSettingsFrame.contentDocument.getElementById("manageTimetableSettingsForm");
+
+                    if (manageTimetableSettingsForm) {
+                        manageTimetableSettingsForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("forAdmin/manageWebpage/timetable_settings.php", {
+                                    method: "POST",
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.swal) {
+                                        Swal.fire({
+                                            title: data.swal.title,
+                                            text: data.swal.text,
+                                            icon: data.swal.icon,
+                                        }).then(() => {
+                                            if (data.reload) {
+                                                window.location.reload(true); // Hard reload the page
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
+
+                // View Appointments Frame
+                let viewAppointmentsFrame = document.getElementById("viewAppointmentsFrame");
+
+                viewAppointmentsFrame.onload = function() {
+                    resizeIframe(viewAppointmentsFrame);
+                    let viewAppointmentsForm = viewAppointmentsFrame.contentDocument.getElementById("viewAppointmentsForm");
+
+                    if (viewAppointmentsForm) {
+                        viewAppointmentsForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("../Appointments/app_manage/view_all_appointments.php", {
+                                    method: "POST",
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.swal) {
+                                        Swal.fire({
+                                            title: data.swal.title,
+                                            text: data.swal.text,
+                                            icon: data.swal.icon,
+                                        }).then(() => {
+                                            if (data.reload) {
+                                                window.location.reload(true); // Hard reload the page
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
+
+                // System Analytics Frame
+                let systemAnalyticsFrame = document.getElementById("systemAnalyticsFrame");
+
+                systemAnalyticsFrame.onload = function() {
+                    resizeIframe(systemAnalyticsFrame);
+                    let systemAnalyticsForm = systemAnalyticsFrame.contentDocument.getElementById("systemAnalyticsForm");
+
+                    if (systemAnalyticsForm) {
+                        systemAnalyticsForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("forAdmin/systemAnalytics/system_analytics.php", {
+                                    method: "POST",
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.swal) {
+                                        Swal.fire({
+                                            title: data.swal.title,
+                                            text: data.swal.text,
+                                            icon: data.swal.icon,
+                                        }).then(() => {
+                                            if (data.reload) {
+                                                window.location.reload(true); // Hard reload the page
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
+
+                // Settings
+                document.addEventListener("DOMContentLoaded", function() {
+                    const editButton = document.getElementById("editButton");
+                    const saveButton = document.getElementById("saveButton");
+                    const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
+
+                    // Store initial values
+                    let originalValues = {};
+                    inputs.forEach(input => originalValues[input.id] = input.value);
+
+                    editButton.addEventListener("click", function() {
+                        const isDisabled = inputs[0].disabled;
+
+                        if (isDisabled) {
+                            // Enable inputs for editing
+                            inputs.forEach(input => input.disabled = false);
+                            saveButton.disabled = false;
+                            editButton.textContent = "Cancel";
+                        } else {
+                            // Reset inputs to original values and disable editing
+                            inputs.forEach(input => {
+                                input.value = originalValues[input.id];
+                                input.disabled = true;
+                            });
+                            saveButton.disabled = true;
+                            editButton.textContent = "Edit";
+                        }
+                    });
+                });
+
+                function removeProfilePhoto() {
+                    if (confirm("Are you sure you want to remove your profile picture?")) {
+                        fetch("../Accounts/manageaccount/updateinfo.php", {
+                                method: "POST",
+                                body: JSON.stringify({
+                                    action: "remove_profile_picture"
+                                }),
+                                headers: {
+                                    "Content-Type": "application/json"
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    document.querySelector('.profile-preview').src = '../CSS/default.jpg'; // Set to default image
+                                } else {
+                                    alert("Error: " + data.error);
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                    }
+                }
+
+
+                document.addEventListener("DOMContentLoaded", function() {
+                    let profileUploadInput = document.getElementById("profileUpload");
+                    let uploadButton = document.getElementById("uploadButton");
+
+
+                    // Click event to open file dialog
+                    uploadButton.addEventListener("click", function() {
+                        profileUploadInput.click();
+                    });
+
+
+                    // Auto-upload when a file is selected
+                    profileUploadInput.addEventListener("change", function() {
+                        let formData = new FormData();
+                        formData.append("action", "upload_profile_picture");
+                        formData.append("profile_picture", profileUploadInput.files[0]);
+
+
+                        fetch("../Accounts/manageaccount/updateinfo.php", {
+                                method: "POST",
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    document.querySelector(".profile-preview").src = data.imagePath; // Update profile image
+                                } else {
+                                    alert("Error: " + data.error);
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                    });
+                });
+
+                document.addEventListener("DOMContentLoaded", function() {
+                    document.getElementById("settingsvalidate").addEventListener("submit", function(event) {
+                        event.preventDefault(); // Prevent default form submission
+
+                        let formData = new FormData(this);
+
+                        fetch("../Accounts/manageaccount/updateinfo.php", {
+                                method: "POST",
+                                body: formData
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                // Clear previous error messages
+                                document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
+
+                                if (data.errors) {
+                                    // Show errors under respective inputs
+                                    Object.keys(data.errors).forEach(key => {
+                                        let errorElement = document.querySelector(`small[data-error="${key}"]`);
+                                        if (errorElement) {
+                                            errorElement.textContent = data.errors[key];
+                                        }
+                                    });
+                                } else if (data.success) {
+                                    alert(data.success);
+                                    location.reload(); // Reload page on success
+                                }
+                            })
+                            .catch(error => console.error("Error:", error));
+                    });
+                });
+
+                document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+                    document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+                });
+
+                function showSection(sectionId) {
+                    document.querySelectorAll('.section').forEach(section => {
+                        section.style.display = 'none';
+                    });
+                    document.getElementById(sectionId).style.display = 'block';
+
+                    // Resize iframe if present in the section
+                    const iframe = document.getElementById(sectionId).querySelector('iframe');
+                    if (iframe) {
+                        resizeIframe(iframe);
+                    }
+
+                    // Set active class on the sidebar link
+                    document.querySelectorAll('.sidebar-nav a').forEach(link => {
+                        link.parentElement.classList.remove('uk-active');
+                    });
+                    document.querySelector(`.sidebar-nav a[href="#${sectionId}"]`).parentElement.classList.add('uk-active');
+                }
+
+                function previewProfilePhoto(event) {
+                    const reader = new FileReader();
+                    reader.onload = function() {
+                        const preview = document.querySelector('.profile-preview');
+                        preview.src = reader.result;
+                    }
+                    reader.readAsDataURL(event.target.files[0]);
+                }
+
+                function removeProfilePhoto() {
+                    document.querySelector('.profile-preview').src = '../CSS/default.jpg';
+                }
+            </script>
 
 </body>
 

@@ -381,7 +381,7 @@ $stmt->close();
                 <div class="uk-card uk-card-default uk-card-body">
                     <h3 class="uk-card-title uk-text-bold">User Details</h3>
                     <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
-                        <input type="hidden" name="action" value="update_user_details">
+                    <input type="hidden" name="action" value="update_user_details">
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">First Name</label>
                             <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>">
@@ -399,9 +399,9 @@ $stmt->close();
                         </div>
                         <div class="uk-width-1-1">
                             <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"
-                                value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>">
-                            <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
+                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
+       value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>"  >
+                        <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
                         </div>
                         <small style="color: red;" class="error-message" data-error="duplicate"></small>
                         <small style="color: green;" class="error-message" id="successMessage"></small>
@@ -409,10 +409,8 @@ $stmt->close();
                             <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
                         </div>
                     </form>
-                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying 
-                    ?>
-                    <?php unset($_SESSION['update_success']); // Clear success message 
-                    ?>
+                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying ?>
+                    <?php unset($_SESSION['update_success']); // Clear success message ?>
                 </div>
             </div>
 
@@ -436,28 +434,24 @@ $stmt->close();
 </body>
 
 <script>
-    function removeProfilePhoto() {
-        if (confirm("Are you sure you want to remove your profile picture?")) {
-            fetch("../Accounts/manageaccount/updateinfo.php", {
-                    method: "POST",
-                    body: JSON.stringify({
-                        action: "remove_profile_picture"
-                    }),
-                    headers: {
-                        "Content-Type": "application/json"
-                    }
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        document.querySelector('.profile-preview').src = '../CSS/default.jpg'; // Set to default image
-                    } else {
-                        alert("Error: " + data.error);
-                    }
-                })
-                .catch(error => console.error("Error:", error));
-        }
+function removeProfilePhoto() {
+    if (confirm("Are you sure you want to remove your profile picture?")) {
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: JSON.stringify({ action: "remove_profile_picture" }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector('.profile-preview').src = '../CSS/default.jpg'; // Set to default image
+            } else {
+                alert("Error: " + data.error);
+            }
+        })
+        .catch(error => console.error("Error:", error));
     }
+}
 
 
     document.addEventListener("DOMContentLoaded", function() {

@@ -3,10 +3,35 @@ require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Admins, Head Therapists, and Therapists
-if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist", "therapist"])) {
+if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
     header("Location: ../../../loginpage.php");
     exit();
 }
+
+$userid = $_SESSION['account_ID'];
+
+$stmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
+$stmt->bind_param("s", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $userData = $result->fetch_assoc();
+    $firstName = $userData['account_FName'];
+    $lastName = $userData['account_LName'];
+    $email = $userData['account_Email'];
+    $phoneNumber = $userData['account_PNum'];
+
+    if ($userData['profile_picture']) {
+        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture'];
+    } else {
+        $profilePicture = '../CSS/default.jpg';
+    }
+} else {
+    echo "No Data Found.";
+}
+
+$stmt->close();
 
 // ✅ Fetch Filters
 $statusFilter = $_GET['status'] ?? "";
@@ -98,162 +123,113 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
     <!--SWAL-->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <style>
+        html,
+        body {
+            background-color: #ffffff !important;
+        }
+    </style>
+
 </head>
 
 <body>
-    <script>
-        console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
-    </script>
-    <!-- Navbar -->
-    <nav class="uk-navbar-container logged-in">
-        <div class="uk-container">
-            <div uk-navbar>
-                <div class="uk-navbar-center">
-                    <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
-                </div>
-                <div class="uk-navbar-right">
-                    <ul class="uk-navbar-nav">
-                        <li>
-                            <a href="#" class="uk-navbar-item">
-                            <img class="profile-image" src="../../CSS/default.jpg" alt="Profile Image" uk-img>
-                            </a>
-                        </li>
-                        <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
-                        </li>
-                        <li><a href="../../Accounts/logout.php">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <hr class="solid">
-
     <!-- Main Content -->
-    <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport">
-        <!--Sidebar-->
-        <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
-            <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
-                Menu <span uk-navbar-toggle-icon></span>
-            </button>
-            <div class="sidebar-nav">
-                <ul class="uk-nav uk-nav-default">
-                    <li><a href="../../Dashboards/headtherapistdashboard.php">Dashboard</a></li>
-                    <?php if (strtolower($_SESSION['account_Type']) !== "head therapist") : ?>
-                    <li><a href="../../Dashboards/forAdmin/manageWebpage/timetable_settings.php">Manage Timetable Settings</a></li>
-                    <?php endif; ?>                    
-                    <?php if (strtolower($_SESSION['account_Type']) !== "admin") : ?>
-                    <li><a href="manage_appointments.php">View & Manage Appointments</a></li>
-                    <?php endif; ?>                    
-                    <li class="uk-active"><a href="view_all_appointments.php">View All Appointments</a></li>
-                    <?php if (strtolower($_SESSION['account_Type']) !== "head therapist") : ?>
-                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
-                    <?php endif; ?>                    
-                </ul>
+    <h2>View All Appointments</h2>
+
+    <!-- 🔹 Filters Section -->
+    <form method="GET" class="uk-width-1-1">
+        <div class="uk-grid-small uk-flex uk-flex-middle uk-grid-match" uk-grid>
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">Status:</label>
+                <select class="uk-select" name="status">
+                    <option value="">All</option>
+                    <option value="Pending" <?= $statusFilter === "Pending" ? "selected" : "" ?>>Pending</option>
+                    <option value="Approved" <?= $statusFilter === "Approved" ? "selected" : "" ?>>Approved</option>
+                    <option value="Waitlisted" <?= $statusFilter === "Waitlisted" ? "selected" : "" ?>>Waitlisted</option>
+                    <option value="Completed" <?= $statusFilter === "Completed" ? "selected" : "" ?>>Completed</option>
+                    <option value="Cancelled" <?= $statusFilter === "Cancelled" ? "selected" : "" ?>>Cancelled</option>
+                    <option value="Declined" <?= $statusFilter === "Declined" ? "selected" : "" ?>>Declined</option>
+                </select>
+            </div>
+
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">Session Type:</label>
+                <select class="uk-select" name="session_type">
+                    <option value="">All</option>
+                    <option value="Initial Evaluation" <?= $sessionTypeFilter === "Initial Evaluation" ? "selected" : "" ?>>Initial Evaluation</option>
+                    <option value="Playgroup" <?= $sessionTypeFilter === "Playgroup" ? "selected" : "" ?>>Playgroup</option>
+                </select>
+            </div>
+
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">Therapist:</label>
+                <select class="uk-select" name="therapist">
+                    <option value="">All</option>
+                    <?php foreach ($therapists as $therapist): ?>
+                        <option value="<?= $therapist['account_ID']; ?>" <?= $therapistFilter == $therapist['account_ID'] ? "selected" : "" ?>>
+                            <?= htmlspecialchars($therapist['account_FName'] . " " . $therapist['account_LName']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">Start Date:</label>
+                <input class="uk-input" type="date" name="start_date" value="<?= $startDate; ?>">
+            </div>
+
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">End Date:</label>
+                <input class="uk-input" type="date" name="end_date" value="<?= $endDate; ?>">
             </div>
         </div>
 
-        <!-- Content Area -->
-        <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
-            <div class="uk-width-1-1">
-                <h2>View All Appointments</h2>
+        <div class="uk-text-right uk-margin-top">
+            <button class="uk-button uk-button-primary" type="submit">Apply Filters</button>
+            <a href="view_all_appointments.php" class="uk-button uk-button-default">Reset</a>
+        </div>
+    </form>
 
-                <!-- 🔹 Filters Section -->
-                <form method="GET" class="uk-width-1-1">
-                    <div class="uk-grid-small uk-flex uk-flex-middle uk-grid-match" uk-grid>
-                        <div class="uk-width-1-5@m">
-                            <label class="uk-form-label">Status:</label>
-                            <select class="uk-select" name="status">
-                                <option value="">All</option>
-                                <option value="Pending" <?= $statusFilter === "Pending" ? "selected" : "" ?>>Pending</option>
-                                <option value="Approved" <?= $statusFilter === "Approved" ? "selected" : "" ?>>Approved</option>
-                                <option value="Waitlisted" <?= $statusFilter === "Waitlisted" ? "selected" : "" ?>>Waitlisted</option>
-                                <option value="Completed" <?= $statusFilter === "Completed" ? "selected" : "" ?>>Completed</option>
-                                <option value="Cancelled" <?= $statusFilter === "Cancelled" ? "selected" : "" ?>>Cancelled</option>
-                                <option value="Declined" <?= $statusFilter === "Declined" ? "selected" : "" ?>>Declined</option>
-                            </select>
-                        </div>
-
-                        <div class="uk-width-1-5@m">
-                            <label class="uk-form-label">Session Type:</label>
-                            <select class="uk-select" name="session_type">
-                                <option value="">All</option>
-                                <option value="Initial Evaluation" <?= $sessionTypeFilter === "Initial Evaluation" ? "selected" : "" ?>>Initial Evaluation</option>
-                                <option value="Playgroup" <?= $sessionTypeFilter === "Playgroup" ? "selected" : "" ?>>Playgroup</option>
-                            </select>
-                        </div>
-
-                        <div class="uk-width-1-5@m">
-                            <label class="uk-form-label">Therapist:</label>
-                            <select class="uk-select" name="therapist">
-                                <option value="">All</option>
-                                <?php foreach ($therapists as $therapist): ?>
-                                    <option value="<?= $therapist['account_ID']; ?>" <?= $therapistFilter == $therapist['account_ID'] ? "selected" : "" ?>>
-                                        <?= htmlspecialchars($therapist['account_FName'] . " " . $therapist['account_LName']); ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="uk-width-1-5@m">
-                            <label class="uk-form-label">Start Date:</label>
-                            <input class="uk-input" type="date" name="start_date" value="<?= $startDate; ?>">
-                        </div>
-
-                        <div class="uk-width-1-5@m">
-                            <label class="uk-form-label">End Date:</label>
-                            <input class="uk-input" type="date" name="end_date" value="<?= $endDate; ?>">
-                        </div>
-                    </div>
-
-                    <div class="uk-text-right uk-margin-top">
-                        <button class="uk-button uk-button-primary" type="submit">Apply Filters</button>
-                        <a href="view_all_appointments.php" class="uk-button uk-button-default">Reset</a>
-                    </div>
-                </form>
-
-                <!-- 🔹 Appointments Table -->
-                <div class="uk-width-1-1 uk-margin-top">
-                    <div class="uk-overflow-auto">
-                        <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive uk-table-middle">
-                            <thead>
-                                <tr>
-                                    <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Therapist <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                    <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($appointments as $appointment): ?>
-                                    <tr>
-                                        <td>
-                                            <img src="<?= !empty($appointment['patient_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['patient_picture'] : '../../../../CSS/default.jpg'; ?>"
-                                                alt="Patient Picture" class="uk-border-circle" style="width: 40px; height: 40px; object-fit: cover;">
-                                            <?= htmlspecialchars($appointment['patient_firstname'] . " " . $appointment['patient_lastname']); ?>
-                                        </td>
-                                        <td>
-                                            <img src="<?= !empty($appointment['client_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['client_picture'] : '../../../../CSS/default.jpg'; ?>"
-                                                alt="Client Picture" class="uk-border-circle" style="width: 40px; height: 40px; object-fit: cover;">
-                                            <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
-                                        </td>
-                                        <td><?= htmlspecialchars($appointment['date']); ?></td>
-                                        <td><?= htmlspecialchars($appointment['time']); ?></td>
-                                        <td><?= htmlspecialchars($appointment['session_type']); ?></td>
-                                        <td><?= !empty($appointment['therapist_firstname']) ? htmlspecialchars($appointment['therapist_firstname'] . " " . $appointment['therapist_lastname']) : "Not Assigned"; ?></td>
-                                        <td><?= htmlspecialchars($appointment['status']); ?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+    <!-- 🔹 Appointments Table -->
+    <div class="uk-width-1-1 uk-margin-top">
+        <div class="uk-overflow-auto">
+            <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive uk-table-middle">
+                <thead>
+                    <tr>
+                        <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                        <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                        <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                        <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                        <th class="uk-table-shrink">Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                        <th class="uk-table-shrink">Therapist <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                        <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($appointments as $appointment): ?>
+                        <tr>
+                            <td>
+                                <img src="<?= !empty($appointment['patient_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['patient_picture'] : '../../../../CSS/default.jpg'; ?>"
+                                    alt="Patient Picture" class="uk-border-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                <?= htmlspecialchars($appointment['patient_firstname'] . " " . $appointment['patient_lastname']); ?>
+                            </td>
+                            <td>
+                                <img src="<?= !empty($appointment['client_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['client_picture'] : '../../../../CSS/default.jpg'; ?>"
+                                    alt="Client Picture" class="uk-border-circle" style="width: 40px; height: 40px; object-fit: cover;">
+                                <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
+                            </td>
+                            <td><?= htmlspecialchars($appointment['date']); ?></td>
+                            <td><?= htmlspecialchars($appointment['time']); ?></td>
+                            <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                            <td><?= !empty($appointment['therapist_firstname']) ? htmlspecialchars($appointment['therapist_firstname'] . " " . $appointment['therapist_lastname']) : "Not Assigned"; ?></td>
+                            <td><?= htmlspecialchars($appointment['status']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
+
 
     <script>
         $(document).ready(function() {

@@ -15,6 +15,31 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
     exit();
 }
 
+$userid = $_SESSION['account_ID'];
+
+$stmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
+$stmt->bind_param("s", $userid);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    $userData = $result->fetch_assoc();
+    $firstName = $userData['account_FName'];
+    $lastName = $userData['account_LName'];
+    $email = $userData['account_Email'];
+    $phoneNumber = $userData['account_PNum'];
+
+    if ($userData['profile_picture']) {
+        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture'];
+    } else {
+        $profilePicture = '../CSS/default.jpg';
+    }
+} else {
+    echo "No Data Found.";
+}
+
+$stmt->close();
+
 // Fetch current settings
 $query = "SELECT *, DATE_FORMAT(updated_at, '%M %d, %Y %h:%i %p') AS formatted_updated_at FROM settings LIMIT 1";
 $result = $connection->query($query);
@@ -55,114 +80,90 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
     <!-- ✅ Flatpickr Library for Multi-Date Selection -->
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <style>
+        html,
+        body {
+            background-color: #ffffff !important;
+        }
+    </style>
 </head>
 
 <body>
-    <script>
-        console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
-    </script>
-    <!-- Navbar -->
-    <nav class="uk-navbar-container logged-in">
-        <div class="uk-container">
-            <div uk-navbar>
-                <div class="uk-navbar-center">
-                    <a class="uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
-                </div>
-                <div class="uk-navbar-right">
-                    <ul class="uk-navbar-nav">
-                        <li>
-                            <a href="#" class="uk-navbar-item">
-                                <img class="profile-image" src="../../../CSS/default.jpg" alt="Profile Image" uk-img>
-                            </a>
-                        </li>
-                        <li style="display: flex; align-items: center;"> <?php echo $_SESSION['username']; ?>
-                        </li>
-                        <li><a href="../../../Accounts/logout.php">Logout</a></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
-
-    <hr class="solid">
-
     <!-- Main Content -->
-    <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport">
-        <!--Sidebar-->
-        <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
-            <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
-                Menu <span uk-navbar-toggle-icon></span>
-            </button>
-            <div class="sidebar-nav">
-                <ul class="uk-nav uk-nav-default">
-                    <li><a href="../../admindashboard.php">Dashboard</a></li>
-                    <li class="uk-active"><a href="timetable_settings.php">Manage Timetable Settings</a></li>
-                    <li><a href="../../../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="">Manage Therapists [NOT IMPLEMENTED YET]</a></li>
-                </ul>
+    <h2>System Settings</h2>
+
+    <p><strong>Last Updated:</strong> <?= $settings['formatted_updated_at'] ?? 'Never' ?></p>
+
+    <form id="settingsForm" method="POST" class="uk-form-stacked">
+        <div class="uk-margin">
+            <label class="uk-form-label">Business Hours Start:</label>
+            <div class="uk-form-controls">
+                <input class="uk-input uk-width-1-1" type="time" name="business_hours_start" value="<?= $settings['business_hours_start']; ?>" required>
             </div>
         </div>
 
-        <!-- Content Area -->
-        <div class="uk-width-4-5@m uk-padding">
-            <div class="uk-card uk-card-default uk-card-body form-card">
-                <h2>System Settings</h2>
-
-                <p><strong>Last Updated:</strong> <?= $settings['formatted_updated_at'] ?? 'Never' ?></p>
-
-                <form id="settingsForm" method="POST" class="uk-form-stacked">
-                    <label>Business Hours Start:</label>
-                    <input class="uk-input" type="time" name="business_hours_start" value="<?= $settings['business_hours_start']; ?>" required>
-
-                    <br />
-
-                    <label>Business Hours End:</label>
-                    <input class="uk-input" type="time" name="business_hours_end" value="<?= $settings['business_hours_end']; ?>" required>
-
-                    <br />
-
-                    <label>Max Booking Days (Advance):</label>
-                    <input class="uk-input" type="number" name="max_days_advance" value="<?= $settings['max_days_advance']; ?>" min="1" max="60" required>
-
-                    <br />
-
-                    <label>Min Days Before Appointment (Required Advance Booking):</label>
-                    <input class="uk-input" type="number" name="min_days_advance" value="<?= $settings['min_days_advance']; ?>" min="0" max="30" required>
-
-                    <br />
-
-                    <label>Blocked Dates:</label>
-                    <input class="uk-input" type="text" id="blocked_dates" name="blocked_dates" placeholder="Select dates..." required>
-
-                    <br />
-
-                    <label>Initial Evaluation Duration (Minutes):</label>
-                    <input class="uk-input" type="number" name="initial_eval_duration" value="<?= $settings['initial_eval_duration']; ?>" min="30" max="180" required>
-
-                    <br />
-
-                    <label>Playgroup Duration (Minutes):</label>
-                    <input class="uk-input" type="number" name="playgroup_duration" value="<?= $settings['playgroup_duration']; ?>" min="60" max="240" required>
-
-                    <br />
-
-                    <label>Occupational Therapy Session Duration (Minutes):</label>
-                    <input class="uk-input" type="number" name="service_ot_duration" value="<?= $settings['service_ot_duration']; ?>" min="30" max="180" required>
-
-                    <br />
-
-                    <label>Behavioral Therapy Session Duration (Minutes):</label>
-                    <input class="uk-input" type="number" name="service_bt_duration" value="<?= $settings['service_bt_duration']; ?>" min="30" max="180" required>
-
-                    <br />
-
-                    <div class="uk-text-right">
-                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Settings</button>
-                    </div>
-                </form>
+        <div class="uk-margin">
+            <label class="uk-form-label">Business Hours End:</label>
+            <div class="uk-form-controls">
+                <input class="uk-input uk-width-1-1" type="time" name="business_hours_end" value="<?= $settings['business_hours_end']; ?>" required>
             </div>
         </div>
-    </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label">Max Booking Days (Advance):</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="number" name="max_days_advance" value="<?= $settings['max_days_advance']; ?>" min="1" max="60" required>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label">Min Days Before Appointment (Required Advance Booking):</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="number" name="min_days_advance" value="<?= $settings['min_days_advance']; ?>" min="0" max="30" required>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label">Blocked Dates:</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="text" id="blocked_dates" name="blocked_dates" placeholder="Select dates..." required>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label">Initial Evaluation Duration (Minutes):</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="number" name="initial_eval_duration" value="<?= $settings['initial_eval_duration']; ?>" min="30" max="180" required>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label">Playgroup Duration (Minutes):</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="number" name="playgroup_duration" value="<?= $settings['playgroup_duration']; ?>" min="60" max="240" required>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label">Occupational Therapy Session Duration (Minutes):</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="number" name="service_ot_duration" value="<?= $settings['service_ot_duration']; ?>" min="30" max="180" required>
+            </div>
+        </div>
+
+        <div class="uk-margin">
+            <label class="uk-form-label">Behavioral Therapy Session Duration (Minutes):</label>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="number" name="service_bt_duration" value="<?= $settings['service_bt_duration']; ?>" min="30" max="180" required>
+            </div>
+        </div>
+
+        <div class="uk-text-right">
+            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Settings</button>
+        </div>
+
+    </form>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
