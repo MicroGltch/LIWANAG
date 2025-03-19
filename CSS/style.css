@@ -299,7 +299,7 @@ hr.solid{
 
 .uk-section
 {    
-    height: 100vh;
+
 }
 
 .welcome-title{
@@ -348,22 +348,38 @@ hr.solid{
     background-repeat: no-repeat;
     background-position: center bottom;
     height: 740px;
-    position: relative;
+   /* position: relative;*/
     margin-top: -80px; 
     padding-top: 80px; 
 }
 
 
-
-
 #section2{
 background-color: #ffffff;
-padding-top: 150px !important;
-
+padding-top: 145px !important;
+padding-bottom: 150px;
 }
 
 #section3{
-background-color: #ffffff;
+    background-image: url(section3_bg.png);
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center top;
+    height: 740px;
+   /* position: relative;*/
+    margin-top: -80px; 
+    padding-top: 100px; 
+}
+
+
+.about-us-description{
+    font-size: 18px;
+    margin-bottom: 20px;
+    color: #ffffff
+}
+
+.about-us-image{
+    margin-bottom: 20px;
 }
 
 .homepage-welcome {
@@ -391,7 +407,7 @@ background-color: #ffffff;
     border-radius: 5px;
 }
 
-/* Margin and Padding Adjustments based sa screen*/
+/* Welcome Text Margin and Padding Adjustments based sa screen*/
 @media screen and (max-width: 1024px) {
     .homepage-welcome {
         text-align: center;
@@ -420,19 +436,40 @@ background-color: #ffffff;
 }
 
 .service-description {
-    text-align: center;
-    margin-top: -10px;
+    text-align: left;
+    
 }
 
 .ie-img {
     display: flex;
     justify-content: center;
 }
-
+/*
 @media (max-width: 768px) {
-    /* Reduce parallax effects further if needed */
+     Reduce parallax effects further if needed 
     [uk-parallax] {
-        transform: none !important; /* Stops any unwanted side movement */
+        transform: none !important; Stops any unwanted side movement
     }
 }
+*/
+.about-us{
+margin-top: 50px;
+padding-left: 100px;
+padding-right: 100px;
+}
 
+.about-us-quote{
+    font-size: 35px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    color: #ffffff;
+}
+
+.about-us-title{
+    text-align: center;
+    color: #ffffff;
+}
+
+.about-us-slideshow{
+    border-radius:20px;
+}
