@@ -13,10 +13,12 @@ $first_name = $_POST['first_name'];
 $last_name = $_POST['last_name'];
 $bday = $_POST['bday'];
 $gender = $_POST['gender'];
-$existing_picture = $_POST['existing_profile_picture']; // Existing profile picture
+$existing_picture = $_POST['existing_profile_picture'];
+
+var_dump($_POST['bday']); // Debugging
 
 $target_dir = "../../../uploads/profile_pictures/";
-$new_file_name = $existing_picture; // Default to existing picture
+$new_file_name = $existing_picture;
 
 // ✅ If a new profile picture is uploaded, process it
 if (!empty($_FILES['profile_picture']['name'])) {
@@ -48,36 +50,49 @@ if (!empty($_FILES['profile_picture']['name'])) {
         $_SESSION['error'] = "Failed to upload profile picture.";
         header("Location: ../../../Dashboards/clientdashboard.php#view-registered-patients");
         exit();
-    }
-
-    if (!empty($_POST['bday'])) {
-        $date = DateTime::createFromFormat('Y-m-d', $_POST['bday']);
-        if ($date) {
-            $bday = $date->format('Y-m-d'); // Format correctly for MySQL
-        } else {
-            $_SESSION['error'] = "Invalid date format.";
-            header("Location: ../../../Dashboards/clientdashboard.php#view-registered-patients");
-            exit();
-        }
-    } else {
-        $bday = null; // If no date is provided, store NULL
-    }
-    
+    } 
 }
 
-// ✅ Update patient details in the database
+if (!empty($_POST['bday'])) {
+    $date = DateTime::createFromFormat('Y-m-d', $_POST['bday']);
+    if ($date) {
+        $bday = $date->format('Y-m-d');
+    } else {
+        $_SESSION['error'] = "Invalid date format.";
+        header("Location: ../../../Dashboards/clientdashboard.php#view-registered-patients");
+        exit();
+    }
+} else {
+    $bday = null;
+}
+
+// Update patient details in the database
 $query = "UPDATE patients SET first_name = ?, last_name = ?, bday = ?, gender = ?, profile_picture = ? WHERE patient_id = ? AND account_id = ?";
 $stmt = $connection->prepare($query);
 $stmt->bind_param("ssissii", $first_name, $last_name, $bday, $gender, $new_file_name, $patient_id, $_SESSION['account_ID']);
 
+// Log the query parameters
+error_log("Update Query Parameters: first_name=" . $first_name . ", last_name=" . $last_name . ", bday=" . ($bday !== null ? $bday : 'NULL') . ", gender=" . $gender . ", profile_picture=" . $new_file_name . ", patient_id=" . $patient_id . ", account_id=" . $_SESSION['account_ID']);
+
+if(!$stmt){
+    error_log("Prepare failed: ". $connection->error);
+}
+error_log("Bind Params: first_name=" . $first_name . ", last_name=" . $last_name . ", bday=" . ($bday !== null ? $bday : 'NULL') . ", gender=" . $gender . ", profile_picture=" . $new_file_name . ", patient_id=" . $patient_id . ", account_id=" . $_SESSION['account_ID']);
+$stmt->bind_param("ssissii", $first_name, $last_name, $bday, $gender, $new_file_name, $patient_id, $_SESSION['account_ID']);
+
+
 if ($stmt->execute()) {
-    $_SESSION['success'] = "Patient details updated successfully!";
+    if ($stmt->affected_rows > 0) {
+        $_SESSION['success'] = "Patient details updated successfully!";
+    } else {
+        $_SESSION['error'] = "No rows updated. Patient details may be the same.";
+    }
 } else {
-    $_SESSION['error'] = "Error updating patient details.";
+    $_SESSION['error'] = "Error updating patient details: " . $stmt->error;
+    error_log("SQL Error: " . $stmt->error);
 }
 
 $stmt->close();
-header("Location: ../../../Dashboards/clientdashboard.php#view-registered-patients"); // Redirect to dashboard
-var_dump($_POST['bday']);
+header("Location: ../../../Dashboards/clientdashboard.php#view-registered-patients");
 exit();
 ?>
