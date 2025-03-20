@@ -1,0 +1,8 @@
+Array
+(
+    [appointment_id] => 53
+    [status] => approved
+    [date] => 2025-03-31
+    [time] => 12:02
+    [therapist_id] => 66
+)

@@ -14,7 +14,8 @@ $therapistID = $_SESSION['account_ID'];
 $query = "SELECT DISTINCT p.patient_id, p.first_name, p.last_name, p.service_type 
           FROM appointments a
           JOIN patients p ON a.patient_id = p.patient_id
-          WHERE a.therapist_id = ?";
+          WHERE a.therapist_id = ? 
+          AND a.status = 'Completed'";
 $stmt = $connection->prepare($query);
 $stmt->bind_param("i", $therapistID);
 $stmt->execute();
@@ -126,39 +127,38 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
             }
 
             // ✅ Function to check existing appointment in real-time
-            function checkExistingAppointment() {
-                    let patientID = patientDropdown.value;
-                    if (!patientID) return;
+            function checkExistingAppointment() {    let patientID = patientDropdown.value;
+                if (!patientID) return;
 
-                    fetch(`../backend/check_patient_appointment.php?patient_id=${patientID}`)
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.status === "error") {
-                                Swal.fire({
-                                    title: "Rebooking Not Allowed",
-                                    html: `
-                                        <p>${data.message}</p>
-                                        <p><strong>Existing Status:</strong> ${data.existing_status}</p>
-                                        <p><strong>Date:</strong> ${data.existing_date}</p>
-                                        <p><strong>Time:</strong> ${data.existing_time}</p>
-                                        <p>Please select a different patient or check the existing appointment.</p>
-                                    `,
-                                    icon: "warning"
-                                });
+                fetch(`../backend/check_patient_appointment.php?patient_id=${patientID}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === "error") {
+                            Swal.fire({
+                                title: "Rebooking Not Allowed",
+                                html: `
+                                    <p>${data.message}</p>
+                                    <p><strong>Existing Status:</strong> ${data.existing_status}</p>
+                                    <p><strong>Date:</strong> ${data.existing_date}</p>
+                                    <p><strong>Time:</strong> ${data.existing_time}</p>
+                                    <p>Please select a different patient or check the existing appointment.</p>
+                                `,
+                                icon: "warning"
+                            });
 
-                                submitButton.disabled = true; // ❌ Disable form submission
-                            } else {
-                                submitButton.disabled = false; // ✅ Allow submission if no conflict
-                            }
-                        })
-                        .catch(error => {
-                            console.error("Error checking existing appointments:", error);
-                            Swal.fire("Error", "An error occurred while checking for existing appointments.", "error");
-                        });
-                }
+                            submitButton.disabled = true; // ❌ Disable form submission
+                        } else {
+                            submitButton.disabled = false; // ✅ Allow submission if no conflict
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error checking existing appointments:", error);
+                        Swal.fire("Error", "An error occurred while checking for existing appointments.", "error");
+                    });
+            }
 
-                // ✅ Trigger validation when a patient is selected
-                patientDropdown.addEventListener("change", checkExistingAppointment);
+            // ✅ Trigger validation when a patient is selected
+            patientDropdown.addEventListener("change", checkExistingAppointment);
             });
     </script>
 </body>
