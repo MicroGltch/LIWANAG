@@ -381,6 +381,61 @@ padding-right: 100px;
 /* Extra small devices (phones, 600px and down) */
 @media only screen and (max-width: 600px) {
 
+    .login-div{
+        min-height: 82vh;
+    }
+    .login-title{
+        font-family: 'Roboto',sans-serif;
+        font-weight: 800;
+        font-size: 20px !important;
+        margin-bottom: 0px !important;
+    }
+
+
+    .login-helper{
+        font-size: 13px !important;
+        margin-top: 0px;
+    }
+    .create-acc-card{
+        width: 325px;
+        margin-top: 0px;
+        padding-left:30px ;
+        padding-right:30px ;
+    }
+
+    .uk-input{
+        margin-bottom: -6.5px;
+        font-size: 13px;
+    }
+
+    .uk-text-small{
+        font-size: 13px !important;
+    }
+
+    .forgot-password-txt{
+        font-size: 13px;
+    }
+
+
+    .login-btn-div{
+        margin-top: 15px !important;
+    }
+
+    .login-btn{
+        font-size: 12px;
+    }
+    .signup-redirect-txt{
+        font-size:13px;
+    }
+
+    ::placeholder{
+        font-size: 11px ;
+    }
+
+    .uk-form-label{
+        font-size: 12px;
+    }
+
     .menu-button{
         width: 50px;
         font-size: 10px ;
@@ -494,6 +549,10 @@ padding-right: 100px;
 
     .slideshow-div{
         padding-left:0px;
+    }
+
+    .footer{
+       height:60px; 
     }
 } 
 

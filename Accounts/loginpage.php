@@ -31,31 +31,20 @@
         <div class="uk-container">
             <div uk-navbar>
                 <!--Navbar Left-->
-                    <div class="uk-navbar-left">
-                        <ul class="uk-navbar-nav">
-                            <li class="uk-active"><a href="#">About Us</a></li>
-                            <li class="uk-active"><a href="#">FAQs</a></li>
-                            <li class="uk-active"><a href="#">Services</a></li>
-                        </ul>
-                    </div>
+
 
                 <!--Navbar Center-->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
+                        <a class="logo-navbar uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
                     </div>
 
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                            <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
-                            <!-- <li><a href="#">Item</a></li> -->
+                            <li></li>
+                            <li><a href="#"></a></li>
                         </ul>
 
-                        <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
-                        <div class="uk-navbar-item">
-                                <button class="uk-button uk-button-default">Sign Up to Book an Appointment</button>
-                                <button class="uk-button uk-button-secondary">Login</button>
-                        </div>-->
                     </div>
     
                 </div>
@@ -64,13 +53,13 @@
         </div>
     </nav>
 
-    <div class="uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
+    <div class="login-div uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
     <!-- Login Account Card -->
         <div class="create-acc-card uk-card uk-card-default uk-card-body form-card">
             
             <!-- Title and Helper -->
-            <h3 class="uk-card-title uk-flex uk-flex-center">Welcome Back</h3>
-            <p class="uk-flex uk-flex-center">Please log in to continue.</p>
+            <h3 class="login-title uk-card-title uk-flex uk-flex-center">Welcome Back</h3>
+            <p class="login-helper uk-flex uk-flex-center">Please log in to continue.</p>
             
             <!-- Form Fields -->
             <form id="login-form" action="loginverify/loginlogic.php" method="post" class="uk-form-stacked uk-grid-medium" uk-grid>
@@ -82,7 +71,7 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label uk-text-left" for="login-email">Email</label>
                     <div class="uk-form-controls">
-                    <input class="uk-input" id="login-email" type="text" placeholder="Input your Email..." name="email">
+                    <input class="email-txtbox uk-input" id="login-email" type="text" placeholder="Input your Email..." name="email">
                     <span class="invalid-feedback" id="email-error"></span> 
                     </div>
                 </div>
@@ -91,7 +80,7 @@
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label uk-text-left" for="login-pass">Password</label>
                     <div class="uk-form-controls">
-                        <input class="uk-input" id="login-pass" type="password" placeholder="Input your Password..." name="password">
+                        <input class="password-txtbox uk-input" id="login-pass" type="password" placeholder="Input your Password..." name="password">
                         <span style="position: absolute; right: 10px; cursor: pointer;" onclick="togglePassword()">
                             <i class="fas fa-eye" id="togglePasswordIcon"></i>  </span>
                         <span class="invalid-feedback" id="pass-error"></span>  </div>
@@ -106,12 +95,12 @@
                 <!-- Add function -->
                 <!--Forgot Password-->
                 <div class="uk-width-1-2@s uk-width-1-2@l uk-text-right@s uk-text-right@l">
-                <a href="passwordmodify/forgetpassword.php"> Forgot Password?</a>
+                <a class="forgot-password-txt" href="passwordmodify/forgetpassword.php"> Forgot Password?</a>
                 </div>
 
                 <!-- Login Button -->
                 <div class="login-btn-div uk-width-1@s uk-width-1@l">
-                    <button type="submit" name="login" class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Log In</button>
+                    <button type="submit" name="login" class="login-btn uk-button uk-button-primary uk-width-1@s uk-width-1@l">Log In</button>
                 </div>
 
                 <!-- Divider -->
