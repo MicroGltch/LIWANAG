@@ -140,10 +140,10 @@ $stmt->close();
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li><a href="#dashboard" onclick="showSection('dashboard')"><span class="uk-margin-small-right" uk-icon="home"></span> Dashboard</a></li>
-
+                
                     <hr>
                     
-                    <li class="uk-parent">
+                    <!-- <li class="uk-parent">
                         <a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a>
                         
                         <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
@@ -151,9 +151,9 @@ $stmt->close();
 
                             <li><a href="../Appointments/app_process/rebook_appointment.php"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook Appointment</a></li>
                         </ul>
-                    </li>
+                    </li> 
 
-                    <hr>
+                    <hr> -->
 
                     <li class="uk-parent">
                     <a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a>
@@ -208,14 +208,13 @@ $stmt->close();
             <div id="dashboard" class="section">
                 <h1 class="uk-text-bold">Dashboard</h1>
 
-                <!-- Calendar Container -->
+                <!-- Calendar Container  **OLD DASHBOARD**
                 <div class="calendar-container uk-flex uk-flex-row">
                     <div class="uk-width-expand">
                         <div class="dashboard-calendar-container uk-card uk-card-default uk-card-body">
                             <div class="dashboard-header uk-flex uk-flex-between uk-flex-middle uk-margin-bottom">
                                 <div class="dashboard-month-selector">
                                     <select class="uk-select month-select" id="monthSelect">
-                                        <!-- Will be populated by JavaScript -->
                                     </select>
                                 </div>
                             </div>
@@ -223,7 +222,7 @@ $stmt->close();
                         </div>
                     </div>
 
-                    <!-- Right Sidebar -->
+                    Right Sidebar 
                     <div class="uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
                         <div class="sidebar-nav">
                             <ul class="uk-nav uk-nav-default">
@@ -232,7 +231,6 @@ $stmt->close();
                                     Pending Approval
                                 </li>
                                 <div class="pending-appointments">
-                                    <!-- Will be populated dynamically -->
                                 </div>
 
                                 <li class="uk-nav-header uk-margin-top">
@@ -240,13 +238,20 @@ $stmt->close();
                                     Upcoming
                                 </li>
                                 <div class="upcoming-appointments">
-                                    <!-- Will be populated dynamically -->
                                 </div>
                             </ul>
                         </div>
                     </div>
+                </div>-->
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+
+                    <iframe id="upcomingAppointmentsFormFrame" src="../Appointments/app_manage/upcoming_appointments.php" style="width: 100%; height: 800px; border: none;">
+                    </iframe>
+
                 </div>
-            </div>
+
+            </div> 
 
             <!-- Controls for DataTable -->
             <div id="appointmentsTableControls" class="uk-margin uk-flex uk-flex-between uk-flex-middle">

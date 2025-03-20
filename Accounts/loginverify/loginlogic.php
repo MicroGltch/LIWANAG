@@ -105,6 +105,11 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             echo json_encode(['redirect' => $redirectURL]);
             exit();
         } 
+
+        if($status === 'Archived'){
+            echo json_encode(['sweetalert' => ["Account Disabled", "Your account has been disabled. Please contact the team for assistance.", "error"]]);
+            exit();
+        }
         
         if ($status === 'Pending' && $accountType ==='therapist' && $passwordCorrect) {
             // Check if the entered password is the default one
@@ -116,6 +121,10 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                 ]);
                 exit();
             }
+        } elseif ($status === 'Pending' && $accountType ==='therapist' && !$passwordCorrect){
+            echo json_encode(['sweetalert' => ["Default Password Required", "Your account is pending activation. Please use the default password.", "warning"]]);
+            exit();
+
         } elseif ($status === 'Pending') {
             // ✅ **ACCOUNT PENDING VERIFICATION**
             if ($days < 1 || ($days === 0 && $hours < 24)) {

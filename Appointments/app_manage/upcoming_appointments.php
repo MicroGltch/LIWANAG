@@ -96,10 +96,10 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
             </tbody>
         </table>
     
-    <div class="uk-width-1-1 uk-text-right uk-margin-top">
+    <!-- <div class="uk-width-1-1 uk-text-right uk-margin-top">
     <button class="uk-button uk-button-primary" onclick="redirectIframe()">Rebook a Previous Patient</button>
 
-    </div>
+    </div> -->
     </div>
 
     <script>
