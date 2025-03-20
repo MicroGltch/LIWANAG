@@ -54,7 +54,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
     <title>Validate Appointments</title>
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="../../assets/favicon.ico">
+    <!-- <link rel="icon" type="image/x-icon" href="../../assets/favicon.ico"> -->
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -289,6 +289,12 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
             document.addEventListener("DOMContentLoaded", function () {
                 document.querySelectorAll(".action-btn").forEach(button => {
                     button.addEventListener("click", function () {
+
+                        console.log("Button clicked!"); // Add this line
+                        console.log(`Fetching details for appointment ID: ${appointmentId}`);
+                        console.log(`Fetching from: ../app_data/get_appointment_details.php?appointment_id=${appointmentId}`);
+
+
                         let appointmentId = this.getAttribute("data-id");
                         let action = this.getAttribute("data-action");
 
