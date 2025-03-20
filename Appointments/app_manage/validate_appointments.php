@@ -300,7 +300,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
 
                         let status = statusMapping[action];
 
-                        fetch(`../backend/get_appointment_details.php?appointment_id=${appointmentId}`)
+                        fetch(`../app_data/get_appointment_details.php?appointment_id=${appointmentId}`)
                             .then(response => {
                                 if (!response.ok) {
                                     throw new Error("Network response was not ok.");
@@ -323,7 +323,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                 `;
 
                                 if (action === "Approve") {
-                                    fetch(`../backend/get_available_therapists.php?date=${data.details.date}&time=${data.details.time}`)
+                                    fetch(`../app_data/get_available_therapists.php?date=${data.details.date}&time=${data.details.time}`)
                                         .then(response => {
                                             if (!response.ok) {
                                                 throw new Error("Failed to fetch available therapists.");
@@ -361,7 +361,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                                 }
                                             }).then((result) => {
                                                 if (result.isConfirmed) {
-                                                    fetch("../backend/update_appointment_status.php", {
+                                                    fetch("../app_process/update_appointment_status.php", {
                                                         method: "POST",
                                                         headers: { "Content-Type": "application/json" },  // ✅ Change to JSON
                                                         body: JSON.stringify({
@@ -407,7 +407,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                         }
                                     }).then((result) => {
                                         if (result.isConfirmed) {
-                                            fetch("../backend/update_appointment_status.php", {
+                                            fetch("../app_process/update_appointment_status.php", {
                                             method: "POST",
                                             headers: { "Content-Type": "application/x-www-form-urlencoded" },
                                             body: `appointment_id=${appointmentId}&status=declined&validation_notes=${encodeURIComponent(result.value.reason)}`
@@ -444,7 +444,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                         }
                                     }).then((result) => {
                                         if (result.isConfirmed) {
-                                            fetch("../backend/update_appointment_status.php", {
+                                            fetch("../app_process/update_appointment_status.php", {
                                                 method: "POST",
                                                 headers: { "Content-Type": "application/json" },
                                                 body: JSON.stringify({
@@ -488,7 +488,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                         let appointmentId = this.getAttribute("data-id");
 
                         // Fetch timetable settings before opening the modal
-                        fetch("../backend/get_timetable_settings.php")
+                        fetch("../app_data/get_timetable_settings.php")
                             .then(response => response.json())
                             .then(data => {
                                 if (data.status === "success") {
@@ -532,7 +532,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                         }
                                     }).then((result) => {
                                         if (result.isConfirmed) {
-                                            fetch("../backend/update_appointment_status.php", {
+                                            fetch("../app_process/update_appointment_status.php", {
                                                 method: "POST",
                                                 headers: { "Content-Type": "application/json" },
                                                 body: JSON.stringify({
@@ -607,7 +607,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                             return;
                                         }
 
-                                        fetch(`../backend/get_available_therapists.php?date=${date}&time=${time}`)
+                                        fetch(`../app_data/get_available_therapists.php?date=${date}&time=${time}`)
                                             .then(response => response.json())
                                             .then(data => {
                                                 if (data.status !== "success" || data.therapists.length === 0) {

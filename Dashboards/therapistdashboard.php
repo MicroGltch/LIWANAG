@@ -149,7 +149,7 @@ $stmt->close();
                         <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
                             <li style="padding:0px 0px 15px 0px"><a href="#upcoming-appointments" onclick="showSection('upcoming-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Upcoming Appointments </a></li>
 
-                            <li><a href="../Appointments/app_process/rebook_appointment.php"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook Appointment</a></li>
+                            <!-- <li><a href="../Appointments/app_process/rebook_appointment.php"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook Appointment</a></li> -->
                         </ul>
                     </li>
 
