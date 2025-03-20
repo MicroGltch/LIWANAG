@@ -46,7 +46,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 
 // EDIT PATIENT FORM
 // Fetch patients for the dropdown
-$patientsQuery = "SELECT patient_id, first_name, last_name FROM patients WHERE account_id = ?";
+$patientsQuery = "SELECT patient_id, first_name, last_name, bday FROM patients WHERE account_id = ?";
 $stmt = $connection->prepare($patientsQuery);
 $stmt->bind_param("i", $_SESSION['account_ID']);
 $stmt->execute();
@@ -506,8 +506,6 @@ $stmt->close();
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-</body>
 
 <script>
      document.addEventListener("DOMContentLoaded", function () {
@@ -1116,21 +1114,25 @@ $stmt->close();
             .then(response => response.json())
             .then(data => {
                 console.log("Fetched Data:", data); // Debugging
-                if (data.status === "success") {
-
-                    console.log("Received birthday:", data.patient.bday); // Debugging
-                    if (!data.patient.bday || data.patient.bday.trim() === "" || data.patient.bday === "0000-00-00") {
-                        birthdayInput.value = ""; // Ensure it's empty
-                        birthdayInput.placeholder = "mm/dd/yyyy"; // Set a placeholder
-                    } else {
-                        birthdayInput.value = data.patient.bday;
-                    }
+                if (data.status === "success") {            
 
                     patientIDInput.value = data.patient.patient_id;
                     firstNameInput.value = data.patient.first_name;
                     lastNameInput.value = data.patient.last_name;
                     genderInput.value = data.patient.gender;
                     existingProfilePicInput.value = data.patient.profile_picture;
+
+                     // Simply assign the birthday value directly without reformatting
+                     if (data.patient.bday && data.patient.bday !== "0000-00-00" && data.patient.bday.trim() !== "") {
+                    birthdayInput.value = data.patient.bday;
+                    console.log("Setting birthday value to:", data.patient.bday);
+                    } else {
+                        birthdayInput.value = "";
+                    }
+                    
+                    if (data.patient.bday === null) {
+                        console.log("Birthday is null for patient ID:", patientID);
+                    }
 
                     if (data.patient.profile_picture) {
                         profilePicPreview.src = "../uploads/profile_pictures/" + data.patient.profile_picture;
@@ -1150,6 +1152,18 @@ $stmt->close();
                 }
             })
             .catch(error => console.error("Error fetching patient details:", error));
+        });
+
+        // Ensure the birthday value is preserved when submitting the form
+        document.getElementById("editPatientForm").addEventListener("submit", function(event) {
+            console.log("Birthday value before submission:", birthdayInput.value);
+            
+            // If birthday is empty but should be required, you can prevent submission
+            if (birthdayInput.required && birthdayInput.value.trim() === "") {
+                event.preventDefault();
+                Swal.fire("Error", "Birthday field is required.", "error");
+                return false;
+            }
         });
 
         // Toggle edit mode when clicking "Edit" button
@@ -1218,5 +1232,6 @@ $stmt->close();
     });
 
 </script>
+</body>
 
 </html>
