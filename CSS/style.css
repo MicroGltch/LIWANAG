@@ -398,7 +398,7 @@ padding-right: 100px;
     }
     .create-acc-card{
         width: 325px;
-        margin-top: 0px;
+        margin-top: 15px;
         padding-left:30px ;
         padding-right:30px ;
     }
@@ -553,6 +553,57 @@ padding-right: 100px;
 
     .footer{
        height:60px; 
+    }
+
+
+    .forget-password-div{
+        min-height: 80vh;
+    }
+
+    .forgot-title{
+        font-family: 'Roboto',sans-serif;
+        font-weight: 800;
+        font-size: 20px !important;
+        margin-bottom: 0px !important;
+
+    }
+
+    .forgot-helper{
+        font-size: 13px !important;
+        margin-top: 5px;
+    }
+
+    .uk-form-label{
+        text-align: left;
+    }
+
+    .forgot-submit-btn-div{
+        margin-top: 20px;
+        
+    }
+
+    .forgot-submit-btn{
+        font-size: 12px;
+    }
+
+    .create-acc-title{
+        font-family: 'Roboto',sans-serif;
+        font-weight: 800;
+        font-size: 20px !important;
+        margin-bottom: 0px !important;
+    }
+
+    .create-acc-helper{
+        font-size: 13px !important;
+        margin-top: 5px;
+    }
+
+    .login-redirect-txt{
+        font-size:13px;
+    }
+
+    .signup-btn{
+        font-size: 12px;
     }
 } 
 

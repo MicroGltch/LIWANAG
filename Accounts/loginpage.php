@@ -26,7 +26,7 @@
 </head>
 
 <body>
-    <!-- Nav Bar (Ayusin pa alignment n stuff) -->
+    <!-- Nav Bar -->
     <nav class="uk-navbar-container">
         <div class="uk-container">
             <div uk-navbar>

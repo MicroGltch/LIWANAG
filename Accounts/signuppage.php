@@ -37,31 +37,19 @@ include "../dbconfig.php"
         <div class="uk-container">
             <div uk-navbar>
                 <!--Navbar Left-->
-                    <div class="uk-navbar-left">
-                        <ul class="uk-navbar-nav">
-                            <li class="uk-active"><a href="#">About Us</a></li>
-                            <li class="uk-active"><a href="#">FAQs</a></li>
-                            <li class="uk-active"><a href="#">Services</a></li>
-                        </ul>
-                    </div>
 
                 <!--Navbar Center-->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
+                        <a class="logo-navbar uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
                     </div>
 
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                             <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
-                            <li><a href="loginpage.php">Login</a></li>
+                            <li></li>
+                            <li><a href="#"></a></li>
                         </ul>
 
-                        <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
-                        <div class="uk-navbar-item">
-                                <button class="uk-button uk-button-default">Sign Up to Book an Appointment</button>
-                                <button class="uk-button uk-button-secondary">Login</button>
-                        </div>-->
                     </div>
     
                 </div>
@@ -75,8 +63,8 @@ include "../dbconfig.php"
     <!-- Create Account Card -->
     <div class="create-acc-card uk-card uk-card-default uk-card-body form-card">
         <!-- Title and Helper -->
-        <h3 class="uk-card-title uk-flex uk-flex-center">Create an Account</h3>
-        <p class="uk-flex uk-flex-center">Enter your personal details to start your journey with us.</p>
+        <h3 class="create-acc-title uk-card-title uk-flex uk-flex-center">Create an Account</h3>
+        <p class="create-acc-helper uk-flex uk-flex-center">Enter your personal details to start your journey with us.</p>
 
         <!-- Form Fields -->
         <form id="signupvalidate" class="uk-form-stacked uk-grid-medium" uk-grid method="POST" action="signupverify/signupprocess.php">
@@ -176,7 +164,7 @@ include "../dbconfig.php"
 
                 <!-- Sign Up Button -->
                 <div class="signup-btn-div uk-width-1@s uk-width-1@l">
-                    <button type="submit" name="signup" class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Sign Up</button>
+                    <button type="submit" name="signup" class="signup-btn uk-button uk-button-primary uk-width-1@s uk-width-1@l">Sign Up</button>
                 </div>
 
                 <!-- Divider -->
