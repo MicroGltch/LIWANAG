@@ -89,7 +89,7 @@ $stmt->close();
 
 <body>
     <script>
-        console.log('Session Username:', <?php echo isset($_SESSION['account_ID']) ? json_encode($_SESSION['account_ID']) : 'null'; ?>);
+        console.log('Session User ID:', <?php echo isset($_SESSION['account_ID']) ? json_encode($_SESSION['account_ID']) : 'null'; ?>);
     </script>
     <!-- Navbar -->
     <nav class="uk-navbar-container logged-in">
