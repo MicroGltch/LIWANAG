@@ -80,10 +80,10 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                 <?php foreach ($appointments as $appointment): ?>
                     <tr>
                         <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
-                        <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                        <td><?= htmlspecialchars(ucfirst($appointment['session_type'])); ?></td>
                         <td><?= htmlspecialchars($appointment['date']); ?></td>
                         <td><?= htmlspecialchars($appointment['time']); ?></td>
-                        <td><?= htmlspecialchars($appointment['status']); ?></td>
+                        <td><?= htmlspecialchars(ucfirst($appointment['status'])); ?></td>
                         <td>
                             <button class="uk-button uk-button-primary complete-btn"
                                 data-id="<?= $appointment['appointment_id']; ?>"

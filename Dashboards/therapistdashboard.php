@@ -171,7 +171,7 @@ $stmt->close();
                     <hr> -->
 
                     <li class="uk-parent">
-                    <a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a>
+                    <a href="#patient-details" onclick="showSection('patient-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a>
                         
                         <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
                         <li><a href="#rebook-patient" onclick="showSection('rebook-patient')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook Patient </a></li>
@@ -307,7 +307,7 @@ $stmt->close();
             </div>
 
             <!--Patients-->
-            <div id="account-details" style="display: none;" class="section">
+            <div id="patient-details" style="display: none;" class="section">
                 <h1 class="uk-text-bold">Patient List</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <table id="patientTable" class="display" style="width:100%">

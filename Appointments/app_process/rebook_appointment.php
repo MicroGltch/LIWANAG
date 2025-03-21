@@ -1,4 +1,4 @@
-<?php
+    <?php
 require_once "../../dbconfig.php";
 session_start();
 
