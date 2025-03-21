@@ -56,11 +56,11 @@ if ($result->num_rows === 1) {
 
     // ✅ Handle doctor referral links correctly
     $officialReferral = !empty($appointment["official_referral_file"]) 
-        ? "<a href='../uploads/doctors_referrals/{$appointment["official_referral_file"]}' target='_blank'>View Official Referral</a>" 
+        ? "<a href='../../uploads/doctors_referrals/{$appointment["official_referral_file"]}' target='_blank'>View Official Referral</a>" 
         : "Not Provided";
 
     $proofOfBooking = !empty($appointment["proof_of_booking_referral_file"]) 
-        ? "<a href='../uploads/doctors_referrals/{$appointment["proof_of_booking_referral_file"]}' target='_blank'>View Proof of Booking</a>" 
+        ? "<a href='../../uploads/doctors_referrals/{$appointment["proof_of_booking_referral_file"]}' target='_blank'>View Proof of Booking</a>" 
         : "Not Provided";
 
     echo json_encode([
