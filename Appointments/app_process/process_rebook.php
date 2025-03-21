@@ -7,10 +7,10 @@ use PHPMailer\PHPMailer\Exception;
 session_start();
 
 // ✅ Restrict Access to Therapists
-// if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-//     echo json_encode(["status" => "error", "message" => "Unauthorized access."]);
-//     exit();
-// }
+if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
+    echo json_encode(["status" => "error", "message" => "Unauthorized access."]);
+    exit();
+}
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $appointmentID = $_POST['appointment_id'] ?? null;

@@ -3,10 +3,10 @@ require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Therapists Only
-// if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-//     header("Location: ../../../loginpage.php");
-//     exit();
-// }
+if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
+    header("Location: ../../Accounts/loginpage.php");
+    exit();
+}
 
 // ✅ Get `patient_id` from URL instead of `appointment_id`
 $patientID = $_GET['patient_id'] ?? null;
@@ -65,6 +65,37 @@ $service_type = htmlspecialchars($patient['service_type']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rebook Appointment</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/uikit/3.9.6/css/uikit.min.css">
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&family=Roboto:wght@100..900&display=swap" rel="stylesheet">
+
+    <!-- UIkit Library -->
+    <link rel="stylesheet" href="/LIWANAG/CSS/uikit-3.22.2/css/uikit.min.css">
+<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit.min.js"></script>
+<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+
+
+    <!-- LIWANAG CSS -->
+    <link rel="stylesheet" href="/LIWANAG/CSS/style.css" type="text/css" >
+
+    <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.7/js/dataTables.uikit.min.js"></script>
+
+    <!-- Include Flatpickr -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <style>
+        html, body {
+        background-color: #ffffff !important;
+    }
+
+    </style>
 </head>
 <body>
     <div class="uk-container uk-margin-top">
@@ -90,8 +121,8 @@ $service_type = htmlspecialchars($patient['service_type']);
 
 
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Rebook Appointment</button>
-            <a href="../../Dashboards/therapistdashboard.php" class="uk-button uk-button-default">Cancel</a>
-        </form>
+            <a href="../app_manage/upcoming_appointments.php" class="uk-button uk-button-default">Cancel</a>
+            </form>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -108,7 +139,7 @@ $service_type = htmlspecialchars($patient['service_type']);
             .then(data => {
                 if (data.status === "success") {
                     Swal.fire("Success!", data.message, "success").then(() => {
-                        window.location.href = "therapist_dashboard.php";
+                        location.reload();
                     });
                 } else {
                     Swal.fire("Error!", data.message, "error");

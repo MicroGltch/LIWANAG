@@ -2,10 +2,10 @@
 include "../dbconfig.php";
 session_start();
 
-// Check if the user is logged in (basic check)
-if (!isset($_SESSION['account_ID'])) {
+// ✅ Restrict Access to Therapists Only
+if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
     header("Location: ../Accounts/loginpage.php");
-    exit;
+    exit();
 }
 
 
@@ -19,6 +19,8 @@ $stmt->execute();
 $result = $stmt->get_result();
 
 
+
+
 if ($result->num_rows > 0) {
     $userData = $result->fetch_assoc();
     $firstName = $userData['account_FName'];
@@ -27,7 +29,7 @@ if ($result->num_rows > 0) {
     $phoneNumber = $userData['account_PNum'];
     // Determine the profile picture path
     if ($userData['profile_picture']) {
-        $profilePicture = '/LIWANAG/uploads/profile_pictures/' . $userData['profile_picture']; // Corrected path
+        $profilePicture = '../uploads/profile_pictures/' . $userData['profile_picture']; // Corrected path
     } else {
         $profilePicture = '../CSS/default.jpg';
     }
@@ -35,6 +37,19 @@ if ($result->num_rows > 0) {
 } else {
     echo "No Data Found.";
 }
+
+// Fetch therapist's upcoming appointments
+$query = "SELECT a.appointment_id, a.date, a.time, a.session_type, a.status,
+                 p.patient_id, p.first_name, p.last_name 
+          FROM appointments a
+          JOIN patients p ON a.patient_id = p.patient_id
+          WHERE a.therapist_id = ? AND a.status IN ('Approved', 'Pending')
+          ORDER BY a.date ASC, a.time ASC";
+$stmt = $connection->prepare($query);
+$stmt->bind_param("i", $therapistID);
+$stmt->execute();
+$result = $stmt->get_result();
+$appointments = $result->fetch_all(MYSQLI_ASSOC);
 
 
 $stmt->close();
@@ -176,10 +191,6 @@ $stmt->close();
                     <hr>
                     
                     <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
-
-
-
-
 
 
                     <li></li>

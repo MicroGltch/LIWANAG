@@ -110,8 +110,7 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
             
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Rebook Appointment</button>
 
-            <button href="../../../Dashboards/therapistdashboard.php" class="uk-button uk-button-primary uk-margin-top">Cancel</button>
-
+            <button type="button" id="clearButton" class="uk-button uk-button-default uk-margin-top">Clear</button>
         </form>
         
  
@@ -196,6 +195,15 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
 
                 // ✅ Trigger validation when a patient is selected
                 patientDropdown.addEventListener("change", checkExistingAppointment);
+
+                document.getElementById("clearButton").addEventListener("click", function() {
+                document.getElementById("patient_id").value = "";
+                document.getElementById("service_type").value = "";
+                document.getElementById("new_date").value = "";
+                document.getElementById("new_time").value = "";
+                document.getElementById("new_time").innerHTML = ""; // Clear time options
+                submitButton.disabled = false; // Re-enable submit button
+                });
             });
     </script>
 </body>
