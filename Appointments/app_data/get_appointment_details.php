@@ -36,15 +36,18 @@ if (!$isAuthorized) {
 }
 
 // ✅ Fetch appointment details with updated referral information
-$query = "SELECT a.date, a.time, a.status, a.session_type, 
+$query = "SELECT a.date, a.time, a.status, a.session_type, a.rebooked_by, -- ✅ Include `rebooked_by`
                  p.first_name AS patient_firstname, p.last_name AS patient_lastname, p.profile_picture AS patient_picture,
                  u.account_FName AS client_firstname, u.account_LName AS client_lastname, u.profile_picture AS client_picture,
+                 t.account_FName AS rebooked_by_firstname, t.account_LName AS rebooked_by_lastname, -- ✅ Fetch Rebooked By Therapist's Name
                  dr.official_referral_file, dr.proof_of_booking_referral_file
           FROM appointments a
           JOIN patients p ON a.patient_id = p.patient_id
           JOIN users u ON a.account_id = u.account_ID
-          LEFT JOIN doctor_referrals dr ON a.referral_id = dr.referral_id -- ✅ Join doctor_referrals for updated referral structure
+          LEFT JOIN users t ON a.rebooked_by = t.account_ID -- ✅ Join `users` to get `rebooked_by` name
+          LEFT JOIN doctor_referrals dr ON a.referral_id = dr.referral_id 
           WHERE a.appointment_id = ?";
+
 
 $stmt = $connection->prepare($query);
 $stmt->bind_param("i", $appointmentId);
@@ -74,9 +77,13 @@ if ($result->num_rows === 1) {
             "time" => htmlspecialchars($appointment["time"]),
             "session_type" => htmlspecialchars($appointment["session_type"]),
             "status" => htmlspecialchars($appointment["status"]),
+            "rebooked_by_name" => !empty($appointment["rebooked_by_firstname"]) 
+                ? htmlspecialchars($appointment["rebooked_by_firstname"] . " " . $appointment["rebooked_by_lastname"]) 
+                : null, // ✅ Set to `null` if not a rebooking
             "doctor_referral" => $officialReferral . " | " . $proofOfBooking
         ]
     ]);
+
 } else {
     echo json_encode(["status" => "error", "message" => "Appointment details not found."]);
 }

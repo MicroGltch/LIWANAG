@@ -111,11 +111,25 @@
                 <option value="Playgroup">Playgroup</option>
             </select>
 
-            <label>Date:</label>
-            <input class="uk-input" type="date" name="appointment_date" id="appointment_date" required>
+            <!-- 🔹 Date & Time Fields (Hidden when Playgroup is selected) -->
+            <div id="date_time_container">
+                <label>Date:</label>
+                <input class="uk-input" type="date" name="appointment_date" id="appointment_date" required>
 
-            <label>Time:</label>
-            <select class="uk-select" name="appointment_time" id="appointment_time" required></select>
+                <label>Time:</label>
+                <select class="uk-select" name="appointment_time" id="appointment_time" required></select>
+            </div>
+
+            <!-- 🔹 Playgroup Session Selection (Hidden by Default) -->
+            <div id="playgroup_session_container" style="display: none;">
+                <label>Select Playgroup Session:</label>
+                <select class="uk-select" name="pg_session_id" id="pg_session_id" required>
+                    <option value="" disabled selected>Fetching available sessions...</option>
+                </select>
+                <p><strong>Date:</strong> <span id="pg_selected_date"></span></p>
+                <p><strong>Time:</strong> <span id="pg_selected_time"></span></p>
+            </div>
+
 
             <div id="referralQuestion" style="display: none;">
                 <label>
@@ -377,6 +391,74 @@
                 .catch(error => console.error("Error fetching patient history:", error));
         });
     });
+
+    document.addEventListener("DOMContentLoaded", function () {
+    let appointmentTypeDropdown = document.getElementById("appointment_type");
+    let dateTimeContainer = document.getElementById("date_time_container");
+    let playgroupSessionContainer = document.getElementById("playgroup_session_container");
+    let playgroupSessionDropdown = document.getElementById("pg_session_id");
+    let selectedDateDisplay = document.getElementById("pg_selected_date");
+    let selectedTimeDisplay = document.getElementById("pg_selected_time");
+
+    // ✅ When the appointment type changes
+    appointmentTypeDropdown.addEventListener("change", function () {
+        if (this.value === "Playgroup") {
+            fetchOpenPlaygroupSessions(); // Fetch available sessions
+            dateTimeContainer.style.display = "none"; // Hide manual date/time selection
+            playgroupSessionContainer.style.display = "block"; // Show session dropdown
+            playgroupSessionDropdown.required = true;
+        } else {
+            dateTimeContainer.style.display = "block"; // Show date/time selection for other types
+            playgroupSessionContainer.style.display = "none"; // Hide session selection
+            playgroupSessionDropdown.required = false;
+        }
+    });
+
+    // ✅ Fetch only OPEN Playgroup sessions
+    function fetchOpenPlaygroupSessions() {
+        fetch("app_data/get_open_playgroup_sessions.php") // Fetch open sessions
+            .then(response => response.json())
+            .then(data => {
+                playgroupSessionDropdown.innerHTML = ""; // Clear existing options
+
+                if (data.status === "success" && data.sessions.length > 0) {
+                    data.sessions.forEach(session => {
+                        let option = document.createElement("option");
+                        option.value = session.pg_session_id;
+                        option.textContent = `${session.date} at ${session.time} (${session.current_count}/${session.max_capacity})`;
+                        playgroupSessionDropdown.appendChild(option);
+                    });
+
+                    // ✅ Auto-fill the first session's date/time
+                    let firstSession = data.sessions[0];
+                    playgroupSessionDropdown.value = firstSession.pg_session_id;
+                    selectedDateDisplay.textContent = firstSession.date;
+                    selectedTimeDisplay.textContent = firstSession.time;
+                } else {
+                    let option = document.createElement("option");
+                    option.value = "";
+                    option.disabled = true;
+                    option.selected = true;
+                    option.textContent = "No open playgroup sessions available";
+                    playgroupSessionDropdown.appendChild(option);
+                }
+            })
+            .catch(error => {
+                console.error("Error fetching playgroup sessions:", error);
+            });
+    }
+
+    // ✅ Update selected date/time when a different session is chosen
+    playgroupSessionDropdown.addEventListener("change", function () {
+        let selectedOption = this.options[this.selectedIndex];
+        let sessionText = selectedOption.textContent.match(/(\d{4}-\d{2}-\d{2}) at (\d{2}:\d{2}:\d{2})/);
+        if (sessionText) {
+            selectedDateDisplay.textContent = sessionText[1];
+            selectedTimeDisplay.textContent = sessionText[2];
+        }
+    });
+
+});
 
 
 </script>

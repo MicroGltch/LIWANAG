@@ -54,7 +54,42 @@ $result = $stmt->get_result();
 $patients = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// BOOK APPOINTMENT FORM PHP from book_appointment_form
+
+
+
+// Fetch settings from database
+$settingsQuery = "SELECT business_hours_start, business_hours_end, max_days_advance, min_days_advance, blocked_dates,
+                         initial_eval_duration, playgroup_duration, service_ot_duration, service_bt_duration 
+                  FROM settings LIMIT 1";
+
+$result = $connection->query($settingsQuery);
+$settings = $result->fetch_assoc();
+
+// Convert blocked dates into an array
+$blockedDates = !empty($settings["blocked_dates"]) ? explode(",", $settings["blocked_dates"]) : [];
+
+// Set up PHP arrays for JS conversion
+$sessionDurations = [
+    "playgroup" => (int) $settings["playgroup_duration"],
+    "initial_evaluation" => (int) $settings["initial_eval_duration"],
+    "occupational_therapy" => (int) $settings["service_ot_duration"],
+    "behavioral_therapy" => (int) $settings["service_bt_duration"]
+];
+
+$timetableSettings = [
+    "businessHoursStart" => $settings["business_hours_start"],
+    "businessHoursEnd" => $settings["business_hours_end"],
+    "maxDaysAdvance" => (int) $settings["max_days_advance"],
+    "minDaysAdvance" => (int) $settings["min_days_advance"],
+    "blockedDates" => $blockedDates
+];
+
+// Send data to JavaScript
+echo "<script>
+        const sessionDurations = " . json_encode($sessionDurations) . ";
+        const timetableSettings = " . json_encode($timetableSettings) . ";
+      </script>";
+
 
 
 ?>
@@ -83,9 +118,16 @@ $stmt->close();
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
 </head>
 
-
+</head>
 
 <body>
     <script>
@@ -227,14 +269,28 @@ $stmt->close();
                                             <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
                                         <?php endif; ?>
 
-                                        <!-- ✅ Edit button (Only for "Pending" & edit_count < 2) -->
-                                        <?php if ($appointment['status'] === "pending" && $appointment['edit_count'] < 2): ?>
+                                        <!-- ✅ Edit button logic -->
+                                        <?php if (
+                                            $appointment['status'] === "pending" &&
+                                            $appointment['edit_count'] < 2 &&
+                                            strtolower($appointment['session_type']) !== "playgroup"
+                                        ): ?>
                                             <button class="uk-button uk-button-primary edit-btn" data-id="<?= $appointment['appointment_id']; ?>"
                                                 data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
                                                 Reschedule (<?= 2 - $appointment['edit_count']; ?> left)
                                             </button>
                                         <?php else: ?>
-                                            <button class="uk-button uk-button-default" disabled>Reschedule Is Not Allowed</button>
+                                            <?php if (
+                                                strtolower($appointment['session_type']) === "playgroup" &&
+                                                !in_array(strtolower($appointment['status']), ["completed", "cancelled", "declined"])
+                                            ): ?>
+                                                <button class="uk-button uk-button-default" disabled>Reschedule Not Allowed for Playgroup</button>
+                                            <?php elseif ($appointment['edit_count'] >= 2 && $appointment['status'] === "pending"): ?>
+                                                <button class="uk-button uk-button-default" disabled>Reschedule Limit Reached</button>
+                                            <?php else: ?>
+                                                <button class="uk-button uk-button-default" disabled>Reschedule Is Not Allowed</button>
+                                            <?php endif; ?>
+
                                         <?php endif; ?>
                                     </td>
                                 </tr>
@@ -508,61 +564,17 @@ $stmt->close();
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-     document.addEventListener("DOMContentLoaded", function () {
-    // Select elements
-    const editButton = document.getElementById("editButton");
-    const saveButton = document.getElementById("saveButton");
-    const form = document.getElementById("settingsvalidate");
-    const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
-    const otpSection = document.getElementById("otpSection");
-    const otpInput = document.getElementById("otp");
-    const successMessage = document.getElementById("successMessage");
-    const profileUploadInput = document.getElementById("profileUpload");
-    const uploadButton = document.getElementById("uploadButton");
-    const emailInput = document.getElementById("email"); // Select the email input
-    const removePhotoButton = document.getElementById("removePhotoButton");
-    
-    // Add new elements
-    const editEmailButton = document.createElement("button");
-    editEmailButton.id = "editEmailButton";
-    editEmailButton.textContent = "Edit Email";
-    editEmailButton.className = "uk-button uk-button-secondary";  // Using UK button classes for consistency
-    editEmailButton.style.marginRight = "15px";
-    editEmailButton.style.fontSize = "16px";
-    editEmailButton.style.padding = "8px 20px";
-    editEmailButton.style.fontWeight = "bold";
-    
-    const cancelVerificationButton = document.createElement("button");
-    cancelVerificationButton.id = "cancelVerificationButton";
-    cancelVerificationButton.textContent = "Cancel Verification";
-    cancelVerificationButton.className = "uk-button uk-button-danger";  // Using UK button classes for consistency
-    cancelVerificationButton.style.fontSize = "16px";
-    cancelVerificationButton.style.padding = "8px 20px";
-    cancelVerificationButton.style.fontWeight = "bold";
-    
-    // Create a container for the buttons
-    const buttonContainer = document.createElement("div");
-    buttonContainer.className = "uk-margin-medium-top";  // Using UK margin class
-    buttonContainer.style.display = "flex";
-    buttonContainer.style.justifyContent = "flex-start";
-    buttonContainer.style.marginTop = "20px";
-    buttonContainer.appendChild(editEmailButton);
-    buttonContainer.appendChild(cancelVerificationButton);
-    
-    // Insert these buttons after the OTP input
-    if (otpSection) {
-        // Append the button container to the OTP section (after all existing elements)
-        otpSection.appendChild(buttonContainer);
-    }
 
-    let originalValues = {};
-    inputs.forEach(input => originalValues[input.id] = input.value);
-    
-    // Original email value to restore if verification is canceled
-    let originalEmail = emailInput ? emailInput.value : '';
 
-    // Edit Button Click Event
-    if (editButton) {
+    document.addEventListener("DOMContentLoaded", function () {
+        const editButton = document.getElementById("editButton");
+        const saveButton = document.getElementById("saveButton");
+        const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
+
+        // Store initial values
+        let originalValues = {};
+        inputs.forEach(input => originalValues[input.id] = input.value);
+
         editButton.addEventListener("click", function () {
             if (editButton.textContent === "Edit") {
                 inputs.forEach(input => input.disabled = false);
@@ -924,16 +936,52 @@ $stmt->close();
             });
         });
 
+
+        function generateTimeOptions(start, end, sessionType) {
+            const [startHour, startMin] = start.split(":").map(Number);
+            const [endHour, endMin] = end.split(":").map(Number);
+            const interval = sessionDurations[sessionType] || 60; // Default 60 mins if not found
+            const timeDropdown = document.getElementById("appointmentTime");
+
+            timeDropdown.innerHTML = '<option value="">Select Time</option>'; // Reset
+
+            let current = new Date();
+            current.setHours(startHour, startMin, 0, 0);
+            const endTime = new Date();
+            endTime.setHours(endHour, endMin, 0, 0);
+
+            while (current < endTime) {
+                const hh = current.getHours().toString().padStart(2, '0');
+                const mm = current.getMinutes().toString().padStart(2, '0');
+                const option = document.createElement("option");
+                option.value = `${hh}:${mm}`;
+                option.textContent = `${hh}:${mm}`;
+                timeDropdown.appendChild(option);
+                current.setMinutes(current.getMinutes() + interval);
+            }
+        }
         // ✅ Edit Appointment (Reschedule)
         document.querySelectorAll(".edit-btn").forEach(button => {
-            button.addEventListener("click", function() {
+            button.addEventListener("click", function () {
                 let appointmentId = this.getAttribute("data-id");
-                let currentStatus = this.getAttribute("data-status"); // Get status from dataset
+                let currentStatus = this.getAttribute("data-status");
 
                 Swal.fire({
                     title: "Edit Appointment",
-                    html: `<label>New Date:</label> <input type="date" id="appointmentDate" class="swal2-input">
-                           <label>New Time:</label> <input type="time" id="appointmentTime" class="swal2-input">`,
+                    html: `
+                        <label>New Date:</label> <input type="text" id="appointmentDate" class="swal2-input">
+                        <label>New Time:</label> <select id="appointmentTime" class="swal2-select"></select>
+                    `,
+                    didOpen: () => {
+                        flatpickr("#appointmentDate", {
+                            minDate: new Date().fp_incr(timetableSettings.minDaysAdvance),
+                            maxDate: new Date().fp_incr(timetableSettings.maxDaysAdvance),
+                            disable: timetableSettings.blockedDates.map(date => new Date(date))
+                        });
+
+                        let sessionType = document.querySelector(".edit-btn").getAttribute("data-session-type");
+                        generateTimeOptions(timetableSettings.businessHoursStart, timetableSettings.businessHoursEnd, sessionType);
+                    },
                     showCancelButton: true,
                     confirmButtonText: "Save Changes",
                     preConfirm: () => {
@@ -945,9 +993,7 @@ $stmt->close();
                 }).then((result) => {
                     fetch("../Appointments/app_manage/client_edit_appointment.php", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
+                        headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             appointment_id: appointmentId,
                             action: "edit",
@@ -963,6 +1009,9 @@ $stmt->close();
                 });
             });
         });
+
+
+
 
         // Book Appointment Form Submission Handling
         let appointmentFormFrame = document.getElementById("appointmentFormFrame");
