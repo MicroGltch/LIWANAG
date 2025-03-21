@@ -51,7 +51,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // First Name Validation
         let firstName = document.getElementById("firstName").value.trim();
         let firstNameError = document.getElementById("firstNameError");
-        let nameRegex = /^[A-Za-z]{2,30}$/;
+        let nameRegex = /^[A-Za-z]+( [A-Za-z]+)+$/;
         if (!nameRegex.test(firstName)) {
             firstNameError.textContent = "Only letters allowed (2-30 characters).";
             valid = false;
