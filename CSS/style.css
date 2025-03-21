@@ -135,8 +135,8 @@ hr.solid{
 }
 
 
-.footer{    
-    width:auto;
+.footer{
+    width: 100vw;    
     text-align: center;
     background-color: #1a202c;
     padding: 2%;
