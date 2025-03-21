@@ -75,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // ✅ Check Playgroup Session Capacity
-    if ($appointment_type === "Playgroup") {
+    if ($appointment_type === "playgroup") {
         $check_capacity = "SELECT COUNT(*) as count FROM appointments WHERE date = ? AND time = ? AND session_type = 'Playgroup'";
         $stmt = $connection->prepare($check_capacity);
         $stmt->bind_param("ss", $appointment_date, $appointment_time);
@@ -138,9 +138,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 
-    // ✅ Insert Appointment Into `appointments` Table
-    $insertAppointmentSQL = "INSERT INTO appointments (account_id, patient_id, date, time, session_type, status, referral_id) 
-                             VALUES (?, ?, ?, ?, ?, 'Pending', ?)";
+    //playgroup
+    $pg_session_id = $_POST['pg_session_id'] ?? null;
+
+    if ($appointment_type === "Playgroup") {
+        // Make sure a Playgroup session is selected
+        if (empty($pg_session_id)) {
+            echo json_encode(["status" => "error", "message" => "No Playgroup session selected."]);
+            exit();
+        }
+
+        // Get date/time from the selected session
+        $pgQuery = "SELECT date, time FROM playgroup_sessions WHERE pg_session_id = ?";
+        $stmt = $connection->prepare($pgQuery);
+        $stmt->bind_param("s", $pg_session_id);
+        $stmt->execute();
+        $pgResult = $stmt->get_result();
+
+        if ($pgResult->num_rows > 0) {
+            $pgData = $pgResult->fetch_assoc();
+            $appointment_date = $pgData['date'];
+            $appointment_time = $pgData['time'];
+        } else {
+            echo json_encode(["status" => "error", "message" => "Selected Playgroup session not found."]);
+            exit();
+        }
+    }
+
+
+
+    $insertAppointmentSQL = "INSERT INTO appointments (account_id, patient_id, date, time, session_type, pg_session_id, status, referral_id, created_at, updated_at) 
+    VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, NOW(), NOW())";
     $stmt = $connection->prepare($insertAppointmentSQL);
 
     if ($stmt === false) {
@@ -148,7 +176,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    $stmt->bind_param("iisssi", $account_id, $patient_id, $appointment_date, $appointment_time, $appointment_type, $referral_id);
+    $stmt->bind_param("iissssi", $account_id, $patient_id, $appointment_date, $appointment_time, $appointment_type, $pg_session_id, $referral_id);
 
     if ($stmt->execute()) {
         $appointment_id = $stmt->insert_id; // ✅ Get the newly inserted appointment ID
