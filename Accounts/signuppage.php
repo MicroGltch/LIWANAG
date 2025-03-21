@@ -167,9 +167,8 @@ include "../dbconfig.php"
                             name="phone" 
                             type="tel" 
                             placeholder="Input your Phone Number..." 
-                            value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>" 
-                            pattern="^\+63\d{10}$" 
-                            required>
+                            value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>"  
+                            >
                         <span class="error" id="mobileNumberError" style="color: red;"></span>
                     </div>
                 </div>
@@ -203,8 +202,165 @@ include "../dbconfig.php"
 
     <!-- Javascript -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="accountJS/signup.js"></script>
+    <script>
+        function togglePassword() {
+        const passwordField = document.getElementById("password");
+        const togglePasswordBtn = document.getElementById("togglePasswordIcon");
+
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            togglePasswordBtn.classList.remove("fa-eye");
+            togglePasswordBtn.classList.add("fa-eye-slash");
+        } else {
+            passwordField.type = "password";
+            togglePasswordBtn.classList.remove("fa-eye-slash");
+            togglePasswordBtn.classList.add("fa-eye");
+        }
+    }
+
+    function toggleConfirmPassword() {
+        const confirmPasswordField = document.getElementById("confirmPassword");
+        const toggleConfirmPasswordBtn = document.getElementById("toggleConfirmPasswordIcon");
+
+        if (confirmPasswordField.type === "password") {
+            confirmPasswordField.type = "text";
+            toggleConfirmPasswordBtn.classList.remove("fa-eye");
+            toggleConfirmPasswordBtn.classList.add("fa-eye-slash");
+        } else {
+            confirmPasswordField.type = "password";
+            toggleConfirmPasswordBtn.classList.remove("fa-eye-slash");
+            toggleConfirmPasswordBtn.classList.add("fa-eye");
+        }
+    }
+
     
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+document.getElementById("signupvalidate").addEventListener("submit", function (event) {
+    let valid = true;
+
+    // First Name Validation
+    let firstName = document.getElementById("firstName").value.trim();
+    let firstNameError = document.getElementById("firstNameError");
+    let nameRegex = /^[A-Za-z ]{2,30}$/;
+    if (!nameRegex.test(firstName)) {
+        firstNameError.textContent = "Only letters allowed (2-30 characters).";
+        valid = false;
+    } else {
+        firstNameError.textContent = "";
+    }
+
+    // Last Name Validation
+    let lastName = document.getElementById("lastName").value.trim();
+    let lastNameError = document.getElementById("lastNameError");
+    if (!nameRegex.test(lastName)) {
+        lastNameError.textContent = "Only letters allowed (2-30 characters).";
+        valid = false;
+    } else {
+        lastNameError.textContent = "";
+    }
+
+    // Email Validation
+    let email = document.getElementById("email").value.trim();
+    let emailError = document.getElementById("emailError");
+    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+        emailError.textContent = "Invalid email format.";
+        valid = false;
+    } else {
+        emailError.textContent = "";
+    }
+
+    // Password Validation
+    let password = document.getElementById("password").value;
+    let passwordError = document.getElementById("passwordError");
+    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-_])[A-Za-z\d@$!%*?&\-_]{8,20}$/;
+    if (!passwordRegex.test(password)) {
+        passwordError.textContent = "Password must be 8-20 chars, with uppercase, lowercase, number, and special char.";
+        valid = false;
+    } else {
+        passwordError.textContent = "";
+    }
+
+    // Confirm Password Validation
+    let confirmPassword = document.getElementById("confirmPassword").value;
+    let confirmPasswordError = document.getElementById("confirmPasswordError");
+    if (confirmPassword !== password) {
+        confirmPasswordError.textContent = "Passwords do not match.";
+        valid = false;
+    } else {
+        confirmPasswordError.textContent = "";
+    }
+
+    // Mobile Number Validation
+    let mobileNumber = document.getElementById("mobileNumber").value.trim();
+    let mobileNumberError = document.getElementById("mobileNumberError");
+
+    // Validate: must be 11 digits, and start with 09
+    let mobileRegex = /^09\d{9}$/;
+    if (!mobileRegex.test(mobileNumber)) {
+        if (mobileNumber.length !== 11) {
+            mobileNumberError.textContent = "Phone number must be exactly 11 digits.";
+        } else if (!mobileNumber.startsWith("09")) {
+            mobileNumberError.textContent = "Phone number must start with 09.";
+        } else if (!/^\d+$/.test(mobileNumber)) {
+            mobileNumberError.textContent = "Phone number must contain only digits.";
+        } else {
+            mobileNumberError.textContent = "Invalid phone number format. Must be 09XXXXXXXXX.";
+        }
+        valid = false;
+    } else {
+        mobileNumberError.textContent = "";
+    }
+
+    // Address Validation
+    let address = document.getElementById("address").value;
+    let addressError = document.getElementById("addressError");
+    if (address.length < 5) {
+        addressError.textContent = "Address must be at least 5 characters.";
+        valid = false;
+    } else {
+        addressError.textContent = "";
+    }
+
+    // Email Duplication Check (Client-Side)
+    if (valid) { // Only perform email check if other validations pass
+        fetch('check_email.php', { // Create a PHP file called check_email.php
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'email=' + encodeURIComponent(email)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                emailError.textContent = "The email you entered is already registered. Please use a different email.";
+                valid = false;
+            }
+
+            if (!valid) {
+                event.preventDefault();
+                return false;
+            } else {
+                // If all validations pass, submit the form
+                document.getElementById("signupvalidate").submit();
+            }
+        })
+        .catch(error => {
+            valid = false;
+            event.preventDefault();
+            return false;
+        });
+    } else {
+        event.preventDefault();
+        return false;
+    }
+});
+});
+
+    </script>
 
 </body>
 
