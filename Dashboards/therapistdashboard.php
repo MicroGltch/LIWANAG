@@ -190,7 +190,7 @@ $stmt->close();
 
                     <hr>
                     
-                    <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
+                    <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
 
 
                     <li></li>
@@ -363,9 +363,9 @@ $stmt->close();
                 </div>
             </div>
 
-             <!-- Settings -->
-             <div id="settings" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Settings</h1>
+             <!-- Account Details Card -->
+             <div id="account-details" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Account Details</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
