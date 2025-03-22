@@ -618,7 +618,46 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
                 <!-- The buttons will be dynamically added here by JavaScript -->
             </div>
+            <div class="uk-width-1-1 uk-margin-top">
+                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
+            </div>
         </form>
+        <!-- Change Password Modal still -->
+<div id="change-password-modal" uk-modal>
+    <div class="uk-modal-dialog uk-modal-body uk-overflow-auto">
+        <h2 class="uk-modal-title">Change Password</h2>
+
+        <div id="password-alert-container"></div>
+        
+        <form id="change-password-form" class="uk-form-stacked">
+            <div class="uk-margin">
+                <label class="uk-form-label" for="current-password">Current Password</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" id="current-password" type="password" required>
+                </div>
+            </div>
+            
+            <div class="uk-margin">
+                <label class="uk-form-label" for="new-password">New Password</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" id="new-password" type="password" required>
+                </div>
+            </div>
+            
+            <div class="uk-margin">
+                <label class="uk-form-label" for="confirm-password">Confirm New Password</label>
+                <div class="uk-form-controls">
+                    <input class="uk-input" id="confirm-password" type="password" required>
+                </div>
+            </div>
+            
+            <div class="uk-margin uk-text-right">
+                <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+                <button class="uk-button uk-button-primary" type="submit">Update Password</button>
+            </div>
+        </form>
+    </div>
+</div>
 
         <?php unset($_SESSION['update_errors']); ?>
         <?php unset($_SESSION['update_success']); ?>
@@ -683,16 +722,27 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
     // Original email value to restore if verification is canceled
     let originalEmail = emailInput ? emailInput.value : '';
 
-    // Edit Button Click Event
+    // Modify Edit Button Click Event
     if (editButton) {
         editButton.addEventListener("click", function () {
             if (editButton.textContent === "Edit") {
                 inputs.forEach(input => input.disabled = false);
                 saveButton.disabled = false;
                 editButton.textContent = "Cancel";
-                uploadButton.disabled = false; // Enable upload button
+                uploadButton.disabled = false;
                 removePhotoButton.style.pointerEvents = "auto";
                 removePhotoButton.style.color = "";
+
+                // Enable Change Password button
+                if (changePasswordButton) {
+                    changePasswordButton.disabled = false;
+                }
+
+                // Enable password form inputs
+                if (passwordForm) {
+                    const passwordInputs = passwordForm.querySelectorAll("input");
+                    passwordInputs.forEach(input => input.disabled = false);
+                }
             } else {
                 inputs.forEach(input => {
                     input.value = originalValues[input.id];
@@ -700,15 +750,25 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 });
                 saveButton.disabled = true;
                 editButton.textContent = "Edit";
-                otpSection.style.display = "none"; // Hide OTP section on cancel
-                uploadButton.disabled = true; // Disable upload button
+                otpSection.style.display = "none";
+                uploadButton.disabled = true;
                 removePhotoButton.style.pointerEvents = "none";
                 removePhotoButton.style.color = "grey";
-                
-                // Reset save button state
+
                 saveButton.textContent = "Save";
                 saveButton.dataset.step = "";
+
+                // Disable Change Password button
+                if (changePasswordButton) {
+                    changePasswordButton.disabled = true;
+                }
+
+                // Disable password form inputs
+                if (passwordForm) {
+                    const passwordInputs = passwordForm.querySelectorAll("input");
+                    passwordInputs.forEach(input => input.disabled = true);
             }
+        }
         });
     }
 
@@ -930,6 +990,127 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     .catch(error => console.error("Error:", error));
             });
         }
+
+        // Change Password Button
+    const changePasswordButton = document.querySelector('[uk-toggle="target: #change-password-modal"]');
+
+if (changePasswordButton) {
+    // Initially disable the Change Password button
+    changePasswordButton.disabled = true;
+}
+
+                // Change Password
+const passwordForm = document.getElementById("change-password-form");
+const passwordAlertContainer = document.getElementById("password-alert-container");
+
+// Prevent default form submission and save actions
+changePasswordButton.addEventListener('click', function(event) {
+        // Prevent any default behavior that might submit a form or trigger save actions
+        event.preventDefault();
+         // Open the modal (UIkit will handle this via the uk-toggle attribute)
+         UIkit.modal("#change-password-modal").show();
+    });
+
+if (passwordForm) {
+    // Initially disable password form inputs
+    const passwordInputs = passwordForm.querySelectorAll("input");
+    passwordInputs.forEach(input => input.disabled = true);
+
+    passwordForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+        passwordAlertContainer.innerHTML = "";
+
+        const currentPassword = document.getElementById("current-password").value.trim();
+        const newPassword = document.getElementById("new-password").value.trim();
+        const confirmPassword = document.getElementById("confirm-password").value.trim();
+
+        // Frontend validation
+        if (newPassword !== confirmPassword) {
+            showPasswordAlert("error", "New passwords do not match");
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            showPasswordAlert("error", "Password must be at least 8 characters");
+            return;
+        }
+
+        if (!/[A-Z]/.test(newPassword)) {
+            showPasswordAlert("error", "Password must contain at least one uppercase letter");
+            return;
+        }
+
+        if (!/[a-z]/.test(newPassword)) {
+            showPasswordAlert("error", "Password must contain at least one lowercase letter");
+            return;
+        }
+
+        if (!/[0-9]/.test(newPassword)) {
+            showPasswordAlert("error", "Password must contain at least one number");
+            return;
+        }
+
+        if (!/[^A-Za-z0-9]/.test(newPassword)) {
+            showPasswordAlert("error", "Password must contain at least one special character");
+            return;
+        }
+
+        console.log("Sending password change request");
+
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: new URLSearchParams({
+                action: "change_password",
+                current_password: currentPassword,
+                new_password: newPassword,
+                confirm_password: confirmPassword
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("Response received:", data);
+                if (data.success) {
+                    showPasswordAlert("success", data.success);
+                    passwordForm.reset();
+                    setTimeout(() => {
+                        if (typeof UIkit !== "undefined") {
+                            UIkit.modal("#change-password-modal").hide();
+                        }
+                    }, 2000);
+                } else if (data.error) {
+                    showPasswordAlert("error", data.error);
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                showPasswordAlert("error", "An unexpected error occurred. Please try again.");
+            });
+    });
+}
+    function showPasswordAlert(type, message) {
+            const alertClass = type === "success" ? "uk-alert-success" : "uk-alert-danger";
+            passwordAlertContainer.innerHTML = `
+                <div class="${alertClass}" uk-alert>
+                    <a class="uk-alert-close" uk-close></a>
+                    <p>${message}</p>
+                </div>`;
+        }
+
+        // UIkit Modal 'shown' event handler for debugging
+        UIkit.util.on('#change-password-modal', 'shown', function () {
+            console.log("Change password modal is shown.");
+
+            let currentPasswordInput = document.getElementById('current-password');
+            console.log("currentPasswordInput:", currentPasswordInput);
+
+            let newPasswordInput = document.getElementById('new-password');
+            console.log("newPasswordInput:", newPasswordInput);
+
+            let confirmPasswordInput = document.getElementById('confirm-password');
+            console.log("confirmPasswordInput:", confirmPasswordInput);
+        });
+
 
         // Initialize OTP section to be hidden
         otpSection.style.display = "none";

@@ -20,12 +20,12 @@ $_SESSION['update_success'] = "";
 $stmt = $connection->prepare("SELECT account_Type, account_Password, account_Email FROM users WHERE account_ID = ?");
 $stmt->bind_param("i", $userid);
 $stmt->execute();
-$stmt->bind_result($account_Type, $hashedPassword, $currentEmail); // Renamed $account_Password to $hashedPassword for clarity
+$stmt->bind_result($account_Type, $hashedPassword, $currentEmail);
 $stmt->fetch();
 $stmt->close();
 
 // Change Password
-if (isset($_POST['action']) === 'change_password') {
+if (isset($_POST['action']) && $_POST['action'] === 'change_password') {
     $currentPassword = $_POST['current_password'] ?? '';
     $newPassword = $_POST['new_password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';

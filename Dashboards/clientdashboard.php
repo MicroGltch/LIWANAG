@@ -562,7 +562,7 @@ echo "<script>
         <?php unset($_SESSION['update_success']); ?>
     </div>
 
-</div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
