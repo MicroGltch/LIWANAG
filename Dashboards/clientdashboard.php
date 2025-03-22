@@ -569,13 +569,58 @@ echo "<script>
     document.addEventListener("DOMContentLoaded", function () {
         const editButton = document.getElementById("editButton");
         const saveButton = document.getElementById("saveButton");
+        const form = document.getElementById("settingsvalidate");
         const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
+        const otpSection = document.getElementById("otpSection");
+        const otpInput = document.getElementById("otp");
+        const successMessage = document.getElementById("successMessage");
+        const profileUploadInput = document.getElementById("profileUpload");
+        const uploadButton = document.getElementById("uploadButton");
+        const emailInput = document.getElementById("email"); // Select the email input
+        const removePhotoButton = document.getElementById("removePhotoButton");
+    
+        // Add new elements
+        const editEmailButton = document.createElement("button");
+        editEmailButton.id = "editEmailButton";
+        editEmailButton.textContent = "Edit Email";
+        editEmailButton.className = "uk-button uk-button-secondary";  // Using UK button classes for consistency
+        editEmailButton.style.marginRight = "15px";
+        editEmailButton.style.fontSize = "16px";
+        editEmailButton.style.padding = "8px 20px";
+        editEmailButton.style.fontWeight = "bold";
+        
+        const cancelVerificationButton = document.createElement("button");
+        cancelVerificationButton.id = "cancelVerificationButton";
+        cancelVerificationButton.textContent = "Cancel Verification";
+        cancelVerificationButton.className = "uk-button uk-button-danger";  // Using UK button classes for consistency
+        cancelVerificationButton.style.fontSize = "16px";
+        cancelVerificationButton.style.padding = "8px 20px";
+        cancelVerificationButton.style.fontWeight = "bold";
+        
+        // Create a container for the buttons
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "uk-margin-medium-top";  // Using UK margin class
+        buttonContainer.style.display = "flex";
+        buttonContainer.style.justifyContent = "flex-start";
+        buttonContainer.style.marginTop = "20px";
+        buttonContainer.appendChild(editEmailButton);
+        buttonContainer.appendChild(cancelVerificationButton);
+        
+        // Insert these buttons after the OTP input
+        if (otpSection) {
+            // Append the button container to the OTP section (after all existing elements)
+            otpSection.appendChild(buttonContainer);
+        }
 
         // Store initial values
         let originalValues = {};
         inputs.forEach(input => originalValues[input.id] = input.value);
+        // Original email value to restore if verification is canceled
+    let originalEmail = emailInput ? emailInput.value : '';
 
-        editButton.addEventListener("click", function () {
+        // Edit Button Click Event
+        if (editButton) {
+            editButton.addEventListener("click", function () {
             if (editButton.textContent === "Edit") {
                 inputs.forEach(input => input.disabled = false);
                 saveButton.disabled = false;

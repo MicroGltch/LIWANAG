@@ -22,6 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $therapist_id = $requestData['therapist_id'] ?? null;
         $validation_notes = isset($requestData['validation_notes']) ? trim($requestData['validation_notes']) : null;
         $pg_session_id = $requestData['pg_session_id'] ?? null;
+        $date = $requestData['date'] ?? null;  // ✅ Fixed missing assignment
+        $time = $requestData['time'] ?? null;  // ✅ Fixed missing assignment
 
     } else {  // Otherwise, fall back to form-encoded `$_POST`
         $appointment_id = $_POST['appointment_id'] ?? null;
@@ -29,6 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $therapist_id = $_POST['therapist_id'] ?? null;
         $validation_notes = isset($_POST['validation_notes']) ? trim($_POST['validation_notes']) : null;
         $pg_session_id = $requestData['pg_session_id'] ?? null;
+        $date = $_POST['date'] ?? null;  // ✅ Fixed missing assignment
+        $time = $_POST['time'] ?? null;  // ✅ Fixed missing assignment
 
     }
 
@@ -154,21 +158,44 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     // ✅ Reschedule Waitlisted Appointment (Waitlisted → Approved)
     else if ($status === "approved" && $current_status === "waitlisted") {
-        if (empty($date) || empty($time) || empty($therapist_id)) {
-            echo json_encode(["status" => "error", "title" => "Missing Data", "message" => "Date, time, and therapist are required for rescheduling."]);
-            exit();
+        // If this is a Playgroup session assignment
+        if (!empty($pg_session_id)) {
+            $updateQuery = "UPDATE appointments SET status = ?, pg_session_id = ?, updated_at = NOW() WHERE appointment_id = ?";
+            $stmt = $connection->prepare($updateQuery);
+            $stmt->bind_param("ssi", $status, $pg_session_id, $appointment_id);
+
+            if ($stmt->execute()) {
+                // ✅ Increment current_count since we assigned a new patient
+                $incrementStmt = $connection->prepare("UPDATE playgroup_sessions SET current_count = current_count + 1 WHERE pg_session_id = ?");
+                $incrementStmt->bind_param("s", $pg_session_id);
+                $incrementStmt->execute();
+            
+                send_email_notification($email, $status, $session_type, $patient_name, $client_name, null, null, null);
+                echo json_encode([
+                    "status" => "success",
+                    "title" => "Assigned to Playgroup Slot",
+                    "message" => "Appointment for <strong>$patient_name</strong> has been assigned to a playgroup session."
+                ]);
+                exit();
+            } else {
+                echo json_encode([
+                    "status" => "error",
+                    "title" => "Database Error",
+                    "message" => "Failed to assign playgroup session."
+                ]);
+                exit();
+            }
         }
 
-        
-    // ✅ Debugging: Log extracted variables
-
-    file_put_contents("log_extracted.txt", print_r([
-        "appointment_id" => $appointment_id,
-        "status" => $status,
-        "date" => $date,
-        "time" => $time,
-        "therapist_id" => $therapist_id
-    ], true));
+        // 🔒 Standard behavior for 1-on-1 sessions
+        if (empty($date) || empty($time) || empty($therapist_id)) {
+            echo json_encode([
+                "status" => "error",
+                "title" => "Missing Data",
+                "message" => "Date, time, and therapist are required for rescheduling."
+            ]);
+            exit();
+        }
 
         $updateQuery = "UPDATE appointments SET status = ?, date = ?, time = ?, therapist_id = ? WHERE appointment_id = ?";
         $stmt = $connection->prepare($updateQuery);
@@ -176,13 +203,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         if ($stmt->execute()) {
             send_email_notification($email, $status, $session_type, $patient_name, $client_name, $date, $time, $therapist_id);
-            echo json_encode(["status" => "success", "title" => "Appointment Rescheduled", "message" => "Appointment for <strong>$patient_name</strong> has been rescheduled and assigned to a therapist."]);
+            echo json_encode([
+                "status" => "success",
+                "title" => "Appointment Rescheduled",
+                "message" => "Appointment for <strong>$patient_name</strong> has been rescheduled and assigned to a therapist."
+            ]);
             exit();
         } else {
-            echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to reschedule appointment."]);
+            echo json_encode([
+                "status" => "error",
+                "title" => "Database Error",
+                "message" => "Failed to reschedule appointment."
+            ]);
             exit();
         }
     }
+
 
     // ✅ Therapist Cancelation for "Approved" Appointments
     if ($status === "cancelled" && in_array($account_type, ["therapist", "head therapist", "admin"])) {
@@ -226,12 +262,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit();
         }
     }
-    
-     // ✅ Error Handling: Prevent invalid transitions
-    else {
-        echo json_encode(["status" => "error", "title" => "Invalid Status Transition", "message" => "You cannot move from '$current_status' to '$status'."]);
-        exit();
-    }
 
     // ✅ Handle "Declined" & "Cancelled" Status (Both Require Validation Notes)
     if ($status === "declined" || $status === "cancelled" && in_array($account_type, ["admin", "head therapist, therapist"])) {
@@ -251,6 +281,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to decline/cancel appointment."]);
             exit();
         }
+    }
+
+    
+     // ✅ Error Handling: Prevent invalid transitions
+     else {
+        echo json_encode(["status" => "error", "title" => "Invalid Status Transition", "message" => "You cannot move from '$current_status' to '$status'."]);
+        exit();
     }
 
     
@@ -343,6 +380,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit();
         }
     }
+
+        // ✅ Handle "Waitlisted" Status
+        if ($status === "waitlisted") {
+            if (empty($validation_notes)) {
+                echo json_encode(["status" => "error", "title" => "Missing Information", "message" => "A reason is required for waitlisting."]);
+                exit();
+            } else {
+                $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
+                $stmt = $connection->prepare($updateQuery);
+                $stmt->bind_param("ssi", $status, $validation_notes, $appointment_id);
+            }
+    
+            if ($stmt->execute()) {
+                // ✅ Send Email Notification to Client
+                send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
+    
+                echo json_encode([
+                    "status" => "success",
+                    "title" => "Appointment Waitlisted",
+                    "message" => "Appointment for <strong>$patient_name</strong> has been moved to <strong>Waitlisted</strong>. Email notification sent."
+                ]);
+                exit();
+            } else {
+                echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to update appointment to Waitlisted."]);
+                exit();
+            }
+        }
 
 
 
