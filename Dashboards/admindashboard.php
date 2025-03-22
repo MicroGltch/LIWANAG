@@ -229,7 +229,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 <ul class="uk-nav uk-nav-default">
                     <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
                     
-                    <li><a href="#view-appointments" onclick="showSection('view-appointments')">View All Appointments</a></li>
+                    <!-- <li><a href="#view-appointments" onclick="showSection('view-appointments')">View All Appointments</a></li> -->
                     
                     <li class="uk-parent">
                         <a>Accounts</a>
@@ -290,12 +290,12 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </div>
 
             <!-- View All Appointments Section 📑-->
-            <div id="view-appointments" class="section" style="display: none;">
+            <!-- <div id="view-appointments" class="section" style="display: none;">
                 <h1 class="uk-text-bold">View All Appointments</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <iframe id="viewAppointmentsFrame" src="../Appointments/app_manage/view_all_appointments.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
                 </div>
-            </div>
+            </div> -->
 
 
             <!-- Accounts Section 📑 -->
