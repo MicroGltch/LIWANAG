@@ -4,6 +4,11 @@ require_once "../../Accounts/signupverify/vendor/autoload.php";
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 session_start();
+//debugging
+error_reporting(E_ERROR);
+ini_set('display_errors', 0);
+header('Content-Type: application/json');
+error_log("POST data received: " . print_r($_POST, true));
 $userid = $_SESSION['account_ID'];
 
 header('Content-Type: application/json');
@@ -12,12 +17,112 @@ $_SESSION['update_errors'] = [];
 $_SESSION['update_success'] = "";
 
 // Fetch user account type
-$stmt = $connection->prepare("SELECT account_Type, account_Email FROM users WHERE account_ID = ?");
+$stmt = $connection->prepare("SELECT account_Type, account_Password, account_Email FROM users WHERE account_ID = ?");
 $stmt->bind_param("i", $userid);
 $stmt->execute();
-$stmt->bind_result($account_Type, $currentEmail);
+$stmt->bind_result($account_Type, $account_Password, $currentEmail);
 $stmt->fetch();
 $stmt->close();
+
+
+//Change Password
+if (isset($_POST['action']) && $_POST['action'] === 'change_password') {
+    // Simplified variable access - use only underscore version for consistency
+    $currentPassword = $_POST['current_password'] ?? '';
+    $newPassword = $_POST['new_password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
+
+    // Basic debug logging - don't log actual passwords in production
+    error_log("Password change attempt received");
+    
+    $userid = $_SESSION['account_ID'] ?? null; // Retrieve user ID from session
+    
+    if (!$userid) {
+        echo json_encode(['error' => 'Unauthorized access']);
+        exit();
+    }
+
+    // Fetch current password hash from DB
+    $stmt = $connection->prepare("SELECT account_Password FROM users WHERE account_ID = ?");
+    if (!$stmt) {
+        echo json_encode(['error' => 'Database error: preparing statement failed.']);
+        exit();
+    }
+    $stmt->bind_param("i", $userid);
+    if (!$stmt->execute()) {
+        echo json_encode(['error' => 'Database error: executing statement failed.']);
+        exit();
+    }
+    $stmt->bind_result($hashedPassword);
+    if (!$stmt->fetch()) {
+        echo json_encode(['error' => 'User not found or database error.']);
+        exit();
+    }
+    $stmt->close();
+
+    // For debugging only - use in development, remove in production
+    file_put_contents('password_debug.log', 
+        "Received parameters: " . print_r($_POST, true) . "\n" .
+        "Current password entered: " . $currentPassword . "\n" .
+        "Stored hash: " . $hashedPassword . "\n" .
+        "Verification result: " . (password_verify($currentPassword, $hashedPassword) ? "true" : "false") . "\n",
+        FILE_APPEND);
+
+  // Validate current password with plain text against stored hash
+  if (!password_verify($currentPassword, $hashedPassword)) {
+    echo json_encode(['error' => 'Current password is incorrect']);
+    exit();
+}
+
+// Validate new password
+if ($newPassword !== $confirmPassword) {
+    echo json_encode(['error' => 'New passwords do not match']);
+    exit();
+}
+
+if (strlen($newPassword) < 8) {
+    echo json_encode(['error' => 'Password must be at least 8 characters']);
+    exit();
+}
+
+if (!preg_match('/[A-Z]/', $newPassword)) {
+    echo json_encode(['error' => 'Password must contain at least one uppercase letter']);
+    exit();
+}
+
+if (!preg_match('/[a-z]/', $newPassword)) {
+    echo json_encode(['error' => 'Password must contain at least one lowercase letter']);
+    exit();
+}
+
+if (!preg_match('/[0-9]/', $newPassword)) {
+    echo json_encode(['error' => 'Password must contain at least one number']);
+    exit();
+}
+
+if (!preg_match('/[^A-Za-z0-9]/', $newPassword)) {
+    echo json_encode(['error' => 'Password must contain at least one special character']);
+    exit();
+}
+
+// Hash new password and update
+$hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+$stmt = $connection->prepare("UPDATE users SET account_Password = ? WHERE account_ID = ?");
+if (!$stmt) {
+    echo json_encode(['error' => 'Database error: preparing update statement failed.']);
+    exit();
+}
+$stmt->bind_param("si", $hashedNewPassword, $userid);
+
+if ($stmt->execute()) {
+    echo json_encode(['success' => 'Password updated successfully']);
+} else {
+    echo json_encode(['error' => 'Failed to update password. Database error.']);
+}
+$stmt->close();
+exit();
+}
+///////
 
 // Function to get the correct dashboard URL
 function getDashboardURL($account_Type) {
@@ -298,4 +403,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'verify_otp') {
     }
     exit();
 }
+echo json_encode(['success' => 'Test successful']);
+
 ?>
