@@ -183,8 +183,8 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
         </div>
 
         <div class="uk-text-right uk-margin-top">
-            <button class="uk-button uk-button-primary" type="submit">Apply Filters</button>
-            <a href="view_all_appointments.php" class="uk-button uk-button-default">Reset</a>
+            <button class="uk-button uk-button-primary" type="submit" style="border-radius: 15px;">Apply Filters</button>
+            <a href="view_all_appointments.php" class="uk-button uk-button-default" style="border-radius: 15px;">Reset</a>
         </div>
     </form>
 
