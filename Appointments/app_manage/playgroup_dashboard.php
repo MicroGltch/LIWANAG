@@ -43,6 +43,8 @@ $pastSessions = $connection->query($pastSessionsQuery)->fetch_all(MYSQLI_ASSOC);
     <meta charset="UTF-8">
     <title>Playgroup Dashboard</title>
     <link rel="stylesheet" href="../../CSS/uikit-3.22.2/css/uikit.min.css" />
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 </head>
 <body>
 <div class="uk-container uk-margin-top">
@@ -147,7 +149,11 @@ $pastSessions = $connection->query($pastSessionsQuery)->fetch_all(MYSQLI_ASSOC);
             $hasDisplay = true;
         ?>
             <div class="uk-margin">
-                <h5><?= $session['date'] ?> — <?= $session['time'] ?> (<?= $session['current_count'] ?>/<?= $session['max_capacity'] ?>)</h5>
+                <h5>
+                    <?= $session['date'] ?> — <?= $session['time'] ?> 
+                    (<span id="current-count-<?= $session['pg_session_id'] ?>"><?= $session['current_count'] ?></span>/<?= $session['max_capacity'] ?>)
+                </h5>
+
                 <?php if (empty($patients)): ?>
                     <p class="uk-text-muted">No approved patients assigned yet.</p>
                 <?php else: ?>
@@ -167,11 +173,13 @@ $pastSessions = $connection->query($pastSessionsQuery)->fetch_all(MYSQLI_ASSOC);
                                             </select>
                                         </td>
                                         <td>
-                                            <button type="button" class="uk-button uk-button-danger kick-btn" 
-                                                data-patient-id="<?= $p['patient_id'] ?>" 
-                                                data-session-id="<?= $session['pg_session_id'] ?>">
-                                                Kick
-                                            </button>
+                                        <button type="button" class="uk-button uk-button-danger kick-btn" 
+                                            data-patient-id="<?= $p['patient_id'] ?>" 
+                                            data-session-id="<?= $session['pg_session_id'] ?>"
+                                            data-patient-name="<?= $p['first_name'] . ' ' . $p['last_name'] ?>">
+                                            Kick
+                                        </button>
+
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -191,17 +199,18 @@ document.addEventListener("DOMContentLoaded", function () {
         button.addEventListener("click", function () {
             let patientId = this.getAttribute("data-patient-id");
             let sessionId = this.getAttribute("data-session-id");
+            let patientName = this.getAttribute("data-patient-name");
 
             Swal.fire({
-                title: "Confirm Kick",
-                text: "Are you sure you want to remove this patient from the session?",
+                title: `Kick ${patientName}?`,
+                text: `Are you sure you want to remove ${patientName} from the session?`,
                 icon: "warning",
                 showCancelButton: true,
                 confirmButtonText: "Yes, Kick",
                 cancelButtonText: "Cancel"
             }).then((result) => {
                 if (result.isConfirmed) {
-                    fetch("kick_patient_playgroup.php", {
+                    fetch("../app_process/kick_patient_playgroup.php", {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ patient_id: patientId, pg_session_id: sessionId })
@@ -211,7 +220,16 @@ document.addEventListener("DOMContentLoaded", function () {
                         if (data.status === "success") {
                             Swal.fire("Removed!", data.message, "success");
                             document.getElementById("patientRow-" + patientId).remove();
-                        } else {
+
+                            // 👇 Update current count in the session header
+                            const countSpan = document.getElementById("current-count-" + sessionId);
+                            if (countSpan) {
+                                const current = parseInt(countSpan.textContent);
+                                if (!isNaN(current) && current > 0) {
+                                    countSpan.textContent = current - 1;
+                                }
+                            }
+                        }else {
                             Swal.fire("Error", data.message, "error");
                         }
                     })
