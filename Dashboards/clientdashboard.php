@@ -134,88 +134,55 @@ echo "<script>
         console.log('Session User ID:', <?php echo isset($_SESSION['account_ID']) ? json_encode($_SESSION['account_ID']) : 'null'; ?>);
     </script>
     <!-- Navbar -->
-    <nav class=" uk-navbar-container uk-light uk-navbar-transparent logged-out">
-            <div class="uk-container">
-        <div uk-navbar>
-
-            <!-- Navbar Left (Mobile: Offcanvas Trigger) -->
-            <div class="menu-div uk-navbar-left uk-hidden@s" style="color:black !important; ">
-                <a href="#offcanvas-slide" class="menu-button uk-button uk-button-default" style="color:black !important; border-color:black !important;" uk-toggle>Menu</a>
-            </div>
-
-            <!-- Navbar Left (Desktop) -->
-            <div class="uk-navbar-left uk-visible@s">
-                <ul class="uk-navbar-nav">
-                    <li class="uk-active"><a href="#section2">Services</a></li>
-                    <li class="uk-active"><a href="#section3">About Us</a></li>
-                    <li class="uk-active"><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
-                    <li class="uk-active"><a href="#faqs-modal" uk-toggle>FAQs</a></li>
-                </ul>
-            </div>
-
-            <!-- Navbar Center -->
-            <div class="logo-center-div uk-navbar-center">
-                <a class="logo-navbar uk-navbar-item uk-logo" href="homepage.php" style="color:black !important;">Little Wanderer's Therapy Center</a>
-            </div>
-
-            <!-- Navbar Right -->
-            <div class="uk-navbar-right">
-                <ul class="uk-navbar-nav">
-                    <?php if (isset($_SESSION['account_ID'])): ?>
+    <nav class="uk-navbar-container logged-in">
+        <div class="uk-container">
+            <div uk-navbar>
+                <div class="uk-navbar-left">
+                    <ul class="uk-navbar-nav">
+                        <li><a href="#">About Us</a></li>
+                        <li><a href="#">FAQs</a></li>
+                        <li><a href="#">Services</a></li>
+                    </ul>
+                </div>
+                <div class="uk-navbar-center">
+                    <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
+                </div>
+                <div class="uk-navbar-right">
+                    <ul class="uk-navbar-nav">
+                        <li>
+                            <a href="#" class="uk-navbar-item">
+                            <img src="<?php echo $profilePicture . '?t=' . time(); ?>" alt="Profile" class="navbar-profile-pic profile-image">                               
+                            </a>
+                        </li>
+                        <li style="display: flex; align-items: center;">
                         <?php
-                        $account_ID = $_SESSION['account_ID'];
-                        $query = "SELECT account_FName, account_Type FROM users WHERE account_ID = ?";
-                        $stmt = $connection->prepare($query);
-                        $stmt->bind_param("i", $account_ID);
-                        $stmt->execute();
-                        $stmt->bind_result($account_FN, $account_Type);
-                        $stmt->fetch();
-                        $stmt->close();
-                        $connection->close();
+                        if (isset($_SESSION['account_ID'])) {
+                        
+                            $account_ID = $_SESSION['account_ID'];
+                            $query = "SELECT account_FName FROM users WHERE account_ID = ?";
+                            $stmt = $connection->prepare($query);
+                            $stmt->bind_param("i", $account_ID);
+                            $stmt->execute();
+                            $stmt->bind_result($account_FN);
+                            $stmt->fetch();
+                            $stmt->close();
+                            $connection->close();
 
-                        switch ($account_Type) {
-                            case 'admin':
-                                $dashboardURL = "Dashboards/admindashboard.php";
-                                break;
-                            case 'therapist':
-                                $dashboardURL = "Dashboards/therapistdashboard.php";
-                                break;
-                            case 'client':
-                            default:
-                                $dashboardURL = "Dashboards/clientdashboard.php";
-                                break;
+
+                            echo htmlspecialchars($account_FN);
+                        } else {
+                            echo '<a href="../Accounts/loginpage.php">Login</a>';
                         }
                         ?>
-                        <li>
-                            <a style="color:black !important; " class="username-nav" href="#">Hi, <?php echo htmlspecialchars($account_FN); ?>!</a>
-                            <div class="uk-navbar-dropdown">
-                                <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li><a href="<?php echo $dashboardURL; ?>" style="color: black !important;">Dashboard</a></li>
-                                    <li><a href="Accounts/logout.php" style="color: black !important;">Logout</a></li>
-                                </ul>
-                            </div>
                         </li>
-                    <?php else: ?>
-                        <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
-                        <li><a href="Accounts/loginpage.php">Login</a></li>
+                        <?php if (isset($_SESSION['account_ID'])): ?>
+                        <li><a href="../Accounts/logout.php">Logout</a></li>
                     <?php endif; ?>
-                </ul>
+                    </ul>
+                </div>
             </div>
         </div>
-    </div>
-</nav>
-
-<!-- Offcanvas Menu (Mobile) -->
-<div id="offcanvas-slide" uk-offcanvas="mode: slide; overlay: true">
-    <div class="uk-offcanvas-bar">
-        <button class="uk-offcanvas-close" type="button" uk-close></button>
-        <ul class="uk-nav uk-nav-default">
-
-            <li class="uk-active" ><a href="#tnc-modal" uk-toggle style="margin-top:25px;color:black; border-radius: 15px;">Terms and Conditions</a></li>
-            <li class="uk-active" ><a href="#faqs-modal" uk-toggle style="color:black; border-radius: 15px;">FAQs</a></li>
-        </ul>
-    </div>
-</div>
+    </nav>
 
     <hr class="solid">
 
@@ -224,7 +191,7 @@ echo "<script>
         <!-- Sidebar -->
         <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
             <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
-                Dashboard
+                Menu <span uk-navbar-toggle-icon></span>
             </button>
 
             <div class="sidebar-nav">
