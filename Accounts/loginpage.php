@@ -10,6 +10,7 @@
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
 
     <!-- UIkit Library -->
@@ -84,6 +85,8 @@
                         <span style="position: absolute; right: 10px; cursor: pointer;" onclick="togglePassword()">
                             <i class="fas fa-eye" id="togglePasswordIcon"></i>  </span>
                         <span class="invalid-feedback" id="pass-error"></span>  </div>
+
+                    </div>
                 </div>
 
                 <!-- Add function -->

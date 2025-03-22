@@ -23,9 +23,9 @@ if ($result->num_rows > 0) {
     $phoneNumber = $userData['account_PNum'];
 
     if ($userData['profile_picture']) {
-        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture'];
+        $profilePicture = '../../uploads/client_profile_pictures/' . $userData['profile_picture'];
     } else {
-        $profilePicture = '../CSS/default.jpg';
+        $profilePicture = '../../CSS/default.jpg';
     }
 } else {
     echo "No Data Found.";
@@ -134,8 +134,6 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
 
 <body>
     <!-- Main Content -->
-    <h2>View All Appointments</h2>
-
     <!-- 🔹 Filters Section -->
     <form method="GET" class="uk-width-1-1">
         <div class="uk-grid-small uk-flex uk-flex-middle uk-grid-match" uk-grid>
@@ -209,20 +207,20 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
                     <?php foreach ($appointments as $appointment): ?>
                         <tr>
                             <td>
-                                <img src="<?= !empty($appointment['patient_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['patient_picture'] : '../../../../CSS/default.jpg'; ?>"
+                                <img src="<?= !empty($appointment['patient_picture']) ? '../../uploads/profile_pictures/' . $appointment['patient_picture'] : '../../CSS/default.jpg'; ?>"
                                     alt="Patient Picture" class="uk-border-circle" style="width: 40px; height: 40px; object-fit: cover;">
                                 <?= htmlspecialchars($appointment['patient_firstname'] . " " . $appointment['patient_lastname']); ?>
                             </td>
                             <td>
-                                <img src="<?= !empty($appointment['client_picture']) ? '../../../../../uploads/profile_pictures/' . $appointment['client_picture'] : '../../../../CSS/default.jpg'; ?>"
+                                <img src="<?= !empty($appointment['client_picture']) ? '../../uploads/profile_pictures/' . $appointment['client_picture'] : '../../CSS/default.jpg'; ?>"
                                     alt="Client Picture" class="uk-border-circle" style="width: 40px; height: 40px; object-fit: cover;">
                                 <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
                             </td>
                             <td><?= htmlspecialchars($appointment['date']); ?></td>
                             <td><?= htmlspecialchars($appointment['time']); ?></td>
-                            <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                            <td><?= ucfirst(htmlspecialchars($appointment['session_type'])); ?></td>
                             <td><?= !empty($appointment['therapist_firstname']) ? htmlspecialchars($appointment['therapist_firstname'] . " " . $appointment['therapist_lastname']) : "Not Assigned"; ?></td>
-                            <td><?= htmlspecialchars($appointment['status']); ?></td>
+                            <td><?= ucfirst(htmlspecialchars($appointment['status'])); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

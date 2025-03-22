@@ -17,13 +17,23 @@ if ($result->num_rows > 0) {
     $phoneNumber = $userData['account_PNum'];
     // Determine the profile picture path
     if ($userData['profile_picture']) {
-        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture']; // Corrected path
+        $profilePicture = '../uploads/profile_pictures/' . $userData['profile_picture']; // Corrected path
     } else {
         $profilePicture = '../CSS/default.jpg';
     }
     // $profilePicture = $userData['profile_picture'] ? '../uploads/' . $userData['profile_picture'] : '../CSS/default.jpg';
 } else {
     echo "";
+}
+
+// Fetch dynamic content from the database
+$stmt = $connection->prepare("SELECT section_name, content FROM webpage_content");
+$stmt->execute();
+$result = $stmt->get_result();
+
+$content = [];
+while ($row = $result->fetch_assoc()) {
+    $content[$row['section_name']] = $row['content'];
 }
 
 
@@ -325,16 +335,17 @@ $stmt->close();
         </h2>
         <div class="about-us uk-grid uk-flex-middle" uk-grid style="margin-left: 0px;">
 
-
-
             <!-- Description Section -->
             <div class="description-div uk-width-1-2@l uk-width-1-1@s uk-width-1-2@m">
 
                 <div class="about-us-quote">
                     Nurturing Wander and Wonders
                 </div>
+                
+                <!-- TESTING FOR MANAGE CONTENT -->
                 <div class="about-us-description">
-                    Wanderer Therapy Center, located in Makati City, is committed to improving the lives of children by offering accessible, high-quality therapy services. Our mission is to identify special needs early, provide the necessary support, and implement effective interventions, ensuring that young people can fully participate and thrive. We aim to make a positive difference in the lives of the children and families in our community by nurturing wander and wonder.
+                    <!-- Wanderer Therapy Center, located in Makati City, is committed to improving the lives of children by offering accessible, high-quality therapy services. Our mission is to identify special needs early, provide the necessary support, and implement effective interventions, ensuring that young people can fully participate and thrive. We aim to make a positive difference in the lives of the children and families in our community by nurturing wander and wonder. -->
+                    <?php echo $content['about_us'] ?? ''; ?>
 
                 </div>
             </div>
@@ -368,12 +379,15 @@ $stmt->close();
     <div id="tnc-modal" uk-modal>
         <div class="uk-modal-dialog uk-modal-body">
             <h2 class="uk-modal-title">Terms and Conditions</h2>
-            <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
+            <!-- TESTING FOR MANAGE CONTENT -->
+            <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
 
                 Donec vehicula, augue non mattis venenatis, nisl quam tincidunt velit, id mattis quam quam nec justo. Nullam efficitur tempor volutpat. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque gravida elit non libero porta, in euismod arcu aliquet. Praesent posuere posuere dolor. Nullam mattis lectus nisl, at aliquam urna interdum vitae. Etiam non lobortis urna. Donec elementum, urna sed lobortis maximus, nulla metus elementum nibh, sit amet egestas libero tellus vel nibh. Sed sapien ex, tincidunt pellentesque magna a, condimentum lobortis ante. Quisque sed sollicitudin arcu, a congue elit. Vestibulum dictum elit vitae eleifend gravida. Nulla suscipit felis at eros dignissim convallis. Mauris ut tincidunt justo. Vivamus velit leo, ornare vitae nibh eget, congue tempus quam. Duis vehicula eu erat ac fringilla.
 
                 Vivamus eleifend, risus sed iaculis tincidunt, urna dui hendrerit lacus, et pharetra nulla massa a urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi pretium eget turpis id pulvinar. Nullam in imperdiet sem, et consectetur dui. Pellentesque mattis ex in feugiat tempus. In at nunc orci. Sed accumsan scelerisque ipsum, vel lobortis sem gravida non. Curabitur facilisis, felis molestie ornare consectetur, nibh ex congue nisi, in mattis erat leo at nisi. Vestibulum et lorem nec lorem elementum eleifend. </p>
-            <p class="uk-text-right">
+             -->
+                <p><?php echo $content['terms'] ?? ''; ?></p>
+                <p class="uk-text-right">
                 <button class="uk-button uk-button-primary uk-modal-close" type="button">Close</button>
             </p>
         </div>
@@ -383,12 +397,15 @@ $stmt->close();
     <div id="faqs-modal" uk-modal>
         <div class="uk-modal-dialog uk-modal-body">
             <h2 class="uk-modal-title">FAQs</h2>
-            <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
+            <!-- TESTING FOR MANAGE CONTENT -->
+            <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
 
                 Donec vehicula, augue non mattis venenatis, nisl quam tincidunt velit, id mattis quam quam nec justo. Nullam efficitur tempor volutpat. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque gravida elit non libero porta, in euismod arcu aliquet. Praesent posuere posuere dolor. Nullam mattis lectus nisl, at aliquam urna interdum vitae. Etiam non lobortis urna. Donec elementum, urna sed lobortis maximus, nulla metus elementum nibh, sit amet egestas libero tellus vel nibh. Sed sapien ex, tincidunt pellentesque magna a, condimentum lobortis ante. Quisque sed sollicitudin arcu, a congue elit. Vestibulum dictum elit vitae eleifend gravida. Nulla suscipit felis at eros dignissim convallis. Mauris ut tincidunt justo. Vivamus velit leo, ornare vitae nibh eget, congue tempus quam. Duis vehicula eu erat ac fringilla.
 
                 Vivamus eleifend, risus sed iaculis tincidunt, urna dui hendrerit lacus, et pharetra nulla massa a urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi pretium eget turpis id pulvinar. Nullam in imperdiet sem, et consectetur dui. Pellentesque mattis ex in feugiat tempus. In at nunc orci. Sed accumsan scelerisque ipsum, vel lobortis sem gravida non. Curabitur facilisis, felis molestie ornare consectetur, nibh ex congue nisi, in mattis erat leo at nisi. Vestibulum et lorem nec lorem elementum eleifend. </p>
-            <p class="uk-text-right">
+             -->
+                <p><?php echo $content['faqs'] ?? ''; ?></p>
+                <p class="uk-text-right">
                 <button class="uk-button uk-button-primary uk-modal-close" type="button">Close</button>
             </p>
         </div>

@@ -3,10 +3,10 @@ require_once "../../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Therapists Only
-// if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-//     header("Location: ../../../loginpage.php");
-//     exit();
-// }
+if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
+    header("Location: ../../../Accounts/loginpage.php");
+    exit();
+}
 
 $therapistID = $_SESSION['account_ID'];
 
@@ -14,7 +14,8 @@ $therapistID = $_SESSION['account_ID'];
 $query = "SELECT DISTINCT p.patient_id, p.first_name, p.last_name, p.service_type 
           FROM appointments a
           JOIN patients p ON a.patient_id = p.patient_id
-          WHERE a.therapist_id = ?";
+          WHERE a.therapist_id = ? 
+          AND a.status = 'Completed'";
 $stmt = $connection->prepare($query);
 $stmt->bind_param("i", $therapistID);
 $stmt->execute();
@@ -109,8 +110,7 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
             
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Rebook Appointment</button>
 
-            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Cancel</button>
-
+            <button type="button" id="clearButton" class="uk-button uk-button-default uk-margin-top">Clear</button>
         </form>
         
  
@@ -195,6 +195,15 @@ $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["bloc
 
                 // ✅ Trigger validation when a patient is selected
                 patientDropdown.addEventListener("change", checkExistingAppointment);
+
+                document.getElementById("clearButton").addEventListener("click", function() {
+                document.getElementById("patient_id").value = "";
+                document.getElementById("service_type").value = "";
+                document.getElementById("new_date").value = "";
+                document.getElementById("new_time").value = "";
+                document.getElementById("new_time").innerHTML = ""; // Clear time options
+                submitButton.disabled = false; // Re-enable submit button
+                });
             });
     </script>
 </body>

@@ -91,6 +91,56 @@ document.addEventListener('DOMContentLoaded', function () {
                     };
                 }
 
+                if (data.showChangePassword) {
+                    Swal.fire({
+                        title: 'Enter New Password to Activate your Account',
+                        text: 'You are using the default password. Please update it now.',
+                        icon: 'warning',
+                        confirmButtonColor: '#3085d6'
+                    }).then(() => { //Use then instead of didClose.
+                        Swal.fire({
+                            title: 'Change Password',
+                            html: `
+                                <p>Please enter your New Password <br>below to activate your account.</p>
+                                <input type="password" id="newPassword" class="swal2-input" placeholder="New Password">
+                                <input type="password" id="confirmPassword" class="swal2-input" placeholder="Confirm New Password">`,
+                            confirmButtonText: 'Submit',
+                            focusConfirm: false,
+                            preConfirm: () => {
+                                const newPassword = Swal.getPopup().querySelector('#newPassword').value;
+                                const confirmPassword = Swal.getPopup().querySelector('#confirmPassword').value;
+                                if (!newPassword || !confirmPassword) {
+                                    Swal.showValidationMessage(`Please enter password and confirm password`);
+                                }
+                                if (newPassword !== confirmPassword) {
+                                    Swal.showValidationMessage(`Passwords do not match`);
+                                }
+                                return { newPassword: newPassword, confirmPassword: confirmPassword };
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                fetch('manageaccount/therapist_newpassword.php', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/x-www-form-urlencoded',
+                                    },
+                                    body: `account_ID=${data.account_ID}&new_password=${encodeURIComponent(result.value.newPassword)}&confirm_password=${encodeURIComponent(result.value.confirmPassword)}`,
+                                })
+                                .then(response => response.json())
+                                .then(updateData => {
+                                    if (updateData.status === 'success') {
+                                        Swal.fire('Password Updated!', '', 'success').then(() => {
+                                            window.location.href = 'loginpage.php'; // Redirect to login
+                                        });
+                                    } else {
+                                         Swal.fire('Error!', updateData.message, 'error');
+                                    }
+                                });
+                            }
+                        });
+                    });
+                }
+
                 Swal.fire(swalOptions);
             }
         })

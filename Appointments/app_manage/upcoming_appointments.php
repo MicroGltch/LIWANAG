@@ -3,12 +3,12 @@ require_once "../../dbconfig.php";
 session_start();
 
 // ✅ Restrict Access to Therapists Only
-// if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-//     header("Location: ../../../loginpage.php");
-//     exit();
-// }
+if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
+    header("Location: ../../Accounts/loginpage.php");
+    exit();
+}
 
-// $therapistID = $_SESSION['account_ID'];
+$therapistID = $_SESSION['account_ID'];
 
 // Fetch therapist's upcoming appointments
 $query = "SELECT a.appointment_id, a.date, a.time, a.session_type, a.status,
@@ -80,10 +80,10 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                 <?php foreach ($appointments as $appointment): ?>
                     <tr>
                         <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
-                        <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                        <td><?= htmlspecialchars(ucfirst($appointment['session_type'])); ?></td>
                         <td><?= htmlspecialchars($appointment['date']); ?></td>
                         <td><?= htmlspecialchars($appointment['time']); ?></td>
-                        <td><?= htmlspecialchars($appointment['status']); ?></td>
+                        <td><?= htmlspecialchars(ucfirst($appointment['status'])); ?></td>
                         <td>
                             <button class="uk-button uk-button-primary complete-btn"
                                 data-id="<?= $appointment['appointment_id']; ?>"
@@ -96,10 +96,10 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
             </tbody>
         </table>
     
-    <div class="uk-width-1-1 uk-text-right uk-margin-top">
+    <!-- <div class="uk-width-1-1 uk-text-right uk-margin-top">
     <button class="uk-button uk-button-primary" onclick="redirectIframe()">Rebook a Previous Patient</button>
 
-    </div>
+    </div> -->
     </div>
 
     <script>
@@ -117,13 +117,13 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                         showDenyButton: true,   
                         showCancelButton: true,  
                         confirmButtonText: "Rebook",  
-                        denyButtonText: "Skip Rebooking",  
-                        cancelButtonText: "Cancel",  
+                        cancelButtonText: "Confirm Only",  
+                        denyButtonText: "Cancel",
                         allowOutsideClick: false,
                     }).then((result) => {
                         if (result.isConfirmed) {
                             // ✅ Redirect to `rebook_appointment.php` with `patient_id`
-                            window.location.href = `rebook_appointment.php?patient_id=${patientId}&appointment_id=${appointmentId}`;
+                            window.location.href = `../app_process/rebook_appointment.php?patient_id=${patientId}&appointment_id=${appointmentId}`;
                         } else if (result.dismiss === Swal.DismissReason.cancel) {
                             // ✅ Confirmation before marking as complete
                             Swal.fire({
@@ -136,7 +136,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                                 allowOutsideClick: false,
                             }).then((confirmResult) => {
                                 if (confirmResult.isConfirmed) {
-                                    fetch("../../../Appointments/backend/update_appointment_status.php", {
+                                    fetch("../app_process/update_appointment_status.php", {
                                         method: "POST",
                                         headers: { "Content-Type": "application/x-www-form-urlencoded" },
                                         body: `appointment_id=${appointmentId}&status=Completed`
@@ -198,7 +198,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                                         confirmButtonText: "Proceed to Rebooking"
                                     }).then(() => {
                                         // ✅ Redirect therapist to rebook page with patient_id
-                                        window.location.href = `rebook_appointment.php?patient_id=${patientId}&appointment_id=${appointmentId}`;
+                                        window.location.href = `../app_process/rebook_appointment.php?patient_id=${patientId}&appointment_id=${appointmentId}`;
                                     });
                                 } else {
                                     Swal.fire("Error!", data.message, "error");

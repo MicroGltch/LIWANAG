@@ -15,6 +15,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $bday = $_POST['patient_birthday'];
     $gender = $_POST['patient_gender'];
 
+    // Check for duplicates
+    $stmt_check = $connection->prepare("SELECT COUNT(*) FROM patients WHERE first_name = ? AND last_name = ? AND bday = ? AND gender = ?");
+    $stmt_check->bind_param("ssss", $first_name, $last_name, $bday, $gender);
+    $stmt_check->execute();
+    $stmt_check->bind_result($count);
+    $stmt_check->fetch();
+    $stmt_check->close();
+
+    if ($count > 0) {
+        echo json_encode(['status' => 'duplicate', 'message' => 'A patient with these credentials already exists.']);
+        exit();
+    }
+
     $target_dir = "../../../uploads/profile_pictures/";
     $file_name = $_FILES['profile_picture']['name'];
     $file_tmp = $_FILES['profile_picture']['tmp_name'];
