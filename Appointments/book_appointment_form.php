@@ -88,6 +88,8 @@
                     </option>
                 <?php endforeach; ?>
             </select>
+            <input type="hidden" name="patient_name" id="patient_name_hidden">
+
 
             <!-- ✅ Display Patient Details Here -->
             <div id="patientDetails" class="uk-margin uk-card uk-card-default uk-card-body" style="display: none;">
@@ -349,6 +351,7 @@
                 .then(data => {
                     if (data.status === "success") {
                         patientName.textContent = data.patient.first_name + " " + data.patient.last_name;
+                        document.getElementById("patient_name_hidden").value = fullName;
                         patientAge.textContent = data.patient.age;
                         patientGender.textContent = data.patient.gender;
                         patientService.textContent = data.patient.service_type ?? "Pending";
