@@ -81,6 +81,10 @@
                 <div class="forgot-submit-btn-div uk-width-1@s uk-width-1@l">
                     <button class="forgot-submit-btn uk-button uk-button-primary">Submit</button>
                 </div>
+                <!-- Back Button -->
+                <div class="forgot-submit-btn-div uk-width-1@s uk-width-1@l">
+                    <button class="back uk-button" onclick="window.location.href='../loginpage.php';">Back to Login</button>
+                </div>
 
             </form>
 
@@ -94,6 +98,27 @@
             LIWANAG in construction, everything is subject to change.
         </p>
     </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <?php
+    session_start(); 
+    if (isset($_SESSION['status']) && isset($_SESSION['message'])) {
+        echo "<script>
+            Swal.fire({
+                icon: '" . ($_SESSION['status'] == 'success' ? 'success' : 'error') . "',
+                title: '" . ($_SESSION['status'] == 'success' ? 'Success' : 'Error') . "',
+                text: '" . $_SESSION['message'] . "',
+                allowOutsideClick: false
+            }).then((result) => {
+                window.location.href = '../loginpage.php'; // Change to your login page
+            });
+        </script>";
+        unset($_SESSION['status']); 
+        unset($_SESSION['message']);
+    }
+    ?>
+
+
 </body>
 
 
