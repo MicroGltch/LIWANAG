@@ -31,47 +31,38 @@
         <div class="uk-container">
             <div uk-navbar>
                 <!--Navbar Left-->
-                    <div class="uk-navbar-left">
-                        <ul class="uk-navbar-nav">
-                            <li class="uk-active"><a href="#">About Us</a></li>
-                            <li class="uk-active"><a href="#">FAQs</a></li>
-                            <li class="uk-active"><a href="#">Services</a></li>
-                        </ul>
-                    </div>
+
 
                 <!--Navbar Center-->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="../../homepage.php">Little Wanderer's Therapy Center</a>
+                        <a class="logo-navbar uk-navbar-item uk-logo" href="..\..\..\LIWANAG\homepage.php">Little Wanderer's Therapy Center</a>
                     </div>
 
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                             <li><a href="../signuppage.php">Sign Up to Book an Appointment</a></li>
-                            <li><a href="../loginpage.php">Login</a></li>
+                            <li></li>
+                            <li><a href="#"></a></li>
                         </ul>
 
-                        <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
-                        <div class="uk-navbar-item">
-                                <button class="uk-button uk-button-default">Sign Up to Book an Appointment</button>
-                                <button class="uk-button uk-button-secondary">Login</button>
-                        </div>-->
                     </div>
     
                 </div>
+    
             </div>
-        </nav>
+        </div>
+    </nav>
 
     </div>
 
 
-    <div class="uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
+    <div class="forget-password-div uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
     <!-- Login Account Card -->
         <div class="create-acc-card uk-card uk-card-default uk-card-body uk-width-1-2 form-card">
             
             <!-- Title and Helper -->
-            <h3 class="uk-card-title uk-flex uk-flex-center">Forgot Password</h3>
-            <p class="uk-flex uk-flex-center">To recover your password, kindly provide your email address.</p>
+            <h3 class="forgot-title uk-card-title uk-flex uk-flex-center">Forgot Password</h3>
+            <p class="forgot-helper uk-flex uk-flex-center">To recover your password, kindly provide your email address.</p>
             
             <!-- Form Fields -->
             <form action="forgotpasswordprocess.php" method="POST" class="uk-form-stacked uk-grid-medium" uk-grid>
@@ -87,8 +78,8 @@
                 </div>
                 
                 <!-- Submit Button -->
-                <div class="login-btn-div uk-width-1@s uk-width-1@l">
-                    <button class="uk-button uk-button-primary">Submit</button>
+                <div class="forgot-submit-btn-div uk-width-1@s uk-width-1@l">
+                    <button class="forgot-submit-btn uk-button uk-button-primary">Submit</button>
                 </div>
 
             </form>
@@ -96,10 +87,6 @@
         </div>
     </div>
 
-
-    <div id="section3" class="uk-section">
-        
-    </div>
 
     <!-- Footer -->
     <footer class="footer">
