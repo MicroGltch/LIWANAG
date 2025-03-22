@@ -145,6 +145,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
                     <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')">Manage Appointments</a></li>                    
 
+                    <li><a href="#timetable-settings" onclick="showSection('timetable-settings')">Manage Timetable Settings</a></li>
+
                     <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
@@ -251,6 +253,14 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 <h1 class="uk-text-bold">View All Appointments</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <iframe id="viewAppointmentsFrame" src="../Appointments/app_manage/view_all_appointments.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
+            <!-- Manage Timetable Settings Section 📑-->
+            <div id="timetable-settings" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Manage Timetable Settings</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="manageTimetableSettingsFrame" src="forAdmin/manageWebpage/timetable_settings.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
                 </div>
             </div>
 
