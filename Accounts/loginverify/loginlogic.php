@@ -111,7 +111,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             exit();
         }
         
-        if ($status === 'Pending' && $accountType ==='therapist' && $passwordCorrect) {
+        if ($status === 'Pending' && in_array($accountType, ['therapist', 'head therapist']) && $passwordCorrect) {
             // Check if the entered password is the default one
             if (password_verify("Liwanag@2025", $storedPassword)) {
                 echo json_encode([
@@ -121,7 +121,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
                 ]);
                 exit();
             }
-        } elseif ($status === 'Pending' && $accountType ==='therapist' && !$passwordCorrect){
+        } elseif ($status === 'Pending' && in_array($accountType, ['therapist', 'head therapist']) && !$passwordCorrect) {
             echo json_encode(['sweetalert' => ["Default Password Required", "Your account is pending activation. Please use the default password.", "warning"]]);
             exit();
 
