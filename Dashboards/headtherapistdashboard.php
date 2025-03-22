@@ -139,10 +139,14 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="headtherapistdashboard.php">Dashboard</a></li>
-                    <li><a href="../Appointments/app_manage/manage_appointments.php">View & Manage Appointments</a></li>
-                    <li><a href="../Appointments/app_manage/view_all_appointments.php">View All Appointments</a></li>
-                    <li><a href="../Appointments/app_manage/playgroup_dashboard.php">View & Manage Playgroup</a></li>
+                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+
+                    <li><a href="#view-appointments" onclick="showSection('view-appointments')">View All Appointments</a></li>
+
+                    <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')">Manage Appointments</a></li>                    
+
+                    <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
+                    <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
             </div>
         </div>

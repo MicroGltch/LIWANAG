@@ -22,6 +22,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $therapist_id = $requestData['therapist_id'] ?? null;
         $validation_notes = isset($requestData['validation_notes']) ? trim($requestData['validation_notes']) : null;
         $pg_session_id = $requestData['pg_session_id'] ?? null;
+        $date = $requestData['date'] ?? null;  // ✅ Fixed missing assignment
+        $time = $requestData['time'] ?? null;  // ✅ Fixed missing assignment
 
     } else {  // Otherwise, fall back to form-encoded `$_POST`
         $appointment_id = $_POST['appointment_id'] ?? null;
@@ -29,6 +31,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $therapist_id = $_POST['therapist_id'] ?? null;
         $validation_notes = isset($_POST['validation_notes']) ? trim($_POST['validation_notes']) : null;
         $pg_session_id = $requestData['pg_session_id'] ?? null;
+        $date = $_POST['date'] ?? null;  // ✅ Fixed missing assignment
+        $time = $_POST['time'] ?? null;  // ✅ Fixed missing assignment
 
     }
 
@@ -343,6 +347,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             exit();
         }
     }
+
+        // ✅ Handle "Waitlisted" Status
+        if ($status === "waitlisted") {
+            if (empty($validation_notes)) {
+                echo json_encode(["status" => "error", "title" => "Missing Information", "message" => "A reason is required for waitlisting."]);
+                exit();
+            } else {
+                $updateQuery = "UPDATE appointments SET status = ?, validation_notes = ? WHERE appointment_id = ?";
+                $stmt = $connection->prepare($updateQuery);
+                $stmt->bind_param("ssi", $status, $validation_notes, $appointment_id);
+            }
+    
+            if ($stmt->execute()) {
+                // ✅ Send Email Notification to Client
+                send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
+    
+                echo json_encode([
+                    "status" => "success",
+                    "title" => "Appointment Waitlisted",
+                    "message" => "Appointment for <strong>$patient_name</strong> has been moved to <strong>Waitlisted</strong>. Email notification sent."
+                ]);
+                exit();
+            } else {
+                echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to update appointment to Waitlisted."]);
+                exit();
+            }
+        }
 
 
 
