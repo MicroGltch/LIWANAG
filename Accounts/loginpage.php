@@ -84,7 +84,9 @@
                         <span style="position: absolute; right: 10px; cursor: pointer;" onclick="togglePassword()">
                             <i class="fas fa-eye" id="togglePasswordIcon"></i>  </span>
                         <span class="invalid-feedback" id="pass-error"></span>  </div>
-                </div>
+                
+                    </div>
+                
 
                 <!-- Add function -->
                 <!--Remember Me-->
