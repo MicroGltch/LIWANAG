@@ -230,9 +230,6 @@ echo "<script>
                     
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
 
-                    <hr>
-                    
-                    <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
                 </ul>
             </div>
         </div>
@@ -441,46 +438,9 @@ echo "<script>
                 </div>
             </div>
 
-            <!--Account Details Card-->
-            <div id="account-details" style="display: none;" class="section uk-width-1-1 uk-width-4-5@m uk-padding">
+             <!-- Account Details Card -->
+             <div id="account-details" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Account Details</h1>
-
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
-                    <div class="uk-flex uk-flex-center">
-                        <div class="uk-width-1-4">
-                            <img class="uk-border-circle" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form class="uk-grid-small" uk-grid>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" value="<?php echo $firstName; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" value="<?php echo $lastName; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" value="<?php echo $email; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel"  value="<?php echo '0' . $phoneNumber; ?>" disabled>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-
-             <!-- Settings -->
-             <div id="settings" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Settings</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
@@ -1116,6 +1076,19 @@ echo "<script>
             let gender = formData.get("patient_gender");
             let file = formData.get("profile_picture") ? formData.get("profile_picture").name : "No file selected";
 
+            
+            // Validation for first and last names
+            const nameRegex = /^[A-Za-z ]{2,30}$/;
+            if (!nameRegex.test(firstName)) {
+                Swal.fire("Validation Error", "First name must be between 2 and 30 characters and contain only letters and spaces.", "error");
+                return; // Stop the registration process
+            }
+            if (!nameRegex.test(lastName)) {
+                Swal.fire("Validation Error", "Last name must be between 2 and 30 characters and contain only letters and spaces.", "error");
+                return; // Stop the registration process
+            }
+
+
             Swal.fire({
                 title: "Confirm Registration",
                 html: `
@@ -1153,7 +1126,10 @@ echo "<script>
                                     window.location.href = "#view-registered-patients"; // Adjust the ID accordingly
                                 }, 500);
                             });
-                        } else {
+                        }   
+                        else if (data.status === "duplicate") {
+                                Swal.fire("Duplicate!", data.message, "warning");
+                        }else {
                             Swal.fire("Error!", data.message, "error");
                         }
                     })

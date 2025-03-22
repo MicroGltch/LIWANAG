@@ -255,7 +255,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
                     <!-- To follow & confirm-->
                     <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
-                    <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
             </div>
         </div>
@@ -544,46 +543,9 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
             </div>
 
-
             <!-- Account Details Section 📑-->
             <div id="account-details" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Account Details</h1>
-
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
-                    <div class="uk-flex uk-flex-center">
-                        <div class="uk-width-1-4">
-                            <img class="uk-border-circle" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form class="uk-grid-small" uk-grid>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" value="<?php echo $firstName; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" value="<?php echo $lastName; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" value="<?php echo $email; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel"  value="<?php echo '0' . $phoneNumber; ?>" disabled>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Settings Section 📑-->
-            <div id="settings" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Settings</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
