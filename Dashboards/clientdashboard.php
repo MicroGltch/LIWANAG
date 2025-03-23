@@ -375,16 +375,9 @@ echo "<script>
 
                         <div class="uk-width-1-2@s uk-width-1-2@l">
                             <label class="uk-form-label">Upload Referral File</label>
-                            <div class="js-upload uk-placeholder uk-text-center">
-                                <span uk-icon="icon: cloud-upload"></span>
-                                <span class="uk-text-middle">Drag and drop a file or</span>
-                                <div uk-form-custom>
-                                    <input type="file" name="referral_file" id="referral_file_input" required>
-                                    <span class="uk-link">Browse</span>
-                                    <span class="uk-text-middle" id="file-name-display-referral">to choose a file</span>
-                                </div>
-                            </div>
+                            <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required accept=".jpg,.jpeg,.png,.pdf">
                         </div>
+
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
                             <button class="uk-button uk-button-primary" type="button" id="registerPatientButton">Register</button>
