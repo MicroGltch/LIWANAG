@@ -33,7 +33,7 @@ $stmt->close();
 $query = "SELECT *, DATE_FORMAT(updated_at, '%M %d, %Y %h:%i %p') AS formatted_updated_at FROM settings LIMIT 1";
 $result = $connection->query($query);
 $settings = $result->fetch_assoc();
-//$blockedDates = json_decode($settings['blocked_dates'], true);
+$blockedDates = json_decode($settings['blocked_dates'], true);
 
 // ✅ Load weekly business hours
 $days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -197,20 +197,20 @@ while ($row = $exceptionsResult->fetch_assoc()) {
         </div>
 
         <div class="uk-text-right">
-            <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="border-radius: 15px;">Save Settings</button>
+            <button class="uk-button uk-button-primary" type="submit">Save Global Settings</button>
         </div>
     </form>
 
     <!-- ✅ JS for Forms and Flatpickr -->
     <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // flatpickr("#blocked_dates", {
-        //     minDate: "today",
-        //     altInput: true,
-        //     mode: "multiple",
-        //     dateFormat: "Y-m-d",
-        //     defaultDate: <?= json_encode($blockedDates) ?>
-        // });
+        flatpickr("#blocked_dates", {
+            minDate: "today",
+            altInput: true,
+            mode: "multiple",
+            dateFormat: "Y-m-d",
+            defaultDate: <?= json_encode($blockedDates) ?>
+        });
 
         function handleFormSubmit(formId) {
         const form = document.getElementById(formId);

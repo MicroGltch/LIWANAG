@@ -120,7 +120,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $incrementStmt->bind_param("s", $sessionID);
                 $incrementStmt->execute();
 
-                send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null);
+                send_email_notification(
+                    email: $email,
+                    status: $status,
+                    session_type: $session_type,
+                    patient_name: $patient_name,
+                    client_name: $client_name,
+                    appointment_date: $appointment_date,
+                    appointment_time: $appointment_time,
+                    current_status: $current_status,
+                    therapist_id: null,
+                    isRebooked: false,
+                    reason: $validation_notes
+                );
                 echo json_encode([
                     "status" => "success",
                     "title" => "Appointment Approved",
@@ -144,7 +156,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->bind_param("sii", $status, $therapist_id, $appointment_id);
 
             if ($stmt->execute()) {
-                send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null);
+                send_email_notification(
+                    email: $email,
+                    status: $status,
+                    session_type: $session_type,
+                    patient_name: $patient_name,
+                    client_name: $client_name,
+                    appointment_date: $appointment_date,
+                    appointment_time: $appointment_time,
+                    current_status: $current_status,
+                    therapist_id: null,
+                    isRebooked: false,
+                    reason: $validation_notes
+                );
                 echo json_encode(["status" => "success", "title" => "Appointment Approved", "message" => "Appointment for <strong>$patient_name</strong> has been <strong>approved</strong>. Email notification sent."]);
                 exit();
             } else {
@@ -170,7 +194,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 $incrementStmt->bind_param("s", $pg_session_id);
                 $incrementStmt->execute();
             
-                send_email_notification($email, $status, $session_type, $patient_name, $client_name, null, null, null);
+                send_email_notification(
+                    email: $email,
+                    status: $status,
+                    session_type: $session_type,
+                    patient_name: $patient_name,
+                    client_name: $client_name,
+                    appointment_date: $appointment_date,
+                    appointment_time: $appointment_time,
+                    current_status: $current_status,
+                    therapist_id: null,
+                    isRebooked: false,
+                    reason: $validation_notes
+                );
                 echo json_encode([
                     "status" => "success",
                     "title" => "Assigned to Playgroup Slot",
@@ -202,8 +238,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->bind_param("sssii", $status, $date, $time, $therapist_id, $appointment_id);
 
         if ($stmt->execute()) {
-            send_email_notification($email, $status, $session_type, $patient_name, $client_name, $date, $time, $therapist_id);
-            echo json_encode([
+            send_email_notification(
+                email: $email,
+                status: $status,
+                session_type: $session_type,
+                patient_name: $patient_name,
+                client_name: $client_name,
+                appointment_date: $appointment_date,
+                appointment_time: $appointment_time,
+                current_status: $current_status,
+                therapist_id: null,
+                isRebooked: false,
+                reason: $validation_notes
+            );            echo json_encode([
                 "status" => "success",
                 "title" => "Appointment Rescheduled",
                 "message" => "Appointment for <strong>$patient_name</strong> has been rescheduled and assigned to a therapist."
@@ -233,8 +280,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $stmt->bind_param("ssi", $status, $validation_notes, $appointment_id);
 
         if ($stmt->execute()) {
-            send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
-            echo json_encode(["status" => "success", "title" => "Appointment Cancelled", "message" => "Appointment for <strong>$patient_name</strong> has been <strong>cancelled</strong>. Email notification sent."]);
+            send_email_notification(
+                email: $email,
+                status: $status,
+                session_type: $session_type,
+                patient_name: $patient_name,
+                client_name: $client_name,
+                appointment_date: $appointment_date,
+                appointment_time: $appointment_time,
+                current_status: $current_status,
+                therapist_id: null,
+                isRebooked: false,
+                reason: $validation_notes
+            );            echo json_encode(["status" => "success", "title" => "Appointment Cancelled", "message" => "Appointment for <strong>$patient_name</strong> has been <strong>cancelled</strong>. Email notification sent."]);
             exit();
         } else {
             echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to cancel appointment."]);
@@ -254,8 +312,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->bind_param("ssi", $status, $validation_notes, $appointment_id);
         }
         if ($stmt->execute()) {
-            send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
-            echo json_encode(["status" => "success", "title" => "Appointment Waitlisted", "message" => "Appointment for </strong>$patient_name<strong> has been moved to <strong>Waitlisted</strong>."]);
+            send_email_notification(
+                email: $email,
+                status: $status,
+                session_type: $session_type,
+                patient_name: $patient_name,
+                client_name: $client_name,
+                appointment_date: $appointment_date,
+                appointment_time: $appointment_time,
+                current_status: $current_status,
+                therapist_id: null,
+                isRebooked: false,
+                reason: $validation_notes
+            );            echo json_encode(["status" => "success", "title" => "Appointment Waitlisted", "message" => "Appointment for </strong>$patient_name<strong> has been moved to <strong>Waitlisted</strong>."]);
             exit();
         } else {
             echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to update appointment to Waitlisted."]);
@@ -274,8 +343,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         if ($stmt->execute()) {
-            send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
-            echo json_encode(["status" => "success", "title" => "Appointment $status", "message" => "Appointment for <strong>$patient_name</strong> has been <strong>$status</strong>. Email notification sent."]);
+            send_email_notification(
+                email: $email,
+                status: $status,
+                session_type: $session_type,
+                patient_name: $patient_name,
+                client_name: $client_name,
+                appointment_date: $appointment_date,
+                appointment_time: $appointment_time,
+                current_status: $current_status,
+                therapist_id: null,
+                isRebooked: false,
+                reason: $validation_notes
+            );            echo json_encode(["status" => "success", "title" => "Appointment $status", "message" => "Appointment for <strong>$patient_name</strong> has been <strong>$status</strong>. Email notification sent."]);
             exit();
         }else {
             echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to decline/cancel appointment."]);
@@ -372,8 +452,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $stmt->bind_param("si", $status, $appointment_id);
         }
         if ($stmt->execute()) {
-            send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time);
-            echo json_encode(["status" => "success", "title" => "Appointment Completed", "message" => "Appointment for <strong>$patient_name</strong> has been marked as <strong>Completed</strong>. Email notification sent."]);
+            send_email_notification(
+                email: $email,
+                status: $status,
+                session_type: $session_type,
+                patient_name: $patient_name,
+                client_name: $client_name,
+                appointment_date: $appointment_date,
+                appointment_time: $appointment_time,
+                current_status: $current_status,
+                therapist_id: null,
+                isRebooked: false,
+                reason: $validation_notes
+            );            echo json_encode(["status" => "success", "title" => "Appointment Completed", "message" => "Appointment for <strong>$patient_name</strong> has been marked as <strong>Completed</strong>. Email notification sent."]);
             exit();
         }else {
             echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to cancel appointment."]);
@@ -394,7 +485,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
             if ($stmt->execute()) {
                 // ✅ Send Email Notification to Client
-                send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, null, false, $validation_notes);
+                send_email_notification($email, $status, $session_type, $patient_name, $client_name, $appointment_date, $appointment_time, $current_status, false, $validation_notes);
     
                 echo json_encode([
                     "status" => "success",

@@ -44,6 +44,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $appointments = $result->fetch_all(MYSQLI_ASSOC);
 
+
 // EDIT PATIENT FORM
 // Fetch patients for the dropdown
 $patientsQuery = "SELECT patient_id, first_name, last_name, bday FROM patients WHERE account_id = ?";
@@ -242,25 +243,36 @@ echo "<script>
 
 
         <!-- Content Area -->
+        
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
             <div id="appointments" class="section">
                 <h1 class="uk-text-bold">Appointments</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <div class="uk-margin-small-bottom uk-flex uk-flex-between uk-flex-wrap">
+                        <div>
+                            <button class="uk-button uk-button-default filter-btn" data-filter="all">All</button>
+                            <button class="uk-button uk-button-primary filter-btn" data-filter="upcoming">Upcoming</button>
+                            <button class="uk-button uk-button-secondary filter-btn" data-filter="past">Past</button>
+                        </div>
+                    </div>
+
                     <table class="uk-table uk-table-striped">
-                        <thead>
+                    <input class="uk-input uk-margin-bottom" type="text" id="appointmentSearch" placeholder="Search appointments...">
+
+                    <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Session Type</th>
-                                <th>Patient</th>
-                                <th>Status</th>
+                                <th data-sort="date"><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span> </th>
+                                <th data-sort="time"><span class="no-break"></span>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="session"><span class="no-break"></span>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="patient"><span class="no-break"></span>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="status"><span class="no-break"></span>Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($appointments as $appointment): ?>
-                            <tr>
+                            <tr data-date="<?= $appointment['date']; ?>">
                                 <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
                                 <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
                                 <td><?= ucwords(htmlspecialchars($appointment['session_type'])); ?></td>
@@ -328,7 +340,7 @@ echo "<script>
 
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">Gender</label>
-                            <select class="uk-select" name="patient_gender">
+                            <select class="uk-select" name="patient_gender" required>
                                 <option value="" disabled selected>Select Patient Gender</option>
                                 <option value="Male">Male</option>
                                 <option value="Female">Female</option>
@@ -363,16 +375,9 @@ echo "<script>
 
                         <div class="uk-width-1-2@s uk-width-1-2@l">
                             <label class="uk-form-label">Upload Referral File</label>
-                            <div class="js-upload uk-placeholder uk-text-center">
-                                <span uk-icon="icon: cloud-upload"></span>
-                                <span class="uk-text-middle">Drag and drop a file or</span>
-                                <div uk-form-custom>
-                                    <input type="file" name="referral_file" id="referral_file_input" required>
-                                    <span class="uk-link">Browse</span>
-                                    <span class="uk-text-middle" id="file-name-display-referral">to choose a file</span>
-                                </div>
-                            </div>
+                            <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required accept=".jpg,.jpeg,.png,.pdf">
                         </div>
+
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
                             <button class="uk-button uk-button-primary" type="button" id="registerPatientButton">Register</button>
@@ -406,8 +411,6 @@ echo "<script>
                         <input type="hidden" name="patient_id" id="patient_id">
 
                         <input type="hidden" name="existing_profile_picture" id="existing_profile_picture"> <!-- Store existing picture -->
-
-
 
 
                         <!------ LEMME COOK ------->
@@ -472,21 +475,27 @@ echo "<script>
                         <label class="uk-form-label">Proof of Booking</label>
                         <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
                         </div>
-                        
-                        <!--wth is this? if i remove it, nawawla yung save profile sa baba ren ?!?!-->
-                        <div class="uk-width-1-2 uk-text-right uk-margin-top">
-                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
-                        </div>    
-                        <!--wtf-->
 
-                        <div class="uk-width-1-2 uk-text-right uk-margin-top" style="margin-bottom: 15px;">
+                        
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Upload New Official Referral</label>
+                            <input class="uk-input" type="file" name="official_referral" id="official_referral_input" accept=".pdf,.jpg,.jpeg,.png" disabled>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Upload New Proof of Booking</label>
+                            <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking_input" accept=".pdf,.jpg,.jpeg,.png" disabled>
+                        </div>
+
+
+                        <div class="uk-width-1-1 uk-text-right uk-margin-top" style="margin-bottom: 15px;">
                         
                         <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button">Edit</button>
                         
                         <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
 
                         
-                        </div> 
+                            </div> 
             
 
                         </div>
@@ -607,6 +616,82 @@ echo "<script>
             }
         }
     });
+ 
+    //sorting n search n filter past upcoming
+    document.addEventListener("DOMContentLoaded", function () {
+        const table = document.querySelector("table.uk-table");
+        const headers = table.querySelectorAll("th[data-sort]");
+        const tbody = table.querySelector("tbody");
+
+        headers.forEach(header => {
+            header.style.cursor = "pointer";
+            header.addEventListener("click", () => {
+                const type = header.getAttribute("data-sort");
+                const rows = Array.from(tbody.querySelectorAll("tr"));
+                const colIndex = Array.from(header.parentNode.children).indexOf(header);
+                const ascending = header.classList.toggle("asc");
+
+                rows.sort((a, b) => {
+                    let valA = a.children[colIndex].textContent.trim();
+                    let valB = b.children[colIndex].textContent.trim();
+
+                    if (type === "date") {
+                        valA = new Date(valA);
+                        valB = new Date(valB);
+                    } else {
+                        valA = valA.toLowerCase();
+                        valB = valB.toLowerCase();
+                    }
+
+                    if (valA < valB) return ascending ? -1 : 1;
+                    if (valA > valB) return ascending ? 1 : -1;
+                    return 0;
+                });
+
+                // Clear and reinsert sorted rows
+                tbody.innerHTML = "";
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+
+        const searchInput = document.getElementById("appointmentSearch");
+        const rows = document.querySelectorAll("table.uk-table tbody tr");
+
+        searchInput.addEventListener("keyup", function () {
+            const keyword = this.value.toLowerCase();
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(keyword) ? "" : "none";
+            });
+        });
+
+
+
+    });
+
+            //upcoming past
+            document.querySelectorAll(".filter-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            const filter = this.dataset.filter;
+            const rows = document.querySelectorAll("table.uk-table tbody tr");
+            const today = new Date().toISOString().split("T")[0];
+
+            rows.forEach(row => {
+                const rowDate = row.dataset.date;
+                if (filter === "all") {
+                    row.style.display = "";
+                } else if (filter === "upcoming") {
+                    row.style.display = rowDate >= today ? "" : "none";
+                } else if (filter === "past") {
+                    row.style.display = rowDate < today ? "" : "none";
+                }
+            });
+        });
+    });
+
+    document.querySelector(".filter-btn[data-filter='all']").click();
+
 
 
 
@@ -1620,8 +1705,11 @@ otpSection.style.display = "none";
         let profilePicPreview = document.getElementById("profile_picture_preview");
         let profilePicInput = document.getElementById("profile_picture_input");
         let existingProfilePicInput = document.getElementById("existing_profile_picture");
+        let officialReferralInput = document.getElementById("official_referral_input");
+        let proofReferralInput = document.getElementById("proof_of_booking_input");
         let editPatientBtn = document.getElementById("editPatientBtn");
         let saveProfileChangesBtn = document.querySelector("#editPatientForm button[type='submit']");
+
         
         // Referral Section
         // let uploadReferralSection = document.getElementById("uploadReferralForm");
@@ -1631,14 +1719,24 @@ otpSection.style.display = "none";
         function toggleFormInputs(disable) {
             firstNameInput.disabled = disable;
             lastNameInput.disabled = disable;
-            birthdayInput.disabled = disable;
+            birthdayInput.disabled  = disable;
             genderInput.disabled = disable;
             profilePicInput.disabled = disable;
-            saveProfileChangesBtn.style.display = disable ? "none" : "inline-block"; // Hide "Save" when disabled
+
+            officialReferralInput.disabled = disable;
+    proofReferralInput.disabled = disable;
+
+            // Instead of hiding the save button entirely, we’ll disable it to keep layout intact
+            saveProfileChangesBtn.disabled = disable;
+            saveProfileChangesBtn.style.opacity = disable ? "0.5" : "1";
+            saveProfileChangesBtn.style.pointerEvents = disable ? "none" : "auto";
         }
         
         // Load patient details when selecting from dropdown
         patientDropdown.addEventListener("change", function () {
+            officialReferralInput.value = "";
+proofReferralInput.value = "";
+
             let patientID = this.value;
             if (!patientID) {
                 editForm.style.display = "none";
@@ -1649,41 +1747,60 @@ otpSection.style.display = "none";
             fetch("../Appointments/patient/patient_data/fetch_patient_details.php?patient_id=" + patientID)
             .then(response => response.json())
             .then(data => {
-                console.log("Fetched Data:", data); // Debugging
-                if (data.status === "success") {            
 
-                    patientIDInput.value = data.patient.patient_id;
-                    firstNameInput.value = data.patient.first_name;
-                    lastNameInput.value = data.patient.last_name;
-                    genderInput.value = data.patient.gender;
-                    existingProfilePicInput.value = data.patient.profile_picture;
+                if (data.status === "success") {
+                    const patient = data.patient;
 
-                     // Simply assign the birthday value directly without reformatting
-                     if (data.patient.bday && data.patient.bday !== "0000-00-00" && data.patient.bday.trim() !== "") {
-                    birthdayInput.value = data.patient.bday;
-                    console.log("Setting birthday value to:", data.patient.bday);
+                    patientIDInput.value = patient.patient_id;
+                    firstNameInput.value = patient.first_name;
+                    lastNameInput.value = patient.last_name;
+                    genderInput.value = patient.gender;
+                    existingProfilePicInput.value = patient.profile_picture;
+
+                    // ✅ Reset birthday properly
+                    if (patient.bday && patient.bday !== "0000-00-00") {
+                        birthdayInput.value = patient.bday;
                     } else {
-                        birthdayInput.value = "";
-                    }
-                    
-                    if (data.patient.bday === null) {
-                        console.log("Birthday is null for patient ID:", patientID);
+                        birthdayInput.value = ""; // Leave blank
                     }
 
-                    if (data.patient.profile_picture) {
-                        profilePicPreview.src = "../uploads/profile_pictures/" + data.patient.profile_picture;
+                    if (patient.profile_picture) {
+                        profilePicPreview.src = "../uploads/profile_pictures/" + patient.profile_picture;
                         profilePicPreview.style.display = "block";
                     } else {
                         profilePicPreview.style.display = "none";
                     }
 
-                    // Disable form inputs initially
+                   // ✅ Load latest referral file links
+                    const latestReferrals = data.latest_referrals;
+
+                    const officialLink = document.getElementById("official_referral_link");
+                    if (latestReferrals && latestReferrals.official && latestReferrals.official.official_referral_file) {
+                        officialLink.href = "../../uploads/doctors_referrals/" + latestReferrals.official.official_referral_file;
+                        officialLink.style.display = "inline-block";
+                    } else {
+                        officialLink.href = "#";
+                        officialLink.style.display = "none";
+                    }
+
+                    const proofLink = document.getElementById("proof_of_booking_link");
+                    if (latestReferrals && latestReferrals.proof_of_booking && latestReferrals.proof_of_booking.proof_of_booking_referral_file) {
+                        proofLink.href = "../../uploads/doctors_referrals/" + latestReferrals.proof_of_booking.proof_of_booking_referral_file;
+                        proofLink.style.display = "inline-block";
+                    } else {
+                        proofLink.href = "#";
+                        proofLink.style.display = "none";
+                    }
+
+
+                    // Show form and section
                     toggleFormInputs(true);
                     editForm.style.display = "block";
-                    uploadReferralSection.style.display = "block"; 
+                    uploadReferralSection.style.display = "block";
+
                 } else {
                     editForm.style.display = "none";
-                    uploadReferralSection.style.display = "none"; 
+                    uploadReferralSection.style.display = "none";
                     Swal.fire("Error", "Patient details could not be loaded.", "error");
                 }
             })
@@ -1711,7 +1828,7 @@ otpSection.style.display = "none";
             editPatientBtn.textContent = isDisabled ? "Cancel" : "Edit";
             
             // Show/hide "Save" button
-            saveProfileChangesBtn.style.display = isDisabled ? "inline-block" : "none";
+            saveProfileChangesBtn.style.display = isDisabled ? "inline-block" : "inline-block";
 
             // If canceling, reload patient details to reset changes
             if (!isDisabled) {
@@ -1766,6 +1883,7 @@ otpSection.style.display = "none";
             .catch(error => console.error("Error:", error));
         });
     });
+
 
 </script>
 </body>
