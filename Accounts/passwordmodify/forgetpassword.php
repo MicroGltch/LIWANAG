@@ -56,7 +56,10 @@
     </div>
 
 
-    <div class="forget-password-div uk-flex uk-flex-center uk-flex-middle uk-height-viewport">
+    <div class="forget-password-div uk-flex uk-flex-center uk-flex-middle uk-height-viewport" style="background-image: url(loginbg.png) !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;">
     <!-- Login Account Card -->
         <div class="create-acc-card uk-card uk-card-default uk-card-body uk-width-1-2 form-card">
             
@@ -89,11 +92,42 @@
 
 
     <!-- Footer -->
-    <footer class="footer">
-        <p class="footer-text">
-            LIWANAG in construction, everything is subject to change.
-        </p>
-    </footer>
+    <footer class="footer uk-section uk-section-small uk-background-secondary uk-light">
+    <div class="footer uk-container">
+
+        <div class="uk-grid-match uk-child-width-1-2@m" uk-grid>
+            
+        <div style="text-align: left ; ">
+                <h4 style="margin-bottom: 7px;">Little Wanderer's Therapy Center</h4>
+                <p style="margin-top: 0px;font-size: 13px;">Welcome to Little Wanderer Therapy Center! We guarantee quality service that your child and family need.</p>
+                <div>
+                    <a href="#" class="uk-icon-button uk-margin-small-right" uk-icon="facebook"></a>
+
+                </div>
+            </div>
+
+        
+            <div style="text-align: right ;">
+                <ul class="uk-list uk-list">
+                    <li style="font-size:13px;">
+                        <span uk-icon="location" ></span>
+                        Benrosi V, 9746 Kamagong, Village, Makati, 1203 Kalakhang Maynila, Philippines
+                    </li>
+                    <li style="font-size:13px;">
+                        <span uk-icon="receiver" ></span>
+                        09274492970
+                    </li>
+                    <li style="font-size:13px;">
+                        <span uk-icon="mail" ></span>
+                        <a href="mailto:liwanag@company.com" class="uk-link-text">liwanag@company.com</a>
+                    </li>
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+</footer>
 </body>
 
 

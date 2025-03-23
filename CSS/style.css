@@ -51,6 +51,12 @@ hr.solid{
     border-radius: 15px !important;
 }
 
+.login-div{
+    background-image: url(loginbg.png) !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+  }
 
 /* Account Details Page */
 .uk-nav > li {
@@ -138,13 +144,12 @@ hr.solid{
 }
 
 
-.footer{
+.footer{    
     
-    height:60px;
     width: 100vw;
     text-align: center;
     background-color: #1a202c;
-    padding: 2%;
+    
 }
 
 .footer-text{
@@ -390,6 +395,7 @@ padding-right: 100px;
     vertical-align: top;
     text-align:center;
   }
+
 
 
 /* Extra small devices (phones, 600px and down) */

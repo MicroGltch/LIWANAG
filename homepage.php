@@ -411,33 +411,42 @@ $stmt->close();
     </div>
 
     <!-- Footer -->
-    <footer class="footer" style="background-color: #333; color: white; padding: 40px 0;">
-        <div class="uk-container uk-container-expand">
-            <div class="uk-grid-divider uk-child-width-expand@s uk-grid" uk-grid>
-                <div class="uk-width-2-3@m" style="background-color: #333;">
-                    <h3 class="uk-text-left" style="color: white;">[Little Wanderer's Therapy Center Logo]</h3>
-                    <ul class="uk-list">
-                        <li class="uk-text-left"><span uk-icon="icon: location;"></span> Benrosi V, 9746 Kamagong, Village, Makati, 1203 Kalakhang Maynila, Philippines</li>
-                        <li class="uk-text-left"><span uk-icon="icon: clock;"></span> You can visit us: Saturday, 9:00 AM - 5:00 PM</li>
-                    </ul>
-                    <p class="uk-text-left" style="color: gray;">For inquiries, send us a message here on our Facebook page. You may also call or text us at 09274492970.</p>
-                </div>
-                <div class="uk-width-1-3@m" style="background-color: #333;">
-                    <div>
-                        <p class="uk-text-left" style="color: gray;">
-                            Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                            Duis nec vestibulum sem, ut gravida purus. 
-                            Vestibulum eleifend dolor nec mauris congue malesuada. 
-                            Interdum et malesuada fames ac ante ipsum primis in faucibus. 
-                            Ut maximus ac lacus eu elementum. Maecenas tincidunt ultrices nisi ac ornare. 
-                        </p>
-                        <a href="" uk-icon="icon: facebook; ratio: 2" class="uk-align-right" style="margin-right: 10px;"></a>
-                        <a href="" uk-icon="icon: tiktok; ratio: 2" class="uk-align-right" style="margin-right: 10px;"></a>
-                    </div>
+    <footer class="footer uk-section uk-section-small uk-background-secondary uk-light">
+    <div class="footer uk-container">
+
+        <div class="uk-grid-match uk-child-width-1-2@m" uk-grid>
+            
+        <div style="text-align: left ; ">
+                <h4 style="margin-bottom: 7px;">Little Wanderer's Therapy Center</h4>
+                <p style="margin-top: 0px;font-size: 13px;">Welcome to Little Wanderer Therapy Center! We guarantee quality service that your child and family need.</p>
+                <div>
+                    <a href="#" class="uk-icon-button uk-margin-small-right" uk-icon="facebook"></a>
+
                 </div>
             </div>
+
+        
+            <div style="text-align: right ;">
+                <ul class="uk-list uk-list">
+                    <li style="font-size:13px;">
+                        <span uk-icon="location" ></span>
+                        Benrosi V, 9746 Kamagong, Village, Makati, 1203 Kalakhang Maynila, Philippines
+                    </li>
+                    <li style="font-size:13px;">
+                        <span uk-icon="receiver" ></span>
+                        09274492970
+                    </li>
+                    <li style="font-size:13px;">
+                        <span uk-icon="mail" ></span>
+                        <a href="mailto:liwanag@company.com" class="uk-link-text">liwanag@company.com</a>
+                    </li>
+                </ul>
+            </div>
+            
+
         </div>
-    </footer>
+    </div>
+</footer>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
