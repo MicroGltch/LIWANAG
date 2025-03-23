@@ -216,11 +216,11 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
                                     alt="Client Picture" class="uk-border-circle" style="width: 40px; height: 40px; object-fit: cover;">
                                 <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
                             </td>
-                            <td><?= htmlspecialchars($appointment['date']); ?></td>
-                            <td><?= htmlspecialchars($appointment['time']); ?></td>
+                            <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
+                            <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
                             <td><?= ucfirst(htmlspecialchars($appointment['session_type'])); ?></td>
                             <td><?= !empty($appointment['therapist_firstname']) ? htmlspecialchars($appointment['therapist_firstname'] . " " . $appointment['therapist_lastname']) : "Not Assigned"; ?></td>
-                            <td><?= ucfirst(htmlspecialchars($appointment['status'])); ?></td>
+                            <td><?= htmlspecialchars(ucwords($appointment['status'])); ?></td>
                         </tr>
                     <?php endforeach; ?>
                 </tbody>

@@ -200,7 +200,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <?php foreach ($appointmentCounts as $status => $count): ?>
                         <div>
                             <div class="uk-card uk-card-default uk-card-body">
-                                <h3 class="uk-card-title"><?= ucfirst($status) ?></h3>
+                                <h3 class="uk-card-title"><?= ucwords($status) ?></h3>
                                 <p>Total: <?= $count ?></p>
                             </div>
                         </div>
@@ -226,9 +226,9 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                             <tr>
                                 <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
                                 <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
-                                <td><?= htmlspecialchars($appointment['date']); ?></td>
-                                <td><?= htmlspecialchars($appointment['time']); ?></td>
-                                <td><?= htmlspecialchars(ucfirst($appointment['status'])); ?></td>
+                                <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
+                                <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
+                                <td><?= htmlspecialchars(ucwords($appointment['status'])); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
