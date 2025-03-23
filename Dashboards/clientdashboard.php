@@ -139,9 +139,8 @@ echo "<script>
             <div uk-navbar>
                 <div class="uk-navbar-left">
                     <ul class="uk-navbar-nav">
-                        <li><a href="#">About Us</a></li>
                         <li><a href="#">FAQs</a></li>
-                        <li><a href="#">Services</a></li>
+                        <li><a href="#">Terms and Conditions</a></li>
                     </ul>
                 </div>
                 <div class="uk-navbar-center">
@@ -196,38 +195,45 @@ echo "<script>
 
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
+                
+
+                <h4 style="font-weight: bold;">Client Dashboard</h4>
 
                 <li class="uk-parent">
-                <a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a>
-                <!-- Reference code: client_view_appointments.php -->
+                <li>
+                    <span>Appointments</span>
+                </li>
 
-                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
-                            
-                        <li style="padding:0px 0px 15px 0px"><a href="#book-appointment" onclick="showSection('book-appointment')"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li>
-                        <!-- Reference code: book_appointment_form.php -->
+                <li>
+                <a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span>Your Appointments</a>
+                </li>
+                
+                <li>
+                <a href="#book-appointment" onclick="showSection('book-appointment')"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a>
+                </li>
 
-                        </ul>
-                    </li>
+                </li>
+                
                 <hr>
                     
                 <li class="uk-parent">
+                <li>
+                    <span>Patients</span>
+                </li>
+                <li>
                 <a href="#register-patient" onclick="showSection('register-patient')"><span class="uk-margin-small-right" uk-icon="user"></span> Register a Patient</a>
-                <!-- Reference code: register_patient_form.php -->
+                </li>
 
-                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
-                            
-                        <li style="padding:0px 0px 15px 0px"><a href="#view-registered-patients" onclick="showSection('view-registered-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li>
-                        <!-- Reference code: edit_patient_form.php -->
+                <li><a href="#view-registered-patients" onclick="showSection('view-registered-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li>
 
-                        </ul>
-                    </li>                    
+                </li>                    
 
-                    <hr>
+                <hr>
                     
-
-                    <!-- <li><a href="../Appointments/book_appointment_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li> -->
-                    
-                    
+                <li class="uk-parent">
+                    <li>
+                        <span>Your Account</span>
+                    </li>
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
 
                 </ul>

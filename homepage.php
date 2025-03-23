@@ -63,8 +63,6 @@ $stmt->close();
 
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="CSS/style.css" type="text/css" />
-
-
 </head>
 
 <body>
@@ -79,89 +77,90 @@ $stmt->close();
     <div uk-sticky="start: 200; animation: uk-animation-slide-top; sel-target: .uk-navbar-container; cls-active: uk-navbar-sticky; cls-inactive: uk-navbar-transparent uk-light">
 
         <!-- Navbar -->
-        <nav class=" uk-navbar-container uk-light uk-navbar-transparent logged-out">
+        <nav class="uk-navbar-container uk-light uk-navbar-transparent logged-out">
             <div class="uk-container">
-        <div uk-navbar>
+                <div uk-navbar>
 
-            <!-- Navbar Left (Mobile: Offcanvas Trigger) -->
-            <div class="menu-div uk-navbar-left uk-hidden@s">
-                <a href="#offcanvas-slide" class="menu-button uk-button uk-button-default" uk-toggle>Menu</a>
+                    <!-- Navbar Left (Mobile: Offcanvas Trigger) -->
+                    <div class="menu-div uk-navbar-left uk-hidden@s">
+                        <a href="#offcanvas-slide" class="menu-button uk-button uk-button-default" uk-toggle>Menu</a>
+                    </div>
+
+                    <!-- Navbar Left (Desktop) -->
+                    <div class="uk-navbar-left uk-visible@s">
+                        <ul class="uk-navbar-nav">
+                            <li class="uk-active"><a href="#section2">Services</a></li>
+                            <li class="uk-active"><a href="#section3">About Us</a></li>
+                            <li class="uk-active"><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
+                            <li class="uk-active"><a href="#faqs-modal" uk-toggle>FAQs</a></li>
+                        </ul>
+                    </div>
+
+                    <!-- Navbar Center -->
+                    <div class="logo-center-div uk-navbar-center">
+                        <a class="logo-navbar uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
+                    </div>
+
+                    <!-- Navbar Right -->
+                    <div class="uk-navbar-right">
+                        <ul class="uk-navbar-nav">
+                            <?php if (isset($_SESSION['account_ID'])): ?>
+                                <?php
+                                $account_ID = $_SESSION['account_ID'];
+                                $query = "SELECT account_FName, account_Type FROM users WHERE account_ID = ?";
+                                $stmt = $connection->prepare($query);
+                                $stmt->bind_param("i", $account_ID);
+                                $stmt->execute();
+                                $stmt->bind_result($account_FN, $account_Type);
+                                $stmt->fetch();
+                                $stmt->close();
+                                $connection->close();
+
+                                switch ($account_Type) {
+                                    case 'admin':
+                                        $dashboardURL = "Dashboards/admindashboard.php";
+                                        break;
+                                    case 'therapist':
+                                        $dashboardURL = "Dashboards/therapistdashboard.php";
+                                        break;
+                                    case 'client':
+                                    default:
+                                        $dashboardURL = "Dashboards/clientdashboard.php";
+                                        break;
+                                }
+                                ?>
+                                <li>
+                                    <a class="username-nav" href="#">Hi, <?php echo htmlspecialchars($account_FN); ?>!</a>
+                                    <div class="uk-navbar-dropdown">
+                                        <ul class="uk-nav uk-navbar-dropdown-nav">
+                                            <li><a href="<?php echo $dashboardURL; ?>" style="color: black !important;">Dashboard</a></li>
+                                            <li><a href="Accounts/logout.php" style="color: black !important;">Logout</a></li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            <?php else: ?>
+                                <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
+                                <li><a href="Accounts/loginpage.php">Login</a></li>
+                            <?php endif; ?>
+                        </ul>
+                    </div>
+                </div>
             </div>
+        </nav>
+    </div>
 
-            <!-- Navbar Left (Desktop) -->
-            <div class="uk-navbar-left uk-visible@s">
-                <ul class="uk-navbar-nav">
-                    <li class="uk-active"><a href="#section2">Services</a></li>
-                    <li class="uk-active"><a href="#section3">About Us</a></li>
-                    <li class="uk-active"><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
-                    <li class="uk-active"><a href="#faqs-modal" uk-toggle>FAQs</a></li>
-                </ul>
-            </div>
-
-            <!-- Navbar Center -->
-            <div class="logo-center-div uk-navbar-center">
-                <a class="logo-navbar uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
-            </div>
-
-            <!-- Navbar Right -->
-            <div class="uk-navbar-right">
-                <ul class="uk-navbar-nav">
-                    <?php if (isset($_SESSION['account_ID'])): ?>
-                        <?php
-                        $account_ID = $_SESSION['account_ID'];
-                        $query = "SELECT account_FName, account_Type FROM users WHERE account_ID = ?";
-                        $stmt = $connection->prepare($query);
-                        $stmt->bind_param("i", $account_ID);
-                        $stmt->execute();
-                        $stmt->bind_result($account_FN, $account_Type);
-                        $stmt->fetch();
-                        $stmt->close();
-                        $connection->close();
-
-                        switch ($account_Type) {
-                            case 'admin':
-                                $dashboardURL = "Dashboards/admindashboard.php";
-                                break;
-                            case 'therapist':
-                                $dashboardURL = "Dashboards/therapistdashboard.php";
-                                break;
-                            case 'client':
-                            default:
-                                $dashboardURL = "Dashboards/clientdashboard.php";
-                                break;
-                        }
-                        ?>
-                        <li>
-                            <a class="username-nav" href="#">Hi, <?php echo htmlspecialchars($account_FN); ?>!</a>
-                            <div class="uk-navbar-dropdown">
-                                <ul class="uk-nav uk-navbar-dropdown-nav">
-                                    <li><a href="<?php echo $dashboardURL; ?>" style="color: black !important;">Dashboard</a></li>
-                                    <li><a href="Accounts/logout.php" style="color: black !important;">Logout</a></li>
-                                </ul>
-                            </div>
-                        </li>
-                    <?php else: ?>
-                        <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
-                        <li><a href="Accounts/loginpage.php">Login</a></li>
-                    <?php endif; ?>
-                </ul>
-            </div>
+    <!-- Offcanvas Menu (Mobile) -->
+    <div id="offcanvas-slide" uk-offcanvas="mode: slide; overlay: true">
+        <div class="uk-offcanvas-bar">
+            <button class="uk-offcanvas-close" type="button" uk-close></button>
+            <ul class="uk-nav uk-nav-default">
+                <li class="uk-active"><a href="#section2" style="color:black; margin-top:25px; border-radius: 15px;">Services</a></li>
+                <li class="uk-active"><a href="#section3" style="color:black; border-radius: 15px;">About Us</a></li>
+                <li class="uk-active"><a href="#tnc-modal" uk-toggle style="color:black; border-radius: 15px;">Terms and Conditions</a></li>
+                <li class="uk-active"><a href="#faqs-modal" uk-toggle style="color:black; border-radius: 15px;">FAQs</a></li>
+            </ul>
         </div>
     </div>
-</nav>
-
-<!-- Offcanvas Menu (Mobile) -->
-<div id="offcanvas-slide" uk-offcanvas="mode: slide; overlay: true">
-    <div class="uk-offcanvas-bar">
-        <button class="uk-offcanvas-close" type="button" uk-close></button>
-        <ul class="uk-nav uk-nav-default">
-            <li class="uk-active" ><a href="#section2" style="color:black; margin-top:25px; border-radius: 15px;">Services</a></li>
-            <li class="uk-active" ><a href="#section3" style="color:black; border-radius: 15px;">About Us</a></li>
-            <li class="uk-active" ><a href="#tnc-modal" uk-toggle style="color:black; border-radius: 15px;">Terms and Conditions</a></li>
-            <li class="uk-active" ><a href="#faqs-modal" uk-toggle style="color:black; border-radius: 15px;">FAQs</a></li>
-        </ul>
-    </div>
-</div>
 
 
     <!---------------- Welcome Section ---------------->
@@ -186,7 +185,7 @@ $stmt->close();
                             <a href="<?php echo $dashboardURL; ?>" class="welcome-book" style="color: white;">Go to Dashboard</a>
                         <?php endif; ?>
                     <?php else: ?>
-                        <button class="welcome-book" style="color: white;">Book an Appointment</button>
+                        <button class="welcome-book" style="color: white; border-radius: 15px">Book an Appointment</button>
                     <?php endif; ?>
                 </div>
 
@@ -380,7 +379,7 @@ $stmt->close();
 
     <!-- Terms and Conditions Modal -->
     <div id="tnc-modal" uk-modal>
-        <div class="uk-modal-dialog uk-modal-body">
+        <div class="uk-modal-dialog uk-modal-body" style="border-radius: 15px">
             <h2 class="uk-modal-title">Terms and Conditions</h2>
             <!-- TESTING FOR MANAGE CONTENT -->
             <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
@@ -391,14 +390,14 @@ $stmt->close();
              -->
                 <p><?php echo $content['terms'] ?? ''; ?></p>
                 <p class="uk-text-right">
-                <button class="uk-button uk-button-primary uk-modal-close" type="button">Close</button>
+                <button class="uk-button uk-button-primary uk-modal-close" type="button" style="border-radius: 15px">Close</button>
             </p>
         </div>
     </div>
 
     <!-- FAQs Modal -->
     <div id="faqs-modal" uk-modal>
-        <div class="uk-modal-dialog uk-modal-body">
+        <div class="uk-modal-dialog uk-modal-body" style="border-radius: 15px">
             <h2 class="uk-modal-title">FAQs</h2>
             <!-- TESTING FOR MANAGE CONTENT -->
             <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
@@ -409,17 +408,48 @@ $stmt->close();
              -->
                 <p><?php echo $content['faqs'] ?? ''; ?></p>
                 <p class="uk-text-right">
-                <button class="uk-button uk-button-primary uk-modal-close" type="button">Close</button>
+                <button class="uk-button uk-button-primary uk-modal-close" type="button" style="border-radius: 15px">Close</button>
             </p>
         </div>
     </div>
 
     <!-- Footer -->
-    <footer class="footer">
-        <p class="footer-text">
-            LIWANAG in construction, everything is subject to change.
-        </p>
-    </footer>
+    <footer class="footer uk-section uk-section-small uk-background-secondary uk-light">
+    <div class="footer uk-container">
+
+        <div class="uk-grid-match uk-child-width-1-2@m" uk-grid>
+            
+        <div style="text-align: left ; ">
+                <h4 style="margin-bottom: 7px;">Little Wanderer's Therapy Center</h4>
+                <p style="margin-top: 0px;font-size: 13px;">Welcome to Little Wanderer Therapy Center! We guarantee quality service that your child and family need.</p>
+                <div>
+                    <a href="#" class="uk-icon-button uk-margin-small-right" uk-icon="facebook"></a>
+
+                </div>
+            </div>
+
+        
+            <div style="text-align: right ;">
+                <ul class="uk-list uk-list">
+                    <li style="font-size:13px;">
+                        <span uk-icon="location" ></span>
+                        Benrosi V, 9746 Kamagong, Village, Makati, 1203 Kalakhang Maynila, Philippines
+                    </li>
+                    <li style="font-size:13px;">
+                        <span uk-icon="receiver" ></span>
+                        09274492970
+                    </li>
+                    <li style="font-size:13px;">
+                        <span uk-icon="mail" ></span>
+                        <a href="mailto:liwanag@company.com" class="uk-link-text">liwanag@company.com</a>
+                    </li>
+                </ul>
+            </div>
+            
+
+        </div>
+    </div>
+</footer>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
