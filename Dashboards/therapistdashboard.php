@@ -270,10 +270,6 @@ $stmt->close();
                 <div id="tableSearch"></div> <!-- Search box -->
             </div>
 
-<<<<<<< HEAD
-
-=======
->>>>>>> e630ff4287e805a1b020559f8266b71caeb7dca1
             <!--Upcoming Appointments-->
             <div id="upcoming-appointments" style="display: none; " class="section">
                 <h1 class="uk-text-bold">Upcoming Appointments</h1>

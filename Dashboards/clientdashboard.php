@@ -257,7 +257,7 @@ echo "<script>
                             <tr>
                                 <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
                                 <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
-                                <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                                <td><?= ucwords(htmlspecialchars($appointment['session_type'])); ?></td>
                                 <td><?= htmlspecialchars($appointment['patient_name']); ?></td>
                                 <td><?= ucfirst($appointment['status']); ?></td>
                                 <td>
