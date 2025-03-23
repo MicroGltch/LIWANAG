@@ -108,35 +108,11 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             transform: translateY(-1px);
             transition: transform 0.2s;
         }*/
-
+        
+        .no-break {
+            white-space: nowrap;
+        }
        
-        .action-btn {
-            width: 120px;
-            text-align: center;
-            margin: 5px 0;
-            display: block;
-        }
-
-        td .action-btn:first-child {
-            margin-top: 0;
-        }
-
-        td .action-btn:last-child {
-            margin-bottom: 0;
-        }
-
-        .uk-button-secondary,
-        .uk-button-warning {
-            padding: 0 15px;
-            min-width: 160px;
-            margin: 5px 0;
-        }
-
-        .uk-button-secondary:hover,
-        .uk-button-warning:hover {
-            transform: translateY(-1px);
-            transition: transform 0.2s;
-        }
     </style>
 </head>
 <body>
@@ -150,172 +126,121 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
 
     <h1 class="uk-text-bold">Validate Appointments</h1>
 
-    <!-- 🔹 Filters Section -->
-    <form method="GET" class="uk-width-1-1">
-        <div class="uk-grid-small uk-flex uk-flex-middle uk-grid-match" uk-grid>
-            <div class="uk-width-1-5@m">
-                <label class="uk-form-label">Status:</label>
-                <select class="uk-select" name="status">
-                    <option value="">All</option>
-                    <option value="Pending" <?= $statusFilter === "Pending" ? "selected" : "" ?>>Pending</option>
-                    <option value="Approved" <?= $statusFilter === "Approved" ? "selected" : "" ?>>Approved</option>
-                    <option value="Waitlisted" <?= $statusFilter === "Waitlisted" ? "selected" : "" ?>>Waitlisted</option>
-                    <option value="Completed" <?= $statusFilter === "Completed" ? "selected" : "" ?>>Completed</option>
-                    <option value="Cancelled" <?= $statusFilter === "Cancelled" ? "selected" : "" ?>>Cancelled</option>
-                    <option value="Declined" <?= $statusFilter === "Declined" ? "selected" : "" ?>>Declined</option>
-                </select>
-            </div>
+    <!-- Tabs -->
+    <ul uk-tab >
+        <li><a href="#"><span uk-icon="icon: calendar"></span> Pending Appointments</a></li>
+        <li><a href="#"><span uk-icon="icon: clock"></span> Waitlisted Appointments</a></li>
+    </ul>
 
-            <div class="uk-width-1-5@m">
-                <label class="uk-form-label">Session Type:</label>
-                <select class="uk-select" name="session_type">
-                    <option value="">All</option>
-                    <option value="Initial Evaluation" <?= $sessionTypeFilter === "Initial Evaluation" ? "selected" : "" ?>>Initial Evaluation</option>
-                    <option value="Playgroup" <?= $sessionTypeFilter === "Playgroup" ? "selected" : "" ?>>Playgroup</option>
-                </select>
-            </div>
-
-            <div class="uk-width-1-5@m">
-                <label class="uk-form-label">Therapist:</label>
-                <select class="uk-select" name="therapist">
-                    <option value="">All</option>
-                    <?php foreach ($therapists as $therapist): ?>
-                        <option value="<?= $therapist['account_ID']; ?>" <?= $therapistFilter == $therapist['account_ID'] ? "selected" : "" ?>>
-                            <?= htmlspecialchars($therapist['account_FName'] . " " . $therapist['account_LName']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-            </div>
-
-            <div class="uk-width-1-5@m">
-                <label class="uk-form-label">Start Date:</label>
-                <input class="uk-input" type="date" name="start_date" value="<?= $startDate; ?>">
-            </div>
-
-            <div class="uk-width-1-5@m">
-                <label class="uk-form-label">End Date:</label>
-                <input class="uk-input" type="date" name="end_date" value="<?= $endDate; ?>">
-            </div>
-        </div>
-
-        <div class="uk-text-right uk-margin-top">
-            <button class="uk-button uk-button-primary" type="submit" style="border-radius: 15px;">Apply Filters</button>
-            <a href="validate_appointments.php" class="uk-button uk-button-default" style="border-radius: 15px;">Reset</a>
-        </div>
-    </form>
-
-    <!-- Pending Appointments Table -->
-    <div class="uk-overflow-auto">
-        <table id="pendingAppointmentsTable" class="uk-table uk-table-striped uk-table-middle uk-table-responsive">
-            <thead>
-                <tr>
-                    <th>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                    <th>Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                    <th>Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                    <th>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                    <th>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                    <th>Doctors Referral</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach ($appointments as $appointment): ?>
-                    <tr>
-                        <td>
-                            <img src="<?= !empty($appointment['patient_picture']) ? '../../uploads/profile_pictures/' . $appointment['patient_picture'] : '../../uploads/profile_pictures/default.png'; ?>"
-                                onerror="this.style.display='none';"
-                                alt="Patient Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                            <?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?>
-                        </td>
-                        <td>
-                            <img src="<?= !empty($appointment['client_picture']) ? '../../uploads/profile_pictures/' . $appointment['client_picture'] : '../../uploads/profile_pictures/default.png'; ?>"
-                                onerror="this.style.display='none';"
-                                alt="Client Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
-                            <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
-                        </td>
-                        <td><?= htmlspecialchars($appointment['date']); ?></td>
-                        <td><?= htmlspecialchars($appointment['time']); ?></td>
-                        <td><?= htmlspecialchars($appointment['session_type']); ?></td>
-
-                        <td>
-                            <?php if (!empty($appointment['official_referral_file'])): ?>
-                                <!-- ✅ Show Official Referral (Priority) -->
-                                <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>" 
-                                target="_blank" class="uk-button uk-button-secondary" style="border-radius: 15px;">
-                                    View Official Referral
-                                </a>
-                            <?php elseif (!empty($appointment['proof_of_booking_referral_file'])): ?>
-                                <!-- ✅ Show Proof of Booking ONLY if no Official Referral exists -->
-                                <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>" 
-                                target="_blank" class="uk-button uk-button-warning" style="border-radius: 15px;">
-                                    View Proof of Booking
-                                </a>
-                            <?php else: ?>
-                                <!-- ✅ No referral available -->
-                                <span class="uk-text-muted">Not Applicable</span>
-                            <?php endif; ?>
-                        </td>
-
-
-
-
-                        <td>
-                            <button class="uk-button uk-button-primary action-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>" data-action="Approve"
-                                data-patient-img="<?= !empty($appointment['patient_picture']) ? '../../uploads/profile_pictures/' . $appointment['patient_picture'] : '../../uploads/profile_pictures/default.png'; ?>">Approve</button>
-                            
-                            <button class="uk-button uk-button-danger action-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>" data-action="Decline">Decline</button>
-                            
-                            <?php if (strpos($appointment['session_type'], 'Rebooking') === false): ?>
-                                <button class="uk-button uk-button-default action-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>" data-action="Waitlist">Waitlist</button>
-                            <?php endif; ?>
-                        </td>
-
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
-
-        
-       
-
-    </div>
-
-    <!-- Waitlisted Appointments Table -->
-    <div class="uk-margin-large-top">
-        <h2 class="uk-text-bold">Waitlisted Appointments</h2>
+    <ul class="uk-switcher uk-margin">
+        <li>
+            <!-- Pending Appointments Table -->
             <div class="uk-overflow-auto">
-                <table id="waitlistedAppointmentsTable" class="uk-table uk-table-striped uk-table-middle uk-table-responsive">
+                <table id="pendingAppointmentsTable" class="uk-table uk-table-striped uk-table-middle uk-table-responsive">
                     <thead>
                         <tr>
-                            <th>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th>Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th>Original Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th>Action</th>
+                            <th><span class="no-break">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                            <th><span class="no-break">Client <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                            <th><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                            <th><span class="no-break">Time <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                            <th><span class="no-break">Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                            <th>Doctors Referral</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                    <?php foreach ($waitlistedAppointments as $appointment): ?>
-                        <tr>
-                            <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
-                            <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
-                            <td><?= htmlspecialchars($appointment['date']); ?> (Waitlisted)</td>
-                            <td>
-                                <?php if (strtolower($appointment['session_type']) === 'playgroup'): ?>
-                                    <button class="uk-button uk-button-primary assign-playgroup-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>">
-                                        Assign Playgroup Slot
-                                    </button>
-                                <?php else: ?>
-                                    <button class="uk-button uk-button-primary assign-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>">
-                                        Assign Date, Time & Therapist
-                                    </button>
-                                <?php endif; ?>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
+                        <?php foreach ($appointments as $appointment): ?>
+                            <tr>
+                                <td>
+                                    <img src="<?= !empty($appointment['patient_picture']) ? '../../uploads/profile_pictures/' . $appointment['patient_picture'] : '../../uploads/profile_pictures/default.png'; ?>"
+                                        onerror="this.style.display='none';"
+                                        alt="Patient Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                    <?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?>
+                                </td>
+                                <td>
+                                    <img src="<?= !empty($appointment['client_picture']) ? '../../uploads/profile_pictures/' . $appointment['client_picture'] : '../../uploads/profile_pictures/default.png'; ?>"
+                                        onerror="this.style.display='none';"
+                                        alt="Client Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
+                                    <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
+                                </td>
+                                <td><?= htmlspecialchars($appointment['date']); ?></td>
+                                <td><?= htmlspecialchars($appointment['time']); ?></td>
+                                <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+
+                                <td>
+                                    <?php if (!empty($appointment['official_referral_file'])): ?>
+                                        <!-- ✅ Show Official Referral (Priority) -->
+                                        <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>" 
+                                        target="_blank" class="uk-button uk-button-secondary" style="border-radius: 15px;">
+                                            View Official Referral
+                                        </a>
+                                    <?php elseif (!empty($appointment['proof_of_booking_referral_file'])): ?>
+                                        <!-- ✅ Show Proof of Booking ONLY if no Official Referral exists -->
+                                        <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>" 
+                                        target="_blank" class="uk-button uk-button-warning" style="border-radius: 15px;">
+                                            View Proof of Booking
+                                        </a>
+                                    <?php else: ?>
+                                        <!-- ✅ No referral available -->
+                                        <span class="uk-text-muted">Not Applicable</span>
+                                    <?php endif; ?>
+                                </td>
+
+                                <td>
+                                    <button class="uk-button uk-button-primary action-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>" data-action="Approve"
+                                        data-patient-img="<?= !empty($appointment['patient_picture']) ? '../../uploads/profile_pictures/' . $appointment['patient_picture'] : '../../uploads/profile_pictures/default.png'; ?>">Approve</button>
+                                    
+                                    <button class="uk-button uk-button-danger action-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>" data-action="Decline">Decline</button>
+                                    
+                                    <?php if (strpos($appointment['session_type'], 'Rebooking') === false): ?>
+                                        <button class="uk-button uk-button-default action-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>" data-action="Waitlist">Waitlist</button>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                     </tbody>
                 </table>
-            </div>                 
-    </div>
+            </div>
+        </li>
+        <li>
+            <!-- Waitlisted Appointments Table -->
+            <div class="uk-margin-large-top">
+                <h2 class="uk-text-bold">Waitlisted Appointments</h2>
+                <div class="uk-overflow-auto">
+                    <table id="waitlistedAppointmentsTable" class="uk-table uk-table-striped uk-table-middle uk-table-responsive">
+                        <thead>
+                            <tr>
+                                <th>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th>Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th>Original Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <?php foreach ($waitlistedAppointments as $appointment): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
+                                <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
+                                <td><?= htmlspecialchars($appointment['date']); ?> (Waitlisted)</td>
+                                <td>
+                                    <?php if (strtolower($appointment['session_type']) === 'playgroup'): ?>
+                                        <button class="uk-button uk-button-primary assign-playgroup-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>">
+                                            Assign Playgroup Slot
+                                        </button>
+                                    <?php else: ?>
+                                        <button class="uk-button uk-button-primary assign-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>">
+                                            Assign Date, Time & Therapist
+                                        </button>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>                 
+            </div>
+        </li>
+    </ul>
 
 <!-- </body>
 </html> -->
@@ -769,6 +694,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 </script> -->
+
 
 
 <!-- Remodified/combined script -->

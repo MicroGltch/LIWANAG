@@ -134,9 +134,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
     <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport">
         <!--Sidebar-->
         <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
-            <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
-                Menu <span uk-navbar-toggle-icon></span>
-            </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
@@ -145,6 +142,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
                     <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')">Manage Appointments</a></li>                    
 
+                    <hr>
                     <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
                     <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
                 </ul>
@@ -320,7 +318,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                             </div>
                         </div>
                     </form>
-                </div>
 
                 <div class="uk-card uk-card-default uk-card-body">
                     <h3 class="uk-card-title uk-text-bold">User Details</h3>
@@ -360,6 +357,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <?php unset($_SESSION['update_errors']); ?>
                     <?php unset($_SESSION['update_success']); ?>
                 </div>
+            </div>
             </div>
 
             <script>

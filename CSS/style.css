@@ -672,6 +672,35 @@ padding-right: 100px;
     
 }
 
+/* Validate app action buttons */
+.action-btn {
+    width: 120px;
+    text-align: center;
+    margin: 5px 0;
+    display: block;
+}
+
+td .action-btn:first-child {
+    margin-top: 0;
+}
+
+td .action-btn:last-child {
+    margin-bottom: 0;
+}
+
+.uk-button-secondary,
+.uk-button-warning {
+    padding: 0 15px;
+    min-width: 160px;
+    margin: 5px 0;
+}
+
+.uk-button-secondary:hover,
+.uk-button-warning:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s;
+}
+
 
 /* adunno ano to?? these values nakita ko lang to dito luma na ata? nakakalito so i put it here huhu ajsd*/
 
