@@ -135,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $proofFileName = time() . "_proof_" . basename($_FILES['proof_of_booking']['name']);
         $proofFilePath = $uploadDir . $proofFileName;
         move_uploaded_file($_FILES['proof_of_booking']['tmp_name'], $proofFilePath);
-        $referralType = 'proof of booking'; // Set referral type as proof only if official is not set
+        $referralType = 'proof_of_booking'; // Set referral type as proof only if official is not set
     }
 
     // ✅ Insert into `doctor_referrals` table if a referral exists
