@@ -18,6 +18,19 @@ html,body{
     overflow-x: hidden;
 }
 
+#signup-div{
+    background-image: url(loginbg.png) !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+  }
+
+.forget-password-div{
+    background-image: url(loginbg.png) !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+}
 
 h3.uk-card-title{    
     font-family: 'Roboto',sans-serif;
@@ -57,6 +70,8 @@ hr.solid{
     background-repeat: no-repeat;
     background-position: center bottom;
   }
+
+
 
 /* Account Details Page */
 .uk-nav > li {

@@ -59,10 +59,7 @@ include "../dbconfig.php"
     </nav>
 
     <?php include "../dbconfig.php"; ?>
-    <div class="body-create-acc uk-flex uk-flex-center uk-flex-middle" style="    background-image: url(loginbg.png) !important;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center bottom;">
+    <div id="signup-div" class=" body-create-acc uk-flex uk-flex-center uk-flex-middle" >
     <!-- Create Account Card -->
     <div class="create-acc-card uk-card uk-card-default uk-card-body form-card">
         <!-- Title and Helper -->

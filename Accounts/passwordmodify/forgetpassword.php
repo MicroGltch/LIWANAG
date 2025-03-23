@@ -56,10 +56,7 @@
     </div>
 
 
-    <div class="forget-password-div uk-flex uk-flex-center uk-flex-middle uk-height-viewport" style="background-image: url(loginbg.png) !important;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center bottom;">
+    <div class="forget-password-div uk-flex uk-flex-center uk-flex-middle uk-height-viewport" >
     <!-- Login Account Card -->
         <div class="create-acc-card uk-card uk-card-default uk-card-body uk-width-1-2 form-card">
             
@@ -74,7 +71,7 @@
 
                 <!-- Email -->
                 <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label">Email</label>
+                    <label class="uk-form-label" style="text-align: left ;">Email</label>
                     <div class="uk-form-controls">
                         <input class="uk-input" name="email" type="email" placeholder="Input your Email..." required>
                     </div>
@@ -82,7 +79,7 @@
                 
                 <!-- Submit Button -->
                 <div class="forgot-submit-btn-div uk-width-1@s uk-width-1@l">
-                    <button class="forgot-submit-btn uk-button uk-button-primary">Submit</button>
+                    <button class="forgot-submit-btn uk-button uk-button-primary" style="border-radius: 15px">Submit</button>
                 </div>
 
             </form>
