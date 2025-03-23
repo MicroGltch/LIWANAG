@@ -226,43 +226,79 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
     <!-- Main Content -->
     <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport">
-        <!--Sidebar-->
+        <!-- Sidebar -->
         <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
+            <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
+                Menu <span uk-navbar-toggle-icon></span>
+            </button>
+
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                    <h4 style="font-weight: bold;">Admin Dashboard</h4>
+                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')"><span class="uk-margin-small-right" uk-icon="home"></span> Dashboard</a></li>
 
-                    <li><a href="#view-appointments" onclick="showSection('view-appointments')">View All Appointments</a></li>
                     <hr>
-                    <!-- Accounts Accordion -->
+
                     <li class="uk-parent">
-                        <label style="margin: 0 0 0 15px; padding: 0 0 15px 0">Accounts</label>
-                        <ul class="uk-nav-sub " style="padding:12px 0px 5px 30px">
-                            <li style="padding:0px 0px 15px 0px"><a href="#clients" onclick="showSection('clients')"> Clients</a></li>
-                            <li style="padding:0px 0px 15px 0px"><a href="#patients" onclick="showSection('patients')"> Patients</a></li>
-                        </ul>
+                    <li>
+                        <span>Appointments</span>
                     </li>
+                        <li><a href="#view-appointments" onclick="showSection('view-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> View All Appointments</a></li>
+                    </li>
+
                     <hr>
-                    <!-- Therapists Accordion -->
+
                     <li class="uk-parent">
-                        <a href="#manage-therapist" onclick="showSection('manage-therapist')"> Manage Therapists</a>
-                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
-                            <li style="padding:0px 0px 15px 0px"><a href="#add-therapist" onclick="showSection('add-therapist')"> Add Therapist</a></li>
-                        </ul>
+                    <li>
+                        <span>Accounts</span>
                     </li>
-                    <hr>
-                    <li><a href="#system-analytics" onclick="showSection('system-analytics')">System Analytics</a></li>
 
-                    <li><a href="#timetable-settings" onclick="showSection('timetable-settings')">Manage Timetable Settings</a></li>
+                    <li>
+                        <li><a href="#clients" onclick="showSection('clients')"><span class="uk-margin-small-right" uk-icon="user"></span> Clients</a></li>
+                        <li><a href="#patients" onclick="showSection('patients')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a></li>
+                    </li>
+                    </li>
 
-                    <li><a href="#manage-content" onclick="showSection('manage-content')">Manage Webpage Contents</a></li>
                     <hr>
-                    <!-- To follow & confirm-->
-                    <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
-                    <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
+
+                    <li class="uk-parent">
+                    <li>
+                        <span>Therapists</span>
+                    </li>
+                    <li>
+                        <li><a href="#manage-therapist" onclick="showSection('manage-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> Manage Therapists</a></li>
+                        <li><a href="#add-therapist" onclick="showSection('add-therapist')"><span class="uk-margin-small-right" uk-icon="plus"></span> Add Therapist</a></li>
+                    </li>
+                    </li>
+
+                    <hr>
+
+                    <li class="uk-parent">
+                    <li>
+                        <span>System</span>
+                    </li>
+                        <li>
+                            <li><a href="#system-analytics" onclick="showSection('system-analytics')"><span class="uk-margin-small-right" uk-icon="settings"></span> System Analytics</a></li>
+                            <li><a href="#timetable-settings" onclick="showSection('timetable-settings')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Timetable Settings</a></li>
+                            <li><a href="#manage-content" onclick="showSection('manage-content')"><span class="uk-margin-small-right" uk-icon="file-text"></span> Manage Webpage Contents</a></li>
+                        </li>
+                    </li>
+
+                    <hr>
+
+                    <li class="uk-parent">
+                    <li>
+                        <span>Your Account</span>
+                    </li>
+                        <li>
+                            <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
+                            <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
+                        </li>
+                    </li>
                 </ul>
             </div>
         </div>
+
 
         <!-- Content Area -->
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">

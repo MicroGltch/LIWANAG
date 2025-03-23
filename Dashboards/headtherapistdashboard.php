@@ -136,15 +136,27 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                    <h4 style="font-weight: bold;">Head Therapist Dashboard</h4>
+                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')"><span class="uk-margin-small-right" uk-icon="home"></span> Dashboard</a></li>
+                <hr>
+                <li class="uk-parent">
+                    <li>
+                        <span>Appointments</span>
+                    </li>
+                    <li><a href="#view-appointments" onclick="showSection('view-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> View All Appointments</a></li>
+                    <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Appointments</a></li>                    
+                </li>
+                
+                <hr>
 
-                    <li><a href="#view-appointments" onclick="showSection('view-appointments')">View All Appointments</a></li>
-
-                    <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')">Manage Appointments</a></li>                    
-
-                    <hr>
-                    <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
-                    <li><a href="#settings" onclick="showSection('settings')">Settings</a></li>
+                <li class="uk-parent">
+                    
+                    <li>
+                        <span>Your Account</span>
+                    </li>
+                    
+                    <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
+                    <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
                 </ul>
             </div>
         </div>
@@ -318,7 +330,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                             </div>
                         </div>
                     </form>
-
+                </div>
                 <div class="uk-card uk-card-default uk-card-body">
                     <h3 class="uk-card-title uk-text-bold">User Details</h3>
                     <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
