@@ -608,7 +608,6 @@ echo "<script>
                             <!-- The buttons will be dynamically added here by JavaScript -->
                         </div>
                         <div class="uk-width-1-1 uk-margin-top">
-                            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                         </div>
                 </div>
             </div>
@@ -823,7 +822,7 @@ echo "<script>
                         removePhotoButton.style.pointerEvents = "none";
                         removePhotoButton.style.color = "grey";
 
-                        saveButton.textContent = "Save";
+                        saveButton.textContent = "Save Changes";
                         saveButton.dataset.step = "";
 
                         // Disable Change Password button
