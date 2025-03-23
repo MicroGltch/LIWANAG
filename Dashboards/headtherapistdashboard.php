@@ -302,7 +302,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                                 <div class="uk-flex uk-flex-column uk-margin-left">
                                     <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" style="border-radius: 15px;>
+                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" style="border-radius: 15px;">
                                         Upload Photo
                                     </button>
                                     <div class="uk-text-center">

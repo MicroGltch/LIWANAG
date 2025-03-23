@@ -154,7 +154,8 @@ $stmt->close();
 
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li><a href="#dashboard" onclick="showSection('dashboard')"><span class="uk-margin-small-right" uk-icon="home"></span> Dashboard</a></li>
+                    <h4 style="font-weight: bold;">Therapist Dashboard</h4>
+                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')"><span class="uk-margin-small-right" uk-icon="home"></span> Dashboard</a></li>
                 
                     <hr>
                     
@@ -174,7 +175,7 @@ $stmt->close();
                     <a href="#patient-details" onclick="showSection('patient-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a>
                         
                         <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
-                        <li><a href="#rebook-patient" onclick="showSection('rebook-patient')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook Patient </a></li>
+                        <li class="uk-active" ><a href="#rebook-patient" onclick="showSection('rebook-patient')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook Patient </a></li>
                         </ul>
                     </li>
 
@@ -184,7 +185,7 @@ $stmt->close();
                     <a href="#manage-availability" onclick="showSection('manage-availability')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Availability </a>
                         
                         <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
-                        <li><a href="#adjust-availability" onclick="showSection('adjust-availability')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Adjust Availability </a></li>
+                        <li class="uk-active"><a href="#adjust-availability" onclick="showSection('adjust-availability')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Adjust Availability </a></li>
                         </ul>
                     </li>
 
@@ -215,7 +216,8 @@ $stmt->close();
 
         <!-- Content Area -->
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
-            <!-- Dashboard Section -->
+            
+        <!-- Dashboard Section -->
             <div id="dashboard" class="section">
                 <h1 class="uk-text-bold">Dashboard</h1>
 
