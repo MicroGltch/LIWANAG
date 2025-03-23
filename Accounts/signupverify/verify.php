@@ -222,7 +222,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['resend_otp'])) {
             </form>
             
             <div class="uk-margin">
-                <button id="resend_otp" class="uk-button uk-button-secondary uk-width-1@s" disabled>Resend OTP (1:00)</button>
+                <button id="resend_otp" class="uk-button uk-button-secondary uk-width-1@s" disabled>Resend OTP (5:00)</button>
             </div>
         </div>
     </div>
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.open('POST', '', true);
         xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
         xhr.onload = function() {
-            if (xhr.status === 200) {
+                        if (xhr.status === 200) {
                 try {
                     const response = JSON.parse(xhr.responseText);
                     
@@ -285,8 +285,8 @@ document.addEventListener('DOMContentLoaded', function() {
                             return;
                         }
                         
-                        // Reset the countdown timer
-                        seconds = 60;
+                        // Reset the countdown timer to 5 minutes (300 seconds)
+                        seconds = 300;
                         const newTimer = setInterval(() => {
                             seconds--;
                             
