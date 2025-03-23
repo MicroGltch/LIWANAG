@@ -395,7 +395,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                         <tr>
                                             <td><?= htmlspecialchars($patient['patient_fname']); ?></td>
                                             <td><?= htmlspecialchars($patient['patient_lname']); ?></td>
-                                            <td><?= htmlspecialchars($patient['bday']); ?></td>
+                                            <td><?= date('F j, Y', strtotime($patient['bday'])); ?></td>
                                             <td><?= htmlspecialchars($patient['gender']); ?></td>
                                             <td><?= htmlspecialchars($patient['client_fname'] . ' ' . $patient['client_lname']); ?></td>
                                             <td>

@@ -171,7 +171,6 @@ $stmt->close();
             <div class="homepage-welcome uk-width-1-2@l uk-width-1-1@s uk-width-1-1@m">
 
                 <div class="welcome-title">
-
                     Welcome to Little Wanderer's Therapy Center
                 </div>
 
@@ -181,7 +180,11 @@ $stmt->close();
 
                 <div>
                     <?php if (isset($_SESSION['account_ID'])): ?>
-                        <a href="Dashboards/clientdashboard.php#book-appointment" class="welcome-book" style="color: white;">Book an Appointment</a>
+                        <?php if ($_SESSION['account_Type'] == 'client'): ?>
+                            <a href="Dashboards/clientdashboard.php#book-appointment" class="welcome-book" style="color: white;">Book an Appointment</a>
+                        <?php else: ?>
+                            <a href="<?php echo $dashboardURL; ?>" class="welcome-book" style="color: white;">Go to Dashboard</a>
+                        <?php endif; ?>
                     <?php else: ?>
                         <button class="welcome-book" style="color: white;">Book an Appointment</button>
                     <?php endif; ?>

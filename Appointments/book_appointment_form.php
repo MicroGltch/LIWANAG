@@ -113,6 +113,13 @@
         <h2>Book an Appointment</h2>
         <p>Your Role: <strong><?= ucfirst($role); ?></strong></p>
 
+        <?php if (empty($patients)): ?>
+            <div class="uk-alert-warning" uk-alert>
+                <p>Please Register a Patient before Booking an Appointment.</p>
+                <button class="uk-button uk-button-primary" onclick="goToRegisterPatient()">Register a Patient</button>
+            </div>
+        <?php else: ?>
+
         <form id="appointmentForm" action="app_process/book_appointment_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked">
             <label>Select Patient:</label>
             <select class="uk-select" name="patient_id" id="patient_id" required>
@@ -189,6 +196,8 @@
 
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Book</button>
         </form>
+        <?php endif; ?>
+
     </div>
 
 
@@ -199,7 +208,17 @@
 
     console.log("closedDays", closedDays);
 
-        //for time table
+    
+    // Function to switch the main page section
+    function goToRegisterPatient() {
+        parent.document.querySelectorAll('.section').forEach(section => {
+            section.style.display = 'none'; // Hide other sections
+        });
+
+        parent.document.getElementById("register-patient").style.display = "block"; // Show Register Patient section
+    }
+
+    //for time table
     document.addEventListener("DOMContentLoaded", function () {
         let blockedDates = <?= json_encode($blockedDates) ?>;
         let minDaysAdvance = <?= $minDaysAdvance ?>;
