@@ -79,7 +79,7 @@
                 
                 <!-- Submit Button -->
                 <div class="forgot-submit-btn-div uk-width-1@s uk-width-1@l">
-                    <button class="forgot-submit-btn uk-button uk-button-primary" style="border-radius: 15px">Submit</button>
+                    <button class="forgot-submit-btn uk-button uk-button-primary">Submit</button>
                 </div>
                 <!-- Back Button -->
                 <div class="forgot-submit-btn-div uk-width-1@s uk-width-1@l">

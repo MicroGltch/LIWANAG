@@ -960,9 +960,190 @@ if (resendOtpButton) {
             });
         }
 
-        // Initialize OTP section to be hidden
-        otpSection.style.display = "none";
-    });
+         // Change Password Button
+    const changePasswordButton = document.querySelector('[uk-toggle="target: #change-password-modal"]');
+
+if (changePasswordButton) {
+    // Initially disable the Change Password button
+    changePasswordButton.disabled = true;
+}
+
+               // Change Password
+const passwordForm = document.getElementById("change-password-form");
+
+// Prevent default form submission and save actions
+changePasswordButton.addEventListener('click', function(event) {
+    // Prevent any default behavior that might submit a form or trigger save actions
+    event.preventDefault();
+    
+    // Create a function to show the password change form
+    function showPasswordChangeForm(errorMessage = null) {
+        Swal.fire({
+            title: 'Change Password',
+            html: `
+                <form id="swal-password-form" class="swal-form">
+                    <div class="swal-input-group">
+                        <label for="swal-current-password">Current Password</label>
+                        <input type="password" id="swal-current-password" class="swal2-input" placeholder="Current password">
+                    </div>
+                    
+                    <div class="swal-input-group">
+                        <label for="swal-new-password">New Password</label>
+                        <input type="password" id="swal-new-password" class="swal2-input" placeholder="New password">
+                    </div>
+                    
+                    <div class="swal-input-group">
+                        <label for="swal-confirm-password">Confirm New Password</label>
+                        <input type="password" id="swal-confirm-password" class="swal2-input" placeholder="Confirm new password">
+                    </div>
+                </form>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Change Password',
+            cancelButtonText: 'Cancel',
+            focusConfirm: false,
+            showLoaderOnConfirm: true,
+            didOpen: () => {
+                // If there's an error message, show it as a validation message
+                if (errorMessage) {
+                    Swal.showValidationMessage(errorMessage);
+                }
+            },
+            preConfirm: () => {
+                const currentPassword = document.getElementById('swal-current-password').value.trim();
+                const newPassword = document.getElementById('swal-new-password').value.trim();
+                const confirmPassword = document.getElementById('swal-confirm-password').value.trim();
+                
+                // Frontend validation
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    Swal.showValidationMessage('All fields are required');
+                    return false;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    Swal.showValidationMessage('New passwords do not match');
+                    return false;
+                }
+                
+                if (newPassword.length < 8) {
+                    Swal.showValidationMessage('Password must be at least 8 characters');
+                    return false;
+                }
+                
+                if (!/[A-Z]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one uppercase letter');
+                    return false;
+                }
+                
+                if (!/[a-z]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one lowercase letter');
+                    return false;
+                }
+                
+                if (!/[0-9]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one number');
+                    return false;
+                }
+                
+                if (!/[^A-Za-z0-9]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one special character');
+                    return false;
+                }
+                
+                // Return values for the next step
+                return { 
+                    currentPassword: currentPassword,
+                    newPassword: newPassword,
+                    confirmPassword: confirmPassword
+                };
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            // If user clicked "Change Password" and validation passed
+            if (result.isConfirmed) {
+                const { currentPassword, newPassword, confirmPassword } = result.value;
+                
+                // Send password change request
+                fetch("../Accounts/manageaccount/updateinfo.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({
+                        action: "change_password",
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response received:", data);
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.success,
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                    } else if (data.error) {
+                        // Reopen the form with the error message but no values preserved
+                        showPasswordChangeForm(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred. Please try again.'
+                    });
+                });
+            } else {
+              // User clicked cancel or outside the modal, reset the page (reload)
+              location.reload();
+            }
+        });
+    }
+    
+    // Show the initial password change form
+    showPasswordChangeForm();
+});
+
+// Add some CSS to improve the SweetAlert form
+const style = document.createElement('style');
+style.textContent = `
+.swal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 15px auto;
+}
+.swal-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+.swal-input-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+    text-align: left;
+}
+.swal2-input {
+    width: 100%;
+    margin: 0;
+}
+.swal-validation-error {
+    color: #f27474;
+    margin-top: 10px;
+    text-align: left;
+    font-size: 14px;
+}
+`;
+document.head.appendChild(style);
+// Initialize OTP section to be hidden
+otpSection.style.display = "none";
+        });
 
 function removeProfilePhoto() {
     if (confirm("Are you sure you want to remove your profile picture?")) {

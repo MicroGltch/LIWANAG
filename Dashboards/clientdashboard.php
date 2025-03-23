@@ -176,14 +176,7 @@ echo "<script>
                         </li>
                         <?php if (isset($_SESSION['account_ID'])): ?>
                         <li><a href="../Accounts/logout.php">Logout</a></li>
-                        <?php if (isset($_SESSION['account_ID'])): ?>
-                        <li><a href="../Accounts/logout.php">Logout</a></li>
                     <?php endif; ?>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </nav>
                     </ul>
                 </div>
             </div>
@@ -197,7 +190,6 @@ echo "<script>
         <!-- Sidebar -->
         <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
             <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
-                Menu <span uk-navbar-toggle-icon></span>
                 Menu <span uk-navbar-toggle-icon></span>
             </button>
 
@@ -343,7 +335,6 @@ echo "<script>
                             </select>
                         </div>
 
-                        <!-- drag and drop profile pic -->
                         <div class="uk-width-1@s uk-width-1-2@l">
                             <label class="uk-form-label">Profile Picture</label>
                             <div class="js-upload uk-placeholder uk-text-center" id="profile-picture-placeholder">
@@ -500,10 +491,6 @@ echo "<script>
 
                         </div>
 
-                        
-
-                    
-
                     </form>
                 </div>
             </div>
@@ -580,9 +567,8 @@ echo "<script>
             <small style="color: green;" class="error-message" id="successMessage"></small>
 
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
-            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>    
-            <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
-
+                <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
             </div>
 
             <div id="otpSection" class="uk-width-1-1" style="display: none;">
