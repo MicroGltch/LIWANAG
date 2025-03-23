@@ -44,6 +44,7 @@ $stmt->execute();
 $result = $stmt->get_result();
 $appointments = $result->fetch_all(MYSQLI_ASSOC);
 
+
 // EDIT PATIENT FORM
 // Fetch patients for the dropdown
 $patientsQuery = "SELECT patient_id, first_name, last_name, bday FROM patients WHERE account_id = ?";
@@ -242,25 +243,36 @@ echo "<script>
 
 
         <!-- Content Area -->
+        
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
             <div id="appointments" class="section">
                 <h1 class="uk-text-bold">Appointments</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <div class="uk-margin-small-bottom uk-flex uk-flex-between uk-flex-wrap">
+                        <div>
+                            <button class="uk-button uk-button-default filter-btn" data-filter="all">All</button>
+                            <button class="uk-button uk-button-primary filter-btn" data-filter="upcoming">Upcoming</button>
+                            <button class="uk-button uk-button-secondary filter-btn" data-filter="past">Past</button>
+                        </div>
+                    </div>
+
                     <table class="uk-table uk-table-striped">
-                        <thead>
+                    <input class="uk-input uk-margin-bottom" type="text" id="appointmentSearch" placeholder="Search appointments...">
+
+                    <thead>
                             <tr>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Session Type</th>
-                                <th>Patient</th>
-                                <th>Status</th>
+                                <th data-sort="date"><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span> </th>
+                                <th data-sort="time"><span class="no-break"></span>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="session"><span class="no-break"></span>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="patient"><span class="no-break"></span>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="status"><span class="no-break"></span>Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                         <?php foreach ($appointments as $appointment): ?>
-                            <tr>
+                            <tr data-date="<?= $appointment['date']; ?>">
                                 <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
                                 <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
                                 <td><?= ucwords(htmlspecialchars($appointment['session_type'])); ?></td>
@@ -607,6 +619,82 @@ echo "<script>
             }
         }
     });
+ 
+    //sorting n search n filter past upcoming
+    document.addEventListener("DOMContentLoaded", function () {
+        const table = document.querySelector("table.uk-table");
+        const headers = table.querySelectorAll("th[data-sort]");
+        const tbody = table.querySelector("tbody");
+
+        headers.forEach(header => {
+            header.style.cursor = "pointer";
+            header.addEventListener("click", () => {
+                const type = header.getAttribute("data-sort");
+                const rows = Array.from(tbody.querySelectorAll("tr"));
+                const colIndex = Array.from(header.parentNode.children).indexOf(header);
+                const ascending = header.classList.toggle("asc");
+
+                rows.sort((a, b) => {
+                    let valA = a.children[colIndex].textContent.trim();
+                    let valB = b.children[colIndex].textContent.trim();
+
+                    if (type === "date") {
+                        valA = new Date(valA);
+                        valB = new Date(valB);
+                    } else {
+                        valA = valA.toLowerCase();
+                        valB = valB.toLowerCase();
+                    }
+
+                    if (valA < valB) return ascending ? -1 : 1;
+                    if (valA > valB) return ascending ? 1 : -1;
+                    return 0;
+                });
+
+                // Clear and reinsert sorted rows
+                tbody.innerHTML = "";
+                rows.forEach(row => tbody.appendChild(row));
+            });
+        });
+
+        const searchInput = document.getElementById("appointmentSearch");
+        const rows = document.querySelectorAll("table.uk-table tbody tr");
+
+        searchInput.addEventListener("keyup", function () {
+            const keyword = this.value.toLowerCase();
+
+            rows.forEach(row => {
+                const text = row.textContent.toLowerCase();
+                row.style.display = text.includes(keyword) ? "" : "none";
+            });
+        });
+
+
+
+    });
+
+            //upcoming past
+            document.querySelectorAll(".filter-btn").forEach(button => {
+        button.addEventListener("click", function () {
+            const filter = this.dataset.filter;
+            const rows = document.querySelectorAll("table.uk-table tbody tr");
+            const today = new Date().toISOString().split("T")[0];
+
+            rows.forEach(row => {
+                const rowDate = row.dataset.date;
+                if (filter === "all") {
+                    row.style.display = "";
+                } else if (filter === "upcoming") {
+                    row.style.display = rowDate >= today ? "" : "none";
+                } else if (filter === "past") {
+                    row.style.display = rowDate < today ? "" : "none";
+                }
+            });
+        });
+    });
+
+    document.querySelector(".filter-btn[data-filter='all']").click();
+
 
 
 
