@@ -98,7 +98,9 @@ $stmt->close();
 
                     <!-- Navbar Center -->
                     <div class="logo-center-div uk-navbar-center">
-                        <a class="logo-navbar uk-navbar-item uk-logo" href="homepage.php">Little Wanderer's Therapy Center</a>
+                        <a class="logo-navbar uk-navbar-item uk-logo" href="homepage.php" style="margin-top: -15px;">
+                            Little Wanderer's Therapy Center
+                        </a>
                     </div>
 
                     <!-- Navbar Right -->
@@ -388,7 +390,8 @@ $stmt->close();
 
                 Vivamus eleifend, risus sed iaculis tincidunt, urna dui hendrerit lacus, et pharetra nulla massa a urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi pretium eget turpis id pulvinar. Nullam in imperdiet sem, et consectetur dui. Pellentesque mattis ex in feugiat tempus. In at nunc orci. Sed accumsan scelerisque ipsum, vel lobortis sem gravida non. Curabitur facilisis, felis molestie ornare consectetur, nibh ex congue nisi, in mattis erat leo at nisi. Vestibulum et lorem nec lorem elementum eleifend. </p>
              -->
-                <p><?php echo $content['terms'] ?? ''; ?></p>
+             <div><?php echo nl2br(htmlspecialchars_decode($content['terms'] ?? '', ENT_QUOTES)); ?></div>
+
                 <p class="uk-text-right">
                 <button class="uk-button uk-button-primary uk-modal-close" type="button" style="border-radius: 15px">Close</button>
             </p>
@@ -406,7 +409,8 @@ $stmt->close();
 
                 Vivamus eleifend, risus sed iaculis tincidunt, urna dui hendrerit lacus, et pharetra nulla massa a urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi pretium eget turpis id pulvinar. Nullam in imperdiet sem, et consectetur dui. Pellentesque mattis ex in feugiat tempus. In at nunc orci. Sed accumsan scelerisque ipsum, vel lobortis sem gravida non. Curabitur facilisis, felis molestie ornare consectetur, nibh ex congue nisi, in mattis erat leo at nisi. Vestibulum et lorem nec lorem elementum eleifend. </p>
              -->
-                <p><?php echo $content['faqs'] ?? ''; ?></p>
+             <div><?php echo nl2br(htmlspecialchars_decode($content['faqs'] ?? '', ENT_QUOTES)); ?></div>
+
                 <p class="uk-text-right">
                 <button class="uk-button uk-button-primary uk-modal-close" type="button" style="border-radius: 15px">Close</button>
             </p>
@@ -429,22 +433,24 @@ $stmt->close();
             </div>
 
         
-            <div style="text-align: right ;">
-                <ul class="uk-list uk-list">
-                    <li style="font-size:13px;">
-                        <span uk-icon="location" ></span>
-                        Benrosi V, 9746 Kamagong, Village, Makati, 1203 Kalakhang Maynila, Philippines
-                    </li>
-                    <li style="font-size:13px;">
-                        <span uk-icon="receiver" ></span>
-                        09274492970
-                    </li>
-                    <li style="font-size:13px;">
-                        <span uk-icon="mail" ></span>
-                        <a href="mailto:liwanag@company.com" class="uk-link-text">liwanag@company.com</a>
-                    </li>
-                </ul>
-            </div>
+            <div style="text-align: right;">
+    <ul class="uk-list uk-list">
+        <li style="font-size:13px;">
+            <span uk-icon="location"></span>
+            <?php echo htmlspecialchars($content['address'] ?? 'Not set'); ?>
+        </li>
+        <li style="font-size:13px;">
+            <span uk-icon="receiver"></span>
+            <?php echo htmlspecialchars($content['mobile'] ?? 'Not set'); ?>
+        </li>
+        <li style="font-size:13px;">
+            <span uk-icon="mail"></span>
+            <a href="mailto:<?php echo htmlspecialchars($content['email'] ?? ''); ?>" class="uk-link-text">
+                <?php echo htmlspecialchars($content['email'] ?? 'Not set'); ?>
+            </a>
+        </li>
+    </ul>
+</div>
             
 
         </div>

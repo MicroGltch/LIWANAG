@@ -678,8 +678,39 @@ $role = strtolower(trim($_SESSION['account_Type']));
                 }
             });
 
-        });
-    </script>
+});
+
+// dr referral error
+document.getElementById("appointmentForm").addEventListener("submit", function (e) {
+    const appointmentType = document.getElementById("appointment_type").value;
+    const hasReferral = document.getElementById("has_referral").value;
+    const officialReferral = document.getElementById("official_referral").files[0];
+    const proofOfBooking = document.getElementById("proof_of_booking").files[0];
+
+    if (appointmentType === "Initial Evaluation") {
+        if (!hasReferral) {
+            e.preventDefault();
+            Swal.fire("Missing Info", "Please indicate if you have a doctor's referral.", "warning");
+            return;
+        }
+
+        if (hasReferral === "yes" && !officialReferral) {
+            e.preventDefault();
+            Swal.fire("Missing Upload", "Please upload your doctor's referral.", "warning");
+            return;
+        }
+
+        if (hasReferral === "no" && !proofOfBooking) {
+            e.preventDefault();
+            Swal.fire("Missing Upload", "Please upload proof of booking for your doctor's referral.", "warning");
+            return;
+        }
+    }
+});
+
+
+
+</script>
 
 </body>
 

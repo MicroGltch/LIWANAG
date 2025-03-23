@@ -566,8 +566,18 @@ function handleDeclineAction(appointmentId, detailsHtml) {
             });
         },
         preConfirm: () => {
-            let reason = document.getElementById("declineReason").value.trim();
-            return { reason }; // Send reason even if blank
+            const reasonSelect = document.getElementById("declineReasonSelect");
+            const reasonInput = document.getElementById("declineReason");
+
+            let finalReason = "";
+
+            if (reasonSelect.value === "Other") {
+                finalReason = reasonInput.value.trim();
+            } else {
+                finalReason = reasonSelect.value || "No reason provided";
+            }
+
+            return { reason: finalReason };
         }
     }).then((result) => {
         if (result.isConfirmed) {
