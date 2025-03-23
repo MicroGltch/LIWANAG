@@ -111,31 +111,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <form id="webpageForm" method="POST" class="uk-form-stacked">
 
-        <div class="uk-margin">
-            <label class="uk-form-label">Services:</label>
-            <div class="uk-form-controls">
-                <textarea id="services" name="services" class="uk-input" rows="4" cols="50" disabled><?php echo htmlspecialchars($content['services'] ?? ''); ?></textarea>
-            </div>
+    <div class="uk-margin">
+        <label class="uk-form-label">Email:</label>
+        <div class="uk-form-controls">
+            <textarea id="email" name="email" class="uk-input"  disabled><?php echo htmlspecialchars($content['email'] ?? ''); ?></textarea>
         </div>
+    </div>
+
+    <div class="uk-margin">
+        <label class="uk-form-label">Mobile Number:</label>
+        <div class="uk-form-controls">
+            <textarea id="mobile" name="mobile" class="uk-input"  disabled><?php echo htmlspecialchars($content['mobile'] ?? ''); ?></textarea>
+        </div>
+    </div>
+
+    <div class="uk-margin">
+        <label class="uk-form-label">Address:</label>
+        <div class="uk-form-controls">
+            <textarea id="address" name="address" class="uk-textarea" rows="4" style="resize: vertical;" disabled><?php echo htmlspecialchars($content['address'] ?? ''); ?></textarea>
+        </div>
+    </div>
+
 
         <div class="uk-margin">
             <label class="uk-form-label">About Us:</label>
             <div class="uk-form-controls">
-                <textarea id="about_us" name="about_us" class="uk-input" rows="4" cols="50" disabled><?php echo htmlspecialchars($content['about_us'] ?? ''); ?></textarea>
+            <textarea id="about_us" name="about_us" class="uk-input" rows="12" cols="50" style="resize: vertical; min-height: 250px;" disabled><?php echo htmlspecialchars($content['about_us'] ?? ''); ?></textarea>
             </div>
         </div>
 
         <div class="uk-margin">
             <label class="uk-form-label">Terms & Conditions:</label>
             <div class="uk-form-controls">
-                <textarea id="terms" name="terms" class="uk-input" rows="4" cols="50" disabled><?php echo htmlspecialchars($content['terms'] ?? ''); ?></textarea>
+            <textarea id="terms" name="terms" class="uk-input" rows="12" cols="50" style="resize: vertical; min-height: 250px;" disabled><?php echo htmlspecialchars($content['terms'] ?? ''); ?></textarea>
             </div>
         </div>
 
         <div class="uk-margin">
             <label class="uk-form-label">FAQs:</label>
             <div class="uk-form-controls">
-                <textarea id="faqs" name="faqs" class="uk-input" rows="4" cols="50" disabled><?php echo htmlspecialchars($content['faqs'] ?? ''); ?></textarea>
+                <textarea id="faqs" name="faqs" class="uk-input" rows="12" cols="50" style="resize: vertical; min-height: 250px;" disabled><?php echo htmlspecialchars_decode($content['faqs'] ?? '', ENT_QUOTES); ?></textarea>
             </div>
         </div>
 
