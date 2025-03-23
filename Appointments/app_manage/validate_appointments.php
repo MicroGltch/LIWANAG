@@ -15,18 +15,20 @@ $query = "SELECT a.appointment_id, a.patient_id, a.date, a.time, a.status,
                      THEN CONCAT('Rebooking by: ', t.account_FName, ' ', t.account_LName) 
                      ELSE a.session_type 
                  END AS session_type,
-                 dr.referral_type, -- ✅ Fetch referral type
-                 dr.official_referral_file, -- ✅ Fetch official referral file
-                 dr.proof_of_booking_referral_file, -- ✅ Fetch proof of booking file
+                 a.created_at, -- ✅ Include created_at
+                 dr.referral_type,
+                 dr.official_referral_file,
+                 dr.proof_of_booking_referral_file,
                  p.first_name, p.last_name, p.profile_picture AS patient_picture,
                  u.account_FName AS client_firstname, u.account_LName AS client_lastname, u.profile_picture AS client_picture
           FROM appointments a
           JOIN patients p ON a.patient_id = p.patient_id
           JOIN users u ON a.account_id = u.account_ID
           LEFT JOIN users t ON a.rebooked_by = t.account_ID
-          LEFT JOIN doctor_referrals dr ON a.referral_id = dr.referral_id -- ✅ Join doctor_referrals table
+          LEFT JOIN doctor_referrals dr ON a.referral_id = dr.referral_id
           WHERE a.status = 'Pending'
           ORDER BY a.date ASC, a.time ASC";
+
 
 $result = $connection->query($query);
 $appointments = $result->fetch_all(MYSQLI_ASSOC);
@@ -155,6 +157,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                     <th>Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                     <th>Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                     <th>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                    <th>Booked On <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                     <th>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                     <th>Doctors Referral</th>
                     <th>Actions</th>
@@ -175,8 +178,9 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                 alt="Client Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
                             <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
                         </td>
-                        <td><?= htmlspecialchars($appointment['date']); ?></td>
-                        <td><?= htmlspecialchars($appointment['time']); ?></td>
+                        <td><?= htmlspecialchars(date("M d, Y", strtotime($appointment['date']))); ?></td>
+                        <td><?= htmlspecialchars(date("h:i A", strtotime($appointment['time']))); ?></td>
+                        <td><?= htmlspecialchars(date("M d, Y h:i A", strtotime($appointment['created_at']))); ?></td>
                         <td><?= htmlspecialchars($appointment['session_type']); ?></td>
 
                         <td>
