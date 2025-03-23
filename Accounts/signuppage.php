@@ -163,7 +163,7 @@ include "../dbconfig.php"
 
                 <!-- Sign Up Button -->
                 <div class="signup-btn-div uk-width-1@s uk-width-1@l">
-                    <button type="submit" name="signup" class="signup-btn uk-button uk-button-primary uk-width-1@s uk-width-1@l">Sign Up</button>
+                    <button type="submit" name="signup" class="signup-btn uk-button uk-button-primary uk-width-1@s uk-width-1@l" style="border-radius: 15px">Sign Up</button>
                 </div>
 
                 <!-- Divider -->
