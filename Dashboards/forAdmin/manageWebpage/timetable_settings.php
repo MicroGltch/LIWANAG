@@ -33,7 +33,7 @@ $stmt->close();
 $query = "SELECT *, DATE_FORMAT(updated_at, '%M %d, %Y %h:%i %p') AS formatted_updated_at FROM settings LIMIT 1";
 $result = $connection->query($query);
 $settings = $result->fetch_assoc();
-$blockedDates = json_decode($settings['blocked_dates'], true);
+//$blockedDates = json_decode($settings['blocked_dates'], true);
 
 // ✅ Load weekly business hours
 $days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
@@ -175,10 +175,10 @@ while ($row = $exceptionsResult->fetch_assoc()) {
             <label>Min Days Before Appointment:</label>
             <input class="uk-input" type="number" name="min_days_advance" value="<?= $settings['min_days_advance']; ?>" min="0" max="30" required>
         </div>
-        <div class="uk-margin">
+        <!-- <div class="uk-margin">
             <label>Blocked Dates:</label>
             <input class="uk-input" type="text" id="blocked_dates" name="blocked_dates" placeholder="Select dates..." required>
-        </div>
+        </div> -->
         <div class="uk-margin">
             <label>Initial Evaluation Duration (Minutes):</label>
             <input class="uk-input" type="number" name="initial_eval_duration" value="<?= $settings['initial_eval_duration']; ?>" min="30" max="180" required>
@@ -204,13 +204,13 @@ while ($row = $exceptionsResult->fetch_assoc()) {
     <!-- ✅ JS for Forms and Flatpickr -->
     <script>
     document.addEventListener("DOMContentLoaded", function () {
-        flatpickr("#blocked_dates", {
-            minDate: "today",
-            altInput: true,
-            mode: "multiple",
-            dateFormat: "Y-m-d",
-            defaultDate: <?= json_encode($blockedDates) ?>
-        });
+        // flatpickr("#blocked_dates", {
+        //     minDate: "today",
+        //     altInput: true,
+        //     mode: "multiple",
+        //     dateFormat: "Y-m-d",
+        //     defaultDate: <?= json_encode($blockedDates) ?>
+        // });
 
         function handleFormSubmit(formId) {
         const form = document.getElementById(formId);
