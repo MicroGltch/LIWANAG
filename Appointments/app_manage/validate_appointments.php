@@ -73,6 +73,13 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
     <!--SWAL-->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
     <style>
         html,
         body {
@@ -625,70 +632,99 @@ function handleWaitlistAction(appointmentId, detailsHtml) {
 
 // Handle the Assign action for waitlisted appointments
 function handleAssignAction(appointmentId) {
-    // Fetch timetable settings
-    fetch("../app_data/get_timetable_settings.php")
+    // 1️⃣ Fetch appointment details first
+    fetch(`../app_data/get_appointment_details.php?appointment_id=${appointmentId}`)
         .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                let settings = data.settings;
-                let blockedDates = settings.blocked_dates || [];
-                let minDays = Number(settings.min_days_advance);
-                let maxDays = Number(settings.max_days_advance);
-
-                let minDate = new Date();
-                let maxDate = new Date();
-                minDate.setDate(minDate.getDate() + minDays);
-                maxDate.setDate(maxDate.getDate() + maxDays);
-
-                Swal.fire({
-                    title: "Reschedule Appointment",
-                    html: `
-                        <label>New Date:</label>
-                        <input type="date" id="appointmentDate" class="swal2-input">
-                        <label>New Time:</label>
-                        <select id="appointmentTime" class="swal2-select">
-                            <option value="">Select a Date First</option>
-                        </select>
-                        <label>Assign Therapist:</label>
-                        <select id="therapistSelect" class="swal2-select" disabled>
-                            <option value="">Select a Date & Time First</option>
-                        </select>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: "Assign",
-                    didOpen: () => {
-                        setupDateTimeFields(settings, blockedDates);
-                    },
-                    preConfirm: () => {
-                        let date = document.getElementById("appointmentDate").value;
-                        let time = document.getElementById("appointmentTime").value;
-                        let therapistId = document.getElementById("therapistSelect").value;
-
-                        if (!date || !time || !therapistId) {
-                            Swal.showValidationMessage("Please select a valid date, time, and therapist.");
-                            return false;
-                        }
-
-                        return { date, time, therapistId };
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        updateAppointmentStatus({
-                            appointment_id: appointmentId,
-                            status: "approved",
-                            date: result.value.date,
-                            time: result.value.time,
-                            therapist_id: result.value.therapistId
-                        }, "Appointment has been rescheduled and therapist assigned", "Failed to update appointment");
-                    }
-                });
-            } else {
-                Swal.fire("Error!", "Could not fetch timetable settings.", "error");
+        .then(appointmentData => {
+            if (appointmentData.status !== "success") {
+                Swal.fire("Error", "Failed to fetch appointment details.", "error");
+                return;
             }
+
+            const d = appointmentData.details;
+
+            // Optional: Format date and time
+            const datetime = new Date(`${d.date}T${d.time}`);
+            const formattedDate = datetime.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const formattedTime = datetime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            const detailsHtml = `
+                <p><strong>Patient:</strong> ${d.patient_name}</p>
+                <p><strong>Client:</strong> ${d.client_name}</p>
+                <p><strong>Session Type:</strong> ${d.session_type}</p>
+                <p><strong>Original Date:</strong> ${formattedDate}</p>
+                <p><strong>Original Time:</strong> ${formattedTime}</p>
+            `;
+
+            // 2️⃣ Then fetch timetable settings
+            fetch("../app_data/get_timetable_settings.php")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status !== "success") {
+                        Swal.fire("Error!", "Could not fetch timetable settings.", "error");
+                        return;
+                    }
+
+                    const settings = data.settings;
+                    const blockedDates = settings.blocked_dates || [];
+
+                    Swal.fire({
+                        title: "Reschedule Appointment",
+                        html: `
+                            ${detailsHtml}
+                            <label>New Date:</label>
+                            <input type="text" id="appointmentDate" class="swal2-input">
+                            <label>New Time:</label>
+                            <select id="appointmentTime" class="swal2-select">
+                                <option value="">Select a Date First</option>
+                            </select>
+                            <br/>
+                            <br/>
+                            <br/>
+                            <label>Assign Therapist:</label>
+                            <div id="therapistSelectContainer" style="max-height:300px; overflow-y:auto; text-align:left;"></div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: "Assign",
+                        didOpen: () => {
+                            setupDateTimeFields(settings, blockedDates);
+                        },
+                        preConfirm: () => {
+                            const date = document.getElementById("appointmentDate").value;
+                            const time = document.getElementById("appointmentTime").value;
+                            const selected = document.querySelector('input[name="therapist"]:checked');
+
+                            if (!date || !time || !selected) {
+                                Swal.showValidationMessage("Please select a valid date, time, and therapist.");
+                                return false;
+                            }
+
+                            return {
+                                date,
+                                time,
+                                therapist_id: selected.value
+                            };
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            updateAppointmentStatus({
+                                appointment_id: appointmentId,
+                                status: "approved",
+                                date: result.value.date,
+                                time: result.value.time,
+                                therapist_id: result.value.therapist_id
+                            }, "Appointment has been rescheduled and therapist assigned", "Failed to update appointment");
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching timetable settings:", error);
+                    Swal.fire("Error!", "Error fetching settings.", "error");
+                });
         })
         .catch(error => {
-            console.error("Error fetching timetable settings:", error);
-            Swal.fire("Error!", "Error fetching settings.", "error");
+            console.error("Error fetching appointment details:", error);
+            Swal.fire("Error", "Unable to load appointment info.", "error");
         });
 }
 
@@ -744,49 +780,42 @@ function handleAssignPlaygroupAction(appointmentId) {
 
 // Setup date and time fields for appointment rescheduling
 function setupDateTimeFields(settings, blockedDates) {
-    let minDate = new Date();
-    let maxDate = new Date();
+    const minDate = new Date();
+    const maxDate = new Date();
     minDate.setDate(minDate.getDate() + Number(settings.min_days_advance));
     maxDate.setDate(maxDate.getDate() + Number(settings.max_days_advance));
-    
-    // Set Date Picker Restrictions
-    let datePicker = document.getElementById("appointmentDate");
-    datePicker.min = minDate.toISOString().split('T')[0];
-    datePicker.max = maxDate.toISOString().split('T')[0];
 
-    datePicker.addEventListener("change", function() {
-        let selectedDate = this.value;
-        let timeDropdown = document.getElementById("appointmentTime");
-        let therapistDropdown = document.getElementById("therapistSelect");
-        
-        // Reset therapist dropdown
-        therapistDropdown.innerHTML = `<option value="">Select a Date & Time First</option>`;
-        therapistDropdown.disabled = true;
+    // 🟩 Initialize Flatpickr for Date Input
+    flatpickr("#appointmentDate", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "M d, Y",
+        minDate: minDate,
+        maxDate: maxDate,
+        disable: blockedDates, // ⛔ Disable blocked dates
+        onChange: function (selectedDates, dateStr) {
+            const timeDropdown = document.getElementById("appointmentTime");
+            const therapistContainer = document.getElementById("therapistSelectContainer");
 
-        // Disable blocked dates
-        if (blockedDates.includes(selectedDate)) {
-            Swal.fire("Unavailable Date", "This date is blocked. Please choose another.", "warning");
-            this.value = ""; // Reset date input
-            timeDropdown.innerHTML = `<option value="">Select a Date First</option>`;
-            timeDropdown.disabled = true;
-            return;
+            if (!dateStr) return;
+
+            // 🧹 Reset containers
+            therapistContainer.innerHTML = "";
+            timeDropdown.innerHTML = generateTimeSlots(settings.business_hours_start, settings.business_hours_end);
+            timeDropdown.disabled = false;
         }
-
-        // Generate Available Time Slots
-        timeDropdown.innerHTML = generateTimeSlots(settings.business_hours_start, settings.business_hours_end);
-        timeDropdown.disabled = false;
     });
 
-    // Handle time selection
-    document.getElementById("appointmentTime").addEventListener("change", function() {
-        let date = document.getElementById("appointmentDate").value;
-        let time = this.value;
-        
-        if (!date || !time) return;
-        
-        fetchTherapistsForDateTime(date, time);
+    // ⏱️ Time dropdown logic
+    document.getElementById("appointmentTime").addEventListener("change", function () {
+        const selectedDate = document.getElementById("appointmentDate").value;
+        const selectedTime = this.value;
+
+        if (!selectedDate || !selectedTime) return;
+        fetchTherapistsForDateTime(selectedDate, selectedTime);
     });
 }
+
 
 // Generate time slots based on business hours
 function generateTimeSlots(startTime, endTime) {
@@ -795,9 +824,16 @@ function generateTimeSlots(startTime, endTime) {
     let end = new Date(`1970-01-01T${endTime}`);
 
     while (start < end) {
-        let timeStr = start.toTimeString().slice(0, 5);
-        options += `<option value="${timeStr}">${timeStr}</option>`;
-        start.setMinutes(start.getMinutes() + 60); // Assuming 1-hour slots
+        const hour = start.getHours();
+        const minutes = start.getMinutes().toString().padStart(2, "0");
+        const ampm = hour >= 12 ? "PM" : "AM";
+        const hour12 = hour % 12 || 12;
+
+        const timeStr = `${hour12}:${minutes} ${ampm}`;
+        const valueStr = `${hour.toString().padStart(2, "0")}:${minutes}`;
+
+        options += `<option value="${valueStr}">${timeStr}</option>`;
+        start.setMinutes(start.getMinutes() + 60); // Adjust interval as needed
     }
 
     return options;
@@ -805,27 +841,45 @@ function generateTimeSlots(startTime, endTime) {
 
 // Fetch available therapists for a specific date and time
 function fetchTherapistsForDateTime(date, time) {
-    let therapistDropdown = document.getElementById("therapistSelect");
-    
+    const container = document.getElementById("therapistSelectContainer");
+    container.innerHTML = `<p>Loading therapists...</p>`;
+    container.dataset.valid = "false";
+
     fetch(`../app_data/get_available_therapists.php?date=${date}&time=${time}`)
         .then(response => response.json())
         .then(data => {
             if (data.status !== "success" || data.therapists.length === 0) {
-                therapistDropdown.innerHTML = `<option value="">No Available Therapists</option>`;
-                therapistDropdown.disabled = true;
+                container.innerHTML = `<p style="color:red;">No therapists available.</p>`;
                 return;
             }
 
-            therapistDropdown.innerHTML = data.therapists.map(t => `
-                <option value="${t.id}">${t.name} - [${t.status}] ${t.schedule}</option>
-            `).join('');
+            let therapistCards = data.therapists.map(t => {
+                const status = t.status.toLowerCase();
+                const statusColor = status === "available" ? "#27ae60" :
+                                    status.includes("time conflict") ? "#e67e22" : "#e74c3c";
+                const disabled = status === "unavailable" ? "disabled" : "";
+                const schedule = t.schedule || "No schedule info";
 
-            therapistDropdown.disabled = false;
+                return `
+                    <div class="therapist-option" style="padding:10px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px;">
+                        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+                            <input type="radio" name="therapist" value="${t.id}" style="margin-top:5px;" ${disabled} />
+                            <div>
+                                <div><strong>${t.name}</strong></div>
+                                <div style="color:${statusColor}; font-weight: bold;">${t.status}</div>
+                                <div style="font-size: 0.85em; color: #555;">${schedule}</div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            }).join("");
+
+            container.innerHTML = therapistCards;
+            container.dataset.valid = "true";
         })
         .catch(error => {
             console.error("Error fetching therapists:", error);
-            therapistDropdown.innerHTML = `<option value="">Error Fetching Therapists</option>`;
-            therapistDropdown.disabled = true;
+            container.innerHTML = `<p style="color:red;">Error loading therapists.</p>`;
         });
 }
 
