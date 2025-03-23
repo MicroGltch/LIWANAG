@@ -2,42 +2,112 @@
 require_once "../../../dbconfig.php";
 session_start();
 
-// ✅ Use correct session variable for role
-if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "admin") {
+if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
     echo json_encode(["status" => "error", "message" => "Unauthorized access."]);
     exit();
 }
 
-// ✅ Ensure POST request
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $business_hours_start = $_POST['business_hours_start'];
-    $business_hours_end = $_POST['business_hours_end'];
-    $max_days_advance = $_POST['max_days_advance'];
-    $min_days_advance = $_POST['min_days_advance'];
-    $blocked_dates = isset($_POST['blocked_dates']) ? explode(",", str_replace(" ", "", $_POST['blocked_dates'])) : [];
-
-    // ✅ Convert blocked dates to JSON format
-    $blocked_dates_json = json_encode($blocked_dates);
-
-    // ✅ Ensure settings table is updated
-    $query = "UPDATE settings SET 
-                business_hours_start = ?, 
-                business_hours_end = ?, 
-                max_days_advance = ?, 
-                min_days_advance = ?, 
-                blocked_dates = ?, 
-                updated_at = NOW()
-              WHERE setting_id = 1";
-
-    $stmt = $connection->prepare($query);
-    $stmt->bind_param("ssiis", $business_hours_start, $business_hours_end, $max_days_advance, $min_days_advance, $blocked_dates_json);
-
-    if ($stmt->execute()) {
-        echo json_encode(["status" => "success", "message" => "Settings updated successfully.", "updated_at" => date("F d, Y h:i A")]);
-    } else {
-        echo json_encode(["status" => "error", "message" => "Failed to update settings. SQL Error: " . $stmt->error]);
-    }
-} else {
+if ($_SERVER["REQUEST_METHOD"] !== "POST" || !isset($_POST['form_type'])) {
     echo json_encode(["status" => "error", "message" => "Invalid request."]);
+    exit();
 }
+
+$formType = $_POST['form_type'];
+
+switch ($formType) {
+    case 'global_settings':
+        $max_days_advance = $_POST['max_days_advance'];
+        $min_days_advance = $_POST['min_days_advance'];
+        $blocked_dates = isset($_POST['blocked_dates']) ? explode(",", str_replace(" ", "", $_POST['blocked_dates'])) : [];
+        $blocked_dates_json = json_encode($blocked_dates);
+
+        $query = "UPDATE settings SET 
+            max_days_advance = ?, 
+            min_days_advance = ?, 
+            blocked_dates = ?, 
+            updated_at = NOW()
+            WHERE setting_id = 1";
+
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("iis", $max_days_advance, $min_days_advance, $blocked_dates_json);
+
+        if ($stmt->execute()) {
+            echo json_encode(["status" => "success", "message" => "Settings updated successfully.", "updated_at" => date("F d, Y h:i A")]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Failed to update settings. SQL Error: " . $stmt->error]);
+        }
+        break;
+
+    case 'weekly_hours':
+        if (isset($_POST['weekly_hours'])) {
+            foreach ($_POST['weekly_hours'] as $day => $info) {
+                $start = isset($info['closed']) ? null : (!empty($info['start']) ? $info['start'] : null);
+                $end   = isset($info['closed']) ? null : (!empty($info['end']) ? $info['end'] : null);
+
+                if (!isset($info['closed']) && $start !== null && $end !== null && $start >= $end) {
+                    echo json_encode(["status" => "error", "message" => "Invalid hours for $day. Start must be before end."]);
+                    exit;
+                }
+
+                $check = $connection->prepare("SELECT 1 FROM business_hours_by_day WHERE day_name = ?");
+                $check->bind_param("s", $day);
+                $check->execute();
+                $exists = $check->get_result()->num_rows > 0;
+
+                if ($exists) {
+                    $update = $connection->prepare("UPDATE business_hours_by_day SET start_time = ?, end_time = ? WHERE day_name = ?");
+                    $update->bind_param("sss", $start, $end, $day);
+                    $update->execute();
+                } else {
+                    $insert = $connection->prepare("INSERT INTO business_hours_by_day (day_name, start_time, end_time) VALUES (?, ?, ?)");
+                    $insert->bind_param("sss", $day, $start, $end);
+                    $insert->execute();
+                }
+            }
+        }
+
+        echo json_encode(["status" => "success", "message" => "Weekly hours saved."]);
+        break;
+
+    case 'date_override':
+        if (!empty($_POST['exception_date'])) {
+            $exceptionDate = $_POST['exception_date'];
+            $start = isset($_POST['exception_closed']) ? null : (!empty($_POST['exception_start']) ? $_POST['exception_start'] : null);
+            $end   = isset($_POST['exception_closed']) ? null : (!empty($_POST['exception_end']) ? $_POST['exception_end'] : null);
+
+            if (!isset($_POST['exception_closed']) && $start !== null && $end !== null && $start >= $end) {
+                echo json_encode(["status" => "error", "message" => "Invalid override: Start must be before end."]);
+                exit;
+            }
+
+            $check = $connection->prepare("SELECT 1 FROM business_hours_exceptions WHERE exception_date = ?");
+            $check->bind_param("s", $exceptionDate);
+            $check->execute();
+            $exists = $check->get_result()->num_rows > 0;
+
+            if ($exists) {
+                $update = $connection->prepare("UPDATE business_hours_exceptions SET start_time = ?, end_time = ? WHERE exception_date = ?");
+                $update->bind_param("sss", $start, $end, $exceptionDate);
+                $update->execute();
+            } else {
+                $insert = $connection->prepare("INSERT INTO business_hours_exceptions (exception_date, start_time, end_time) VALUES (?, ?, ?)");
+                $insert->bind_param("sss", $exceptionDate, $start, $end);
+                $insert->execute();
+            }
+
+            echo json_encode([
+                "status" => "success",
+                "message" => "Override saved.",
+                "changed" => "Date <b>" . date("F j, Y", strtotime($exceptionDate)) . "</b> is now " . 
+                             ($start && $end ? "open from <b>$start</b> to <b>$end</b>" : "<b>closed</b>")
+            ]);
+            
+        }
+        break;
+
+    default:
+        echo json_encode(["status" => "error", "message" => "Unknown form type."]);
+}
+
+
 ?>

@@ -5,7 +5,10 @@ require __DIR__ . '/../signupverify/vendor/autoload.php';
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+session_start(); // Start session
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    date_default_timezone_set('Asia/Manila');
     $email = $_POST['email'];
 
     // Check if email exists
@@ -21,8 +24,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Generate a secure token
         $token = bin2hex(random_bytes(50));
-        $hashedToken = password_hash($token, PASSWORD_BCRYPT); // Hash the token
-        $expiry = date("Y-m-d H:i:s", strtotime("+15 minutes")); // Token valid for 15 minutes
+        $hashedToken = password_hash($token, PASSWORD_BCRYPT);
+        $expiry = date("Y-m-d H:i:s", strtotime("+15 minutes"));
 
         // Delete old token
         $delete_old_token = "DELETE FROM security_tokens WHERE account_ID = ?";
@@ -42,20 +45,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $mail = new PHPMailer(true);
         try {
             $mail->isSMTP();
-            $mail->Host = 'smtp.gmail.com';
+            $mail->Host = 'smtp.hostinger.com';
             $mail->SMTPAuth = true;
-            $mail->Username = 'danielpeig@gmail.com';
-            $mail->Password = 'jilrihriaqqjwhwr'; // ⚠️ Consider moving credentials to an environment variable
-            $mail->SMTPSecure = 'tls';
-            $mail->Port = 587;
+            $mail->Username = 'no-reply@myliwanag.com';
+            $mail->Password = '[l/+1V/B4';
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+            $mail->Port = 465;
 
-            $mail->setFrom('danielpeig@gmail.com', "Little Wanderer's Therapy Center");
+            $mail->setFrom('no-reply@myliwanag.com', "Little Wanderer's Therapy Center");
             $mail->addAddress($email);
             $mail->isHTML(true);
             $mail->Subject = "Password Reset Request";
 
-            // Send the raw (non-hashed) token in the reset link
-            $reset_link = "http://localhost:3000/LIWANAG/Accounts/passwordmodify/resetpasswordpage.php?token=$token&email=$email";
+            $reset_link = "http://localhost/LIWANAG/Accounts/passwordmodify/resetpasswordpage.php?token=$token&email=$email";
             $mail->Body = "Hello,<br><br>Click the link below to reset your password:<br>
                            <a href='$reset_link'>Reset Password</a><br><br>
                            This link is valid for 15 minutes.<br><br>
@@ -63,12 +65,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                            Best regards, <br> LIWANAG Team";
 
             $mail->send();
-            echo json_encode(["status" => "success", "message" => "Password reset link sent to your email."]);
+            $_SESSION['status'] = "success";
+            $_SESSION['message'] = "Password Reset Link sent to your Email Inbox or Spam folder.";
         } catch (Exception $e) {
-            echo json_encode(["status" => "error", "message" => "Error sending email."]);
+            $_SESSION['status'] = "error";
+            $_SESSION['message'] = "Error sending email.";
         }
     } else {
-        echo json_encode(["status" => "error", "message" => "Email not found."]);
+        $_SESSION['status'] = "error";
+        $_SESSION['message'] = "Email not found.";
     }
+
+    header("Location: forgetpassword.php"); // Redirect back to forgetpassword.php
+    exit();
 }
 ?>

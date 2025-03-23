@@ -10,8 +10,13 @@ if (!isset($_SESSION['account_ID']) || !isset($_GET['patient_id'])) {
 $patientID = $_GET['patient_id'];
 $accountID = $_SESSION['account_ID'];
 
-// ✅ Fetch patient details
-$query = "SELECT patient_id, first_name, last_name, age, gender, profile_picture FROM patients WHERE patient_id = ? AND account_id = ?";
+$query = "SELECT patient_id, first_name, last_name, 
+                CASE 
+                    WHEN bday = '0000-00-00' THEN NULL 
+                    ELSE bday 
+                END AS bday, 
+                gender, profile_picture 
+                FROM patients WHERE patient_id = ? AND account_id = ?";
 $stmt = $connection->prepare($query);
 $stmt->bind_param("ii", $patientID, $accountID);
 $stmt->execute();
@@ -25,11 +30,18 @@ if ($result->num_rows !== 1) {
 $patient = $result->fetch_assoc();
 $stmt->close();
 
+// ✅ Convert `0000-00-00` or `NULL` birthdays to null
+if ($patient['bday'] === null || $patient['bday'] === "0000-00-00"){
+    $patient['bday'] = null;
+} else{
+    $patient['bday'] = date('Y-m-d', strtotime($patient['bday']));
+}
+
 // ✅ Fetch latest official referral
 $officialReferralQuery = "SELECT referral_id, official_referral_file, created_at 
-                          FROM doctor_referrals 
-                          WHERE patient_id = ? AND official_referral_file IS NOT NULL 
-                          ORDER BY created_at DESC LIMIT 1";
+                                    FROM doctor_referrals 
+                                    WHERE patient_id = ? AND official_referral_file IS NOT NULL 
+                                    ORDER BY created_at DESC LIMIT 1";
 $stmt = $connection->prepare($officialReferralQuery);
 $stmt->bind_param("i", $patientID);
 $stmt->execute();
@@ -39,9 +51,9 @@ $stmt->close();
 
 // ✅ Fetch latest proof of booking
 $proofReferralQuery = "SELECT referral_id, proof_of_booking_referral_file, created_at 
-                       FROM doctor_referrals 
-                       WHERE patient_id = ? AND proof_of_booking_referral_file IS NOT NULL 
-                       ORDER BY created_at DESC LIMIT 1";
+                                   FROM doctor_referrals 
+                                   WHERE patient_id = ? AND proof_of_booking_referral_file IS NOT NULL 
+                                   ORDER BY created_at DESC LIMIT 1";
 $stmt = $connection->prepare($proofReferralQuery);
 $stmt->bind_param("i", $patientID);
 $stmt->execute();
@@ -58,3 +70,4 @@ echo json_encode([
         "proof_of_booking" => $latestProofReferral ?: null
     ]
 ]);
+?>

@@ -37,31 +37,19 @@ include "../dbconfig.php"
         <div class="uk-container">
             <div uk-navbar>
                 <!--Navbar Left-->
-                    <div class="uk-navbar-left">
-                        <ul class="uk-navbar-nav">
-                            <li class="uk-active"><a href="#">About Us</a></li>
-                            <li class="uk-active"><a href="#">FAQs</a></li>
-                            <li class="uk-active"><a href="#">Services</a></li>
-                        </ul>
-                    </div>
 
                 <!--Navbar Center-->
                     <div class="uk-navbar-center">
-                        <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
+                        <a class="logo-navbar uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
                     </div>
 
                 <!--Navbar Right-->
                     <div class="uk-navbar-right">
                         <ul class="uk-navbar-nav">
-                             <li><a href="signuppage.php">Sign Up to Book an Appointment</a></li>
-                            <li><a href="loginpage.php">Login</a></li>
+                            <li></li>
+                            <li><a href="#"></a></li>
                         </ul>
 
-                        <!-- Buttons ver but need ayusin responsiveness eme so imma leave as comment
-                        <div class="uk-navbar-item">
-                                <button class="uk-button uk-button-default">Sign Up to Book an Appointment</button>
-                                <button class="uk-button uk-button-secondary">Login</button>
-                        </div>-->
                     </div>
     
                 </div>
@@ -75,8 +63,8 @@ include "../dbconfig.php"
     <!-- Create Account Card -->
     <div class="create-acc-card uk-card uk-card-default uk-card-body form-card">
         <!-- Title and Helper -->
-        <h3 class="uk-card-title uk-flex uk-flex-center">Create an Account</h3>
-        <p class="uk-flex uk-flex-center">Enter your personal details to start your journey with us.</p>
+        <h3 class="create-acc-title uk-card-title uk-flex uk-flex-center">Create an Account</h3>
+        <p class="create-acc-helper uk-flex uk-flex-center">Enter your personal details to start your journey with us.</p>
 
         <!-- Form Fields -->
         <form id="signupvalidate" class="uk-form-stacked uk-grid-medium" uk-grid method="POST" action="signupverify/signupprocess.php">
@@ -91,7 +79,7 @@ include "../dbconfig.php"
             ?>
             <!-- First Name -->
             <div class="uk-width-1@s uk-width-1-2@l">
-                <label class="uk-form-label" for="firstName">First Name</label>
+                <label class="uk-form-label uk-text-left" for="firstName">First Name</label>
                 <div class="uk-form-controls">
                     <input class="uk-input" id="firstName" name="fname" type="text" placeholder="Input your First Name..." value="<?php echo isset($_POST['fname']) ? htmlspecialchars($_POST['fname']) : ''; ?>">
                     <span class="error" id="firstNameError" style="color: red;"></span>
@@ -100,7 +88,7 @@ include "../dbconfig.php"
 
             <!-- Last Name -->
             <div class="uk-width-1@s uk-width-1-2@l">
-                <label class="uk-form-label" for="lastName">Last Name</label>
+                <label class="uk-form-label uk-text-left" for="lastName">Last Name</label>
                 <div class="uk-form-controls">
                     <input class="uk-input" id="lastName" name="lname" type="text" placeholder="Input your Last Name..." value="<?php echo isset($_POST['lname']) ? htmlspecialchars($_POST['lname']) : ''; ?>">
                     <span class="error" id="lastNameError" style="color: red;"></span>
@@ -109,7 +97,7 @@ include "../dbconfig.php"
 
             <!-- Email -->
             <div class="uk-width-1@s uk-width-1@l">
-                <label class="uk-form-label" for="email">Email</label>
+                <label class="uk-form-label uk-text-left" for="email">Email</label>
                 <div class="uk-form-controls">
                     <input class="uk-input" id="email" name="email" type="email" placeholder="Input your Email..." value="<?php echo isset($_POST['email']) ? htmlspecialchars($_POST['email']) : ''; ?>">
                     <span class="error" id="emailError" style="color: red;"></span>
@@ -118,7 +106,7 @@ include "../dbconfig.php"
 
             <!-- Password Field -->
             <div class="uk-width-1@s uk-width-1-2@l">
-                <label class="uk-form-label" for="password">Password</label>
+                <label class="uk-form-label uk-text-left" for="password">Password</label>
                 <div class="uk-form-controls">
                     <div style="position: relative; display: flex; align-items: center;">
                         <input class="uk-input password-input" id="password" name="password" type="password" 
@@ -134,7 +122,7 @@ include "../dbconfig.php"
 
             <!-- Confirm Password Field -->
             <div class="uk-width-1@s uk-width-1-2@l">
-                <label class="uk-form-label" for="confirmPassword">Confirm Password</label>
+                <label class="uk-form-label uk-text-left" for="confirmPassword">Confirm Password</label>
                 <div class="uk-form-controls">
                     <div style="position: relative; display: flex; align-items: center;">
                         <input class="uk-input password-input" id="confirmPassword" name="confirmPassword" type="password" 
@@ -150,7 +138,7 @@ include "../dbconfig.php"
 
             <!-- Address -->
             <div class="uk-width-1@s uk-width-1@l">
-                <label class="uk-form-label" for="address">Address</label>
+                <label class="uk-form-label uk-text-left" for="address">Address</label>
                 <div class="uk-form-controls">
                     <input class="uk-input" id="address" name="address" type="text" placeholder="Input your Address..." value="<?php echo isset($_POST['address']) ? htmlspecialchars($_POST['address']) : ''; ?>">
                     <span class="error" id="addressError" style="color: red;"></span>
@@ -159,7 +147,7 @@ include "../dbconfig.php"
 
                 <!-- Phone Number -->
                 <div class="uk-width-1@s uk-width-1@l">
-                    <label class="uk-form-label" for="mobileNumber">Phone Number</label>
+                    <label class="uk-form-label uk-text-left" for="mobileNumber">Phone Number</label>
                     <div class="uk-form-controls">
                         <input 
                             class="uk-input" 
@@ -167,16 +155,15 @@ include "../dbconfig.php"
                             name="phone" 
                             type="tel" 
                             placeholder="Input your Phone Number..." 
-                            value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>" 
-                            pattern="^\+63\d{10}$" 
-                            required>
+                            value="<?php echo isset($_POST['phone']) ? htmlspecialchars($_POST['phone']) : ''; ?>"  
+                            >
                         <span class="error" id="mobileNumberError" style="color: red;"></span>
                     </div>
                 </div>
 
                 <!-- Sign Up Button -->
                 <div class="signup-btn-div uk-width-1@s uk-width-1@l">
-                    <button type="submit" name="signup" class="uk-button uk-button-primary uk-width-1@s uk-width-1@l">Sign Up</button>
+                    <button type="submit" name="signup" class="signup-btn uk-button uk-button-primary uk-width-1@s uk-width-1@l">Sign Up</button>
                 </div>
 
                 <!-- Divider -->
@@ -203,8 +190,165 @@ include "../dbconfig.php"
 
     <!-- Javascript -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="accountJS/signup.js"></script>
+    <script>
+        function togglePassword() {
+        const passwordField = document.getElementById("password");
+        const togglePasswordBtn = document.getElementById("togglePasswordIcon");
+
+        if (passwordField.type === "password") {
+            passwordField.type = "text";
+            togglePasswordBtn.classList.remove("fa-eye");
+            togglePasswordBtn.classList.add("fa-eye-slash");
+        } else {
+            passwordField.type = "password";
+            togglePasswordBtn.classList.remove("fa-eye-slash");
+            togglePasswordBtn.classList.add("fa-eye");
+        }
+    }
+
+    function toggleConfirmPassword() {
+        const confirmPasswordField = document.getElementById("confirmPassword");
+        const toggleConfirmPasswordBtn = document.getElementById("toggleConfirmPasswordIcon");
+
+        if (confirmPasswordField.type === "password") {
+            confirmPasswordField.type = "text";
+            toggleConfirmPasswordBtn.classList.remove("fa-eye");
+            toggleConfirmPasswordBtn.classList.add("fa-eye-slash");
+        } else {
+            confirmPasswordField.type = "password";
+            toggleConfirmPasswordBtn.classList.remove("fa-eye-slash");
+            toggleConfirmPasswordBtn.classList.add("fa-eye");
+        }
+    }
+
     
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+document.getElementById("signupvalidate").addEventListener("submit", function (event) {
+    let valid = true;
+
+    // First Name Validation
+    let firstName = document.getElementById("firstName").value.trim();
+    let firstNameError = document.getElementById("firstNameError");
+    let nameRegex = /^[A-Za-z ]{2,30}$/;
+    if (!nameRegex.test(firstName)) {
+        firstNameError.textContent = "Only letters allowed (2-30 characters).";
+        valid = false;
+    } else {
+        firstNameError.textContent = "";
+    }
+
+    // Last Name Validation
+    let lastName = document.getElementById("lastName").value.trim();
+    let lastNameError = document.getElementById("lastNameError");
+    if (!nameRegex.test(lastName)) {
+        lastNameError.textContent = "Only letters allowed (2-30 characters).";
+        valid = false;
+    } else {
+        lastNameError.textContent = "";
+    }
+
+    // Email Validation
+    let email = document.getElementById("email").value.trim();
+    let emailError = document.getElementById("emailError");
+    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(email)) {
+        emailError.textContent = "Invalid email format.";
+        valid = false;
+    } else {
+        emailError.textContent = "";
+    }
+
+    // Password Validation
+    let password = document.getElementById("password").value;
+    let passwordError = document.getElementById("passwordError");
+    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-_])[A-Za-z\d@$!%*?&\-_]{8,20}$/;
+    if (!passwordRegex.test(password)) {
+        passwordError.textContent = "Password must be 8-20 chars, with uppercase, lowercase, number, and special char.";
+        valid = false;
+    } else {
+        passwordError.textContent = "";
+    }
+
+    // Confirm Password Validation
+    let confirmPassword = document.getElementById("confirmPassword").value;
+    let confirmPasswordError = document.getElementById("confirmPasswordError");
+    if (confirmPassword !== password) {
+        confirmPasswordError.textContent = "Passwords do not match.";
+        valid = false;
+    } else {
+        confirmPasswordError.textContent = "";
+    }
+
+    // Mobile Number Validation
+    let mobileNumber = document.getElementById("mobileNumber").value.trim();
+    let mobileNumberError = document.getElementById("mobileNumberError");
+
+    // Validate: must be 11 digits, and start with 09
+    let mobileRegex = /^09\d{9}$/;
+    if (!mobileRegex.test(mobileNumber)) {
+        if (mobileNumber.length !== 11) {
+            mobileNumberError.textContent = "Phone number must be exactly 11 digits.";
+        } else if (!mobileNumber.startsWith("09")) {
+            mobileNumberError.textContent = "Phone number must start with 09.";
+        } else if (!/^\d+$/.test(mobileNumber)) {
+            mobileNumberError.textContent = "Phone number must contain only digits.";
+        } else {
+            mobileNumberError.textContent = "Invalid phone number format. Must be 09XXXXXXXXX.";
+        }
+        valid = false;
+    } else {
+        mobileNumberError.textContent = "";
+    }
+
+    // Address Validation
+    let address = document.getElementById("address").value;
+    let addressError = document.getElementById("addressError");
+    if (address.length < 5) {
+        addressError.textContent = "Address must be at least 5 characters.";
+        valid = false;
+    } else {
+        addressError.textContent = "";
+    }
+
+    // Email Duplication Check (Client-Side)
+    if (valid) { // Only perform email check if other validations pass
+        fetch('check_email.php', { // Create a PHP file called check_email.php
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'email=' + encodeURIComponent(email)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.exists) {
+                emailError.textContent = "The email you entered is already registered. Please use a different email.";
+                valid = false;
+            }
+
+            if (!valid) {
+                event.preventDefault();
+                return false;
+            } else {
+                // If all validations pass, submit the form
+                document.getElementById("signupvalidate").submit();
+            }
+        })
+        .catch(error => {
+            valid = false;
+            event.preventDefault();
+            return false;
+        });
+    } else {
+        event.preventDefault();
+        return false;
+    }
+});
+});
+
+    </script>
 
 </body>
 

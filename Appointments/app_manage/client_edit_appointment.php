@@ -100,7 +100,15 @@ if ($action === "edit") {
     $stmt->bind_param("ssi", $new_date, $new_time, $appointment_id);
 
     if ($stmt->execute()) {
-        send_email_notification($_SESSION['email'], "rescheduled", $appointment['session_type'], $new_date, $new_time);
+        // ✅ Send to client
+        send_email_notification($client_email, "rescheduled", $appointment['session_type'], $new_date, $new_time);
+
+        // ✅ Also send to all head therapists
+        $heads = $connection->query("SELECT account_Email FROM users WHERE account_Type = 'Head Therapist'");
+        while ($ht = $heads->fetch_assoc()) {
+            send_email_notification($ht['account_Email'], "rescheduled_notice", $appointment['session_type'], $new_date, $new_time);
+        }
+
         echo json_encode(["status" => "success", "title" => "Appointment Updated", "message" => "Your appointment has been updated."]);
         exit();
     } else {
@@ -126,7 +134,7 @@ function send_email_notification($email, $action, $session_type, $date, $time) {
         $mail->addAddress($email);
         $mail->isHTML(true);
 
-        // ✅ Email Body for Cancellations
+        // ✅ Email to client when cancelled
         if ($action === "cancelled") {
             $mail->Subject = "Appointment Cancellation Notice";
             $mail->Body = "
@@ -136,14 +144,26 @@ function send_email_notification($email, $action, $session_type, $date, $time) {
                 <p>If this was not intentional, please contact us.</p>
             ";
         }
-        // ✅ Email Body for Edits (Rescheduling)
-        else {
+
+        // ✅ Email to Head Therapists when client reschedules
+        else if ($action === "rescheduled_notice") {
+            $mail->Subject = "Client Rescheduled Appointment";
+            $mail->Body = "
+                <h3>Client Appointment Rescheduled</h3>
+                <p>A client has rescheduled their <strong>$session_type</strong> appointment.</p>
+                <p><strong>New Date:</strong> $date</p>
+                <p><strong>New Time:</strong> $time</p>
+                <p>Please review if further action is needed.</p>
+            ";
+        }
+
+        // ✅ Default email to client for rescheduling
+        else if ($action === "rescheduled") {
             $mail->Subject = "Appointment Update Notification";
             $mail->Body = "
                 <h3>Appointment Update</h3>
                 <p>Dear Client,</p>
                 <p>Your appointment details have been <strong>modified</strong>.</p>
-                <p><strong>New Appointment Details:</strong></p>
                 <ul>
                     <li><strong>Session Type:</strong> $session_type</li>
                     <li><strong>Date:</strong> $date</li>

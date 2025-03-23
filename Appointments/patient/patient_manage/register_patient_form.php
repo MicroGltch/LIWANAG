@@ -12,8 +12,21 @@ if (!isset($_SESSION['username']) || !isset($_SESSION['account_ID'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $first_name = $_POST['patient_fname'];
     $last_name = $_POST['patient_lname'];
-    $age = $_POST['patient_age'];
+    $bday = $_POST['patient_birthday'];
     $gender = $_POST['patient_gender'];
+
+    // Check for duplicates
+    $stmt_check = $connection->prepare("SELECT COUNT(*) FROM patients WHERE first_name = ? AND last_name = ? AND bday = ? AND gender = ?");
+    $stmt_check->bind_param("ssss", $first_name, $last_name, $bday, $gender);
+    $stmt_check->execute();
+    $stmt_check->bind_result($count);
+    $stmt_check->fetch();
+    $stmt_check->close();
+
+    if ($count > 0) {
+        echo json_encode(['status' => 'duplicate', 'message' => 'A patient with these credentials already exists.']);
+        exit();
+    }
 
     $target_dir = "../../../uploads/profile_pictures/";
     $file_name = $_FILES['profile_picture']['name'];
@@ -33,9 +46,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $target_file = $target_dir . $new_file_name;
 
         if (move_uploaded_file($file_tmp, $target_file)) {
-            $query = "INSERT INTO patients (account_id, first_name, last_name, age, gender, profile_picture, service_type) VALUES (?, ?, ?, ?, ?, ?, 'For Evaluation')";
+            $query = "INSERT INTO patients (account_id, first_name, last_name, bday, gender, profile_picture, service_type) VALUES (?, ?, ?, ?, ?, ?, 'For Evaluation')";
             $stmt = $connection->prepare($query);
-            $stmt->bind_param("isssss", $_SESSION['account_ID'], $first_name, $last_name, $age, $gender, $new_file_name);
+            $stmt->bind_param("isssss", $_SESSION['account_ID'], $first_name, $last_name, $bday, $gender, $new_file_name);
 
             if ($stmt->execute()) {
                 echo json_encode(['status' => 'success', 'message' => 'Patient registered successfully!']);

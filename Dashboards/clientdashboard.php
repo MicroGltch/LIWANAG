@@ -24,7 +24,7 @@ if ($result->num_rows > 0) {
     $phoneNumber = $userData['account_PNum'];
     // Determine the profile picture path
     if ($userData['profile_picture']) {
-        $profilePicture = '../uploads/client_profile_pictures/' . $userData['profile_picture']; // Corrected path
+        $profilePicture = '/LIWANAG/uploads/profile_pictures/' . $userData['profile_picture']; // Corrected path
     } else {
         $profilePicture = '../CSS/default.jpg';
     }
@@ -44,9 +44,9 @@ $stmt->execute();
 $result = $stmt->get_result();
 $appointments = $result->fetch_all(MYSQLI_ASSOC);
 
-// EDIT PATIENT FORM PHP from edit_patient_form
+// EDIT PATIENT FORM
 // Fetch patients for the dropdown
-$patientsQuery = "SELECT patient_id, first_name, last_name FROM patients WHERE account_id = ?";
+$patientsQuery = "SELECT patient_id, first_name, last_name, bday FROM patients WHERE account_id = ?";
 $stmt = $connection->prepare($patientsQuery);
 $stmt->bind_param("i", $_SESSION['account_ID']);
 $stmt->execute();
@@ -54,7 +54,42 @@ $result = $stmt->get_result();
 $patients = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// BOOK APPOINTMENT FORM PHP from book_appointment_form
+
+
+
+// Fetch settings from database
+$settingsQuery = "SELECT business_hours_start, business_hours_end, max_days_advance, min_days_advance, blocked_dates,
+                         initial_eval_duration, playgroup_duration, service_ot_duration, service_bt_duration 
+                  FROM settings LIMIT 1";
+
+$result = $connection->query($settingsQuery);
+$settings = $result->fetch_assoc();
+
+// Convert blocked dates into an array
+$blockedDates = !empty($settings["blocked_dates"]) ? explode(",", $settings["blocked_dates"]) : [];
+
+// Set up PHP arrays for JS conversion
+$sessionDurations = [
+    "playgroup" => (int) $settings["playgroup_duration"],
+    "initial_evaluation" => (int) $settings["initial_eval_duration"],
+    "occupational_therapy" => (int) $settings["service_ot_duration"],
+    "behavioral_therapy" => (int) $settings["service_bt_duration"]
+];
+
+$timetableSettings = [
+    "businessHoursStart" => $settings["business_hours_start"],
+    "businessHoursEnd" => $settings["business_hours_end"],
+    "maxDaysAdvance" => (int) $settings["max_days_advance"],
+    "minDaysAdvance" => (int) $settings["min_days_advance"],
+    "blockedDates" => $blockedDates
+];
+
+// Send data to JavaScript
+echo "<script>
+        const sessionDurations = " . json_encode($sessionDurations) . ";
+        const timetableSettings = " . json_encode($timetableSettings) . ";
+      </script>";
+
 
 
 ?>
@@ -83,15 +118,21 @@ $stmt->close();
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+
 </head>
 
 </head>
 
 <body>
     <script>
-        console.log('Session Username:', <?php echo isset($_SESSION['username']) ? json_encode($_SESSION['username']) : 'null'; ?>);
+        console.log('Session User ID:', <?php echo isset($_SESSION['account_ID']) ? json_encode($_SESSION['account_ID']) : 'null'; ?>);
     </script>
-
     <!-- Navbar -->
     <nav class="uk-navbar-container logged-in">
         <div class="uk-container">
@@ -110,7 +151,7 @@ $stmt->close();
                     <ul class="uk-navbar-nav">
                         <li>
                             <a href="#" class="uk-navbar-item">
-                                <img class="profile-image" src="../CSS/default.jpg" alt="Profile Image" uk-img>
+                            <img src="<?php echo $profilePicture . '?t=' . time(); ?>" alt="Profile" class="navbar-profile-pic profile-image">                               
                             </a>
                         </li>
                         <li style="display: flex; align-items: center;">
@@ -152,26 +193,47 @@ $stmt->close();
             <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
                 Menu <span uk-navbar-toggle-icon></span>
             </button>
+
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li><a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a></li>
-                    <!-- Reference code: client_view_appointments.php -->
 
-                    <li><a href="#register-patient" onclick="showSection('register-patient')"><span class="uk-margin-small-right" uk-icon="user"></span> Register Patient</a></li>
-                    <!-- Reference code: register_patient_form.php -->
+                <li class="uk-parent">
+                <a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Appointments</a>
+                <!-- Reference code: client_view_appointments.php -->
 
-                    <li><a href="#view-registered-patients" onclick="showSection('view-registered-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li>
-                    <!-- Reference code: edit_patient_form.php -->
+                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
+                            
+                        <li style="padding:0px 0px 15px 0px"><a href="#book-appointment" onclick="showSection('book-appointment')"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li>
+                        <!-- Reference code: book_appointment_form.php -->
+
+                        </ul>
+                    </li>
+                <hr>
+                    
+                <li class="uk-parent">
+                <a href="#register-patient" onclick="showSection('register-patient')"><span class="uk-margin-small-right" uk-icon="user"></span> Register a Patient</a>
+                <!-- Reference code: register_patient_form.php -->
+
+                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
+                            
+                        <li style="padding:0px 0px 15px 0px"><a href="#view-registered-patients" onclick="showSection('view-registered-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li>
+                        <!-- Reference code: edit_patient_form.php -->
+
+                        </ul>
+                    </li>                    
+
+                    <hr>
+                    
 
                     <!-- <li><a href="../Appointments/book_appointment_form.php"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li> -->
-                    <li><a href="#book-appointment" onclick="showSection('book-appointment')"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a></li>
-                    <!-- Reference code: book_appointment_form.php -->
-
+                    
+                    
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
-                    <li><a href="#settings" onclick="showSection('settings')"><span class="uk-margin-small-right" uk-icon="cog"></span> Settings</a></li>
+
                 </ul>
             </div>
         </div>
+
 
         <!-- Content Area -->
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
@@ -191,31 +253,44 @@ $stmt->close();
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($appointments as $appointment): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($appointment['date']); ?></td>
-                                    <td><?= htmlspecialchars($appointment['time']); ?></td>
-                                    <td><?= htmlspecialchars($appointment['session_type']); ?></td>
-                                    <td><?= htmlspecialchars($appointment['patient_name']); ?></td>
-                                    <td><?= ucfirst($appointment['status']); ?></td>
-                                    <td>
-                                        <!-- ✅ Cancel button (Allowed only for "Pending" or "Waitlisted") -->
-                                        <?php if (in_array($appointment['status'], ["pending", "waitlisted"])): ?>
-                                            <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
-                                        <?php endif; ?>
+                        <?php foreach ($appointments as $appointment): ?>
+                            <tr>
+                                <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
+                                <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
+                                <td><?= ucwords(htmlspecialchars($appointment['session_type'])); ?></td>
+                                <td><?= htmlspecialchars($appointment['patient_name']); ?></td>
+                                <td><?= ucfirst($appointment['status']); ?></td>
+                                <td>
+                                    <!-- ✅ Cancel button (Allowed only for "Pending" or "Waitlisted") -->
+                                    <?php if (in_array($appointment['status'], ["pending", "waitlisted"])): ?>
+                                        <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
+                                    <?php endif; ?>
 
-                                        <!-- ✅ Edit button (Only for "Pending" & edit_count < 2) -->
-                                        <?php if ($appointment['status'] === "pending" && $appointment['edit_count'] < 2): ?>
-                                            <button class="uk-button uk-button-primary edit-btn" data-id="<?= $appointment['appointment_id']; ?>"
-                                                data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
-                                                Reschedule (<?= 2 - $appointment['edit_count']; ?> left)
-                                            </button>
+                                    <!-- ✅ Edit button logic -->
+                                    <?php if (
+                                        $appointment['status'] === "pending" &&
+                                        $appointment['edit_count'] < 2 &&
+                                        strtolower($appointment['session_type']) !== "playgroup"
+                                    ): ?>
+                                        <button class="uk-button uk-button-primary edit-btn" data-id="<?= $appointment['appointment_id']; ?>"
+                                            data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
+                                            Reschedule (<?= 2 - $appointment['edit_count']; ?> left)
+                                        </button>
+                                    <?php else: ?>
+                                        <?php if (
+                                            strtolower($appointment['session_type']) === "playgroup" &&
+                                            !in_array(strtolower($appointment['status']), ["completed", "cancelled", "declined"])
+                                        ): ?>
+                                            <button class="uk-button uk-button-default" disabled>Reschedule Not Allowed for Playgroup</button>
+                                        <?php elseif ($appointment['edit_count'] >= 2 && $appointment['status'] === "pending"): ?>
+                                            <button class="uk-button uk-button-default" disabled>Reschedule Limit Reached</button>
                                         <?php else: ?>
                                             <button class="uk-button uk-button-default" disabled>Reschedule Is Not Allowed</button>
                                         <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
@@ -241,8 +316,8 @@ $stmt->close();
                             <input class="uk-input" type="text" name="patient_lname" required>
                         </div>
                         <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Age</label>
-                            <input class="uk-input" type="number" name="patient_age" required>
+                            <label class="uk-form-label">Birthday</label>
+                            <input class="uk-input" type="date" name="patient_birthday" id="patient_birthday" min="2008-01-01" max="2024-12-31" required>
                         </div>
 
                         <div class="uk-width-1-2@s">
@@ -267,6 +342,32 @@ $stmt->close();
                             </div>
                         </div>
 
+                        <div class="uk-width-1-1 uk-margin-top">
+                            <h4 class="uk-margin-small-bottom">Upload Doctor's Referral</h4>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Referral Type</label>
+                            <select class="uk-select" name="referral_type" id="referral_type_select" required>
+                                <option value="" disabled selected>Select Referral Type</option>
+                                <option value="official">Official Referral</option>
+                                <option value="proof_of_booking">Proof of Booking</option>
+                            </select>
+                        </div>
+
+                        <div class="uk-width-1-2@s uk-width-1-2@l">
+                            <label class="uk-form-label">Upload Referral File</label>
+                            <div class="js-upload uk-placeholder uk-text-center">
+                                <span uk-icon="icon: cloud-upload"></span>
+                                <span class="uk-text-middle">Drag and drop a file or</span>
+                                <div uk-form-custom>
+                                    <input type="file" name="referral_file" id="referral_file_input" required>
+                                    <span class="uk-link">Browse</span>
+                                    <span class="uk-text-middle" id="file-name-display-referral">to choose a file</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
                             <button class="uk-button uk-button-primary" type="button" id="registerPatientButton">Register</button>
                         </div>
@@ -281,8 +382,6 @@ $stmt->close();
 
                 <div class="uk-card uk-card-default uk-card-body">
                     <p>Choose a patient to view.</p>
-
-
                     <select class="uk-select" id="patientDropdown">
                         <option value="" disabled selected>Select a Patient</option>
                         <?php foreach ($patients as $patient): ?>
@@ -291,45 +390,34 @@ $stmt->close();
                             </option>
                         <?php endforeach; ?>
                     </select>
-
-
-
+                    <hr>
                     <!-- 🔹 Patient Details Form (Initially Hidden) -->
-                    <form id="editPatientForm" class="uk-grid-small uk-grid" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" style="display: none;" uk-grid>
-
-
+                   
+                   
+                    <form id="editPatientForm" class="uk-grid-small uk-grid" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
 
 
                         <input type="hidden" name="patient_id" id="patient_id">
-
-
 
                         <input type="hidden" name="existing_profile_picture" id="existing_profile_picture"> <!-- Store existing picture -->
 
 
 
+
+                        <!------ LEMME COOK ------->
                         <div class="uk-flex uk-flex-middle">
-
                             <div class="profile-upload-container uk-width-1@s " style="padding: 25px; ">
+                            
+                            <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 150px; height: 150px; display: none;">
+                            
+                            <div class="uk-flex uk-flex-column uk-margin-left">
+                            
+                                <button class="uk-button uk-button-primary uk-margin-small-bottom" type="file" name="profile_picture" id="profile_picture_input">Upload Photo</button>
 
+                            </div>
 
-                                <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 150px; height: 150px; display: none;" alt="Profile Photo">
-
-
-                                <div class="uk-flex uk-flex-column uk-margin-left">
-
-                                    <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-
-
-                                    <!-- onclick="document.getElementById('profileUpload').click();" -->
-                                    <button id="profile_picture_input" class="uk-button uk-button-primary uk-margin-small-bottom">Upload Photo</button>
-
-                                    <div class="uk-text-center">
-                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
-                                    </div>
-                                </div>
-
-                                <div class="uk-margin-large-left">
+                            
+                            <div class="uk-margin-large-left">
                                     <h4>Image requirements:</h4>
                                     <ul class="uk-list">
                                         <li>1. Min. 400 x 400px</li>
@@ -337,98 +425,67 @@ $stmt->close();
                                         <li>3. Your child's face.</li>
                                     </ul>
                                 </div>
+
+
                             </div>
                         </div>
 
-
                         <div class="uk-grid-small" uk-grid>
+                        
+                        
+                        <div class="uk-width-1-2@s">
+                                <label class="uk-form-label">First Name</label>
+                                <input class="uk-input" type="text" name="first_name" id="first_name" required>
+                        </div>
+                            
 
-                            <!--
-                        <div class="uk-margin">
-                            <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 100px; height: 100px; display: none;">
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Last Name</label>
+                        <input class="uk-input" type="text" name="last_name" id="last_name" required>
                         </div>
 
                         <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Profile Picture</label>
-                            <input class="uk-input" type="file" name="profile_picture" id="profile_picture_input">
-                        </div>
-                        -->
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">First Name</label>
-                                <input class="uk-input" type="text" name="first_name" id="first_name" required>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Last Name</label>
-                                <input class="uk-input" type="text" name="last_name" id="last_name" required>
-                            </div>
-
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Age</label>
-                                <input class="uk-input" type="number" name="age" id="age" required>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Gender</label>
-                                <select class="uk-select" name="gender" id="gender">
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Official Referral</label>
-                                <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Proof of Booking</label>
-                                <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
-
-                            </div>
-
-                            <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                                <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
-                            </div>
-
-
-                            
-                        <div class="uk-width-1@s">
-                            <hr>
-                            <h4>Upload Doctor's Referral </h4>
-                        </div>
-                            
-
-                            <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Referral Type</label>
-                                <select class="uk-select" name="referral_type" id="referral_type_select" required>
-                                    <option value="" disabled selected>Select Referral Type</option>
-                                    <option value="official">Official Referral</option>
-                                    <option value="proof_of_booking">Proof of Booking</option>
-                                </select>
-                            </div>
-
-                            <div class="uk-width-1@s">
-                            <label class="uk-form-label">Upload File</label>
-                            <input  type="file" name="referral_file" id="referral_file_input" required>
-                            </div>
-
-
+                        <label class="uk-form-label">Birthday</label>
+                        <input class="uk-input" type="date" name="bday" id="bday" min="2008-01-01" max="2024-12-31" required>
                         </div>
 
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Gender</label>
+                        <select class="uk-select" name="gender" id="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Official Referral</label>
+                        <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Proof of Booking</label>
+                        <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+                        </div>
+                        
+                        <!--wth is this? if i remove it, nawawla yung save profile sa baba ren ?!?!-->
+                        <div class="uk-width-1-2 uk-text-right uk-margin-top">
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
+                        </div>    
+                        <!--wtf-->
+
+                        <div class="uk-width-1-2 uk-text-right uk-margin-top" style="margin-bottom: 15px;">
+                        
+                        <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button">Edit</button>
+                        
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
 
                         
-                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                        <button class="uk-button uk-button-primary uk-margin-top" type="button" id="uploadReferralBtn">
-                            Upload Referral
-                        </button>
+                        </div> 
+            
 
                         </div>
+
                     </form>
-
-
                 </div>
             </div>
 
@@ -442,47 +499,9 @@ $stmt->close();
                 </div>
             </div>
 
-            <!--Account Details Card-->
-            <div id="account-details" style="display: none;" class="section uk-width-1-1 uk-width-4-5@m uk-padding">
+             <!-- Account Details Card -->
+             <div id="account-details" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Account Details</h1>
-
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
-                    <div class="uk-flex uk-flex-center">
-                        <div class="uk-width-1-4">
-                            <img class="uk-border-circle" src="../CSS/default.jpg" alt="Profile Photo">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form class="uk-grid-small" uk-grid>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" value="<?php echo $firstName; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" value="<?php echo $lastName; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" value="<?php echo $email; ?>" disabled>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" value="<?php echo $phoneNumber; ?>" disabled>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-
-            <!-- Settings -->
-            <div id="settings" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Settings</h1>
-
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
@@ -492,9 +511,11 @@ $stmt->close();
                                 <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                                 <div class="uk-flex uk-flex-column uk-margin-left">
                                     <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                    <button class="uk-button uk-button-primary uk-margin-small-bottom" onclick="document.getElementById('profileUpload').click();">Upload Photo</button>
+                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" disabled>
+                                        Upload Photo
+                                    </button>
                                     <div class="uk-text-center">
-                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();">remove</a>
+                                        <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();" id="removePhotoButton" style="pointer-events: none; color: grey;">remove</a>
                                     </div>
                                 </div>
                                 <div class="uk-margin-large-left">
@@ -507,88 +528,791 @@ $stmt->close();
                                 </div>
                             </div>
                         </div>
-                        <button type="submit" class="uk-button uk-button-primary uk-margin-top">Upload</button>
                     </form>
                 </div>
 
-                <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
-                    <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
-                        <input type="hidden" name="action" value="update_user_details">
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">First Name</label>
-                            <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>">
-                            <small style="color: red;" class="error-message" data-error="firstName"></small>
-                        </div>
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Last Name</label>
-                            <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>">
-                            <small style="color: red;" class="error-message" data-error="lastName"></small>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Email</label>
-                            <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>">
-                            <small style="color: red;" class="error-message" data-error="email"></small>
-                        </div>
-                        <div class="uk-width-1-1">
-                            <label class="uk-form-label">Phone Number</label>
-                            <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber"  
-       value="<?= htmlspecialchars($_SESSION['phoneNumber'] ?? $phoneNumber, ENT_QUOTES, 'UTF-8') ?>"  >
-                        <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
-                        </div>
-                        <small style="color: red;" class="error-message" data-error="duplicate"></small>
-                        <small style="color: green;" class="error-message" id="successMessage"></small>
-                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
-                        </div>
-                    </form>
-                    <?php unset($_SESSION['update_errors']); // Clear errors after displaying ?>
-                    <?php unset($_SESSION['update_success']); // Clear success message ?>
+            <div class="uk-card uk-card-default uk-card-body">
+        <h3 class="uk-card-title uk-text-bold">User Details</h3>
+        <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
+            <input type="hidden" name="action" id="formAction" value="update_user_details">
+
+            <div class="uk-width-1-2@s">
+                <label class="uk-form-label">First Name</label>
+                <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>" disabled>
+                <small style="color: red;" class="error-message" data-error="firstName"></small>
+            </div>
+            <div class="uk-width-1-2@s">
+                <label class="uk-form-label">Last Name</label>
+                <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>" disabled>
+                <small style="color: red;" class="error-message" data-error="lastName"></small>
+            </div>
+            <div class="uk-width-1-1">
+                <label class="uk-form-label">Email</label>
+                <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>" disabled>
+                <small style="color: red;" class="error-message" data-error="email"></small>
+            </div>
+            <div class="uk-width-1-1">
+                <label class="uk-form-label">Phone Number</label>
+                <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber" value="<?php echo '0' . $phoneNumber; ?>" disabled>
+                <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
+            </div>
+
+            <small style="color: red;" class="error-message" data-error="duplicate"></small>
+            <small style="color: green;" class="error-message" id="successMessage"></small>
+
+            <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
+            </div>
+
+            <div id="otpSection" class="uk-width-1-1" style="display: none;">
+                <h3 class="uk-card-title uk-text-bold">Enter OTP</h3>
+                <p class="uk-text-muted">A verification code has been sent to your new email address. Please enter it below to complete the change.</p>
+                <div class="uk-margin">
+                    <input class="uk-input" type="text" name="otp" id="otp" placeholder="Enter OTP">
+                    <small style="color: red;" class="error-message" data-error="otp"></small>
                 </div>
+                <!-- The buttons will be dynamically added here by JavaScript -->
+            </div>
+            <div class="uk-width-1-1 uk-margin-top">
+                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
             </div>
         </div>
     </div>
+</div>
+</form> 
 
+        <?php unset($_SESSION['update_errors']); ?>
+        <?php unset($_SESSION['update_success']); ?>
     </div>
 
-                <!-- Javascript -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
 
-</body>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+        
+        document.addEventListener("DOMContentLoaded", function () {
+        if (window.location.hash === "#book-appointment") {
+            document.getElementById("book-appointment").style.display = "block";
+            let appointmentsSection = document.getElementById("appointments"); // Adjust ID if necessary
+            if (appointmentsSection) {
+                appointmentsSection.style.display = "none"; // Hide Appointments section
+            }
+        }
+    });
+
+
+
     document.addEventListener("DOMContentLoaded", function () {
-    document.getElementById("settingsvalidate").addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevent default form submission
+        const editButton = document.getElementById("editButton");
+        const saveButton = document.getElementById("saveButton");
+        const form = document.getElementById("settingsvalidate");
+        const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
+        const otpSection = document.getElementById("otpSection");
+        const otpInput = document.getElementById("otp");
+        const successMessage = document.getElementById("successMessage");
+        const profileUploadInput = document.getElementById("profileUpload");
+        const uploadButton = document.getElementById("uploadButton");
+        const emailInput = document.getElementById("email"); // Select the email input
+        const removePhotoButton = document.getElementById("removePhotoButton");
 
-        let formData = new FormData(this);
+        // Create all three buttons with the exact styling from Image 2
+        const resendOtpButton = document.createElement("button");
+        resendOtpButton.id = "resendOtpButton";
+        resendOtpButton.textContent = "RESEND OTP";
+        resendOtpButton.className = "uk-button";
+        resendOtpButton.style.backgroundColor = "#1e88e5"; // Bright blue
+        resendOtpButton.style.color = "white";
+        resendOtpButton.style.fontWeight = "bold";
+        resendOtpButton.style.padding = "8px 20px";
+        resendOtpButton.style.margin = "0 10px 0 0";
+        resendOtpButton.style.border = "none";
+        resendOtpButton.style.borderRadius = "4px";
+        resendOtpButton.style.textTransform = "uppercase";
+        resendOtpButton.style.transition = ".1s ease-in-out";
+        resendOtpButton.style.transitionProperty = "color, background-color, border-color";
+        
+        const editEmailButton = document.createElement("button");
+        editEmailButton.id = "editEmailButton";
+        editEmailButton.textContent = "EDIT EMAIL";
+        editEmailButton.className = "uk-button";
+        editEmailButton.style.backgroundColor = "#212121"; // Dark gray/black
+        editEmailButton.style.color = "white";
+        editEmailButton.style.fontWeight = "bold";
+        editEmailButton.style.padding = "8px 20px";
+        editEmailButton.style.margin = "0 10px 0 0";
+        editEmailButton.style.border = "none";
+        editEmailButton.style.borderRadius = "4px";
+        
+        const cancelVerificationButton = document.createElement("button");
+        cancelVerificationButton.id = "cancelVerificationButton";
+        cancelVerificationButton.textContent = "CANCEL VERIFICATION";
+        cancelVerificationButton.className = "uk-button";
+        cancelVerificationButton.style.backgroundColor = "#e91e63"; // Pink
+        cancelVerificationButton.style.color = "white";
+        cancelVerificationButton.style.fontWeight = "bold";
+        cancelVerificationButton.style.padding = "8px 20px";
+        cancelVerificationButton.style.margin = "0";
+        cancelVerificationButton.style.border = "none";
+        cancelVerificationButton.style.borderRadius = "4px";
+        
+        // Create a container for the buttons
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "uk-margin-medium-top";
+        buttonContainer.style.display = "flex";
+        buttonContainer.style.justifyContent = "flex-start";
+        buttonContainer.style.marginTop = "20px";
+        
+        // Add buttons to container in the correct order
+        buttonContainer.appendChild(resendOtpButton);
+        buttonContainer.appendChild(editEmailButton);
+        buttonContainer.appendChild(cancelVerificationButton);
+        
+        // Insert these buttons after the OTP input
+        if (otpSection) {
+            // Append the button container to the OTP section (after all existing elements)
+            otpSection.appendChild(buttonContainer);
+        }
 
+        // Store initial values
+        let originalValues = {};
+        inputs.forEach(input => originalValues[input.id] = input.value);
+        // Original email value to restore if verification is canceled
+    let originalEmail = emailInput ? emailInput.value : '';
+
+        // Modify Edit Button Click Event
+        if (editButton) {
+        editButton.addEventListener("click", function () {
+            if (editButton.textContent === "Edit") {
+                inputs.forEach(input => input.disabled = false);
+                saveButton.disabled = false;
+                editButton.textContent = "Cancel";
+                uploadButton.disabled = false;
+                removePhotoButton.style.pointerEvents = "auto";
+                removePhotoButton.style.color = "";
+
+                // Enable Change Password button
+                if (changePasswordButton) {
+                    changePasswordButton.disabled = false;
+                }
+
+                // Enable password form inputs
+                if (passwordForm) {
+                    const passwordInputs = passwordForm.querySelectorAll("input");
+                    passwordInputs.forEach(input => input.disabled = false);
+                }
+            } else {
+                inputs.forEach(input => {
+                    input.value = originalValues[input.id];
+                    input.disabled = true;
+                });
+                saveButton.disabled = true;
+                editButton.textContent = "Edit";
+                otpSection.style.display = "none";
+                uploadButton.disabled = true;
+                removePhotoButton.style.pointerEvents = "none";
+                removePhotoButton.style.color = "grey";
+
+                saveButton.textContent = "Save";
+                saveButton.dataset.step = "";
+
+                // Disable Change Password button
+                if (changePasswordButton) {
+                    changePasswordButton.disabled = true;
+                }
+
+                // Disable password form inputs
+                if (passwordForm) {
+                    const passwordInputs = passwordForm.querySelectorAll("input");
+                    passwordInputs.forEach(input => input.disabled = true);
+            }
+        }
+        });
+    }
+
+    // Save Button Click Event
+    if (saveButton) {
+        saveButton.addEventListener("click", function (event) {
+            if (saveButton.dataset.step === "verify") {
+                event.preventDefault();
+                verifyOTP();
+            } else {
+                event.preventDefault();
+                saveChanges();
+            }
+        });
+    }
+    
+    // Edit Email Button Click Event - Allows user to go back and edit their email
+    if (editEmailButton) {
+        editEmailButton.addEventListener("click", function(event) {
+            event.preventDefault();
+            
+            // Hide OTP section
+            otpSection.style.display = "none";
+            
+            // Enable email input
+            emailInput.disabled = false;
+            
+            // Reset save button state
+            saveButton.textContent = "Save";
+            saveButton.dataset.step = "";
+        });
+    }
+
+    // Add event listener for Resend OTP button
+if (resendOtpButton) {
+    resendOtpButton.addEventListener("click", function(event) {
+        event.preventDefault();
+        resendOtpButton.disabled = true;
+        
+        // Make the button transparent
+        resendOtpButton.style.opacity = "0.4"; // Higher transparency (lower opacity)
+        
+        // Add a countdown timer to prevent spam
+        let timeLeft = 60;
+        const originalText = resendOtpButton.textContent;
+        resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
+        
+        const countdownTimer = setInterval(() => {
+            timeLeft--;
+            resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                resendOtpButton.textContent = originalText;
+                resendOtpButton.disabled = false;
+                resendOtpButton.style.opacity = "1"; // Restore full opacity
+            }
+        }, 1000);
+        
+        // Send request to resend OTP
+        const email = document.getElementById("email").value.trim();
+        
+        let formData = new URLSearchParams({
+            action: "resend_otp",
+            email: email
+        });
+        
         fetch("../Accounts/manageaccount/updateinfo.php", {
             method: "POST",
-            body: formData
+            body: formData,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
         })
         .then(response => response.json())
         .then(data => {
-            // Clear previous error messages
-            document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
-
-            if (data.errors) {
-                // Show errors under respective inputs
-                Object.keys(data.errors).forEach(key => {
-                    let errorElement = document.querySelector(`small[data-error="${key}"]`);
-                    if (errorElement) {
-                        errorElement.textContent = data.errors[key];
-                    }
+            if (data.success) {
+                Swal.fire({
+                    title: 'OTP Resent',
+                    text: 'A new verification code has been sent to your email.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
                 });
+                // Keep the button disabled and transparent during the countdown
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.error || 'Failed to resend OTP. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                
+                // Reset the button immediately on error
+                clearInterval(countdownTimer);
+                resendOtpButton.textContent = originalText;
+                resendOtpButton.disabled = false;
+                resendOtpButton.style.opacity = "1"; // Restore full opacity
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            
+            // Reset the button immediately on error
+            clearInterval(countdownTimer);
+            resendOtpButton.textContent = originalText;
+            resendOtpButton.disabled = false;
+            resendOtpButton.style.opacity = "1"; // Restore full opacity
+        });
+    });
+}
+    
+    // Cancel Verification Button Click Event - Cancels email verification and restores original email
+    if (cancelVerificationButton) {
+        cancelVerificationButton.addEventListener("click", function(event) {
+            event.preventDefault();
+            
+            // Confirm cancellation with SweetAlert
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Your email will not be changed.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, cancel verification'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Restore original email
+                emailInput.value = originalEmail;
+                
+                // Hide OTP section
+                otpSection.style.display = "none";
+                
+                // Reset save button state
+                saveButton.textContent = "Save";
+                saveButton.dataset.step = "";
+                
+                // Disable inputs if we're not in edit mode
+                if (editButton.textContent === "Edit") {
+                    inputs.forEach(input => input.disabled = true);
+                }
+                
+                Swal.fire(
+                    'Cancelled',
+                    'Email verification has been cancelled.',
+                    'info'
+                );
+            }
+        });
+    });
+}
+
+   // Function to Save Changes
+function saveChanges() {
+    let firstName = document.getElementById("firstName").value.trim();
+    let lastName = document.getElementById("lastName").value.trim();
+    let email = emailInput.value.trim(); // Use the selected email input
+    let phoneNumber = document.getElementById("mobileNumber").value.trim();
+    
+    document.querySelectorAll(".error-message").forEach(error => error.textContent = "");
+    
+    if (!firstName || !lastName || !email || !phoneNumber) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'All fields are required.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+    
+    // Store the original email in case user cancels verification later
+    originalEmail = emailInput.value;
+    
+    let formData = new URLSearchParams({
+        action: "update_user_details",
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phoneNumber: phoneNumber
+    });
+    
+    fetch("../Accounts/manageaccount/updateinfo.php", {
+        method: "POST",
+        body: formData,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    })
+        .then(response => response.json())
+        .then(data => {
+            if (data.errors) {
+                Object.entries(data.errors).forEach(([key, message]) => {
+                    let errorElement = document.querySelector(`[data-error="${key}"]`);
+                    if (errorElement) errorElement.textContent = message;
+                });
+                
+                Swal.fire({
+                    title: 'Validation Error',
+                    text: 'Please check the form for errors.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            } else if (data.otp_required) {
+                Swal.fire({
+                    title: 'OTP Sent',
+                    text: 'OTP sent to your new email. Please enter the OTP to verify.',
+                    icon: 'info',
+                    confirmButtonText: 'OK'
+                });
+                
+                otpSection.style.display = "block";
+                saveButton.textContent = "Verify OTP";
+                saveButton.dataset.step = "verify";
             } else if (data.success) {
-                alert(data.success);
-                location.reload(); // Reload page on success
+                Swal.fire({
+                    title: 'Success!',
+                    text: data.success,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Something went wrong.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        });
+}
+    // Function to Verify OTP
+function verifyOTP() {
+    let otp = otpInput.value.trim();
+    if (!otp) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Please enter OTP.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        return;
+    }
+
+    // Get the user details to update along with the OTP
+    let firstName = document.getElementById("firstName").value.trim();
+    let lastName = document.getElementById("lastName").value.trim();
+    let phoneNumber = document.getElementById("mobileNumber").value.trim();
+
+    // Create form data with all necessary information
+    let formData = new URLSearchParams({
+        action: "verify_otp",
+        otp: otp,
+        firstName: firstName,
+        lastName: lastName,
+        phoneNumber: phoneNumber
+    });
+
+    fetch("../Accounts/manageaccount/updateinfo.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Success!',
+                text: 'Email updated successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                location.reload();
+            });
+        } else if (data.error) {
+            Swal.fire({
+                title: 'Error',
+                text: data.error,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        } else {
+            Swal.fire({
+                title: 'Invalid OTP',
+                text: 'Invalid OTP. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        Swal.fire({
+            title: 'Error',
+            text: 'An error occurred during OTP verification.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    });
+}
+
+
+
+        // Profile Picture Upload Handling
+        if (uploadButton && profileUploadInput) {
+            uploadButton.addEventListener("click", function () {
+                profileUploadInput.click();
+            });
+
+            profileUploadInput.addEventListener("change", function () {
+                let formData = new FormData();
+                formData.append("action", "upload_profile_picture");
+                formData.append("profile_picture", profileUploadInput.files[0]);
+
+                fetch("../Accounts/manageaccount/updateinfo.php", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            document.querySelector(".profile-preview").src = data.imagePath;
+                        } else {
+                            alert("Error: " + data.error);
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        }
+
+        // Form Submission Event (For Validation)
+        if (form) {
+            form.addEventListener("submit", function (event) {
+                event.preventDefault();
+
+                let formData = new FormData(this);
+
+                fetch("../Accounts/manageaccount/updateinfo.php", {
+                    method: "POST",
+                    body: formData
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
+
+                        if (data.errors) {
+                            Object.keys(data.errors).forEach(key => {
+                                let errorElement = document.querySelector(`small[data-error="${key}"]`);
+                                if (errorElement) {
+                                    errorElement.textContent = data.errors[key];
+                                }
+                            });
+                        } else if (data.success) {
+                            alert(data.success);
+                            location.reload();
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        }
+          // Change Password Button
+    const changePasswordButton = document.querySelector('[uk-toggle="target: #change-password-modal"]');
+
+if (changePasswordButton) {
+    // Initially disable the Change Password button
+    changePasswordButton.disabled = true;
+}
+
+               // Change Password
+const passwordForm = document.getElementById("change-password-form");
+
+// Prevent default form submission and save actions
+changePasswordButton.addEventListener('click', function(event) {
+    // Prevent any default behavior that might submit a form or trigger save actions
+    event.preventDefault();
+    
+    // Create a function to show the password change form
+    function showPasswordChangeForm(errorMessage = null) {
+        Swal.fire({
+            title: 'Change Password',
+            html: `
+                <form id="swal-password-form" class="swal-form">
+                    <div class="swal-input-group">
+                        <label for="swal-current-password">Current Password</label>
+                        <input type="password" id="swal-current-password" class="swal2-input" placeholder="Current password">
+                    </div>
+                    
+                    <div class="swal-input-group">
+                        <label for="swal-new-password">New Password</label>
+                        <input type="password" id="swal-new-password" class="swal2-input" placeholder="New password">
+                    </div>
+                    
+                    <div class="swal-input-group">
+                        <label for="swal-confirm-password">Confirm New Password</label>
+                        <input type="password" id="swal-confirm-password" class="swal2-input" placeholder="Confirm new password">
+                    </div>
+                </form>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Change Password',
+            cancelButtonText: 'Cancel',
+            focusConfirm: false,
+            showLoaderOnConfirm: true,
+            didOpen: () => {
+                // If there's an error message, show it as a validation message
+                if (errorMessage) {
+                    Swal.showValidationMessage(errorMessage);
+                }
+            },
+            preConfirm: () => {
+                const currentPassword = document.getElementById('swal-current-password').value.trim();
+                const newPassword = document.getElementById('swal-new-password').value.trim();
+                const confirmPassword = document.getElementById('swal-confirm-password').value.trim();
+                
+                // Frontend validation
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    Swal.showValidationMessage('All fields are required');
+                    return false;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    Swal.showValidationMessage('New passwords do not match');
+                    return false;
+                }
+                
+                if (newPassword.length < 8) {
+                    Swal.showValidationMessage('Password must be at least 8 characters');
+                    return false;
+                }
+                
+                if (!/[A-Z]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one uppercase letter');
+                    return false;
+                }
+                
+                if (!/[a-z]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one lowercase letter');
+                    return false;
+                }
+                
+                if (!/[0-9]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one number');
+                    return false;
+                }
+                
+                if (!/[^A-Za-z0-9]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one special character');
+                    return false;
+                }
+                
+                // Return values for the next step
+                return { 
+                    currentPassword: currentPassword,
+                    newPassword: newPassword,
+                    confirmPassword: confirmPassword
+                };
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            // If user clicked "Change Password" and validation passed
+            if (result.isConfirmed) {
+                const { currentPassword, newPassword, confirmPassword } = result.value;
+                
+                // Send password change request
+                fetch("../Accounts/manageaccount/updateinfo.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({
+                        action: "change_password",
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response received:", data);
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.success,
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                    } else if (data.error) {
+                        // Reopen the form with the error message but no values preserved
+                        showPasswordChangeForm(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred. Please try again.'
+                    });
+                });
+            } else {
+              // User clicked cancel or outside the modal, reset the page (reload)
+              location.reload();
+            }
+        });
+    }
+    
+    // Show the initial password change form
+    showPasswordChangeForm();
+});
+
+// Add some CSS to improve the SweetAlert form
+const style = document.createElement('style');
+style.textContent = `
+.swal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 15px auto;
+}
+.swal-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+.swal-input-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+    text-align: left;
+}
+.swal2-input {
+    width: 100%;
+    margin: 0;
+}
+.swal-validation-error {
+    color: #f27474;
+    margin-top: 10px;
+    text-align: left;
+    font-size: 14px;
+}
+`;
+document.head.appendChild(style);
+// Initialize OTP section to be hidden
+otpSection.style.display = "none";
+        });
+
+
+
+
+    function removeProfilePhoto() {
+    if (confirm("Are you sure you want to remove your profile picture?")) {
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: JSON.stringify({ action: "remove_profile_picture" }),
+            headers: { "Content-Type": "application/json" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.querySelector('.profile-preview').src = '../CSS/default.jpg'; // Set to default image
+            } else {
+                alert("Error: " + data.error);
             }
         })
         .catch(error => console.error("Error:", error));
-    });
-});
+    }
+}
+
         
         document.querySelector('.sidebar-toggle').addEventListener('click', function() {
         document.querySelector('.sidebar-nav').classList.toggle('uk-open');
@@ -608,10 +1332,6 @@ $stmt->close();
             preview.src = reader.result;
         }
         reader.readAsDataURL(event.target.files[0]);
-    }
-
-    function removeProfilePhoto() {
-        document.querySelector('.profile-preview').src = '../CSS/default.jpg';
     }
 
 
@@ -682,16 +1402,52 @@ $stmt->close();
             });
         });
 
+
+        function generateTimeOptions(start, end, sessionType) {
+            const [startHour, startMin] = start.split(":").map(Number);
+            const [endHour, endMin] = end.split(":").map(Number);
+            const interval = sessionDurations[sessionType] || 60; // Default 60 mins if not found
+            const timeDropdown = document.getElementById("appointmentTime");
+
+            timeDropdown.innerHTML = '<option value="">Select Time</option>'; // Reset
+
+            let current = new Date();
+            current.setHours(startHour, startMin, 0, 0);
+            const endTime = new Date();
+            endTime.setHours(endHour, endMin, 0, 0);
+
+            while (current < endTime) {
+                const hh = current.getHours().toString().padStart(2, '0');
+                const mm = current.getMinutes().toString().padStart(2, '0');
+                const option = document.createElement("option");
+                option.value = `${hh}:${mm}`;
+                option.textContent = `${hh}:${mm}`;
+                timeDropdown.appendChild(option);
+                current.setMinutes(current.getMinutes() + interval);
+            }
+        }
         // ✅ Edit Appointment (Reschedule)
         document.querySelectorAll(".edit-btn").forEach(button => {
-            button.addEventListener("click", function() {
+            button.addEventListener("click", function () {
                 let appointmentId = this.getAttribute("data-id");
-                let currentStatus = this.getAttribute("data-status"); // Get status from dataset
+                let currentStatus = this.getAttribute("data-status");
 
                 Swal.fire({
                     title: "Edit Appointment",
-                    html: `<label>New Date:</label> <input type="date" id="appointmentDate" class="swal2-input">
-                           <label>New Time:</label> <input type="time" id="appointmentTime" class="swal2-input">`,
+                    html: `
+                        <label>New Date:</label> <input type="text" id="appointmentDate" class="swal2-input">
+                        <label>New Time:</label> <select id="appointmentTime" class="swal2-select"></select>
+                    `,
+                    didOpen: () => {
+                        flatpickr("#appointmentDate", {
+                            minDate: new Date().fp_incr(timetableSettings.minDaysAdvance),
+                            maxDate: new Date().fp_incr(timetableSettings.maxDaysAdvance),
+                            disable: timetableSettings.blockedDates.map(date => new Date(date))
+                        });
+
+                        let sessionType = document.querySelector(".edit-btn").getAttribute("data-session-type");
+                        generateTimeOptions(timetableSettings.businessHoursStart, timetableSettings.businessHoursEnd, sessionType);
+                    },
                     showCancelButton: true,
                     confirmButtonText: "Save Changes",
                     preConfirm: () => {
@@ -703,9 +1459,7 @@ $stmt->close();
                 }).then((result) => {
                     fetch("../Appointments/app_manage/client_edit_appointment.php", {
                         method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
+                        headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({
                             appointment_id: appointmentId,
                             action: "edit",
@@ -721,6 +1475,9 @@ $stmt->close();
                 });
             });
         });
+
+
+
 
         // Book Appointment Form Submission Handling
         let appointmentFormFrame = document.getElementById("appointmentFormFrame");
@@ -774,89 +1531,188 @@ $stmt->close();
             let form = document.getElementById("patientRegistrationForm");
             let formData = new FormData(form);
 
-            fetch("../Appointments/patient/patient_manage/register_patient_form.php", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json()) // Parse JSON
-            .then(data => {
-                if (data.status === "success") {
-                    Swal.fire("Success!", data.message, "success").then(() => {
-                        form.reset();
-                        document.getElementById("file-name-display").textContent = "";
+            let firstName = formData.get("patient_fname");
+            let lastName = formData.get("patient_lname");
+            let birthday = formData.get("patient_birthday");
+            let gender = formData.get("patient_gender");
+            let file = formData.get("profile_picture") ? formData.get("profile_picture").name : "No file selected";
+
+            
+            // Validation for first and last names
+            const nameRegex = /^[A-Za-z ]{2,30}$/;
+            if (!nameRegex.test(firstName)) {
+                Swal.fire("Validation Error", "First name must be between 2 and 30 characters and contain only letters and spaces.", "error");
+                return; // Stop the registration process
+            }
+            if (!nameRegex.test(lastName)) {
+                Swal.fire("Validation Error", "Last name must be between 2 and 30 characters and contain only letters and spaces.", "error");
+                return; // Stop the registration process
+            }
+
+
+            Swal.fire({
+                title: "Confirm Registration",
+                html: `
+                    <strong>First Name:</strong> ${firstName} <br/>
+                    <strong>Last Name:</strong> ${lastName} <br/>
+                    <strong>Birthday:</strong> ${birthday} <br/>
+                    <strong>Gender:</strong> ${gender} <br/>
+                    <strong>Profile Picture:</strong> ${file} <br/>
+                `,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Submit",
+                cancelButtonText: "Cancel",
+                confirmButtonColor: "#28a745", 
+                cancelButtonColor: "#dc3545" 
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with form submission
+                    fetch("../Appointments/patient/patient_manage/register_patient_form.php", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json()) // Parse JSON
+                    .then(data => {
+                        if (data.status === "success") {
+                            Swal.fire("Success!", data.message, "success").then(() => {
+                                form.reset();
+                                document.getElementById("file-name-display").textContent = "";
+
+                                // Hard reload the page
+                                location.reload(true);
+
+                                // Optional: Scroll to the registered patients section after reload
+                                setTimeout(() => {
+                                    window.location.href = "#view-registered-patients"; // Adjust the ID accordingly
+                                }, 500);
+                            });
+                        }   
+                        else if (data.status === "duplicate") {
+                                Swal.fire("Duplicate!", data.message, "warning");
+                        }else {
+                            Swal.fire("Error!", data.message, "error");
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        Swal.fire("Error!", "An unexpected error occurred.", "error");
                     });
-                } else {
-                    Swal.fire("Error!", data.message, "error");
                 }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                Swal.fire("Error!", "An unexpected error occurred.", "error");
             });
         });
 
-        
-        // VIEW AND EDIT PATIENT JS
+    // VIEW AND EDIT PATIENT JS
 
         let patientDropdown = document.getElementById("patientDropdown");
         let editForm = document.getElementById("editPatientForm");
         let patientIDInput = document.getElementById("patient_id");
         let firstNameInput = document.getElementById("first_name");
         let lastNameInput = document.getElementById("last_name");
-        let ageInput = document.getElementById("age");
+        let birthdayInput = document.getElementById("bday");
         let genderInput = document.getElementById("gender");
         let profilePicPreview = document.getElementById("profile_picture_preview");
         let profilePicInput = document.getElementById("profile_picture_input");
         let existingProfilePicInput = document.getElementById("existing_profile_picture");
+        let editPatientBtn = document.getElementById("editPatientBtn");
+        let saveProfileChangesBtn = document.querySelector("#editPatientForm button[type='submit']");
+        
+        // Referral Section
+        // let uploadReferralSection = document.getElementById("uploadReferralForm");
+        // uploadReferralSection.style.display = "none";
 
+        // Initially disable form fields
+        function toggleFormInputs(disable) {
+            firstNameInput.disabled = disable;
+            lastNameInput.disabled = disable;
+            birthdayInput.disabled = disable;
+            genderInput.disabled = disable;
+            profilePicInput.disabled = disable;
+            saveProfileChangesBtn.style.display = disable ? "none" : "inline-block"; // Hide "Save" when disabled
+        }
+        
+        // Load patient details when selecting from dropdown
         patientDropdown.addEventListener("change", function () {
             let patientID = this.value;
             if (!patientID) {
                 editForm.style.display = "none";
+                uploadReferralSection.style.display = "none"; // Hide referral section when no patient is selected
                 return;
             }
 
             fetch("../Appointments/patient/patient_data/fetch_patient_details.php?patient_id=" + patientID)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        patientIDInput.value = data.patient.patient_id;
-                        firstNameInput.value = data.patient.first_name;
-                        lastNameInput.value = data.patient.last_name;
-                        ageInput.value = data.patient.age;
-                        genderInput.value = data.patient.gender;
-                        existingProfilePicInput.value = data.patient.profile_picture;
+            .then(response => response.json())
+            .then(data => {
+                console.log("Fetched Data:", data); // Debugging
+                if (data.status === "success") {            
 
-                        if (data.patient.profile_picture) {
-                            profilePicPreview.src = "../uploads/profile_pictures/" + data.patient.profile_picture;
-                            profilePicPreview.style.display = "block";
-                        } else {
-                            profilePicPreview.style.display = "none";
-                        }
+                    patientIDInput.value = data.patient.patient_id;
+                    firstNameInput.value = data.patient.first_name;
+                    lastNameInput.value = data.patient.last_name;
+                    genderInput.value = data.patient.gender;
+                    existingProfilePicInput.value = data.patient.profile_picture;
 
-                        // Display latest referral details
-                        if (data.latest_referrals.official) {
-                            document.getElementById("official_referral_link").href = "../uploads/doctors_referrals/" + data.latest_referrals.official.official_referral_file;
-                            document.getElementById("official_referral_link").style.display = "block";
-                        } else {
-                            document.getElementById("official_referral_link").style.display = "none";
-                        }
-
-                        if (data.latest_referrals.proof_of_booking) {
-                            document.getElementById("proof_of_booking_link").href = "../uploads/doctors_referrals/" + data.latest_referrals.proof_of_booking.proof_of_booking_referral_file;
-                            document.getElementById("proof_of_booking_link").style.display = "block";
-                        } else {
-                            document.getElementById("proof_of_booking_link").style.display = "none";
-                        }
-
-                        editForm.style.display = "block";
+                     // Simply assign the birthday value directly without reformatting
+                     if (data.patient.bday && data.patient.bday !== "0000-00-00" && data.patient.bday.trim() !== "") {
+                    birthdayInput.value = data.patient.bday;
+                    console.log("Setting birthday value to:", data.patient.bday);
                     } else {
-                        editForm.style.display = "none";
-                        Swal.fire("Error", "Patient details could not be loaded.", "error");
+                        birthdayInput.value = "";
                     }
-                })
-                .catch(error => console.error("Error fetching patient details:", error));
+                    
+                    if (data.patient.bday === null) {
+                        console.log("Birthday is null for patient ID:", patientID);
+                    }
+
+                    if (data.patient.profile_picture) {
+                        profilePicPreview.src = "../uploads/profile_pictures/" + data.patient.profile_picture;
+                        profilePicPreview.style.display = "block";
+                    } else {
+                        profilePicPreview.style.display = "none";
+                    }
+
+                    // Disable form inputs initially
+                    toggleFormInputs(true);
+                    editForm.style.display = "block";
+                    uploadReferralSection.style.display = "block"; 
+                } else {
+                    editForm.style.display = "none";
+                    uploadReferralSection.style.display = "none"; 
+                    Swal.fire("Error", "Patient details could not be loaded.", "error");
+                }
+            })
+            .catch(error => console.error("Error fetching patient details:", error));
         });
+
+        // Ensure the birthday value is preserved when submitting the form
+        document.getElementById("editPatientForm").addEventListener("submit", function(event) {
+            console.log("Birthday value before submission:", birthdayInput.value);
+            
+            // If birthday is empty but should be required, you can prevent submission
+            if (birthdayInput.required && birthdayInput.value.trim() === "") {
+                event.preventDefault();
+                Swal.fire("Error", "Birthday field is required.", "error");
+                return false;
+            }
+        });
+
+        // Toggle edit mode when clicking "Edit" button
+        editPatientBtn.addEventListener("click", function () {
+            let isDisabled = firstNameInput.disabled;
+            toggleFormInputs(!isDisabled);
+            
+            // Change button text to "Save" if enabling edit mode
+            editPatientBtn.textContent = isDisabled ? "Cancel" : "Edit";
+            
+            // Show/hide "Save" button
+            saveProfileChangesBtn.style.display = isDisabled ? "inline-block" : "none";
+
+            // If canceling, reload patient details to reset changes
+            if (!isDisabled) {
+                patientDropdown.dispatchEvent(new Event("change"));
+            }
+        });
+
 
         // Show preview when selecting a new profile picture
         profilePicInput.addEventListener("change", function () {
@@ -906,5 +1762,6 @@ $stmt->close();
     });
 
 </script>
+</body>
 
 </html>

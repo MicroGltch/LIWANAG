@@ -17,6 +17,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $appointment_type = $_POST['appointment_type'];
     $appointment_date = $_POST['appointment_date'];
     $appointment_time = $_POST['appointment_time'];
+
+    $patient_name = '';
+    $patientQuery = "SELECT first_name, last_name FROM patients WHERE patient_id = ?";
+    $stmt = $connection->prepare($patientQuery);
+    $stmt->bind_param("i", $patient_id);
+    $stmt->execute();
+    $patientResult = $stmt->get_result();
+    if ($patientResult && $patientResult->num_rows > 0) {
+        $patientRow = $patientResult->fetch_assoc();
+        $patient_name = $patientRow['first_name'] . ' ' . $patientRow['last_name'];
+    }
+
+
     $has_referral = $_POST['has_referral'] ?? null;
 
     $official_referral = $_FILES['official_referral']['name'] ?? null;
@@ -75,7 +88,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     // ✅ Check Playgroup Session Capacity
-    if ($appointment_type === "Playgroup") {
+    if ($appointment_type === "playgroup") {
         $check_capacity = "SELECT COUNT(*) as count FROM appointments WHERE date = ? AND time = ? AND session_type = 'Playgroup'";
         $stmt = $connection->prepare($check_capacity);
         $stmt->bind_param("ss", $appointment_date, $appointment_time);
@@ -122,7 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $proofFileName = time() . "_proof_" . basename($_FILES['proof_of_booking']['name']);
         $proofFilePath = $uploadDir . $proofFileName;
         move_uploaded_file($_FILES['proof_of_booking']['tmp_name'], $proofFilePath);
-        $referralType = 'proof of booking'; // Set referral type as proof only if official is not set
+        $referralType = 'proof_of_booking'; // Set referral type as proof only if official is not set
     }
 
     // ✅ Insert into `doctor_referrals` table if a referral exists
@@ -138,9 +151,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
 
-    // ✅ Insert Appointment Into `appointments` Table
-    $insertAppointmentSQL = "INSERT INTO appointments (account_id, patient_id, date, time, session_type, status, referral_id) 
-                             VALUES (?, ?, ?, ?, ?, 'Pending', ?)";
+    //playgroup
+    $pg_session_id = $_POST['pg_session_id'] ?? null;
+
+    if ($appointment_type === "Playgroup") {
+        // Make sure a Playgroup session is selected
+        if (empty($pg_session_id)) {
+            echo json_encode(["status" => "error", "message" => "No Playgroup session selected."]);
+            exit();
+        }
+
+        // Get date/time from the selected session
+        $pgQuery = "SELECT date, time FROM playgroup_sessions WHERE pg_session_id = ?";
+        $stmt = $connection->prepare($pgQuery);
+        $stmt->bind_param("s", $pg_session_id);
+        $stmt->execute();
+        $pgResult = $stmt->get_result();
+
+        if ($pgResult->num_rows > 0) {
+            $pgData = $pgResult->fetch_assoc();
+            $appointment_date = $pgData['date'];
+            $appointment_time = $pgData['time'];
+        } else {
+            echo json_encode(["status" => "error", "message" => "Selected Playgroup session not found."]);
+            exit();
+        }
+    }
+
+
+
+    $insertAppointmentSQL = "INSERT INTO appointments (account_id, patient_id, date, time, session_type, pg_session_id, status, referral_id, created_at, updated_at) 
+    VALUES (?, ?, ?, ?, ?, ?, 'Pending', ?, NOW(), NOW())";
     $stmt = $connection->prepare($insertAppointmentSQL);
 
     if ($stmt === false) {
@@ -148,13 +189,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    $stmt->bind_param("iisssi", $account_id, $patient_id, $appointment_date, $appointment_time, $appointment_type, $referral_id);
+    $stmt->bind_param("iissssi", $account_id, $patient_id, $appointment_date, $appointment_time, $appointment_type, $pg_session_id, $referral_id);
 
     if ($stmt->execute()) {
         $appointment_id = $stmt->insert_id; // ✅ Get the newly inserted appointment ID
 
         // ✅ Send Confirmation Email
-        if (send_email_notification($client_email, $client_name, $appointment_type, $appointment_date, $appointment_time)) {
+        if (send_email_notification($client_email, $client_name, $patient_name, $appointment_type, $appointment_date, $appointment_time)        ) {
             echo json_encode([
                 "status" => "success",
                 "message" => "Appointment booked successfully. A confirmation email has been sent.",
@@ -196,7 +237,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 // ✅ Function to Send Email Notification for New Appointments
-function send_email_notification($email, $client_name, $session_type, $appointment_date, $appointment_time) {
+function send_email_notification($email, $client_name, $patient_name, $session_type, $appointment_date, $appointment_time) {
     $mail = new PHPMailer(true);
 
     try {
@@ -216,7 +257,7 @@ function send_email_notification($email, $client_name, $session_type, $appointme
         $emailBody = "
             <h3>Appointment Confirmation</h3>
             <p>Dear <strong>$client_name</strong>,</p>
-            <p>Your appointment has been successfully booked with the following details:</p>
+            <p>Your appointment for <strong>$patient_name</strong> has been successfully booked with the following details:</p>
             <ul>
                 <li><strong>Session Type:</strong> $session_type</li>
                 <li><strong>Date:</strong> $appointment_date</li>
@@ -226,6 +267,7 @@ function send_email_notification($email, $client_name, $session_type, $appointme
             <p>We will notify you once your appointment is confirmed.</p>
             <p>Thank you for choosing our therapy center.</p>
         ";
+
 
         $mail->Body = $emailBody;
         $mail->send();
