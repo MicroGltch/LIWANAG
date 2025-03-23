@@ -40,8 +40,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["signup"])) {
             if ($stmt2->execute()) {
                 $stmt2->close();
 
-                include "setotp.php";
-                send_verification($fullname, $email, $otp);
+                require_once "mail_helper.php";
+                // Then use the function as before:
+                $mail_result = send_verification($fullname, $email, $otp);
+
+                if ($mail_result !== true) {
+                    $_SESSION['signup_error'] = "Failed to send verification email: " . $mail_result;
+                    header("Location: ../signuppage.php");
+                    exit();
+                }
 
                 $_SESSION['signup_success'] = "Signup successful! A one-time password has been sent to your email. It will expire in 5 minutes.";
                 $_SESSION['email'] = $email;
