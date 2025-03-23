@@ -62,7 +62,7 @@
 </head>
 <body>
     <div class="uk-container uk-margin-top">
-        <h2>Manage Default Availability</h2>
+        <h4>Manage Default Availability</h4>
 
         <form id="availabilityForm" method="POST" class="uk-form-stacked">
             <table class="uk-table uk-table-divider">
@@ -85,7 +85,10 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <div class="uk-width-1-1 uk-text-right uk-margin-top">
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Availability</button>
+            </div>
+           
         </form>
     </div>
 
