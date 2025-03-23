@@ -60,29 +60,43 @@ $existingDates = array_column($overrides, 'date'); // Track already blocked date
 </head>
 <body>
     <div class="uk-container uk-margin-top">
-        <h2>Adjust Availability for Specific Dates</h2>
+        <h4>Adjust Availability for Specific Dates</h4>
 
-        <form id="overrideForm" method="POST" class="uk-form-stacked">
-            <label>Select Date:</label>
-            <input class="uk-input" type="date" name="override_date" id="override_date" required>
+        <form id="overrideForm" method="POST" class="uk-grid-small" uk-grid>
+        
+        <div class="uk-width-1-2@s">
+            <label class="uk-form-label uk-margin-top">Select Date</label>
+            <input class="uk-input" type="date" name="override_date" id="override_date" required style="margin-bottom: 0px;">
+        </div>
 
-            <label>Status:</label>
+        <div class="uk-width-1-2@s">
+            <label class="uk-form-label uk-margin-top" >Status</label>
             <select class="uk-select" name="status" id="statusSelect">
                 <option value="Unavailable">Unavailable</option>
                 <option value="Custom">Custom Availability</option>
             </select>
+        </div>
 
-            <div id="customTimes" style="display: none;">
-                <label>Start Time:</label>
+      
+        <div class="uk-width-1-1@s" id="customTimes" style="display: none;">
+                <label class="uk-form-label uk-margin-top">Start Time</label>
                 <input class="uk-input" type="time" name="start_time" id="start_time">
-                <label>End Time:</label>
+                <label class="uk-form-label uk-margin-top">End Time</label>
                 <input class="uk-input" type="time" name="end_time" id="end_time">
-            </div>
+        </div>
 
-            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Adjustment</button>
+           
+  
+            
+
+            <div class="uk-width-1-1 uk-text-right uk-margin-top">
+            <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="border-radius: 15px;">Save Adjustment</button>
+            </div>
+            
         </form>
 
-        <h3 class="uk-margin-top">Existing Adjustments</h3>
+        <hr>
+        <h4 class="uk-margin-top">Existing Adjustments</h4>
         <table class="uk-table uk-table-divider">
             <thead>
                 <tr>
@@ -101,7 +115,7 @@ $existingDates = array_column($overrides, 'date'); // Track already blocked date
                         <td><?= $override['start_time'] ?? '-' ?></td>
                         <td><?= $override['end_time'] ?? '-' ?></td>
                         <td>
-                            <button class="uk-button uk-button-danger delete-btn" data-id="<?= $override['override_id']; ?>">Delete</button>
+                            <button class="uk-button uk-button-danger delete-btn" data-id="<?= $override['override_id']; ?>" style="border-radius: 15px;">Delete</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
