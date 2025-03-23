@@ -270,31 +270,6 @@ $stmt->close();
                 <div id="tableSearch"></div> <!-- Search box -->
             </div>
 
-            <!--Appoinments-->
-            <div id="appointments" class="section">
-                <h1 class="uk-text-bold">Appointments</h1>
-                <p>Appointment table will be displayed here.</p>
-
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <table id="appointmentsTable" class="display" style="width:100%">
-                        <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Time</th>
-                                <th>Name</th>
-                                <th>Service</th>
-                                <th>Status</th>
-                                <th>Approve</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- population area -->
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-
             <!--Upcoming Appointments-->
             <div id="upcoming-appointments" style="display: none; " class="section">
                 <h1 class="uk-text-bold">Upcoming Appointments</h1>
