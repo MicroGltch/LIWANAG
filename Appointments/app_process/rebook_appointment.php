@@ -169,8 +169,9 @@ $service_type = htmlspecialchars($patient['service_type']);
                 </button>
 
                 <p id="quickRebookInvalidMsg" class="uk-text-danger" style="display: none;">
-                    ⚠️ Cannot prefill <?= date("F j, Y", strtotime($nextWeekDate)); ?> — schedule not available.
+                    ⚠️ Cannot prefill <?= date("F j, Y", strtotime($nextWeekDate)); ?> at <?= date("g:i A", strtotime($originalTime)); ?> — schedule not available.
                 </p>
+
             <?php endif; ?>
 
 
