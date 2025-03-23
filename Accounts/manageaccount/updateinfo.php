@@ -309,6 +309,45 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_user_details') {
     }
 }
 
+// Handle resend OTP request
+if (isset($_POST['action']) && $_POST['action'] === 'resend_otp') {
+    // Check if email is set in the session
+    if (!isset($_SESSION['new_email'])) {
+        echo json_encode(['error' => 'No email change in progress. Please try again.']);
+        exit();
+    }
+    
+    $email = $_SESSION['new_email'];
+    
+    // Generate new OTP
+    $otp = rand(100000, 999999);
+    $_SESSION['email_otp'] = password_hash($otp, PASSWORD_DEFAULT); // Update stored OTP
+    
+    // Send email with new OTP
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.hostinger.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'no-reply@myliwanag.com';
+        $mail->Password = '[l/+1V/B4'; // Consider using a secure environment variable
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+
+        $mail->setFrom('no-reply@myliwanag.com', "Little Wanderer's Therapy Center");
+        $mail->addAddress($email);
+        $mail->Subject = 'New Email Verification Code';
+        $mail->Body = "Your new OTP code is: $otp";
+
+        $mail->send();
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        error_log("Resend OTP email error: " . $mail->ErrorInfo);
+        echo json_encode(['error' => "Failed to send new OTP. Please try again later."]);
+    }
+    exit();
+}
+
 // ** Verify OTP and update email - MOVED OUTSIDE THE PREVIOUS CONDITIONAL BLOCK **
 if (isset($_POST['action']) && $_POST['action'] === 'verify_otp') {
     $enteredOtp = $_POST['otp'] ?? '';

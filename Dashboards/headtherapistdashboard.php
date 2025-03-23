@@ -380,7 +380,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             
             <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
             <script>
-                document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function () {
         const editButton = document.getElementById("editButton");
         const saveButton = document.getElementById("saveButton");
         const form = document.getElementById("settingsvalidate");
@@ -393,33 +393,57 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         const emailInput = document.getElementById("email"); // Select the email input
         const removePhotoButton = document.getElementById("removePhotoButton");
     
-        // Add new elements
+          // Create all three buttons with the exact styling from Image 2
+        const resendOtpButton = document.createElement("button");
+        resendOtpButton.id = "resendOtpButton";
+        resendOtpButton.textContent = "RESEND OTP";
+        resendOtpButton.className = "uk-button";
+        resendOtpButton.style.backgroundColor = "#1e88e5"; // Bright blue
+        resendOtpButton.style.color = "white";
+        resendOtpButton.style.fontWeight = "bold";
+        resendOtpButton.style.padding = "8px 20px";
+        resendOtpButton.style.margin = "0 10px 0 0";
+        resendOtpButton.style.border = "none";
+        resendOtpButton.style.borderRadius = "4px";
+        resendOtpButton.style.textTransform = "uppercase";
+        resendOtpButton.style.transition = ".1s ease-in-out";
+        resendOtpButton.style.transitionProperty = "color, background-color, border-color";
+        
         const editEmailButton = document.createElement("button");
         editEmailButton.id = "editEmailButton";
-        editEmailButton.textContent = "Edit Email";
-        editEmailButton.className = "uk-button uk-button-secondary";  // Using UK button classes for consistency
-        editEmailButton.style.marginRight = "15px";
-        editEmailButton.style.fontSize = "16px";
-        editEmailButton.style.padding = "8px 20px";
+        editEmailButton.textContent = "EDIT EMAIL";
+        editEmailButton.className = "uk-button";
+        editEmailButton.style.backgroundColor = "#212121"; // Dark gray/black
+        editEmailButton.style.color = "white";
         editEmailButton.style.fontWeight = "bold";
+        editEmailButton.style.padding = "8px 20px";
+        editEmailButton.style.margin = "0 10px 0 0";
+        editEmailButton.style.border = "none";
+        editEmailButton.style.borderRadius = "4px";
         
         const cancelVerificationButton = document.createElement("button");
         cancelVerificationButton.id = "cancelVerificationButton";
-        cancelVerificationButton.textContent = "Cancel Verification";
-        cancelVerificationButton.className = "uk-button uk-button-danger";  // Using UK button classes for consistency
-        cancelVerificationButton.style.fontSize = "16px";
-        cancelVerificationButton.style.padding = "8px 20px";
+        cancelVerificationButton.textContent = "CANCEL VERIFICATION";
+        cancelVerificationButton.className = "uk-button";
+        cancelVerificationButton.style.backgroundColor = "#e91e63"; // Pink
+        cancelVerificationButton.style.color = "white";
         cancelVerificationButton.style.fontWeight = "bold";
+        cancelVerificationButton.style.padding = "8px 20px";
+        cancelVerificationButton.style.margin = "0";
+        cancelVerificationButton.style.border = "none";
+        cancelVerificationButton.style.borderRadius = "4px";
         
         // Create a container for the buttons
         const buttonContainer = document.createElement("div");
-        buttonContainer.className = "uk-margin-medium-top";  // Using UK margin class
+        buttonContainer.className = "uk-margin-medium-top";
         buttonContainer.style.display = "flex";
         buttonContainer.style.justifyContent = "flex-start";
         buttonContainer.style.marginTop = "20px";
+        
+        // Add buttons to container in the correct order
+        buttonContainer.appendChild(resendOtpButton);
         buttonContainer.appendChild(editEmailButton);
         buttonContainer.appendChild(cancelVerificationButton);
-        
         // Insert these buttons after the OTP input
         if (otpSection) {
             // Append the button container to the OTP section (after all existing elements)
@@ -511,6 +535,88 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             saveButton.dataset.step = "";
         });
     }
+
+    // Add event listener for Resend OTP button
+if (resendOtpButton) {
+    resendOtpButton.addEventListener("click", function(event) {
+        event.preventDefault();
+        resendOtpButton.disabled = true;
+        
+        // Make the button transparent
+        resendOtpButton.style.opacity = "0.4"; // Higher transparency (lower opacity)
+        
+        // Add a countdown timer to prevent spam
+        let timeLeft = 60;
+        const originalText = resendOtpButton.textContent;
+        resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
+        
+        const countdownTimer = setInterval(() => {
+            timeLeft--;
+            resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
+            
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                resendOtpButton.textContent = originalText;
+                resendOtpButton.disabled = false;
+                resendOtpButton.style.opacity = "1"; // Restore full opacity
+            }
+        }, 1000);
+        
+        // Send request to resend OTP
+        const email = document.getElementById("email").value.trim();
+        
+        let formData = new URLSearchParams({
+            action: "resend_otp",
+            email: email
+        });
+        
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: formData,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'OTP Resent',
+                    text: 'A new verification code has been sent to your email.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+                // Keep the button disabled and transparent during the countdown
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.error || 'Failed to resend OTP. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                
+                // Reset the button immediately on error
+                clearInterval(countdownTimer);
+                resendOtpButton.textContent = originalText;
+                resendOtpButton.disabled = false;
+                resendOtpButton.style.opacity = "1"; // Restore full opacity
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            
+            // Reset the button immediately on error
+            clearInterval(countdownTimer);
+            resendOtpButton.textContent = originalText;
+            resendOtpButton.disabled = false;
+            resendOtpButton.style.opacity = "1"; // Restore full opacity
+        });
+    });
+}
     
     // Cancel Verification Button Click Event - Cancels email verification and restores original email
     if (cancelVerificationButton) {
