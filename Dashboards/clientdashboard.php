@@ -343,6 +343,32 @@ echo "<script>
                             </div>
                         </div>
 
+                        <div class="uk-width-1-1 uk-margin-top">
+                            <h4 class="uk-margin-small-bottom">Upload Doctor's Referral</h4>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Referral Type</label>
+                            <select class="uk-select" name="referral_type" id="referral_type_select" required>
+                                <option value="" disabled selected>Select Referral Type</option>
+                                <option value="official">Official Referral</option>
+                                <option value="proof_of_booking">Proof of Booking</option>
+                            </select>
+                        </div>
+
+                        <div class="uk-width-1-2@s uk-width-1-2@l">
+                            <label class="uk-form-label">Upload Referral File</label>
+                            <div class="js-upload uk-placeholder uk-text-center">
+                                <span uk-icon="icon: cloud-upload"></span>
+                                <span class="uk-text-middle">Drag and drop a file or</span>
+                                <div uk-form-custom>
+                                    <input type="file" name="referral_file" id="referral_file_input" required>
+                                    <span class="uk-link">Browse</span>
+                                    <span class="uk-text-middle" id="file-name-display-referral">to choose a file</span>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
                             <button class="uk-button uk-button-primary" type="button" id="registerPatientButton">Register</button>
                         </div>
@@ -367,67 +393,103 @@ echo "<script>
                     </select>
                     <hr>
                     <!-- 🔹 Patient Details Form (Initially Hidden) -->
-                    <form id="editPatientForm" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
+                   
+                   
+                    <form id="editPatientForm" class="uk-grid-small uk-grid" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
+
+
                         <input type="hidden" name="patient_id" id="patient_id">
+
                         <input type="hidden" name="existing_profile_picture" id="existing_profile_picture"> <!-- Store existing picture -->
 
-                        <label>First Name:</label>
-                        <input class="uk-input" type="text" name="first_name" id="first_name" required>
 
-                        <label>Last Name:</label>
+
+
+                        <!------ LEMME COOK ------->
+                        <div class="uk-flex uk-flex-middle">
+                            <div class="profile-upload-container uk-width-1@s " style="padding: 25px; ">
+                            
+                            <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 150px; height: 150px; display: none;">
+                            
+                            <div class="uk-flex uk-flex-column uk-margin-left">
+                            
+                                <button class="uk-button uk-button-primary uk-margin-small-bottom" type="file" name="profile_picture" id="profile_picture_input">Upload Photo</button>
+
+                            </div>
+
+                            
+                            <div class="uk-margin-large-left">
+                                    <h4>Image requirements:</h4>
+                                    <ul class="uk-list">
+                                        <li>1. Min. 400 x 400px</li>
+                                        <li>2. Max. 2MB</li>
+                                        <li>3. Your child's face.</li>
+                                    </ul>
+                                </div>
+
+
+                            </div>
+                        </div>
+
+                        <div class="uk-grid-small" uk-grid>
+                        
+                        
+                        <div class="uk-width-1-2@s">
+                                <label class="uk-form-label">First Name</label>
+                                <input class="uk-input" type="text" name="first_name" id="first_name" required>
+                        </div>
+                            
+
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Last Name</label>
                         <input class="uk-input" type="text" name="last_name" id="last_name" required>
+                        </div>
 
-                        <label>Birthday:</label>
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Birthday</label>
                         <input class="uk-input" type="date" name="bday" id="bday" min="2008-01-01" max="2024-12-31" required>
+                        </div>
 
-                        <label>Gender:</label>
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Gender</label>
                         <select class="uk-select" name="gender" id="gender">
                             <option value="Male">Male</option>
                             <option value="Female">Female</option>
                         </select>
+                        </div>
 
-                        <label>Profile Picture:</label>
-                        <input class="uk-input" type="file" name="profile_picture" id="profile_picture_input">
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Official Referral</label>
+                        <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Proof of Booking</label>
+                        <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+                        </div>
                         
-                        <div class="uk-margin">
-                            <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 100px; height: 100px; display: none;">
-                        </div>
+                        <!--wth is this? if i remove it, nawawla yung save profile sa baba ren ?!?!-->
+                        <div class="uk-width-1-2 uk-text-right uk-margin-top">
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
+                        </div>    
+                        <!--wtf-->
 
-                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Changes</button>
+                        <div class="uk-width-1-2 uk-text-right uk-margin-top" style="margin-bottom: 15px;">
+                        
                         <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button">Edit</button>
-                    </form>
+                        
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
 
-                    <!-- 🔹 Referral Upload Form -->
-                    <form id="uploadReferralForm" action="../Appointments/patient/patient_data/upload_referral_process.php" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="patient_id" id="referral_patient_id">
-                        <h4>Upload Doctor's Referral</h4>
+                        
+                        </div> 
+            
 
-                        <label>Referral Type:</label>
-                        <select class="uk-select" name="referral_type" id="referral_type_select" required>
-                            <option value="" disabled selected>Select Referral Type</option>
-                            <option value="official">Official Referral</option>
-                            <option value="proof_of_booking">Proof of Booking</option>
-                        </select>
-
-                        <label>Upload File:</label>
-                        <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required>
-
-                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">
-                            Upload Referral
-                        </button>
-
-                        <div class="uk-margin">
-                            <label>Official Referral:</label>
-                            <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
                         </div>
 
-                        <div class="uk-margin">
-                            <label>Proof of Booking:</label>
-                            <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
-                        </div>
                     </form>
                 </div>
             </div>
+
 
             <!-- Book Appointment -->
             <div id="book-appointment" class="section" style="display: none;">
@@ -1439,9 +1501,8 @@ otpSection.style.display = "none";
         let saveProfileChangesBtn = document.querySelector("#editPatientForm button[type='submit']");
         
         // Referral Section
-        let uploadReferralSection = document.getElementById("uploadReferralForm");
-        // Initially hide referral section
-        uploadReferralSection.style.display = "none";
+        // let uploadReferralSection = document.getElementById("uploadReferralForm");
+        // uploadReferralSection.style.display = "none";
 
         // Initially disable form fields
         function toggleFormInputs(disable) {

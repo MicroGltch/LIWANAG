@@ -3,7 +3,7 @@ require_once "../../../dbconfig.php";
 session_start();
 
 // ✅ Use correct session variable for role
-if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "admin") {
+if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_Type']), ["admin", "head therapist"])) {
     echo json_encode(["status" => "error", "message" => "Unauthorized access."]);
     exit();
 }
