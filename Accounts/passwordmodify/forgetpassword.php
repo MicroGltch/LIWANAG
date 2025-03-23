@@ -81,6 +81,10 @@
                 <div class="forgot-submit-btn-div uk-width-1@s uk-width-1@l">
                     <button class="forgot-submit-btn uk-button uk-button-primary" style="border-radius: 15px">Submit</button>
                 </div>
+                <!-- Back Button -->
+                <div class="forgot-submit-btn-div uk-width-1@s uk-width-1@l">
+                    <button class="back uk-button" onclick="window.location.href='../loginpage.php';">Back to Login</button>
+                </div>
 
             </form>
 

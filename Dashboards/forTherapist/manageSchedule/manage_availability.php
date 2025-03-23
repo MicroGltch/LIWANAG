@@ -21,6 +21,17 @@
     while ($row = $result->fetch_assoc()) {
         $availability[$row['day']] = $row;
     }
+
+// Fetch per-day business hours
+$globalBizHours = [];
+$bizQuery = $connection->query("SELECT day_name, start_time, end_time FROM business_hours_by_day");
+while ($row = $bizQuery->fetch_assoc()) {
+    $globalBizHours[$row['day_name']] = [
+        'start' => $row['start_time'],
+        'end' => $row['end_time']
+    ];
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -38,8 +49,8 @@
 
     <!-- UIkit Library -->
     <link rel="stylesheet" href="/LIWANAG/CSS/uikit-3.22.2/css/uikit.min.css">
-<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit.min.js"></script>
-<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
+    <script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
 
 
     <!-- LIWANAG CSS -->
@@ -48,10 +59,10 @@
     <script src="https://cdn.datatables.net/1.13.7/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.7/js/dataTables.uikit.min.js"></script>
 
-    <!-- Include Flatpickr -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!--SWAL-->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
 
 <style>
     html, body {
@@ -63,6 +74,22 @@
 <body>
     <div class="uk-container uk-margin-top">
         <h4>Manage Default Availability</h4>
+
+        <?php
+        function generateTimeOptions($start, $end, $interval = 30) {
+            $startTime = strtotime($start);
+            $endTime = strtotime($end);
+            $options = "";
+
+            for ($time = $startTime; $time <= $endTime; $time += $interval * 60) {
+                $value = date("H:i", $time);           // 24-hour value to submit
+                $label = date("g:i A", $time);         // 12-hour label to display
+                $options .= "<option value=\"$value\">$label</option>";
+            }
+
+            return $options;
+        }
+        ?>
 
         <form id="availabilityForm" method="POST" class="uk-form-stacked">
             <table class="uk-table uk-table-divider">
@@ -79,8 +106,46 @@
                     foreach ($daysOfWeek as $day): ?>
                         <tr>
                             <td><?= $day ?></td>
-                            <td><input class="uk-input" type="time" name="start_time[<?= $day ?>]" value="<?= $availability[$day]['start_time'] ?? '' ?>"></td>
-                            <td><input class="uk-input" type="time" name="end_time[<?= $day ?>]" value="<?= $availability[$day]['end_time'] ?? '' ?>"></td>
+                            <td>
+                                <select class="uk-select" name="start_time[<?= $day ?>]">
+                                    <option value="">--</option>
+                                    <?php
+                                    $bizStart = $globalBizHours[$day]['start'] ?? null;
+                                    $bizEnd = $globalBizHours[$day]['end'] ?? null;
+                                    
+                                    if ($bizStart && $bizEnd) {
+                                        $timeOptionsHTML = generateTimeOptions($bizStart, $bizEnd);
+                                        foreach (explode("</option>", $timeOptionsHTML) as $opt) {
+                                            $val = trim(strip_tags($opt));
+                                            if ($val === "") continue;
+                                            $selected = ($availability[$day]['start_time'] ?? '') === $val ? "selected" : "";
+                                            echo "<option value=\"$val\" $selected>$val</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+
+                            </td>
+                            <td>
+                                <select class="uk-select" name="end_time[<?= $day ?>]">
+                                    <option value="">--</option>
+                                    <?php
+                                    $bizStart = $globalBizHours[$day]['start'] ?? null;
+                                    $bizEnd = $globalBizHours[$day]['end'] ?? null;
+
+                                    if ($bizStart && $bizEnd) {
+                                        $timeOptionsHTML = generateTimeOptions($bizStart, $bizEnd);
+                                        foreach (explode("</option>", $timeOptionsHTML) as $opt) {
+                                            $val = trim(strip_tags($opt));
+                                            if ($val === "") continue;
+                                            $selected = ($availability[$day]['start_time'] ?? '') === $val ? "selected" : "";
+                                            echo "<option value=\"$val\" $selected>$val</option>";
+                                        }
+                                    }
+                                    ?>
+                                </select>
+                            </td>
+
                         </tr>
                     <?php endforeach; ?>
                 </tbody>
@@ -93,25 +158,80 @@
     </div>
 
     <script>
-        document.getElementById("availabilityForm").addEventListener("submit", function (event) {
-            event.preventDefault();
-            let formData = new FormData(this);
+document.getElementById("availabilityForm").addEventListener("submit", function (event) {
+    event.preventDefault();
 
-            fetch("update_default_availability.php", {
-                method: "POST",
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                Swal.fire({
-                    title: data.status === "success" ? "Success!" : "Error!",
-                    text: data.message,
-                    icon: data.status === "success" ? "success" : "error",
-                    confirmButtonText: "OK"
-                });
-            })
-            .catch(error => console.error("Error:", error));
+    // Clear previous error messages
+    document.querySelectorAll(".error-message").forEach(el => el.remove());
+
+    let formData = new FormData(this);
+
+    fetch("update_default_availability.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(async response => {
+        let data;
+        try {
+            data = await response.json();
+        } catch (err) {
+            throw new Error("Invalid JSON response from server.");
+        }
+
+        if (data.status === "success") {
+            Swal.fire({
+                title: "Success!",
+                text: data.message,
+                icon: "success",
+                confirmButtonText: "OK"
+            });
+        } else if (data.status === "field_error") {
+            // Show per-field errors
+            for (const [day, message] of Object.entries(data.field_errors)) {
+                const row = [...document.querySelectorAll("tbody tr")]
+                    .find(tr => tr.querySelector("td")?.innerText.trim() === day);
+
+                if (row) {
+                    const td = document.createElement("td");
+                    td.colSpan = 3;
+                    td.classList.add("error-message");
+                    td.style.color = "red";
+                    td.style.fontSize = "0.875rem";
+                    td.textContent = message;
+
+                    const existingError = row.nextElementSibling;
+                    if (!existingError?.classList.contains("error-message")) {
+                        row.after(td);
+                    }
+                }
+            }
+
+            Swal.fire({
+                title: "Invalid Input",
+                text: "Some days were not saved due to input errors.",
+                icon: "error",
+                confirmButtonText: "Review"
+            });
+        } else {
+            Swal.fire({
+                title: "Error!",
+                text: data.message || "Something went wrong.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error caught:", error);
+        Swal.fire({
+            title: "Error!",
+            text: "Something went wrong. Please try again later.",
+            icon: "error",
+            confirmButtonText: "OK"
         });
-    </script>
+    });
+});
+</script>
+
 </body>
 </html>

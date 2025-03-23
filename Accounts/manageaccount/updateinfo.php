@@ -4,6 +4,11 @@ require_once "../../Accounts/signupverify/vendor/autoload.php";
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 session_start();
+//debugging
+error_reporting(E_ERROR);
+ini_set('display_errors', 0);
+header('Content-Type: application/json');
+error_log("POST data received: " . print_r($_POST, true));
 $userid = $_SESSION['account_ID'];
 
 header('Content-Type: application/json');
@@ -11,13 +16,83 @@ $errors = [];
 $_SESSION['update_errors'] = [];
 $_SESSION['update_success'] = "";
 
-// Fetch user account type
-$stmt = $connection->prepare("SELECT account_Type, account_Email FROM users WHERE account_ID = ?");
+// Fetch user account type, password, and email
+$stmt = $connection->prepare("SELECT account_Type, account_Password, account_Email FROM users WHERE account_ID = ?");
 $stmt->bind_param("i", $userid);
 $stmt->execute();
-$stmt->bind_result($account_Type, $currentEmail);
+$stmt->bind_result($account_Type, $hashedPassword, $currentEmail);
 $stmt->fetch();
 $stmt->close();
+
+// Change Password
+if (isset($_POST['action']) && $_POST['action'] === 'change_password') {
+    $currentPassword = $_POST['current_password'] ?? '';
+    $newPassword = $_POST['new_password'] ?? '';
+    $confirmPassword = $_POST['confirm_password'] ?? '';
+
+    error_log("Password change attempt received");
+
+    $userid = $_SESSION['account_ID'] ?? null;
+
+    if (!$userid) {
+        echo json_encode(['error' => 'Unauthorized access']);
+        exit();
+    }
+
+    // Validate current password with stored hash
+    if (!password_verify($currentPassword, $hashedPassword)) {
+        echo json_encode(['error' => 'Current password is incorrect']);
+        exit();
+    }
+
+    // Validate new password
+    if ($newPassword !== $confirmPassword) {
+        echo json_encode(['error' => 'New passwords do not match']);
+        exit();
+    }
+
+    if (strlen($newPassword) < 8) {
+        echo json_encode(['error' => 'Password must be at least 8 characters']);
+        exit();
+    }
+
+    if (!preg_match('/[A-Z]/', $newPassword)) {
+        echo json_encode(['error' => 'Password must contain at least one uppercase letter']);
+        exit();
+    }
+
+    if (!preg_match('/[a-z]/', $newPassword)) {
+        echo json_encode(['error' => 'Password must contain at least one lowercase letter']);
+        exit();
+    }
+
+    if (!preg_match('/[0-9]/', $newPassword)) {
+        echo json_encode(['error' => 'Password must contain at least one number']);
+        exit();
+    }
+
+    if (!preg_match('/[^A-Za-z0-9]/', $newPassword)) {
+        echo json_encode(['error' => 'Password must contain at least one special character']);
+        exit();
+    }
+
+    // Hash new password and update
+    $hashedNewPassword = password_hash($newPassword, PASSWORD_DEFAULT);
+    $stmt = $connection->prepare("UPDATE users SET account_Password = ? WHERE account_ID = ?");
+    if (!$stmt) {
+        echo json_encode(['error' => 'Database error: preparing update statement failed.']);
+        exit();
+    }
+    $stmt->bind_param("si", $hashedNewPassword, $userid);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => 'Password updated successfully']);
+    } else {
+        echo json_encode(['error' => 'Failed to update password. Database error.']);
+    }
+    $stmt->close();
+    exit();
+}
 
 // Function to get the correct dashboard URL
 function getDashboardURL($account_Type) {
@@ -234,6 +309,45 @@ if (isset($_POST['action']) && $_POST['action'] === 'update_user_details') {
     }
 }
 
+// Handle resend OTP request
+if (isset($_POST['action']) && $_POST['action'] === 'resend_otp') {
+    // Check if email is set in the session
+    if (!isset($_SESSION['new_email'])) {
+        echo json_encode(['error' => 'No email change in progress. Please try again.']);
+        exit();
+    }
+    
+    $email = $_SESSION['new_email'];
+    
+    // Generate new OTP
+    $otp = rand(100000, 999999);
+    $_SESSION['email_otp'] = password_hash($otp, PASSWORD_DEFAULT); // Update stored OTP
+    
+    // Send email with new OTP
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = 'smtp.hostinger.com';
+        $mail->SMTPAuth = true;
+        $mail->Username = 'no-reply@myliwanag.com';
+        $mail->Password = '[l/+1V/B4'; // Consider using a secure environment variable
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        $mail->Port = 465;
+
+        $mail->setFrom('no-reply@myliwanag.com', "Little Wanderer's Therapy Center");
+        $mail->addAddress($email);
+        $mail->Subject = 'New Email Verification Code';
+        $mail->Body = "Your new OTP code is: $otp";
+
+        $mail->send();
+        echo json_encode(['success' => true]);
+    } catch (Exception $e) {
+        error_log("Resend OTP email error: " . $mail->ErrorInfo);
+        echo json_encode(['error' => "Failed to send new OTP. Please try again later."]);
+    }
+    exit();
+}
+
 // ** Verify OTP and update email - MOVED OUTSIDE THE PREVIOUS CONDITIONAL BLOCK **
 if (isset($_POST['action']) && $_POST['action'] === 'verify_otp') {
     $enteredOtp = $_POST['otp'] ?? '';
@@ -298,4 +412,6 @@ if (isset($_POST['action']) && $_POST['action'] === 'verify_otp') {
     }
     exit();
 }
+echo json_encode(['success' => 'Password updated successfully']);
+
 ?>

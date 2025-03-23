@@ -25,12 +25,26 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $connection->begin_transaction();
 
     try {
-        // ✅ Check if patient already has a pending/approved appointment
-        $checkExistingQuery = "SELECT appointment_id FROM appointments 
-                               WHERE patient_id = ? 
-                               AND status IN ('Pending', 'Approved')";
-        $stmt = $connection->prepare($checkExistingQuery);
-        $stmt->bind_param("i", $patientID);
+        if ($appointmentID) {
+            // Rebooking from an existing appointment
+            $checkExistingQuery = "SELECT appointment_id FROM appointments 
+                                   WHERE patient_id = ? 
+                                   AND session_type = ? 
+                                   AND status IN ('Pending', 'Approved')
+                                   AND appointment_id != ?";
+            $stmt = $connection->prepare($checkExistingQuery);
+            $stmt->bind_param("isi", $patientID, $sessionType, $appointmentID);
+        } else {
+            // Rebooking a past patient (no appointment ID)
+            $checkExistingQuery = "SELECT appointment_id FROM appointments 
+                                   WHERE patient_id = ? 
+                                   AND session_type = ? 
+                                   AND status IN ('Pending', 'Approved')";
+            $stmt = $connection->prepare($checkExistingQuery);
+            $stmt->bind_param("is", $patientID, $sessionType);
+        }
+    
+
         $stmt->execute();
         $result = $stmt->get_result();
 
@@ -39,27 +53,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         if ($appointmentID) {
-            // ✅ Case 1: Rebooking from an existing appointment
+            // ✅ Mark the original appointment as completed first
+            $updateQuery = "UPDATE appointments SET status = 'Completed' WHERE appointment_id = ?";
+            $stmt = $connection->prepare($updateQuery);
+            $stmt->bind_param("i", $appointmentID);
+            $stmt->execute();
+        
+            if ($stmt->affected_rows === 0) {
+                throw new Exception("Failed to mark the original appointment as completed.");
+            }
+        
+            // ✅ Get the account ID from the original appointment
             $getAccountIdQuery = "SELECT account_id FROM appointments WHERE appointment_id = ?";
             $stmt = $connection->prepare($getAccountIdQuery);
             $stmt->bind_param("i", $appointmentID);
             $stmt->execute();
             $result = $stmt->get_result();
             $oldAppointment = $result->fetch_assoc();
-
+        
             if (!$oldAppointment) {
                 throw new Exception("Failed to fetch previous appointment details.");
             }
-
+        
             $accountID = $oldAppointment['account_id'];
             $rebookedBy = $therapistID;
-
-
-            // ✅ Mark original appointment as completed
-            $updateQuery = "UPDATE appointments SET status = 'Completed' WHERE appointment_id = ?";
-            $stmt = $connection->prepare($updateQuery);
-            $stmt->bind_param("i", $appointmentID);
-            $stmt->execute();
         } else {
             // ✅ Case 2: Rebooking a past patient (No appointment_id)
             $getAccountIdQuery = "SELECT account_id FROM patients WHERE patient_id = ?";
@@ -119,10 +136,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             echo json_encode(["status" => "success", "message" => "Appointment rebooked successfully. The client has been notified."]);
             } else {
             echo json_encode(["status" => "success", "message" => "Appointment rebooked successfully, but the email notification failed."]);
-            }
+            }    exit(); // ✅ prevent further code execution
+        } else {
+            echo json_encode(["status" => "success", "message" => "Appointment rebooked successfully."]);
+            exit(); // ✅ add exit to ensure only one response
         }
-
-        echo json_encode(["status" => "success", "message" => "Appointment rebooked successfully. "]);
     } catch (Exception $e) {
         $connection->rollback();
         echo json_encode(["status" => "error", "message" => "Failed to rebook appointment: " . $e->getMessage()]);

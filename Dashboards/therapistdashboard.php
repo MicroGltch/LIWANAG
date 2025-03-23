@@ -433,47 +433,9 @@ $stmt->close();
                 <!-- The buttons will be dynamically added here by JavaScript -->
             </div>
             <div class="uk-width-1-1 uk-margin-top">
-                
+                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
             </div>
         </form>
-
-        <!-- Change Password Modal still -->
-<div id="change-password-modal" uk-modal>
-    <div class="uk-modal-dialog uk-modal-body uk-overflow-auto">
-        <h2 class="uk-modal-title">Change Password</h2>
-
-        <div id="password-alert-container"></div>
-        
-        <form id="change-password-form" class="uk-form-stacked">
-            <div class="uk-margin">
-                <label class="uk-form-label" for="current-password">Current Password</label>
-                <div class="uk-form-controls">
-                    <input class="uk-input" id="current-password" type="password" required>
-                </div>
-            </div>
-            
-            <div class="uk-margin">
-                <label class="uk-form-label" for="new-password">New Password</label>
-                <div class="uk-form-controls">
-                    <input class="uk-input" id="new-password" type="password" required>
-                </div>
-            </div>
-            
-            <div class="uk-margin">
-                <label class="uk-form-label" for="confirm-password">Confirm New Password</label>
-                <div class="uk-form-controls">
-                    <input class="uk-input" id="confirm-password" type="password" required>
-                </div>
-            </div>
-            
-            <div class="uk-margin uk-text-right">
-                <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
-                <button class="uk-button uk-button-primary" type="submit">Update Password</button>
-            </div>
-        </form>
-    </div>
-</div>
-
         <?php unset($_SESSION['update_errors']); ?>
         <?php unset($_SESSION['update_success']); ?>
     </div>
@@ -506,32 +468,57 @@ $stmt->close();
     const emailInput = document.getElementById("email"); // Select the email input
     const removePhotoButton = document.getElementById("removePhotoButton");
     
-    // Add new elements
-    const editEmailButton = document.createElement("button");
-    editEmailButton.id = "editEmailButton";
-    editEmailButton.textContent = "Edit Email";
-    editEmailButton.className = "uk-button uk-button-secondary";  // Using UK button classes for consistency
-    editEmailButton.style.marginRight = "15px";
-    editEmailButton.style.fontSize = "16px";
-    editEmailButton.style.padding = "8px 20px";
-    editEmailButton.style.fontWeight = "bold";
-    
-    const cancelVerificationButton = document.createElement("button");
-    cancelVerificationButton.id = "cancelVerificationButton";
-    cancelVerificationButton.textContent = "Cancel Verification";
-    cancelVerificationButton.className = "uk-button uk-button-danger";  // Using UK button classes for consistency
-    cancelVerificationButton.style.fontSize = "16px";
-    cancelVerificationButton.style.padding = "8px 20px";
-    cancelVerificationButton.style.fontWeight = "bold";
-    
-    // Create a container for the buttons
-    const buttonContainer = document.createElement("div");
-    buttonContainer.className = "uk-margin-medium-top";  // Using UK margin class
-    buttonContainer.style.display = "flex";
-    buttonContainer.style.justifyContent = "flex-start";
-    buttonContainer.style.marginTop = "20px";
-    buttonContainer.appendChild(editEmailButton);
-    buttonContainer.appendChild(cancelVerificationButton);
+      // Create all three buttons with the exact styling from Image 2
+      const resendOtpButton = document.createElement("button");
+        resendOtpButton.id = "resendOtpButton";
+        resendOtpButton.textContent = "RESEND OTP";
+        resendOtpButton.className = "uk-button";
+        resendOtpButton.style.backgroundColor = "#1e88e5"; // Bright blue
+        resendOtpButton.style.color = "white";
+        resendOtpButton.style.fontWeight = "bold";
+        resendOtpButton.style.padding = "8px 20px";
+        resendOtpButton.style.margin = "0 10px 0 0";
+        resendOtpButton.style.border = "none";
+        resendOtpButton.style.borderRadius = "4px";
+        resendOtpButton.style.textTransform = "uppercase";
+        resendOtpButton.style.transition = ".1s ease-in-out";
+        resendOtpButton.style.transitionProperty = "color, background-color, border-color";
+        
+        const editEmailButton = document.createElement("button");
+        editEmailButton.id = "editEmailButton";
+        editEmailButton.textContent = "EDIT EMAIL";
+        editEmailButton.className = "uk-button";
+        editEmailButton.style.backgroundColor = "#212121"; // Dark gray/black
+        editEmailButton.style.color = "white";
+        editEmailButton.style.fontWeight = "bold";
+        editEmailButton.style.padding = "8px 20px";
+        editEmailButton.style.margin = "0 10px 0 0";
+        editEmailButton.style.border = "none";
+        editEmailButton.style.borderRadius = "4px";
+        
+        const cancelVerificationButton = document.createElement("button");
+        cancelVerificationButton.id = "cancelVerificationButton";
+        cancelVerificationButton.textContent = "CANCEL VERIFICATION";
+        cancelVerificationButton.className = "uk-button";
+        cancelVerificationButton.style.backgroundColor = "#e91e63"; // Pink
+        cancelVerificationButton.style.color = "white";
+        cancelVerificationButton.style.fontWeight = "bold";
+        cancelVerificationButton.style.padding = "8px 20px";
+        cancelVerificationButton.style.margin = "0";
+        cancelVerificationButton.style.border = "none";
+        cancelVerificationButton.style.borderRadius = "4px";
+        
+        // Create a container for the buttons
+        const buttonContainer = document.createElement("div");
+        buttonContainer.className = "uk-margin-medium-top";
+        buttonContainer.style.display = "flex";
+        buttonContainer.style.justifyContent = "flex-start";
+        buttonContainer.style.marginTop = "20px";
+        
+        // Add buttons to container in the correct order
+        buttonContainer.appendChild(resendOtpButton);
+        buttonContainer.appendChild(editEmailButton);
+        buttonContainer.appendChild(cancelVerificationButton);
     
     // Insert these buttons after the OTP input
     if (otpSection) {
@@ -624,29 +611,127 @@ $stmt->close();
             saveButton.dataset.step = "";
         });
     }
-    
-    // Cancel Verification Button Click Event - Cancels email verification and restores original email
-    if (cancelVerificationButton) {
-        cancelVerificationButton.addEventListener("click", function(event) {
-            event.preventDefault();
+
+    // Add event listener for Resend OTP button
+if (resendOtpButton) {
+    resendOtpButton.addEventListener("click", function(event) {
+        event.preventDefault();
+        resendOtpButton.disabled = true;
+        
+        // Make the button transparent
+        resendOtpButton.style.opacity = "0.4"; // Higher transparency (lower opacity)
+        
+        // Add a countdown timer to prevent spam
+        let timeLeft = 60;
+        const originalText = resendOtpButton.textContent;
+        resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
+        
+        const countdownTimer = setInterval(() => {
+            timeLeft--;
+            resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
             
-            // Confirm cancellation
-            if (confirm("Are you sure you want to cancel? Your email will not be changed.")) {
-                // Restore original email
-                emailInput.value = originalEmail;
-                
-                // Hide OTP section
-                otpSection.style.display = "none";
-                
-                // Reset save button state
-                saveButton.textContent = "Save";
-                saveButton.dataset.step = "";
-                
-                // Disable inputs if we're not in edit mode
-                if (editButton.textContent === "Edit") {
-                    inputs.forEach(input => input.disabled = true);
-                }
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                resendOtpButton.textContent = originalText;
+                resendOtpButton.disabled = false;
+                resendOtpButton.style.opacity = "1"; // Restore full opacity
             }
+        }, 1000);
+        
+        // Send request to resend OTP
+        const email = document.getElementById("email").value.trim();
+        
+        let formData = new URLSearchParams({
+            action: "resend_otp",
+            email: email
+        });
+        
+        fetch("../Accounts/manageaccount/updateinfo.php", {
+            method: "POST",
+            body: formData,
+            headers: { "Content-Type": "application/x-www-form-urlencoded" }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'OTP Resent',
+                    text: 'A new verification code has been sent to your email.',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                });
+                // Keep the button disabled and transparent during the countdown
+            } else {
+                Swal.fire({
+                    title: 'Error',
+                    text: data.error || 'Failed to resend OTP. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+                
+                // Reset the button immediately on error
+                clearInterval(countdownTimer);
+                resendOtpButton.textContent = originalText;
+                resendOtpButton.disabled = false;
+                resendOtpButton.style.opacity = "1"; // Restore full opacity
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+            
+            // Reset the button immediately on error
+            clearInterval(countdownTimer);
+            resendOtpButton.textContent = originalText;
+            resendOtpButton.disabled = false;
+            resendOtpButton.style.opacity = "1"; // Restore full opacity
+        });
+    });
+}
+    
+        // Cancel Verification Button Click Event - Cancels email verification and restores original email
+        if (cancelVerificationButton) {
+            cancelVerificationButton.addEventListener("click", function(event) {
+                event.preventDefault();
+                
+                // Confirm cancellation with SweetAlert
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Your email will not be changed.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, cancel verification'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Restore original email
+                    emailInput.value = originalEmail;
+                    
+                    // Hide OTP section
+                    otpSection.style.display = "none";
+                    
+                    // Reset save button state
+                    saveButton.textContent = "Save";
+                    saveButton.dataset.step = "";
+                    
+                    // Disable inputs if we're not in edit mode
+                    if (editButton.textContent === "Edit") {
+                        inputs.forEach(input => input.disabled = true);
+                    }
+                    
+                    Swal.fire(
+                        'Cancelled',
+                        'Email verification has been cancelled.',
+                        'info'
+                    );
+                }
+            });
         });
     }
 
@@ -656,17 +741,22 @@ $stmt->close();
         let lastName = document.getElementById("lastName").value.trim();
         let email = emailInput.value.trim(); // Use the selected email input
         let phoneNumber = document.getElementById("mobileNumber").value.trim();
-
+        
         document.querySelectorAll(".error-message").forEach(error => error.textContent = "");
-
+        
         if (!firstName || !lastName || !email || !phoneNumber) {
-            alert("All fields are required.");
+            Swal.fire({
+                title: 'Error!',
+                text: 'All fields are required.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
             return;
         }
-
+        
         // Store the original email in case user cancels verification later
         originalEmail = emailInput.value;
-
+        
         let formData = new URLSearchParams({
             action: "update_user_details",
             firstName: firstName,
@@ -674,7 +764,7 @@ $stmt->close();
             email: email,
             phoneNumber: phoneNumber
         });
-
+        
         fetch("../Accounts/manageaccount/updateinfo.php", {
             method: "POST",
             body: formData,
@@ -687,29 +777,62 @@ $stmt->close();
                         let errorElement = document.querySelector(`[data-error="${key}"]`);
                         if (errorElement) errorElement.textContent = message;
                     });
+                    
+                    Swal.fire({
+                        title: 'Validation Error',
+                        text: 'Please check the form for errors.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 } else if (data.otp_required) {
-                    alert("OTP sent to your new email. Please enter the OTP to verify.");
+                    Swal.fire({
+                        title: 'OTP Sent',
+                        text: 'OTP sent to your new email. Please enter the OTP to verify.',
+                        icon: 'info',
+                        confirmButtonText: 'OK'
+                    });
+                    
                     otpSection.style.display = "block";
                     saveButton.textContent = "Verify OTP";
                     saveButton.dataset.step = "verify";
                 } else if (data.success) {
-                    alert(data.success);
-                    location.reload();
+                    Swal.fire({
+                        title: 'Success!',
+                        text: data.success,
+                        icon: 'success',
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        location.reload();
+                    });
                 } else {
-                    alert("Something went wrong.");
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'Something went wrong.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 }
             })
             .catch(error => {
                 console.error("Error:", error);
-                alert("An error occurred. Please try again.");
+                Swal.fire({
+                    title: 'Error',
+                    text: 'An error occurred. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             });
     }
-
-    // Function to Verify OTP
+        // Function to Verify OTP
     function verifyOTP() {
         let otp = otpInput.value.trim();
         if (!otp) {
-            alert("Please enter OTP.");
+            Swal.fire({
+                title: 'Error',
+                text: 'Please enter OTP.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
             return;
         }
 
@@ -740,19 +863,42 @@ $stmt->close();
         })
         .then(data => {
             if (data.success) {
-                alert("Email updated successfully!");
-                location.reload();
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Email updated successfully!',
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload();
+                });
             } else if (data.error) {
-                alert(data.error);
+                Swal.fire({
+                    title: 'Error',
+                    text: data.error,
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             } else {
-                alert("Invalid OTP. Please try again.");
+                Swal.fire({
+                    title: 'Invalid OTP',
+                    text: 'Invalid OTP. Please try again.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         })
         .catch(error => {
             console.error("Error:", error);
-            alert("An error occurred during OTP verification.");
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred during OTP verification.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         });
     }
+
+    
 
 
 
@@ -813,127 +959,6 @@ $stmt->close();
                     .catch(error => console.error("Error:", error));
             });
         }
-
-         // Change Password Button
-    const changePasswordButton = document.querySelector('[uk-toggle="target: #change-password-modal"]');
-
-if (changePasswordButton) {
-    // Initially disable the Change Password button
-    changePasswordButton.disabled = true;
-}
-
-                // Change Password
-const passwordForm = document.getElementById("change-password-form");
-const passwordAlertContainer = document.getElementById("password-alert-container");
-
-// Prevent default form submission and save actions
-changePasswordButton.addEventListener('click', function(event) {
-        // Prevent any default behavior that might submit a form or trigger save actions
-        event.preventDefault();
-         // Open the modal (UIkit will handle this via the uk-toggle attribute)
-         UIkit.modal("#change-password-modal").show();
-    });
-
-if (passwordForm) {
-    // Initially disable password form inputs
-    const passwordInputs = passwordForm.querySelectorAll("input");
-    passwordInputs.forEach(input => input.disabled = true);
-
-    passwordForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        passwordAlertContainer.innerHTML = "";
-
-        const currentPassword = document.getElementById("current-password").value.trim();
-        const newPassword = document.getElementById("new-password").value.trim();
-        const confirmPassword = document.getElementById("confirm-password").value.trim();
-
-        // Frontend validation
-        if (newPassword !== confirmPassword) {
-            showPasswordAlert("error", "New passwords do not match");
-            return;
-        }
-
-        if (newPassword.length < 8) {
-            showPasswordAlert("error", "Password must be at least 8 characters");
-            return;
-        }
-
-        if (!/[A-Z]/.test(newPassword)) {
-            showPasswordAlert("error", "Password must contain at least one uppercase letter");
-            return;
-        }
-
-        if (!/[a-z]/.test(newPassword)) {
-            showPasswordAlert("error", "Password must contain at least one lowercase letter");
-            return;
-        }
-
-        if (!/[0-9]/.test(newPassword)) {
-            showPasswordAlert("error", "Password must contain at least one number");
-            return;
-        }
-
-        if (!/[^A-Za-z0-9]/.test(newPassword)) {
-            showPasswordAlert("error", "Password must contain at least one special character");
-            return;
-        }
-
-        console.log("Sending password change request");
-
-        fetch("../Accounts/manageaccount/updateinfo.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-                action: "change_password",
-                current_password: currentPassword,
-                new_password: newPassword,
-                confirm_password: confirmPassword
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Response received:", data);
-                if (data.success) {
-                    showPasswordAlert("success", data.success);
-                    passwordForm.reset();
-                    setTimeout(() => {
-                        if (typeof UIkit !== "undefined") {
-                            UIkit.modal("#change-password-modal").hide();
-                        }
-                    }, 2000);
-                } else if (data.error) {
-                    showPasswordAlert("error", data.error);
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                showPasswordAlert("error", "An unexpected error occurred. Please try again.");
-            });
-    });
-}
-
-function showPasswordAlert(type, message) {
-    const alertClass = type === "success" ? "uk-alert-success" : "uk-alert-danger";
-    passwordAlertContainer.innerHTML = `
-        <div class="${alertClass}" uk-alert>
-            <a class="uk-alert-close" uk-close></a>
-            <p>${message}</p>
-        </div>`;
-}
-
-// UIkit Modal 'shown' event handler for debugging
-UIkit.util.on('#change-password-modal', 'shown', function () {
-    console.log("Change password modal is shown.");
-
-    let currentPasswordInput = document.getElementById('current-password');
-    console.log("currentPasswordInput:", currentPasswordInput);
-
-    let newPasswordInput = document.getElementById('new-password');
-    console.log("newPasswordInput:", newPasswordInput);
-
-    let confirmPasswordInput = document.getElementById('confirm-password');
-    console.log("confirmPasswordInput:", confirmPasswordInput);
-});
 
         // Initialize OTP section to be hidden
         otpSection.style.display = "none";
