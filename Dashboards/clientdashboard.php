@@ -139,9 +139,8 @@ echo "<script>
             <div uk-navbar>
                 <div class="uk-navbar-left">
                     <ul class="uk-navbar-nav">
-                        <li><a href="#">About Us</a></li>
                         <li><a href="#">FAQs</a></li>
-                        <li><a href="#">Services</a></li>
+                        <li><a href="#">Terms and Conditions</a></li>
                     </ul>
                 </div>
                 <div class="uk-navbar-center">
