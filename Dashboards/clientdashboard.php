@@ -592,6 +592,17 @@ echo "<script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+        
+        document.addEventListener("DOMContentLoaded", function () {
+        if (window.location.hash === "#book-appointment") {
+            document.getElementById("book-appointment").style.display = "block";
+            let appointmentsSection = document.getElementById("appointments"); // Adjust ID if necessary
+            if (appointmentsSection) {
+                appointmentsSection.style.display = "none"; // Hide Appointments section
+            }
+        }
+    });
+
 
 
     document.addEventListener("DOMContentLoaded", function () {
