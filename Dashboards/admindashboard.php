@@ -331,7 +331,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                     <td><?= htmlspecialchars($client['account_status']); ?></td>
                                     <td><?= htmlspecialchars($client['appointment_count']); ?></td>
                                     <td><?php if ($client['account_status'] != 'Archived') { ?>
-                                        <button class="uk-button uk-button-danger archive-user" data-account-id="<?= $client['account_ID']; ?>">Archive</button>
+                                        <button class="uk-button uk-button-danger archive-user" style="border-radius: 15px;" data-account-id="><?= $client['account_ID']; ?>">Archive</button>
                                         <?php } ?>
                                         </td>
                                         <!-- Activate account logic to follow
@@ -593,7 +593,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                                 <div class="uk-flex uk-flex-column uk-margin-left">
                                     <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" disabled>
+                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" style="border-radius: 15px;" disabled>
                                         Upload Photo
                                     </button>
                                     <div class="uk-text-center">
@@ -643,8 +643,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <small style="color: green;" class="error-message" id="successMessage"></small>
 
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
-                <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
+                <button type="button" class="uk-button uk-button-secondary" id="editButton" style="border-radius: 15px;">Edit</button>
+                <button class="uk-button uk-button-primary" type="submit" id="saveButton" style="border-radius: 15px;" disabled>Save Changes</button>
             </div>
 
             <div id="otpSection" class="uk-width-1-1" style="display: none;">

@@ -93,7 +93,7 @@ $upcomingCount = $result->fetch_assoc()['count'];
         <h3>Manage Appointments</h3>
         <div class="uk-grid-small uk-child-width-1-1" uk-grid>
             <div>
-                <a href="validate_appointments.php" class="uk-button uk-button-primary uk-width-1-1">
+                <a href="validate_appointments.php" class="uk-button uk-button-primary uk-width-1-1" style="border-radius: 15px;">
                     Validate Appointments (<?= $pendingCount; ?>)
                 </a>
             </div>

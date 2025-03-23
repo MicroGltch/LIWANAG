@@ -42,6 +42,17 @@ $waitlistQuery = "SELECT a.appointment_id, a.patient_id, a.date, a.time, a.sessi
                   ORDER BY a.date ASC, a.time ASC";
 $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_ASSOC);
 
+// Fetch Filters
+$statusFilter = $_GET['status'] ?? "";
+$sessionTypeFilter = $_GET['session_type'] ?? "";
+$therapistFilter = $_GET['therapist'] ?? "";
+$startDate = $_GET['start_date'] ?? "";
+$endDate = $_GET['end_date'] ?? "";
+
+// Fetch Therapist List
+$therapistQuery = "SELECT account_ID, account_FName, account_LName FROM users WHERE account_Type = 'therapist'";
+$therapistResult = $connection->query($therapistQuery);
+$therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
 ?>
 
 
@@ -77,20 +88,16 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
             background-color: #ffffff !important;
         }
 
-        .action-btn {
+        /*.action-btn {
             width: 120px;
-            /* Set a fixed width for consistency */
             text-align: center;
-            /* Center the text */
             margin: 0 auto;
-            /* Center the button within the container */
-            border-radius: 8px;
-            /* Make the buttons rounded */
+            border-radius: 15px;
         }
 
         .uk-button-secondary,
         .uk-button-warning {
-            border-radius: 8px;
+            border-radius: 15px;
             padding: 0 15px;
             min-width: 160px;
             margin: 5px 0;
@@ -100,14 +107,13 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
         .uk-button-warning:hover {
             transform: translateY(-1px);
             transition: transform 0.2s;
-        }
+        }*/
 
-        /* Updated action button styles */
+       
         .action-btn {
             width: 120px;
             text-align: center;
             margin: 5px 0;
-            border-radius: 8px;
             display: block;
         }
 
@@ -119,10 +125,8 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
             margin-bottom: 0;
         }
 
-        /* Keep existing referral button styles */
         .uk-button-secondary,
         .uk-button-warning {
-            border-radius: 8px;
             padding: 0 15px;
             min-width: 160px;
             margin: 5px 0;
@@ -145,6 +149,60 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
     </ul>
 
     <h1 class="uk-text-bold">Validate Appointments</h1>
+
+    <!-- 🔹 Filters Section -->
+    <form method="GET" class="uk-width-1-1">
+        <div class="uk-grid-small uk-flex uk-flex-middle uk-grid-match" uk-grid>
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">Status:</label>
+                <select class="uk-select" name="status">
+                    <option value="">All</option>
+                    <option value="Pending" <?= $statusFilter === "Pending" ? "selected" : "" ?>>Pending</option>
+                    <option value="Approved" <?= $statusFilter === "Approved" ? "selected" : "" ?>>Approved</option>
+                    <option value="Waitlisted" <?= $statusFilter === "Waitlisted" ? "selected" : "" ?>>Waitlisted</option>
+                    <option value="Completed" <?= $statusFilter === "Completed" ? "selected" : "" ?>>Completed</option>
+                    <option value="Cancelled" <?= $statusFilter === "Cancelled" ? "selected" : "" ?>>Cancelled</option>
+                    <option value="Declined" <?= $statusFilter === "Declined" ? "selected" : "" ?>>Declined</option>
+                </select>
+            </div>
+
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">Session Type:</label>
+                <select class="uk-select" name="session_type">
+                    <option value="">All</option>
+                    <option value="Initial Evaluation" <?= $sessionTypeFilter === "Initial Evaluation" ? "selected" : "" ?>>Initial Evaluation</option>
+                    <option value="Playgroup" <?= $sessionTypeFilter === "Playgroup" ? "selected" : "" ?>>Playgroup</option>
+                </select>
+            </div>
+
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">Therapist:</label>
+                <select class="uk-select" name="therapist">
+                    <option value="">All</option>
+                    <?php foreach ($therapists as $therapist): ?>
+                        <option value="<?= $therapist['account_ID']; ?>" <?= $therapistFilter == $therapist['account_ID'] ? "selected" : "" ?>>
+                            <?= htmlspecialchars($therapist['account_FName'] . " " . $therapist['account_LName']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">Start Date:</label>
+                <input class="uk-input" type="date" name="start_date" value="<?= $startDate; ?>">
+            </div>
+
+            <div class="uk-width-1-5@m">
+                <label class="uk-form-label">End Date:</label>
+                <input class="uk-input" type="date" name="end_date" value="<?= $endDate; ?>">
+            </div>
+        </div>
+
+        <div class="uk-text-right uk-margin-top">
+            <button class="uk-button uk-button-primary" type="submit" style="border-radius: 15px;">Apply Filters</button>
+            <a href="validate_appointments.php" class="uk-button uk-button-default" style="border-radius: 15px;">Reset</a>
+        </div>
+    </form>
 
     <!-- Pending Appointments Table -->
     <div class="uk-overflow-auto">
@@ -183,13 +241,13 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                             <?php if (!empty($appointment['official_referral_file'])): ?>
                                 <!-- ✅ Show Official Referral (Priority) -->
                                 <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>" 
-                                target="_blank" class="uk-button uk-button-secondary">
+                                target="_blank" class="uk-button uk-button-secondary" style="border-radius: 15px;">
                                     View Official Referral
                                 </a>
                             <?php elseif (!empty($appointment['proof_of_booking_referral_file'])): ?>
                                 <!-- ✅ Show Proof of Booking ONLY if no Official Referral exists -->
                                 <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>" 
-                                target="_blank" class="uk-button uk-button-warning">
+                                target="_blank" class="uk-button uk-button-warning" style="border-radius: 15px;">
                                     View Proof of Booking
                                 </a>
                             <?php else: ?>
@@ -202,13 +260,13 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
 
 
                         <td>
-                            <button class="uk-button uk-button-primary action-btn" data-id="<?= $appointment['appointment_id']; ?>" data-action="Approve"
+                            <button class="uk-button uk-button-primary action-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>" data-action="Approve"
                                 data-patient-img="<?= !empty($appointment['patient_picture']) ? '../../uploads/profile_pictures/' . $appointment['patient_picture'] : '../../uploads/profile_pictures/default.png'; ?>">Approve</button>
                             
-                            <button class="uk-button uk-button-danger action-btn" data-id="<?= $appointment['appointment_id']; ?>" data-action="Decline">Decline</button>
+                            <button class="uk-button uk-button-danger action-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>" data-action="Decline">Decline</button>
                             
                             <?php if (strpos($appointment['session_type'], 'Rebooking') === false): ?>
-                                <button class="uk-button uk-button-default action-btn" data-id="<?= $appointment['appointment_id']; ?>" data-action="Waitlist">Waitlist</button>
+                                <button class="uk-button uk-button-default action-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>" data-action="Waitlist">Waitlist</button>
                             <?php endif; ?>
                         </td>
 
@@ -243,11 +301,11 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                             <td><?= htmlspecialchars($appointment['date']); ?> (Waitlisted)</td>
                             <td>
                                 <?php if (strtolower($appointment['session_type']) === 'playgroup'): ?>
-                                    <button class="uk-button uk-button-primary assign-playgroup-btn" data-id="<?= $appointment['appointment_id']; ?>">
+                                    <button class="uk-button uk-button-primary assign-playgroup-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>">
                                         Assign Playgroup Slot
                                     </button>
                                 <?php else: ?>
-                                    <button class="uk-button uk-button-primary assign-btn" data-id="<?= $appointment['appointment_id']; ?>">
+                                    <button class="uk-button uk-button-primary assign-btn" style="border-radius: 15px;" data-id="<?= $appointment['appointment_id']; ?>">
                                         Assign Date, Time & Therapist
                                     </button>
                                 <?php endif; ?>

@@ -160,7 +160,7 @@ $blockedDates = json_decode($settings['blocked_dates'], true);
         </div>
 
         <div class="uk-text-right">
-            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Settings</button>
+            <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="border-radius: 15px;">Save Settings</button>
         </div>
 
     </form>
