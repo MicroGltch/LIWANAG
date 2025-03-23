@@ -87,9 +87,9 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                         <td>
                             <button class="uk-button uk-button-primary complete-btn"
                                 data-id="<?= $appointment['appointment_id']; ?>"
-                                data-patient-id="<?= $appointment['patient_id']; ?>">Complete
+                                data-patient-id="<?= $appointment['patient_id']; ?>" style="margin-right: 10px;border-radius: 15px;">Complete
                             </button>
-                            <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
+                            <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>" style="margin-right: 10px;border-radius: 15px;">Cancel</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
