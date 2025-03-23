@@ -140,7 +140,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         </div>
 
         <div class="uk-text-right">
-            <button type="button" id="editButton" class="uk-button uk-button-default" style="border-radius: 15px;">Edit</button>
+            <button type="button" id="editButton" class="uk-button uk-button-default" style="border-radius: 15px; background-color: #1a202c; color:white;">Edit</button>
             <button type="button" id="cancelButton" class="uk-button uk-button-default" style="display: none; border-radius: 15px;">Cancel</button>
             <button type="submit" id="saveButton" class="uk-button uk-button-primary" style="display: none; border-radius: 15px;">Save Contents</button>
         </div>

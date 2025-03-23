@@ -414,7 +414,7 @@ $stmt->close();
     <footer class="footer" style="background-color: #333; color: white; padding: 40px 0;">
         <div class="uk-container uk-container-expand">
             <div class="uk-grid-divider uk-child-width-expand@s uk-grid" uk-grid>
-                <div class="uk-width-2-3@m">
+                <div class="uk-width-2-3@m" style="background-color: #333;">
                     <h3 class="uk-text-left" style="color: white;">[Little Wanderer's Therapy Center Logo]</h3>
                     <ul class="uk-list">
                         <li class="uk-text-left"><span uk-icon="icon: location;"></span> Benrosi V, 9746 Kamagong, Village, Makati, 1203 Kalakhang Maynila, Philippines</li>
@@ -422,7 +422,7 @@ $stmt->close();
                     </ul>
                     <p class="uk-text-left" style="color: gray;">For inquiries, send us a message here on our Facebook page. You may also call or text us at 09274492970.</p>
                 </div>
-                <div class="uk-width-1-3@m">
+                <div class="uk-width-1-3@m" style="background-color: #333;">
                     <div>
                         <p class="uk-text-left" style="color: gray;">
                             Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
