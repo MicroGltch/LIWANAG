@@ -415,11 +415,11 @@ $stmt->close();
             <small style="color: green;" class="error-message" id="successMessage"></small>
 
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
-            <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
-            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
+            <button type="button" class="uk-button uk-button-secondary" id="editButton" style="border-radius: 15px;">Edit</button>
+            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal" style="border-radius: 15px;">Change Password</button>
                 
                 
-                <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
+                <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="border-radius: 15px;">Save Changes</button>
             
             </div>
 
@@ -432,9 +432,7 @@ $stmt->close();
                 </div>
                 <!-- The buttons will be dynamically added here by JavaScript -->
             </div>
-            <div class="uk-width-1-1 uk-margin-top">
-                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
-            </div>
+
         </form>
         <?php unset($_SESSION['update_errors']); ?>
         <?php unset($_SESSION['update_success']); ?>
