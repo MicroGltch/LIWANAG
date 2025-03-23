@@ -376,7 +376,7 @@ $stmt->close();
 
     <!-- Terms and Conditions Modal -->
     <div id="tnc-modal" uk-modal>
-        <div class="uk-modal-dialog uk-modal-body">
+        <div class="uk-modal-dialog uk-modal-body" style="border-radius: 15px">
             <h2 class="uk-modal-title">Terms and Conditions</h2>
             <!-- TESTING FOR MANAGE CONTENT -->
             <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
@@ -387,14 +387,14 @@ $stmt->close();
              -->
                 <p><?php echo $content['terms'] ?? ''; ?></p>
                 <p class="uk-text-right">
-                <button class="uk-button uk-button-primary uk-modal-close" type="button">Close</button>
+                <button class="uk-button uk-button-primary uk-modal-close" type="button" style="border-radius: 15px">Close</button>
             </p>
         </div>
     </div>
 
     <!-- FAQs Modal -->
     <div id="faqs-modal" uk-modal>
-        <div class="uk-modal-dialog uk-modal-body">
+        <div class="uk-modal-dialog uk-modal-body" style="border-radius: 15px">
             <h2 class="uk-modal-title">FAQs</h2>
             <!-- TESTING FOR MANAGE CONTENT -->
             <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
@@ -405,7 +405,7 @@ $stmt->close();
              -->
                 <p><?php echo $content['faqs'] ?? ''; ?></p>
                 <p class="uk-text-right">
-                <button class="uk-button uk-button-primary uk-modal-close" type="button">Close</button>
+                <button class="uk-button uk-button-primary uk-modal-close" type="button" style="border-radius: 15px">Close</button>
             </p>
         </div>
     </div>
