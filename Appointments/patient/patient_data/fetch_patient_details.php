@@ -10,7 +10,7 @@ if (!isset($_SESSION['account_ID']) || !isset($_GET['patient_id'])) {
 $patientID = $_GET['patient_id'];
 $accountID = $_SESSION['account_ID'];
 
-$query = "SELECT patient_id, first_name, last_name, 
+$query = "SELECT patient_id, first_name, last_name, service_type,
                 CASE 
                     WHEN bday = '0000-00-00' THEN NULL 
                     ELSE bday 

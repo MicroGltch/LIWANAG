@@ -499,7 +499,7 @@ console.log("Today is", today.toISOString().split("T")[0]);
                         patientName.textContent = fullName;
                         document.getElementById("patient_name_hidden").value = fullName;
                         patientGender.textContent = data.patient.gender;
-                        patientService.textContent = data.patient.service_type ?? "Pending";
+                        patientService.textContent = data.patient.service_type ?? "Not Found";
 
                         // Calculate age from birthdate
                         let birthdate = data.patient.bday; // Access birthday from response
