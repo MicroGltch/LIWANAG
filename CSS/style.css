@@ -46,6 +46,12 @@ hr.solid{
     margin-bottom: 0px;
 }
 
+
+.uk-checkbox, .uk-input, .uk-radio, .uk-select, .uk-textarea{
+    border-radius: 15px !important;
+}
+
+
 /* Account Details Page */
 .uk-nav > li {
     margin-bottom: 16px;
@@ -73,7 +79,7 @@ hr.solid{
 }
 
 .uk-card {
-    border-radius: 8px;
+    border-radius: 15px;
 }
 
 .uk-form-label {
@@ -82,9 +88,6 @@ hr.solid{
     margin-bottom: 5px;
 }
 
-.uk-input {
-    border-radius: 4px;
-}
 
 /* Account Details Profile Photo */
 .uk-card .uk-border-circle {
@@ -378,6 +381,15 @@ padding-right: 100px;
     border-radius:20px;
 }
 
+.uk-table th{
+    text-align:center;
+}
+
+.uk-table td {
+    padding: 16px 12px;
+    vertical-align: top;
+    text-align:center;
+  }
 
 
 /* Extra small devices (phones, 600px and down) */
