@@ -2,7 +2,6 @@
 require_once "../../../dbconfig.php";
 session_start();
 
-// ✅ Ensure Therapist Access
 if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
     echo json_encode(["status" => "error", "message" => "Unauthorized access."]);
     exit();
@@ -15,16 +14,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $connection->begin_transaction();
 
     try {
-        // ✅ Fetch global business hours from settings (only one row expected)
-        $settingsQuery  = "SELECT business_hours_start, business_hours_end FROM settings LIMIT 1";
-        $settingsResult = $connection->query($settingsQuery);
-        if (!$settingsResult || $settingsResult->num_rows === 0) {
-            throw new Exception("Business hours not configured.");
+        // ✅ Fetch global business hours by day
+        $globalHours = [];
+        $query = "SELECT day_name, start_time, end_time FROM business_hours_by_day";
+        $result = $connection->query($query);
+        while ($row = $result->fetch_assoc()) {
+            $globalHours[$row['day_name']] = [
+                'start' => $row['start_time'],
+                'end'   => $row['end_time']
+            ];
         }
-
-        $settings = $settingsResult->fetch_assoc();
-        $bizStart = $settings['business_hours_start']; // e.g., "08:00:00"
-        $bizEnd   = $settings['business_hours_end'];   // e.g., "17:00:00"
 
         // ✅ Delete existing therapist availability
         $deleteQuery = "DELETE FROM therapist_default_availability WHERE therapist_id = ?";
@@ -36,17 +35,30 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $insertQuery = "INSERT INTO therapist_default_availability (therapist_id, day, start_time, end_time) VALUES (?, ?, ?, ?)";
         $stmt        = $connection->prepare($insertQuery);
 
-        // ✅ Loop through each weekday and insert validated availability
+        $errorDays = [];
+        $fieldErrors = [];
+
         foreach ($daysOfWeek as $day) {
             if (!empty($_POST['start_time'][$day]) && !empty($_POST['end_time'][$day])) {
                 $startTime = date("H:i:s", strtotime($_POST['start_time'][$day]));
-                $endTime   = date("H:i:s", strtotime($_POST['end_time'][$day]));                
+                $endTime   = date("H:i:s", strtotime($_POST['end_time'][$day]));
 
-                // ✅ Validate: within business hours and logical range
-                if ($startTime < $bizStart || $endTime > $bizEnd || $startTime >= $endTime) {
-                    $rangeStart = date("g:i A", strtotime($bizStart));
-                    $rangeEnd   = date("g:i A", strtotime($bizEnd));
-                    throw new Exception("Invalid hours on {$day}. Must be between {$rangeStart} and {$rangeEnd}.");
+                $allowedStart = $globalHours[$day]['start'] ?? null;
+                $allowedEnd   = $globalHours[$day]['end'] ?? null;
+
+                // ❗ Day is closed globally
+                if ($allowedStart === null || $allowedEnd === null) {
+                    $errorDays[] = "$day is marked as closed.";
+                    $fieldErrors[$day] = "$day is marked as closed by the center.";
+                    continue;
+                }
+
+                // ❗ Time out of range or invalid
+                if ($startTime < $allowedStart || $endTime > $allowedEnd || $startTime >= $endTime) {
+                    $msg = "$day must be within " . date("g:i A", strtotime($allowedStart)) . " to " . date("g:i A", strtotime($allowedEnd)) . " and start time must be before end time.";
+                    $errorDays[] = $msg;
+                    $fieldErrors[$day] = $msg;
+                    continue;
                 }
 
                 $stmt->bind_param("isss", $therapistID, $day, $startTime, $endTime);
@@ -54,19 +66,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
 
-        // ✅ Commit changes
+        if (!empty($errorDays)) {
+            throw new Exception(json_encode(["type" => "field", "messages" => $fieldErrors]));
+        }
+
         $connection->commit();
+
         echo json_encode([
-            "status"  => "success",
+            "status" => "success",
             "message" => "Default availability updated successfully."
         ]);
 
     } catch (Exception $e) {
         $connection->rollback();
-        echo json_encode([
-            "status"  => "error",
-            "message" => $e->getMessage()
-        ]);
+
+        $msg = $e->getMessage();
+        $decoded = json_decode($msg, true);
+
+        if (isset($decoded['type']) && $decoded['type'] === 'field') {
+            echo json_encode([
+                "status"  => "field_error",
+                "field_errors" => $decoded['messages']
+            ]);
+        } else {
+            echo json_encode([
+                "status"  => "error",
+                "message" => $msg
+            ]);
+        }
     }
 }
 ?>
