@@ -68,12 +68,12 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
         <table class="uk-table uk-table-striped">
             <thead>
                 <tr>
-                    <th>Patient</th>
-                    <th>Session Type</th>
-                    <th>Date</th>
-                    <th>Time</th>
-                    <th>Status</th>
-                    <th>Actions</th>
+                    <th >Patient</th>
+                    <th >Session Type</th>
+                    <th >Date</th>
+                    <th >Time</th>
+                    <th >Status</th>
+                    <th >Actions</th>
                 </tr>
             </thead>
             <tbody>

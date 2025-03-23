@@ -128,6 +128,10 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
         body {
             background-color: #ffffff !important;
         }
+        
+        .no-break {
+            white-space: nowrap;
+        }
     </style>
 
 </head>
@@ -183,8 +187,8 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
         </div>
 
         <div class="uk-text-right uk-margin-top">
-            <button class="uk-button uk-button-primary" type="submit">Apply Filters</button>
-            <a href="view_all_appointments.php" class="uk-button uk-button-default">Reset</a>
+            <button class="uk-button" type="submit" style="border-radius: 15px; background-color:#1e87f0; color:white;">Apply Filters</button>
+            <a href="view_all_appointments.php" class="uk-button uk-button-default" style="border-radius: 15px;">Reset</a>
         </div>
     </form>
 
@@ -194,13 +198,13 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive uk-table-middle">
                 <thead>
                     <tr>
-                        <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Therapist <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                        <th class="uk-table-shrink"><span class="no-break">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th class="uk-table-shrink"><span class="no-break">Client <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th class="uk-table-shrink"><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th class="uk-table-shrink"><span class="no-break">Time <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th class="uk-table-shrink"><span class="no-break">Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th class="uk-table-shrink"><span class="no-break">Therapist <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th class="uk-table-shrink"><span class="no-break">Status <span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
                     </tr>
                 </thead>
                 <tbody>

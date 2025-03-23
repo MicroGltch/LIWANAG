@@ -18,6 +18,19 @@ html,body{
     overflow-x: hidden;
 }
 
+#signup-div{
+    background-image: url(loginbg.png) !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+  }
+
+.forget-password-div{
+    background-image: url(loginbg.png) !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+}
 
 h3.uk-card-title{    
     font-family: 'Roboto',sans-serif;
@@ -46,6 +59,20 @@ hr.solid{
     margin-bottom: 0px;
 }
 
+
+.uk-checkbox, .uk-input, .uk-radio, .uk-select, .uk-textarea{
+    border-radius: 15px !important;
+}
+
+.login-div{
+    background-image: url(loginbg.png) !important;
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center bottom;
+  }
+
+
+
 /* Account Details Page */
 .uk-nav > li {
     margin-bottom: 16px;
@@ -73,7 +100,7 @@ hr.solid{
 }
 
 .uk-card {
-    border-radius: 8px;
+    border-radius: 15px;
 }
 
 .uk-form-label {
@@ -82,9 +109,6 @@ hr.solid{
     margin-bottom: 5px;
 }
 
-.uk-input {
-    border-radius: 4px;
-}
 
 /* Account Details Profile Photo */
 .uk-card .uk-border-circle {
@@ -98,6 +122,7 @@ hr.solid{
 .uk-flex.uk-flex-center {
     text-align: center;
 }
+
 
 
 .create-acc-card{
@@ -135,13 +160,12 @@ hr.solid{
 }
 
 
-.footer{
+.footer{    
     
-    height:60px;
     width: 100vw;
     text-align: center;
     background-color: #1a202c;
-    padding: 2%;
+    
 }
 
 .footer-text{
@@ -216,11 +240,6 @@ hr.solid{
     text-decoration: underline;
 }
 
-
-.uk-section
-{    
-
-}
 
 .welcome-title{
     font-size: 50px;
@@ -377,6 +396,16 @@ padding-right: 100px;
 .about-us-slideshow{
     border-radius:20px;
 }
+
+.uk-table th{
+    text-align:center;
+}
+
+.uk-table td {
+    padding: 16px 12px;
+    vertical-align: top;
+    text-align:center;
+  }
 
 
 
@@ -658,6 +687,35 @@ padding-right: 100px;
 
 
     
+}
+
+/* Validate app action buttons */
+.action-btn {
+    width: 120px;
+    text-align: center;
+    margin: 5px 0;
+    display: block;
+}
+
+td .action-btn:first-child {
+    margin-top: 0;
+}
+
+td .action-btn:last-child {
+    margin-bottom: 0;
+}
+
+.uk-button-secondary,
+.uk-button-warning {
+    padding: 0 15px;
+    min-width: 160px;
+    margin: 5px 0;
+}
+
+.uk-button-secondary:hover,
+.uk-button-warning:hover {
+    transform: translateY(-1px);
+    transition: transform 0.2s;
 }
 
 

@@ -74,7 +74,7 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
             </select>
         </div>
         <div class="uk-width-1-1 uk-text-right uk-margin-top">
-            <button class="uk-button uk-button-primary" type="submit" id="registerTherapist">Register</button>
+        <button class="uk-button uk-button-primary" type="submit" id="registerTherapist" style="border-radius: 15px; background-color:#1e87f0; color:white;">Register</button>
         </div>
     </form>
 

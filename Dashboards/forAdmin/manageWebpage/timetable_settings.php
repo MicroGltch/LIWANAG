@@ -197,7 +197,7 @@ while ($row = $exceptionsResult->fetch_assoc()) {
         </div>
 
         <div class="uk-text-right">
-            <button class="uk-button uk-button-primary" type="submit">Save Global Settings</button>
+            <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="border-radius: 15px;">Save Settings</button>
         </div>
     </form>
 

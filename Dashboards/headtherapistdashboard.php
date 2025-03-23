@@ -162,20 +162,28 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
     <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport">
         <!--Sidebar-->
         <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
-            <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
-                Menu <span uk-navbar-toggle-icon></span>
-            </button>
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')">Dashboard</a></li>
+                    <h4 style="font-weight: bold;">Head Therapist Dashboard</h4>
+                    <li class="uk-active"><a href="#dashboard" onclick="showSection('dashboard')"><span class="uk-margin-small-right" uk-icon="home"></span> Dashboard</a></li>
+                <hr>
+                <li class="uk-parent">
+                    <li>
+                        <span>Appointments</span>
+                    </li>
+                    <li><a href="#view-appointments" onclick="showSection('view-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> View All Appointments</a></li>
+                    <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Appointments</a></li>                    
+                </li>
+                
+                <hr>
 
-                    <li><a href="#view-appointments" onclick="showSection('view-appointments')">View All Appointments</a></li>
-
-                    <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')">Manage Appointments</a></li>                    
-
-                    <li><a href="#timetable-settings" onclick="showSection('timetable-settings')">Manage Timetable Settings</a></li>
-
-                    <li><a href="#account-details" onclick="showSection('account-details')">Account Details</a></li>
+                <li class="uk-parent">
+                    
+                    <li>
+                        <span>Your Account</span>
+                    </li>
+                    
+                    <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
                 </ul>
             </div>
         </div>
@@ -303,7 +311,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                                 <div class="uk-flex uk-flex-column uk-margin-left">
                                     <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" disabled>
+                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" style="border-radius: 15px;" disabled>
                                         Upload Photo
                                     </button>
                                     <div class="uk-text-center">
@@ -322,7 +330,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         </div>
                     </form>
                 </div>
-
                 <div class="uk-card uk-card-default uk-card-body">
             <h3 class="uk-card-title uk-text-bold">User Details</h3>
             <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>

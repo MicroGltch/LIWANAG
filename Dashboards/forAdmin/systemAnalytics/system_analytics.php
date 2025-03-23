@@ -53,7 +53,7 @@
         <input class="uk-input uk-width-1-1" type="date" name="end_date" id="end_date" required>
 
         <div class="uk-text-right">
-        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Generate PDF Report</button>
+        <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="border-radius: 15px;">Generate PDF Report</button>
         </div>
     </form>
 

@@ -73,7 +73,7 @@ while ($row = $bizQuery->fetch_assoc()) {
 </head>
 <body>
     <div class="uk-container uk-margin-top">
-        <h2>Manage Default Availability</h2>
+        <h4>Manage Default Availability</h4>
 
         <?php
         function generateTimeOptions($start, $end, $interval = 30) {
@@ -150,7 +150,10 @@ while ($row = $bizQuery->fetch_assoc()) {
                     <?php endforeach; ?>
                 </tbody>
             </table>
+            <div class="uk-width-1-1 uk-text-right uk-margin-top">
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Availability</button>
+            </div>
+           
         </form>
     </div>
 

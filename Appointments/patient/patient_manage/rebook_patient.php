@@ -105,42 +105,56 @@ while ($row = $exceptions->fetch_assoc()) {
 <body>
 
     <div class="uk-container uk-margin-top">
-        <h2 class="uk-text-bold" >Rebook a Previous Patient</h2>
+        <h3 class="uk-text-bold" >Rebook a Previous Patient</h3>
 
 
-        <form id="rebookForm" action="../../app_process/process_rebook.php" method="POST" class="uk-form-stacked">
+        <form id="rebookForm" action="../../app_process/process_rebook.php" method="POST" enctype="multipart/form-data" class="uk-grid-small" uk-grid>
             
-        <label class="uk-form-label">Select Patient:</label>
-
-            <select class="uk-select" name="patient_id" id="patient_id" required>
-                <option value="" disabled selected>Select a Patient</option>
-                <?php foreach ($patients as $patient): ?>
-                    <option value="<?= $patient['patient_id']; ?>" data-service="<?= htmlspecialchars($patient['service_type'] ?? ''); ?>">
-                        <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
-
-            <label class="uk-form-label">Service Type:</label>
-            <select class="uk-select" name="service_type" id="service_type" required>
-                <option value="" disabled selected>Select Service Type</option>
-                <option value="Occupational Therapy">Occupational Theraphy</option>
-                <option value="Behavioral Therapy">Behavioral Therapy</option>
-            </select>
-
-            <label class="uk-form-label">Date for next session:</label>
-            <input class="uk-input" type="text" name="new_date" id="new_date" required>
-
-            <label class="uk-form-label">Time for next session:</label>
-            <select class="uk-select" name="new_time" id="new_time" required></select>
-
+        <div class="uk-width-1@s">
+        <label class="uk-form-label">Select a Patient</label>
+        <select class="uk-select" name="patient_id" id="patient_id" required>
+                    <option value="" disabled selected>Select a Patient</option>
+                    <?php foreach ($patients as $patient): ?>
+                        <option value="<?= $patient['patient_id']; ?>" data-service="<?= htmlspecialchars($patient['service_type'] ?? ''); ?>">
+                            <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+        </div>
             
-            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Rebook Appointment</button>
+        <div class="uk-width-1@s uk-margin-top">
+        <label class="uk-form-label">Service Type</label>
+                <select class="uk-select" name="service_type" id="service_type" required>
+                    <option value="" disabled selected>Select Service Type</option>
+                    <option value="Occupational Therapy">Occupational Therapy</option>
+                    <option value="Behavioral Therapy">Behavioral Therapy</option>
+                </select>
+        </div>
 
-            <button type="button" id="clearButton" class="uk-button uk-button-default uk-margin-top">Clear</button>
+    
+        <div class="uk-width-1-2@s uk-margin-top">
+        <label class="uk-form-label">Date for next session</label>
+        <input class="uk-input" type="text" name="new_date" id="new_date" required>
+        </div>
+    
+        <div class="uk-width-1-2@s uk-margin-top">       
+        <label class="uk-form-label">Time for next session</label>
+        <select class="uk-select" name="new_time" id="new_time" required></select>
+        </div>        
+    
+        <div class="uk-width-1-1 uk-text-right uk-margin-top">
+        <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="margin-right: 10px;">Rebook Appointment</button>
+        <button type="button" id="clearButton" class="uk-button uk-button-default uk-margin-top">Clear</button>
+        </div>
+
+        
+    
+                
+            
         </form>
         
- 
+        
+
     </div>
 
     <script>
