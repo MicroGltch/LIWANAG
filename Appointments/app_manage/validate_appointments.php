@@ -348,11 +348,32 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                     return;
                 }
 
+                let rawDate = data.details.date;
+                let rawTime = data.details.time;
+
+                // Combine into full datetime string
+                let datetimeStr = `${rawDate}T${rawTime}`;
+                let datetimeObj = new Date(datetimeStr);
+
+                // Format date: Mar 23, 2025
+                let formattedDate = datetimeObj.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                // Format time: 02:30 PM
+                let formattedTime = datetimeObj.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+
                 let detailsHtml = `
                     <p><strong>Patient:</strong> ${data.details.patient_name}</p>
                     <p><strong>Client:</strong> ${data.details.client_name}</p>
-                    <p><strong>Date:</strong> ${data.details.date}</p>
-                    <p><strong>Time:</strong> ${data.details.time}</p>
+                    <p><strong>Date:</strong> ${formattedDate}</p>
+                    <p><strong>Time:</strong> ${formattedTime}</p>
                     <p><strong>Session Type:</strong> ${data.details.session_type}</p>
                 `;
                 
@@ -472,28 +493,45 @@ function handleApproveAction(appointmentId, data, detailsHtml) {
                 return;
             }
 
-            let therapistOptions = therapistsData.therapists.map(t => `
-                <option value="${t.id}">${t.name} - [${t.status}] ${t.schedule}</option>
-            `).join('');
+            // ✅ Build therapist card-style options
+            let therapistCards = therapistsData.therapists.map(t => {
+                let status = t.status.toLowerCase();
+                let statusColor = status === "available" ? "#27ae60" : 
+                                  status === "time conflict" ? "#e67e22" : "#e74c3c";
+                let schedule = t.schedule || "No schedule info";
 
+                return `
+                    <div class="therapist-option" style="padding:10px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px;">
+                        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+                            <input type="radio" name="therapist" value="${t.id}" style="margin-top:5px;" />
+                            <div>
+                                <div><strong>${t.name}</strong></div>
+                                <div style="color:${statusColor}; font-weight: bold;">${t.status}</div>
+                                <div style="font-size: 0.85em; color: #555;">${schedule}</div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            }).join('');
+
+            // ✅ Show in SweetAlert modal
             Swal.fire({
                 title: "Assign a Therapist",
                 html: detailsHtml + `
                     <label><strong>Select Therapist:</strong></label>
-                    <select id="therapistSelect" class="swal2-select">
-                        <option value="">Select a Therapist</option>
-                        ${therapistOptions}
-                    </select>
+                    <div id="therapistOptions" style="text-align:left; max-height:300px; overflow-y:auto; margin-top:10px;">
+                        ${therapistCards}
+                    </div>
                 `,
                 showCancelButton: true,
                 confirmButtonText: "Approve",
                 preConfirm: () => {
-                    let therapistId = document.getElementById("therapistSelect").value;
-                    if (!therapistId) {
+                    const selected = document.querySelector('input[name="therapist"]:checked');
+                    if (!selected) {
                         Swal.showValidationMessage("Please select a therapist");
                         return false;
                     }
-                    return { therapistId };
+                    return { therapistId: selected.value };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
