@@ -239,14 +239,14 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
                     <hr>
 
-                    <li class="uk-parent">
+                    <!--<li class="uk-parent">
                     <li>
                         <span>Appointments</span>
                     </li>
                         <li><a href="#view-appointments" onclick="showSection('view-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> View All Appointments</a></li>
                     </li>
 
-                    <hr>
+                    <hr> -->
 
                     <li class="uk-parent">
                     <li>
