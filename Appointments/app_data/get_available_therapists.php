@@ -80,7 +80,7 @@ while ($row = $result->fetch_assoc()) {
 
             if ($appointmentTime >= $startTime && $appointmentTime < $endTime) {
                 $allTherapists[$row['therapist_id']]['available'] = true;
-                $allTherapists[$row['therapist_id']]['status'] = "Available (Custom Schedule)";
+                $allTherapists[$row['therapist_id']]['status'] = "Available";
             } else {
                 $allTherapists[$row['therapist_id']]['available'] = false;
                 $allTherapists[$row['therapist_id']]['status'] = "Time Conflict (Custom Schedule)";
@@ -91,5 +91,16 @@ while ($row = $result->fetch_assoc()) {
 
 // 4️⃣ Format therapist data
 $therapistsList = array_values($allTherapists);
+usort($therapistsList, function($a, $b) {
+    $priority = [
+        "Available" => 1,
+        "Time Conflict" => 2,
+        "Time Conflict (Custom Schedule)" => 2,
+        "Unavailable" => 3
+    ];
+
+    return ($priority[$a['status']] ?? 4) <=> ($priority[$b['status']] ?? 4);
+});
+
 echo json_encode(["status" => "success", "therapists" => $therapistsList]);
 ?>

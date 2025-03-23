@@ -622,42 +622,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
             </div>
         </form>
-        <!-- Change Password Modal still -->
-<div id="change-password-modal" uk-modal>
-    <div class="uk-modal-dialog uk-modal-body uk-overflow-auto">
-        <h2 class="uk-modal-title">Change Password</h2>
-
-        <div id="password-alert-container"></div>
-        
-        <form id="change-password-form" class="uk-form-stacked">
-            <div class="uk-margin">
-                <label class="uk-form-label" for="current-password">Current Password</label>
-                <div class="uk-form-controls">
-                    <input class="uk-input" id="current-password" type="password" required>
-                </div>
-            </div>
-            
-            <div class="uk-margin">
-                <label class="uk-form-label" for="new-password">New Password</label>
-                <div class="uk-form-controls">
-                    <input class="uk-input" id="new-password" type="password" required>
-                </div>
-            </div>
-            
-            <div class="uk-margin">
-                <label class="uk-form-label" for="confirm-password">Confirm New Password</label>
-                <div class="uk-form-controls">
-                    <input class="uk-input" id="confirm-password" type="password" required>
-                </div>
-            </div>
-            
-            <div class="uk-margin uk-text-right">
-                <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
-                <button class="uk-button uk-button-primary" type="submit">Update Password</button>
-            </div>
-        </form>
-    </div>
-</div>
 
         <?php unset($_SESSION['update_errors']); ?>
         <?php unset($_SESSION['update_success']); ?>
@@ -807,8 +771,17 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         cancelVerificationButton.addEventListener("click", function(event) {
             event.preventDefault();
             
-            // Confirm cancellation
-            if (confirm("Are you sure you want to cancel? Your email will not be changed.")) {
+            // Confirm cancellation with SweetAlert
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "Your email will not be changed.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, cancel verification'
+        }).then((result) => {
+            if (result.isConfirmed) {
                 // Restore original email
                 emailInput.value = originalEmail;
                 
@@ -823,113 +796,179 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 if (editButton.textContent === "Edit") {
                     inputs.forEach(input => input.disabled = true);
                 }
+                
+                Swal.fire(
+                    'Cancelled',
+                    'Email verification has been cancelled.',
+                    'info'
+                );
             }
         });
-    }
+    });
+}
 
-    // Function to Save Changes
-    function saveChanges() {
-        let firstName = document.getElementById("firstName").value.trim();
-        let lastName = document.getElementById("lastName").value.trim();
-        let email = emailInput.value.trim(); // Use the selected email input
-        let phoneNumber = document.getElementById("mobileNumber").value.trim();
-
-        document.querySelectorAll(".error-message").forEach(error => error.textContent = "");
-
-        if (!firstName || !lastName || !email || !phoneNumber) {
-            alert("All fields are required.");
-            return;
-        }
-
-        // Store the original email in case user cancels verification later
-        originalEmail = emailInput.value;
-
-        let formData = new URLSearchParams({
-            action: "update_user_details",
-            firstName: firstName,
-            lastName: lastName,
-            email: email,
-            phoneNumber: phoneNumber
+   // Function to Save Changes
+function saveChanges() {
+    let firstName = document.getElementById("firstName").value.trim();
+    let lastName = document.getElementById("lastName").value.trim();
+    let email = emailInput.value.trim(); // Use the selected email input
+    let phoneNumber = document.getElementById("mobileNumber").value.trim();
+    
+    document.querySelectorAll(".error-message").forEach(error => error.textContent = "");
+    
+    if (!firstName || !lastName || !email || !phoneNumber) {
+        Swal.fire({
+            title: 'Error!',
+            text: 'All fields are required.',
+            icon: 'error',
+            confirmButtonText: 'OK'
         });
-
-        fetch("../Accounts/manageaccount/updateinfo.php", {
-            method: "POST",
-            body: formData,
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.errors) {
-                    Object.entries(data.errors).forEach(([key, message]) => {
-                        let errorElement = document.querySelector(`[data-error="${key}"]`);
-                        if (errorElement) errorElement.textContent = message;
-                    });
-                } else if (data.otp_required) {
-                    alert("OTP sent to your new email. Please enter the OTP to verify.");
-                    otpSection.style.display = "block";
-                    saveButton.textContent = "Verify OTP";
-                    saveButton.dataset.step = "verify";
-                } else if (data.success) {
-                    alert(data.success);
-                    location.reload();
-                } else {
-                    alert("Something went wrong.");
-                }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                alert("An error occurred. Please try again.");
-            });
+        return;
     }
-
-    // Function to Verify OTP
-    function verifyOTP() {
-        let otp = otpInput.value.trim();
-        if (!otp) {
-            alert("Please enter OTP.");
-            return;
-        }
-
-        // Get the user details to update along with the OTP
-        let firstName = document.getElementById("firstName").value.trim();
-        let lastName = document.getElementById("lastName").value.trim();
-        let phoneNumber = document.getElementById("mobileNumber").value.trim();
-
-        // Create form data with all necessary information
-        let formData = new URLSearchParams({
-            action: "verify_otp",
-            otp: otp,
-            firstName: firstName,
-            lastName: lastName,
-            phoneNumber: phoneNumber
-        });
-
-        fetch("../Accounts/manageaccount/updateinfo.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: formData
-        })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
+    
+    // Store the original email in case user cancels verification later
+    originalEmail = emailInput.value;
+    
+    let formData = new URLSearchParams({
+        action: "update_user_details",
+        firstName: firstName,
+        lastName: lastName,
+        email: email,
+        phoneNumber: phoneNumber
+    });
+    
+    fetch("../Accounts/manageaccount/updateinfo.php", {
+        method: "POST",
+        body: formData,
+        headers: { "Content-Type": "application/x-www-form-urlencoded" }
+    })
+        .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                alert("Email updated successfully!");
-                location.reload();
-            } else if (data.error) {
-                alert(data.error);
+            if (data.errors) {
+                Object.entries(data.errors).forEach(([key, message]) => {
+                    let errorElement = document.querySelector(`[data-error="${key}"]`);
+                    if (errorElement) errorElement.textContent = message;
+                });
+                
+                Swal.fire({
+                    title: 'Validation Error',
+                    text: 'Please check the form for errors.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
+            } else if (data.otp_required) {
+                Swal.fire({
+                    title: 'OTP Sent',
+                    text: 'OTP sent to your new email. Please enter the OTP to verify.',
+                    icon: 'info',
+                    confirmButtonText: 'OK'
+                });
+                
+                otpSection.style.display = "block";
+                saveButton.textContent = "Verify OTP";
+                saveButton.dataset.step = "verify";
+            } else if (data.success) {
+                Swal.fire({
+                    title: 'Success!',
+                    text: data.success,
+                    icon: 'success',
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    location.reload();
+                });
             } else {
-                alert("Invalid OTP. Please try again.");
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Something went wrong.',
+                    icon: 'error',
+                    confirmButtonText: 'OK'
+                });
             }
         })
         .catch(error => {
             console.error("Error:", error);
-            alert("An error occurred during OTP verification.");
+            Swal.fire({
+                title: 'Error',
+                text: 'An error occurred. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
         });
+}
+    // Function to Verify OTP
+function verifyOTP() {
+    let otp = otpInput.value.trim();
+    if (!otp) {
+        Swal.fire({
+            title: 'Error',
+            text: 'Please enter OTP.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+        return;
     }
+
+    // Get the user details to update along with the OTP
+    let firstName = document.getElementById("firstName").value.trim();
+    let lastName = document.getElementById("lastName").value.trim();
+    let phoneNumber = document.getElementById("mobileNumber").value.trim();
+
+    // Create form data with all necessary information
+    let formData = new URLSearchParams({
+        action: "verify_otp",
+        otp: otp,
+        firstName: firstName,
+        lastName: lastName,
+        phoneNumber: phoneNumber
+    });
+
+    fetch("../Accounts/manageaccount/updateinfo.php", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            Swal.fire({
+                title: 'Success!',
+                text: 'Email updated successfully!',
+                icon: 'success',
+                confirmButtonText: 'OK'
+            }).then(() => {
+                location.reload();
+            });
+        } else if (data.error) {
+            Swal.fire({
+                title: 'Error',
+                text: data.error,
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        } else {
+            Swal.fire({
+                title: 'Invalid OTP',
+                text: 'Invalid OTP. Please try again.',
+                icon: 'error',
+                confirmButtonText: 'OK'
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        Swal.fire({
+            title: 'Error',
+            text: 'An error occurred during OTP verification.',
+            icon: 'error',
+            confirmButtonText: 'OK'
+        });
+    });
+}
 
 
 
@@ -999,124 +1038,182 @@ if (changePasswordButton) {
     changePasswordButton.disabled = true;
 }
 
-                // Change Password
+               // Change Password
 const passwordForm = document.getElementById("change-password-form");
-const passwordAlertContainer = document.getElementById("password-alert-container");
 
 // Prevent default form submission and save actions
 changePasswordButton.addEventListener('click', function(event) {
-        // Prevent any default behavior that might submit a form or trigger save actions
-        event.preventDefault();
-         // Open the modal (UIkit will handle this via the uk-toggle attribute)
-         UIkit.modal("#change-password-modal").show();
-    });
-
-if (passwordForm) {
-    // Initially disable password form inputs
-    const passwordInputs = passwordForm.querySelectorAll("input");
-    passwordInputs.forEach(input => input.disabled = true);
-
-    passwordForm.addEventListener("submit", function (e) {
-        e.preventDefault();
-        passwordAlertContainer.innerHTML = "";
-
-        const currentPassword = document.getElementById("current-password").value.trim();
-        const newPassword = document.getElementById("new-password").value.trim();
-        const confirmPassword = document.getElementById("confirm-password").value.trim();
-
-        // Frontend validation
-        if (newPassword !== confirmPassword) {
-            showPasswordAlert("error", "New passwords do not match");
-            return;
-        }
-
-        if (newPassword.length < 8) {
-            showPasswordAlert("error", "Password must be at least 8 characters");
-            return;
-        }
-
-        if (!/[A-Z]/.test(newPassword)) {
-            showPasswordAlert("error", "Password must contain at least one uppercase letter");
-            return;
-        }
-
-        if (!/[a-z]/.test(newPassword)) {
-            showPasswordAlert("error", "Password must contain at least one lowercase letter");
-            return;
-        }
-
-        if (!/[0-9]/.test(newPassword)) {
-            showPasswordAlert("error", "Password must contain at least one number");
-            return;
-        }
-
-        if (!/[^A-Za-z0-9]/.test(newPassword)) {
-            showPasswordAlert("error", "Password must contain at least one special character");
-            return;
-        }
-
-        console.log("Sending password change request");
-
-        fetch("../Accounts/manageaccount/updateinfo.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: new URLSearchParams({
-                action: "change_password",
-                current_password: currentPassword,
-                new_password: newPassword,
-                confirm_password: confirmPassword
-            })
-        })
-            .then(response => response.json())
-            .then(data => {
-                console.log("Response received:", data);
-                if (data.success) {
-                    showPasswordAlert("success", data.success);
-                    passwordForm.reset();
-                    setTimeout(() => {
-                        if (typeof UIkit !== "undefined") {
-                            UIkit.modal("#change-password-modal").hide();
-                        }
-                    }, 2000);
-                } else if (data.error) {
-                    showPasswordAlert("error", data.error);
+    // Prevent any default behavior that might submit a form or trigger save actions
+    event.preventDefault();
+    
+    // Create a function to show the password change form
+    function showPasswordChangeForm(errorMessage = null) {
+        Swal.fire({
+            title: 'Change Password',
+            html: `
+                <form id="swal-password-form" class="swal-form">
+                    <div class="swal-input-group">
+                        <label for="swal-current-password">Current Password</label>
+                        <input type="password" id="swal-current-password" class="swal2-input" placeholder="Current password">
+                    </div>
+                    
+                    <div class="swal-input-group">
+                        <label for="swal-new-password">New Password</label>
+                        <input type="password" id="swal-new-password" class="swal2-input" placeholder="New password">
+                    </div>
+                    
+                    <div class="swal-input-group">
+                        <label for="swal-confirm-password">Confirm New Password</label>
+                        <input type="password" id="swal-confirm-password" class="swal2-input" placeholder="Confirm new password">
+                    </div>
+                </form>
+            `,
+            showCancelButton: true,
+            confirmButtonText: 'Change Password',
+            cancelButtonText: 'Cancel',
+            focusConfirm: false,
+            showLoaderOnConfirm: true,
+            didOpen: () => {
+                // If there's an error message, show it as a validation message
+                if (errorMessage) {
+                    Swal.showValidationMessage(errorMessage);
                 }
-            })
-            .catch(error => {
-                console.error("Error:", error);
-                showPasswordAlert("error", "An unexpected error occurred. Please try again.");
-            });
-    });
-}
-    function showPasswordAlert(type, message) {
-            const alertClass = type === "success" ? "uk-alert-success" : "uk-alert-danger";
-            passwordAlertContainer.innerHTML = `
-                <div class="${alertClass}" uk-alert>
-                    <a class="uk-alert-close" uk-close></a>
-                    <p>${message}</p>
-                </div>`;
-        }
-
-        // UIkit Modal 'shown' event handler for debugging
-        UIkit.util.on('#change-password-modal', 'shown', function () {
-            console.log("Change password modal is shown.");
-
-            let currentPasswordInput = document.getElementById('current-password');
-            console.log("currentPasswordInput:", currentPasswordInput);
-
-            let newPasswordInput = document.getElementById('new-password');
-            console.log("newPasswordInput:", newPasswordInput);
-
-            let confirmPasswordInput = document.getElementById('confirm-password');
-            console.log("confirmPasswordInput:", confirmPasswordInput);
+            },
+            preConfirm: () => {
+                const currentPassword = document.getElementById('swal-current-password').value.trim();
+                const newPassword = document.getElementById('swal-new-password').value.trim();
+                const confirmPassword = document.getElementById('swal-confirm-password').value.trim();
+                
+                // Frontend validation
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    Swal.showValidationMessage('All fields are required');
+                    return false;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    Swal.showValidationMessage('New passwords do not match');
+                    return false;
+                }
+                
+                if (newPassword.length < 8) {
+                    Swal.showValidationMessage('Password must be at least 8 characters');
+                    return false;
+                }
+                
+                if (!/[A-Z]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one uppercase letter');
+                    return false;
+                }
+                
+                if (!/[a-z]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one lowercase letter');
+                    return false;
+                }
+                
+                if (!/[0-9]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one number');
+                    return false;
+                }
+                
+                if (!/[^A-Za-z0-9]/.test(newPassword)) {
+                    Swal.showValidationMessage('Password must contain at least one special character');
+                    return false;
+                }
+                
+                // Return values for the next step
+                return { 
+                    currentPassword: currentPassword,
+                    newPassword: newPassword,
+                    confirmPassword: confirmPassword
+                };
+            },
+            allowOutsideClick: () => !Swal.isLoading()
+        }).then((result) => {
+            // If user clicked "Change Password" and validation passed
+            if (result.isConfirmed) {
+                const { currentPassword, newPassword, confirmPassword } = result.value;
+                
+                // Send password change request
+                fetch("../Accounts/manageaccount/updateinfo.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: new URLSearchParams({
+                        action: "change_password",
+                        current_password: currentPassword,
+                        new_password: newPassword,
+                        confirm_password: confirmPassword
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Response received:", data);
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: data.success,
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                    } else if (data.error) {
+                        // Reopen the form with the error message but no values preserved
+                        showPasswordChangeForm(data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred. Please try again.'
+                    });
+                });
+            } else {
+              // User clicked cancel or outside the modal, reset the page (reload)
+              location.reload();
+            }
         });
+    }
+    
+    // Show the initial password change form
+    showPasswordChangeForm();
+});
 
-
-        // Initialize OTP section to be hidden
-        otpSection.style.display = "none";
-    });
-
-
+// Add some CSS to improve the SweetAlert form
+const style = document.createElement('style');
+style.textContent = `
+.swal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin: 15px auto;
+}
+.swal-input-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+}
+.swal-input-group label {
+    margin-bottom: 5px;
+    font-weight: 500;
+    text-align: left;
+}
+.swal2-input {
+    width: 100%;
+    margin: 0;
+}
+.swal-validation-error {
+    color: #f27474;
+    margin-top: 10px;
+    text-align: left;
+    font-size: 14px;
+}
+`;
+document.head.appendChild(style);
+// Initialize OTP section to be hidden
+otpSection.style.display = "none";
+        });
 
                 function resizeIframe(iframe) {
                     iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';

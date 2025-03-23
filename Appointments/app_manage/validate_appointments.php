@@ -15,18 +15,20 @@ $query = "SELECT a.appointment_id, a.patient_id, a.date, a.time, a.status,
                      THEN CONCAT('Rebooking by: ', t.account_FName, ' ', t.account_LName) 
                      ELSE a.session_type 
                  END AS session_type,
-                 dr.referral_type, -- ✅ Fetch referral type
-                 dr.official_referral_file, -- ✅ Fetch official referral file
-                 dr.proof_of_booking_referral_file, -- ✅ Fetch proof of booking file
+                 a.created_at, -- ✅ Include created_at
+                 dr.referral_type,
+                 dr.official_referral_file,
+                 dr.proof_of_booking_referral_file,
                  p.first_name, p.last_name, p.profile_picture AS patient_picture,
                  u.account_FName AS client_firstname, u.account_LName AS client_lastname, u.profile_picture AS client_picture
           FROM appointments a
           JOIN patients p ON a.patient_id = p.patient_id
           JOIN users u ON a.account_id = u.account_ID
           LEFT JOIN users t ON a.rebooked_by = t.account_ID
-          LEFT JOIN doctor_referrals dr ON a.referral_id = dr.referral_id -- ✅ Join doctor_referrals table
+          LEFT JOIN doctor_referrals dr ON a.referral_id = dr.referral_id
           WHERE a.status = 'Pending'
           ORDER BY a.date ASC, a.time ASC";
+
 
 $result = $connection->query($query);
 $appointments = $result->fetch_all(MYSQLI_ASSOC);
@@ -70,6 +72,13 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
 
     <!--SWAL-->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <!-- Flatpickr JS -->
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
 
     <style>
         html,
@@ -155,6 +164,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                     <th>Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                     <th>Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                     <th>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                    <th>Booked On <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                     <th>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                     <th>Doctors Referral</th>
                     <th>Actions</th>
@@ -175,9 +185,10 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                                 alt="Client Picture" class="uk-border-rounded" style="width: 40px; height: 40px; object-fit: cover;">
                             <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
                         </td>
-                        <td><?= htmlspecialchars($appointment['date']); ?></td>
-                        <td><?= htmlspecialchars($appointment['time']); ?></td>
-                        <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                        <td><?= htmlspecialchars(date("M d, Y", strtotime($appointment['date']))); ?></td>
+                        <td><?= htmlspecialchars(date("h:i A", strtotime($appointment['time']))); ?></td>
+                        <td><?= htmlspecialchars(date("M d, Y h:i A", strtotime($appointment['created_at']))); ?></td>
+                        <td><?= htmlspecialchars(ucwords(strtolower($appointment['session_type']))); ?></td>
 
                         <td>
                             <?php if (!empty($appointment['official_referral_file'])): ?>
@@ -240,7 +251,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                         <tr>
                             <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
                             <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
-                            <td><?= htmlspecialchars($appointment['date']); ?> (Waitlisted)</td>
+                            <td><?= htmlspecialchars(date("M d, Y", strtotime($appointment['date']))); ?> (Waitlisted)</td>
                             <td>
                                 <?php if (strtolower($appointment['session_type']) === 'playgroup'): ?>
                                     <button class="uk-button uk-button-primary assign-playgroup-btn" data-id="<?= $appointment['appointment_id']; ?>">
@@ -259,458 +270,6 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
             </div>                 
     </div>
 
-<!-- </body>
-</html> -->
-
-<!-- <script>
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".action-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            let appointmentId = this.getAttribute("data-id");
-            let action = this.getAttribute("data-action");
-
-            let statusMapping = {
-                "Approve": "approved",
-                "Decline": "declined",
-                "Waitlist": "waitlisted"
-            };
-
-            let status = statusMapping[action];
-
-            fetch(`../app_data/get_appointment_details.php?appointment_id=${appointmentId}`)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error("Network response was not ok.");
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.status !== "success") {
-                        Swal.fire("Error", "Failed to fetch appointment details.", "error");
-                        return;
-                    }
-
-                    let detailsHtml = `
-                        <p><strong>Patient:</strong> ${data.details.patient_name}</p>
-                        <p><strong>Client:</strong> ${data.details.client_name}</p>
-                        <p><strong>Date:</strong> ${data.details.date}</p>
-                        <p><strong>Time:</strong> ${data.details.time}</p>
-                        <p><strong>Session Type:</strong> ${data.details.session_type}</p>
-                    `;
-
-                    // ✅ Show "Rebooked By" if session type contains "Rebooking"
-                    if (data.details.session_type.includes("rebooking") && data.details.rebooked_by_name) {
-                        detailsHtml += `<p><strong>Rebooked By:</strong> ${data.details.rebooked_by_name}</p>`;
-                    }
-
-                    detailsHtml += `<p><strong>Status:</strong> ${data.details.status}</p>`;
-
-
-                    if (action === "Approve") {
-                        if (data.details.session_type === "playgroup") {
-                            fetch("../app_data/get_open_playgroup_sessions.php")
-                                .then(response => response.json())
-                                .then(slotData => {
-                                    if (slotData.status !== "success" || !slotData.sessions || slotData.sessions.length === 0) {
-                                        Swal.fire("No Available Sessions", "No open Playgroup sessions are available. Please create one first on the <a href='playgroup_dashboard.php'>Playgroup Dashboard</a>.", "warning");
-                                        return;
-                                    }
-
-                                    let slotOptions = slotData.sessions.map(slot => `
-                                        <option value="${slot.pg_session_id}">
-                                            ${slot.date} at ${slot.time} (${slot.current_count}/${slot.max_capacity})
-                                        </option>
-                                    `).join('');
-                                    Swal.fire({
-                                        title: "Select a Playgroup Slot",
-                                        html: detailsHtml + `
-                                            <label>Select a Playgroup Slot:</label>
-                                            <select id="playgroupSlotSelect" class="uk-select" required onchange="updatePGSlotDetails(this)">
-                                                <option value="">Select a Slot</option>
-                                                ${slotOptions}
-                                            </select>
-                                        `,
-                                        showCancelButton: true,
-                                        confirmButtonText: "Approve",
-                                        preConfirm: () => {
-                                            let selectedSlot = document.getElementById("playgroupSlotSelect").value;
-                                            if (!selectedSlot) {
-                                                Swal.showValidationMessage("Please select a Playgroup slot");
-                                                return false;
-                                            }
-                                            return { selectedSlot };
-                                        }
-                                    }).then((result) => {
-                                        if (result.isConfirmed) {
-                                            fetch("../app_process/update_appointment_status.php", {
-                                                method: "POST",
-                                                headers: { "Content-Type": "application/json" },
-                                                body: JSON.stringify({
-                                                    appointment_id: appointmentId,
-                                                    status: "approved",
-                                                    pg_session_id: result.value.selectedSlot
-                                                })
-                                            })
-                                            .then(response => response.json())
-                                            .then(data => {
-                                                if (data.status === "success") {
-                                                    Swal.fire("Success!", data.message, "success").then(() => location.reload());
-                                                } else {
-                                                    Swal.fire("Error", data.message, "error");
-                                                }
-                                            })
-                                            .catch(error => {
-                                                Swal.fire("Error", "Failed to update appointment.", "error");
-                                            });
-                                        }
-                                    });
-                                })
-                                .catch(error => {
-                                    Swal.fire("Error", "Failed to fetch available slots.", "error");
-                                });
-                        } else {
-                            // ✅ Standard approval process (requires therapist)
-                        fetch(`../app_data/get_available_therapists.php?date=${data.details.date}&time=${data.details.time}`)
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error("Failed to fetch available therapists.");
-                                }
-                                return response.json();
-                            })
-                            .then(therapistsData => {
-                                if (therapistsData.status !== "success") {
-                                    Swal.fire("Error", "No therapists available.", "error");
-                                    return;
-                                }
-
-                                let therapistOptions = therapistsData.therapists.map(t => `
-                                    <option value="${t.id}">${t.name} - [${t.status}] ${t.schedule}</option>
-                                `).join('');
-
-                                Swal.fire({
-                                    title: "Assign a Therapist",
-                                    html: detailsHtml + `
-                                        <label><strong>Select Therapist:</strong></label>
-                                        <select id="therapistSelect" class="swal2-select">
-                                            <option value="">Select a Therapist</option>
-                                            ${therapistOptions}
-                                        </select>
-                                    `,
-                                    showCancelButton: true,
-                                    confirmButtonText: "Approve",
-                                    preConfirm: () => {
-                                        let therapistId = document.getElementById("therapistSelect").value;
-                                        if (!therapistId) {
-                                            Swal.showValidationMessage("Please select a therapist");
-                                            return false;
-                                        }
-                                        return { therapistId };
-                                    }
-                                }).then((result) => {
-                                    if (result.isConfirmed) {
-                                        fetch("../app_process/update_appointment_status.php", {
-                                            method: "POST",
-                                            headers: { "Content-Type": "application/json" },  // ✅ Change to JSON
-                                            body: JSON.stringify({
-                                                appointment_id: appointmentId,
-                                                status: "approved",
-                                                therapist_id: result.value.therapistId
-                                            })
-                                        })
-
-                                        .then(response => response.json())
-                                        .then(data => {
-                                            if (data.status === "success") {
-                                                Swal.fire("Success!", data.message, "success").then(() => location.reload());
-                                            } else {
-                                                Swal.fire("Error", "Failed to approve appointment.", "error");
-                                            }
-                                        })
-                                        .catch(error => {
-                                            Swal.fire("Error", "Failed to update appointment.", "error");
-                                        });
-                                    }
-                                });
-                            })
-                            .catch(error => {
-                                Swal.fire("Error", "Failed to fetch therapists.", "error");
-                            });
-                        }
-                    } else if (action === "Decline") {
-                        Swal.fire({
-                            title: "Provide a Decline Reason",
-                            html: detailsHtml + `
-                                <label><strong>Reason for Declining:</strong></label>
-                                <textarea id="declineReason" class="swal2-textarea" placeholder="Enter decline reason"></textarea>
-                            `,
-                            showCancelButton: true,
-                            confirmButtonText: "Confirm Decline",
-                            preConfirm: () => {
-                                let reason = document.getElementById("declineReason").value.trim();
-                                if (!reason) {
-                                    Swal.showValidationMessage("Please provide a reason for declining.");
-                                    return false;
-                                }
-                                return { reason };
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                fetch("../app_process/update_appointment_status.php", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                body: `appointment_id=${appointmentId}&status=declined&validation_notes=${encodeURIComponent(result.value.reason)}`
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                console.log("Debug Response:", data); // Log response to console
-                                if (data.status === "success") {
-                                    Swal.fire("Declined!", data.message, "success").then(() => location.reload());
-                                } else {
-                                    Swal.fire("Error", "Failed to decline appointment.", "error");
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Fetch Error:", error);
-                                Swal.fire("Error", "Failed to update appointment.", "error");
-                            });
-                            }
-                        });
-                    } else if (action === "Waitlist") {
-                        Swal.fire({
-                            title: "Waitlist Appointment",
-                            html: detailsHtml,
-                            input: "textarea",
-                            inputPlaceholder: "Enter a reason for waitlisting...",
-                            showCancelButton: true,
-                            confirmButtonText: "Confirm Waitlist",
-                            allowOutsideClick: false,
-                            preConfirm: (note) => {
-                                if (!note) {
-                                    Swal.showValidationMessage("A reason is required.");
-                                    return false;
-                                }
-                                return note;
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                fetch("../app_process/update_appointment_status.php", {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({
-                                        appointment_id: appointmentId,
-                                        status: "waitlisted",
-                                        validation_notes: result.value
-                                    })
-                                })
-                                .then(response => response.json())
-                                .then(data => {
-                                    if (data.status === "success") {
-                                        Swal.fire("Waitlisted!", data.message, "success").then(() => location.reload());
-                                    } else {
-                                        Swal.fire("Error!", "Failed to waitlist appointment.", "error");
-                                    }
-                                })
-                                .catch(error => console.error("Error:", error));
-                            }
-                        });
-
-                    } else {
-                        // 🔹 Handle invalid selection
-                        Swal.fire({
-                            title: "Error",
-                            text: "Invalid selection or action is not recognized.",
-                            icon: "error"
-                        });
-                    }
-                })
-                .catch(error => {
-                    Swal.fire("Error", "Failed to fetch appointment details.", "error");
-                });
-        });
-    });
-});
-
-
-//waitlisted js add ${t.schedule} if want to fetch the time for that date too
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".assign-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            let appointmentId = this.getAttribute("data-id");
-
-            Swal.fire({
-                title: "Reschedule Appointment",
-                html: `
-                    <label>New Date:</label>
-                    <input type="date" id="appointmentDate" class="swal2-input">
-                    <label>New Time:</label>
-                    <input type="time" id="appointmentTime" class="swal2-input">
-                    <label>Assign Therapist:</label>
-                    <select id="therapistSelect" class="swal2-select" disabled>
-                        <option value="">Select a Date & Time First</option>
-                    </select>
-                `,
-                showCancelButton: true,
-                confirmButtonText: "Assign",
-                preConfirm: () => {
-                    let date = document.getElementById("appointmentDate").value;
-                    let time = document.getElementById("appointmentTime").value;
-                    let therapistId = document.getElementById("therapistSelect").value;
-
-                    if (!date || !time || !therapistId) {
-                        Swal.showValidationMessage("Please select a valid date, time, and therapist.");
-                        return false;
-                    }
-
-                    return { date, time, therapistId };
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    fetch("../app_process/update_appointment_status.php", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({
-                            appointment_id: appointmentId,
-                            status: "approved",
-                            date: result.value.date,
-                            time: result.value.time,
-                            therapist_id: result.value.therapistId
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status === "success") {
-                            Swal.fire("Assigned!", "Appointment has been rescheduled and therapist assigned.", "success")
-                                .then(() => location.reload()); // ✅ Reload to reflect changes
-                        } else {
-                            Swal.fire("Error!", "Failed to update appointment.", "error");
-                        }
-                    })
-                    .catch(error => Swal.fire("Error", "Failed to send update request.", "error"));
-                }
-            });
-
-            // ✅ Load therapists dynamically after selecting a date & time
-            document.getElementById("appointmentDate").addEventListener("change", fetchTherapists);
-            document.getElementById("appointmentTime").addEventListener("change", fetchTherapists);
-
-            function fetchTherapists() {
-                let date = document.getElementById("appointmentDate").value;
-                let time = document.getElementById("appointmentTime").value;
-                let therapistDropdown = document.getElementById("therapistSelect");
-
-                if (!date || !time) {
-                    therapistDropdown.innerHTML = `<option value="">Select a Date & Time First</option>`;
-                    therapistDropdown.disabled = true;
-                    return;
-                }
-
-                fetch(`../app_data/get_available_therapists.php?date=${date}&time=${time}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.status !== "success" || data.therapists.length === 0) {
-                            therapistDropdown.innerHTML = `<option value="">No Available Therapists</option>`;
-                            therapistDropdown.disabled = true;
-                            return;
-                        }
-
-                        therapistDropdown.innerHTML = data.therapists.map(t => `
-                            <option value="${t.id}">${t.name}</option>
-                        `).join('');
-
-                        therapistDropdown.disabled = false;
-                    })
-                    .catch(error => {
-                        therapistDropdown.innerHTML = `<option value="">Error Fetching Therapists</option>`;
-                        therapistDropdown.disabled = true;
-                    });
-            }
-        });
-    });
-});
-
-function updatePGSlotDetails(select) {
-    const selected = select.options[select.selectedIndex];
-    const match = selected.textContent.match(/(\d{2}:\d{2}:\d{2})/);
-    const sessionId = selected.value;
-
-    fetch(`../app_data/get_playgroup_session_details.php?pg_session_id=${sessionId}`)
-        .then(response => response.json());
-}
-
-
-//waitlisted playgroup button
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".assign-playgroup-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            let appointmentId = this.getAttribute("data-id");
-
-            fetch("../app_data/get_open_playgroup_sessions.php")
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status !== "success" || !data.sessions || data.sessions.length === 0) {
-                        Swal.fire("No Sessions", "No open Playgroup sessions are available.", "warning");
-                        return;
-                    }
-
-                    let options = data.sessions.map(session => `
-                        <option value="${session.pg_session_id}">
-                            ${session.date} at ${session.time} (${session.current_count}/${session.max_capacity})
-                        </option>
-                    `).join('');
-
-                    Swal.fire({
-                        title: "Assign to Playgroup Slot",
-                        html: `
-                            <label>Select a Playgroup Slot:</label>
-                            <select id="pgSlotSelect" class="uk-select">
-                                <option value="">Select a slot</option>
-                                ${options}
-                            </select>
-                        `,
-                        showCancelButton: true,
-                        confirmButtonText: "Assign",
-                        preConfirm: () => {
-                            const selected = document.getElementById("pgSlotSelect").value;
-                            if (!selected) {
-                                Swal.showValidationMessage("Please select a Playgroup slot.");
-                                return false;
-                            }
-                            return { pg_session_id: selected };
-                        }
-                    }).then(result => {
-                        if (result.isConfirmed) {
-                            fetch("../app_process/update_appointment_status.php", {
-                                method: "POST",
-                                headers: { "Content-Type": "application/json" },
-                                body: JSON.stringify({
-                                    appointment_id: appointmentId,
-                                    status: "approved",
-                                    pg_session_id: result.value.pg_session_id
-                                })
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.status === "success") {
-                                    Swal.fire("Success", data.message, "success").then(() => location.reload());
-                                } else {
-                                    Swal.fire("Error", data.message || "Failed to assign Playgroup slot.", "error");
-                                }
-                            })
-                            .catch(() => {
-                                Swal.fire("Error", "Server error while assigning slot.", "error");
-                            });
-                        }
-                    });
-                })
-                .catch(() => {
-                    Swal.fire("Error", "Failed to fetch Playgroup sessions.", "error");
-                });
-        });
-    });
-});
-
-
-</script> -->
 
 
 <!-- Remodified/combined script -->
@@ -796,11 +355,32 @@ document.addEventListener("DOMContentLoaded", function () {
                     return;
                 }
 
+                let rawDate = data.details.date;
+                let rawTime = data.details.time;
+
+                // Combine into full datetime string
+                let datetimeStr = `${rawDate}T${rawTime}`;
+                let datetimeObj = new Date(datetimeStr);
+
+                // Format date: Mar 23, 2025
+                let formattedDate = datetimeObj.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+
+                // Format time: 02:30 PM
+                let formattedTime = datetimeObj.toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                });
+
                 let detailsHtml = `
                     <p><strong>Patient:</strong> ${data.details.patient_name}</p>
                     <p><strong>Client:</strong> ${data.details.client_name}</p>
-                    <p><strong>Date:</strong> ${data.details.date}</p>
-                    <p><strong>Time:</strong> ${data.details.time}</p>
+                    <p><strong>Date:</strong> ${formattedDate}</p>
+                    <p><strong>Time:</strong> ${formattedTime}</p>
                     <p><strong>Session Type:</strong> ${data.details.session_type}</p>
                 `;
                 
@@ -920,28 +500,45 @@ function handleApproveAction(appointmentId, data, detailsHtml) {
                 return;
             }
 
-            let therapistOptions = therapistsData.therapists.map(t => `
-                <option value="${t.id}">${t.name} - [${t.status}] ${t.schedule}</option>
-            `).join('');
+            // ✅ Build therapist card-style options
+            let therapistCards = therapistsData.therapists.map(t => {
+                let status = t.status.toLowerCase();
+                let statusColor = status === "available" ? "#27ae60" : 
+                                  status === "time conflict" ? "#e67e22" : "#e74c3c";
+                let schedule = t.schedule || "No schedule info";
 
+                return `
+                    <div class="therapist-option" style="padding:10px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px;">
+                        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+                            <input type="radio" name="therapist" value="${t.id}" style="margin-top:5px;" />
+                            <div>
+                                <div><strong>${t.name}</strong></div>
+                                <div style="color:${statusColor}; font-weight: bold;">${t.status}</div>
+                                <div style="font-size: 0.85em; color: #555;">${schedule}</div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            }).join('');
+
+            // ✅ Show in SweetAlert modal
             Swal.fire({
                 title: "Assign a Therapist",
                 html: detailsHtml + `
                     <label><strong>Select Therapist:</strong></label>
-                    <select id="therapistSelect" class="swal2-select">
-                        <option value="">Select a Therapist</option>
-                        ${therapistOptions}
-                    </select>
+                    <div id="therapistOptions" style="text-align:left; max-height:300px; overflow-y:auto; margin-top:10px;">
+                        ${therapistCards}
+                    </div>
                 `,
                 showCancelButton: true,
                 confirmButtonText: "Approve",
                 preConfirm: () => {
-                    let therapistId = document.getElementById("therapistSelect").value;
-                    if (!therapistId) {
+                    const selected = document.querySelector('input[name="therapist"]:checked');
+                    if (!selected) {
                         Swal.showValidationMessage("Please select a therapist");
                         return false;
                     }
-                    return { therapistId };
+                    return { therapistId: selected.value };
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
@@ -1035,70 +632,99 @@ function handleWaitlistAction(appointmentId, detailsHtml) {
 
 // Handle the Assign action for waitlisted appointments
 function handleAssignAction(appointmentId) {
-    // Fetch timetable settings
-    fetch("../app_data/get_timetable_settings.php")
+    // 1️⃣ Fetch appointment details first
+    fetch(`../app_data/get_appointment_details.php?appointment_id=${appointmentId}`)
         .then(response => response.json())
-        .then(data => {
-            if (data.status === "success") {
-                let settings = data.settings;
-                let blockedDates = settings.blocked_dates || [];
-                let minDays = Number(settings.min_days_advance);
-                let maxDays = Number(settings.max_days_advance);
-
-                let minDate = new Date();
-                let maxDate = new Date();
-                minDate.setDate(minDate.getDate() + minDays);
-                maxDate.setDate(maxDate.getDate() + maxDays);
-
-                Swal.fire({
-                    title: "Reschedule Appointment",
-                    html: `
-                        <label>New Date:</label>
-                        <input type="date" id="appointmentDate" class="swal2-input">
-                        <label>New Time:</label>
-                        <select id="appointmentTime" class="swal2-select">
-                            <option value="">Select a Date First</option>
-                        </select>
-                        <label>Assign Therapist:</label>
-                        <select id="therapistSelect" class="swal2-select" disabled>
-                            <option value="">Select a Date & Time First</option>
-                        </select>
-                    `,
-                    showCancelButton: true,
-                    confirmButtonText: "Assign",
-                    didOpen: () => {
-                        setupDateTimeFields(settings, blockedDates);
-                    },
-                    preConfirm: () => {
-                        let date = document.getElementById("appointmentDate").value;
-                        let time = document.getElementById("appointmentTime").value;
-                        let therapistId = document.getElementById("therapistSelect").value;
-
-                        if (!date || !time || !therapistId) {
-                            Swal.showValidationMessage("Please select a valid date, time, and therapist.");
-                            return false;
-                        }
-
-                        return { date, time, therapistId };
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        updateAppointmentStatus({
-                            appointment_id: appointmentId,
-                            status: "approved",
-                            date: result.value.date,
-                            time: result.value.time,
-                            therapist_id: result.value.therapistId
-                        }, "Appointment has been rescheduled and therapist assigned", "Failed to update appointment");
-                    }
-                });
-            } else {
-                Swal.fire("Error!", "Could not fetch timetable settings.", "error");
+        .then(appointmentData => {
+            if (appointmentData.status !== "success") {
+                Swal.fire("Error", "Failed to fetch appointment details.", "error");
+                return;
             }
+
+            const d = appointmentData.details;
+
+            // Optional: Format date and time
+            const datetime = new Date(`${d.date}T${d.time}`);
+            const formattedDate = datetime.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+            const formattedTime = datetime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
+            const detailsHtml = `
+                <p><strong>Patient:</strong> ${d.patient_name}</p>
+                <p><strong>Client:</strong> ${d.client_name}</p>
+                <p><strong>Session Type:</strong> ${d.session_type}</p>
+                <p><strong>Original Date:</strong> ${formattedDate}</p>
+                <p><strong>Original Time:</strong> ${formattedTime}</p>
+            `;
+
+            // 2️⃣ Then fetch timetable settings
+            fetch("../app_data/get_timetable_settings.php")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status !== "success") {
+                        Swal.fire("Error!", "Could not fetch timetable settings.", "error");
+                        return;
+                    }
+
+                    const settings = data.settings;
+                    const blockedDates = settings.blocked_dates || [];
+
+                    Swal.fire({
+                        title: "Reschedule Appointment",
+                        html: `
+                            ${detailsHtml}
+                            <label>New Date:</label>
+                            <input type="text" id="appointmentDate" class="swal2-input">
+                            <label>New Time:</label>
+                            <select id="appointmentTime" class="swal2-select">
+                                <option value="">Select a Date First</option>
+                            </select>
+                            <br/>
+                            <br/>
+                            <br/>
+                            <label>Assign Therapist:</label>
+                            <div id="therapistSelectContainer" style="max-height:300px; overflow-y:auto; text-align:left;"></div>
+                        `,
+                        showCancelButton: true,
+                        confirmButtonText: "Assign",
+                        didOpen: () => {
+                            setupDateTimeFields(settings, blockedDates);
+                        },
+                        preConfirm: () => {
+                            const date = document.getElementById("appointmentDate").value;
+                            const time = document.getElementById("appointmentTime").value;
+                            const selected = document.querySelector('input[name="therapist"]:checked');
+
+                            if (!date || !time || !selected) {
+                                Swal.showValidationMessage("Please select a valid date, time, and therapist.");
+                                return false;
+                            }
+
+                            return {
+                                date,
+                                time,
+                                therapist_id: selected.value
+                            };
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            updateAppointmentStatus({
+                                appointment_id: appointmentId,
+                                status: "approved",
+                                date: result.value.date,
+                                time: result.value.time,
+                                therapist_id: result.value.therapist_id
+                            }, "Appointment has been rescheduled and therapist assigned", "Failed to update appointment");
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error("Error fetching timetable settings:", error);
+                    Swal.fire("Error!", "Error fetching settings.", "error");
+                });
         })
         .catch(error => {
-            console.error("Error fetching timetable settings:", error);
-            Swal.fire("Error!", "Error fetching settings.", "error");
+            console.error("Error fetching appointment details:", error);
+            Swal.fire("Error", "Unable to load appointment info.", "error");
         });
 }
 
@@ -1154,49 +780,42 @@ function handleAssignPlaygroupAction(appointmentId) {
 
 // Setup date and time fields for appointment rescheduling
 function setupDateTimeFields(settings, blockedDates) {
-    let minDate = new Date();
-    let maxDate = new Date();
+    const minDate = new Date();
+    const maxDate = new Date();
     minDate.setDate(minDate.getDate() + Number(settings.min_days_advance));
     maxDate.setDate(maxDate.getDate() + Number(settings.max_days_advance));
-    
-    // Set Date Picker Restrictions
-    let datePicker = document.getElementById("appointmentDate");
-    datePicker.min = minDate.toISOString().split('T')[0];
-    datePicker.max = maxDate.toISOString().split('T')[0];
 
-    datePicker.addEventListener("change", function() {
-        let selectedDate = this.value;
-        let timeDropdown = document.getElementById("appointmentTime");
-        let therapistDropdown = document.getElementById("therapistSelect");
-        
-        // Reset therapist dropdown
-        therapistDropdown.innerHTML = `<option value="">Select a Date & Time First</option>`;
-        therapistDropdown.disabled = true;
+    // 🟩 Initialize Flatpickr for Date Input
+    flatpickr("#appointmentDate", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "M d, Y",
+        minDate: minDate,
+        maxDate: maxDate,
+        disable: blockedDates, // ⛔ Disable blocked dates
+        onChange: function (selectedDates, dateStr) {
+            const timeDropdown = document.getElementById("appointmentTime");
+            const therapistContainer = document.getElementById("therapistSelectContainer");
 
-        // Disable blocked dates
-        if (blockedDates.includes(selectedDate)) {
-            Swal.fire("Unavailable Date", "This date is blocked. Please choose another.", "warning");
-            this.value = ""; // Reset date input
-            timeDropdown.innerHTML = `<option value="">Select a Date First</option>`;
-            timeDropdown.disabled = true;
-            return;
+            if (!dateStr) return;
+
+            // 🧹 Reset containers
+            therapistContainer.innerHTML = "";
+            timeDropdown.innerHTML = generateTimeSlots(settings.business_hours_start, settings.business_hours_end);
+            timeDropdown.disabled = false;
         }
-
-        // Generate Available Time Slots
-        timeDropdown.innerHTML = generateTimeSlots(settings.business_hours_start, settings.business_hours_end);
-        timeDropdown.disabled = false;
     });
 
-    // Handle time selection
-    document.getElementById("appointmentTime").addEventListener("change", function() {
-        let date = document.getElementById("appointmentDate").value;
-        let time = this.value;
-        
-        if (!date || !time) return;
-        
-        fetchTherapistsForDateTime(date, time);
+    // ⏱️ Time dropdown logic
+    document.getElementById("appointmentTime").addEventListener("change", function () {
+        const selectedDate = document.getElementById("appointmentDate").value;
+        const selectedTime = this.value;
+
+        if (!selectedDate || !selectedTime) return;
+        fetchTherapistsForDateTime(selectedDate, selectedTime);
     });
 }
+
 
 // Generate time slots based on business hours
 function generateTimeSlots(startTime, endTime) {
@@ -1205,9 +824,16 @@ function generateTimeSlots(startTime, endTime) {
     let end = new Date(`1970-01-01T${endTime}`);
 
     while (start < end) {
-        let timeStr = start.toTimeString().slice(0, 5);
-        options += `<option value="${timeStr}">${timeStr}</option>`;
-        start.setMinutes(start.getMinutes() + 60); // Assuming 1-hour slots
+        const hour = start.getHours();
+        const minutes = start.getMinutes().toString().padStart(2, "0");
+        const ampm = hour >= 12 ? "PM" : "AM";
+        const hour12 = hour % 12 || 12;
+
+        const timeStr = `${hour12}:${minutes} ${ampm}`;
+        const valueStr = `${hour.toString().padStart(2, "0")}:${minutes}`;
+
+        options += `<option value="${valueStr}">${timeStr}</option>`;
+        start.setMinutes(start.getMinutes() + 60); // Adjust interval as needed
     }
 
     return options;
@@ -1215,27 +841,45 @@ function generateTimeSlots(startTime, endTime) {
 
 // Fetch available therapists for a specific date and time
 function fetchTherapistsForDateTime(date, time) {
-    let therapistDropdown = document.getElementById("therapistSelect");
-    
+    const container = document.getElementById("therapistSelectContainer");
+    container.innerHTML = `<p>Loading therapists...</p>`;
+    container.dataset.valid = "false";
+
     fetch(`../app_data/get_available_therapists.php?date=${date}&time=${time}`)
         .then(response => response.json())
         .then(data => {
             if (data.status !== "success" || data.therapists.length === 0) {
-                therapistDropdown.innerHTML = `<option value="">No Available Therapists</option>`;
-                therapistDropdown.disabled = true;
+                container.innerHTML = `<p style="color:red;">No therapists available.</p>`;
                 return;
             }
 
-            therapistDropdown.innerHTML = data.therapists.map(t => `
-                <option value="${t.id}">${t.name} - [${t.status}] ${t.schedule}</option>
-            `).join('');
+            let therapistCards = data.therapists.map(t => {
+                const status = t.status.toLowerCase();
+                const statusColor = status === "available" ? "#27ae60" :
+                                    status.includes("time conflict") ? "#e67e22" : "#e74c3c";
+                const disabled = status === "unavailable" ? "disabled" : "";
+                const schedule = t.schedule || "No schedule info";
 
-            therapistDropdown.disabled = false;
+                return `
+                    <div class="therapist-option" style="padding:10px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px;">
+                        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
+                            <input type="radio" name="therapist" value="${t.id}" style="margin-top:5px;" ${disabled} />
+                            <div>
+                                <div><strong>${t.name}</strong></div>
+                                <div style="color:${statusColor}; font-weight: bold;">${t.status}</div>
+                                <div style="font-size: 0.85em; color: #555;">${schedule}</div>
+                            </div>
+                        </label>
+                    </div>
+                `;
+            }).join("");
+
+            container.innerHTML = therapistCards;
+            container.dataset.valid = "true";
         })
         .catch(error => {
             console.error("Error fetching therapists:", error);
-            therapistDropdown.innerHTML = `<option value="">Error Fetching Therapists</option>`;
-            therapistDropdown.disabled = true;
+            container.innerHTML = `<p style="color:red;">Error loading therapists.</p>`;
         });
 }
 
