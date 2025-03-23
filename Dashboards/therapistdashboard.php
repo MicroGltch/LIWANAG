@@ -172,25 +172,38 @@ $stmt->close();
                     <hr> -->
 
                     <li class="uk-parent">
-                    <a href="#patient-details" onclick="showSection('patient-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a>
+                    
+                    <li>
+                        <span>Patients</span>
+                    </li>
                         
-                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
-                        <li class="uk-active" ><a href="#rebook-patient" onclick="showSection('rebook-patient')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook Patient </a></li>
-                        </ul>
+                        
+                        <li><a href="#patient-details" onclick="showSection('patient-details')"><span class="uk-margin-small-right" uk-icon="user"></span> View Patients</a></li>
+                        <li><a href="#rebook-patient" onclick="showSection('rebook-patient')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook a Patient </a></li>
+                        
                     </li>
 
                     <hr>
 
                     <li class="uk-parent">
+                    <li>
+                        <span>Availability</span>
+                    </li>
+
+                    <li class="">
                     <a href="#manage-availability" onclick="showSection('manage-availability')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Availability </a>
-                        
-                        <ul class="uk-nav-sub " style="padding:5px 0px 5px 30px">
-                        <li class="uk-active"><a href="#adjust-availability" onclick="showSection('adjust-availability')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Adjust Availability </a></li>
-                        </ul>
+                    </li>
+                    
+                    <li class="">
+                    <a href="#adjust-availability" onclick="showSection('adjust-availability')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Adjust Availability </a>
+                    </li>
+
                     </li>
 
                     <hr>
-                    
+                    <li>
+                        <span>Your Account</span>
+                    </li>
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
 
 
@@ -402,8 +415,12 @@ $stmt->close();
             <small style="color: green;" class="error-message" id="successMessage"></small>
 
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+            <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
+                
+                
                 <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
+            
             </div>
 
             <div id="otpSection" class="uk-width-1-1" style="display: none;">
@@ -416,9 +433,10 @@ $stmt->close();
                 <!-- The buttons will be dynamically added here by JavaScript -->
             </div>
             <div class="uk-width-1-1 uk-margin-top">
-                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
+                
             </div>
         </form>
+
         <!-- Change Password Modal still -->
 <div id="change-password-modal" uk-modal>
     <div class="uk-modal-dialog uk-modal-body uk-overflow-auto">
