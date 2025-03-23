@@ -502,19 +502,22 @@ function handleApproveAction(appointmentId, data, detailsHtml) {
 
             // ✅ Build therapist card-style options
             let therapistCards = therapistsData.therapists.map(t => {
-                let status = t.status.toLowerCase();
-                let statusColor = status === "available" ? "#27ae60" : 
-                                  status === "time conflict" ? "#e67e22" : "#e74c3c";
-                let schedule = t.schedule || "No schedule info";
+                const status = t.status.toLowerCase();
+                const statusColor = status === "available" ? "#27ae60" :
+                                    status.includes("time conflict") ? "#e67e22" : "#e74c3c";
+                const disabled = status.includes("unavailable") || status.includes("booked") ? "disabled" : "";
+                const schedule = t.schedule || "No schedule info";
+                const tooltip = t.status.includes("Booked") ? "This therapist already has an approved appointment at this time." : "";
 
                 return `
                     <div class="therapist-option" style="padding:10px; border:1px solid #ccc; border-radius:8px; margin-bottom:10px;">
-                        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;">
-                            <input type="radio" name="therapist" value="${t.id}" style="margin-top:5px;" />
+                        <label style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;" title="${tooltip}">
+                            <input type="radio" name="therapist" value="${t.id}" style="margin-top:5px;" ${disabled} />
                             <div>
                                 <div><strong>${t.name}</strong></div>
                                 <div style="color:${statusColor}; font-weight: bold;">${t.status}</div>
                                 <div style="font-size: 0.85em; color: #555;">${schedule}</div>
+                                ${tooltip ? `<div style="font-size: 0.75em; color: #999;">${tooltip}</div>` : ""}
                             </div>
                         </label>
                     </div>
