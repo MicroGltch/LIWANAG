@@ -253,45 +253,44 @@ echo "<script>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php foreach ($appointments as $appointment): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($appointment['date']); ?></td>
-                                    <td><?= htmlspecialchars($appointment['time']); ?></td>
-                                    <td><?= htmlspecialchars($appointment['session_type']); ?></td>
-                                    <td><?= htmlspecialchars($appointment['patient_name']); ?></td>
-                                    <td><?= ucfirst($appointment['status']); ?></td>
-                                    <td>
-                                        <!-- ✅ Cancel button (Allowed only for "Pending" or "Waitlisted") -->
-                                        <?php if (in_array($appointment['status'], ["pending", "waitlisted"])): ?>
-                                            <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
-                                        <?php endif; ?>
+                        <?php foreach ($appointments as $appointment): ?>
+                            <tr>
+                                <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
+                                <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
+                                <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                                <td><?= htmlspecialchars($appointment['patient_name']); ?></td>
+                                <td><?= ucfirst($appointment['status']); ?></td>
+                                <td>
+                                    <!-- ✅ Cancel button (Allowed only for "Pending" or "Waitlisted") -->
+                                    <?php if (in_array($appointment['status'], ["pending", "waitlisted"])): ?>
+                                        <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
+                                    <?php endif; ?>
 
-                                        <!-- ✅ Edit button logic -->
+                                    <!-- ✅ Edit button logic -->
+                                    <?php if (
+                                        $appointment['status'] === "pending" &&
+                                        $appointment['edit_count'] < 2 &&
+                                        strtolower($appointment['session_type']) !== "playgroup"
+                                    ): ?>
+                                        <button class="uk-button uk-button-primary edit-btn" data-id="<?= $appointment['appointment_id']; ?>"
+                                            data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
+                                            Reschedule (<?= 2 - $appointment['edit_count']; ?> left)
+                                        </button>
+                                    <?php else: ?>
                                         <?php if (
-                                            $appointment['status'] === "pending" &&
-                                            $appointment['edit_count'] < 2 &&
-                                            strtolower($appointment['session_type']) !== "playgroup"
+                                            strtolower($appointment['session_type']) === "playgroup" &&
+                                            !in_array(strtolower($appointment['status']), ["completed", "cancelled", "declined"])
                                         ): ?>
-                                            <button class="uk-button uk-button-primary edit-btn" data-id="<?= $appointment['appointment_id']; ?>"
-                                                data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
-                                                Reschedule (<?= 2 - $appointment['edit_count']; ?> left)
-                                            </button>
+                                            <button class="uk-button uk-button-default" disabled>Reschedule Not Allowed for Playgroup</button>
+                                        <?php elseif ($appointment['edit_count'] >= 2 && $appointment['status'] === "pending"): ?>
+                                            <button class="uk-button uk-button-default" disabled>Reschedule Limit Reached</button>
                                         <?php else: ?>
-                                            <?php if (
-                                                strtolower($appointment['session_type']) === "playgroup" &&
-                                                !in_array(strtolower($appointment['status']), ["completed", "cancelled", "declined"])
-                                            ): ?>
-                                                <button class="uk-button uk-button-default" disabled>Reschedule Not Allowed for Playgroup</button>
-                                            <?php elseif ($appointment['edit_count'] >= 2 && $appointment['status'] === "pending"): ?>
-                                                <button class="uk-button uk-button-default" disabled>Reschedule Limit Reached</button>
-                                            <?php else: ?>
-                                                <button class="uk-button uk-button-default" disabled>Reschedule Is Not Allowed</button>
-                                            <?php endif; ?>
-
+                                            <button class="uk-button uk-button-default" disabled>Reschedule Is Not Allowed</button>
                                         <?php endif; ?>
-                                    </td>
-                                </tr>
-                            <?php endforeach; ?>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
                         </tbody>
                     </table>
                 </div>
