@@ -181,7 +181,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                         <td><?= htmlspecialchars(date("M d, Y", strtotime($appointment['date']))); ?></td>
                         <td><?= htmlspecialchars(date("h:i A", strtotime($appointment['time']))); ?></td>
                         <td><?= htmlspecialchars(date("M d, Y h:i A", strtotime($appointment['created_at']))); ?></td>
-                        <td><?= htmlspecialchars($appointment['session_type']); ?></td>
+                        <td><?= htmlspecialchars(ucwords(strtolower($appointment['session_type']))); ?></td>
 
                         <td>
                             <?php if (!empty($appointment['official_referral_file'])): ?>
@@ -244,7 +244,7 @@ $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_A
                         <tr>
                             <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
                             <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
-                            <td><?= htmlspecialchars($appointment['date']); ?> (Waitlisted)</td>
+                            <td><?= htmlspecialchars(date("M d, Y", strtotime($appointment['date']))); ?> (Waitlisted)</td>
                             <td>
                                 <?php if (strtolower($appointment['session_type']) === 'playgroup'): ?>
                                     <button class="uk-button uk-button-primary assign-playgroup-btn" data-id="<?= $appointment['appointment_id']; ?>">
