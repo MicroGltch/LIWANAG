@@ -18,13 +18,48 @@
     $settingsResult = $connection->query($settingsQuery);
     $settings = $settingsResult->fetch_assoc();
 
-    $businessHoursStart = $settings["business_hours_start"] ?? "09:00:00";
-    $businessHoursEnd = $settings["business_hours_end"] ?? "17:00:00";
+    // $businessHoursStart = $settings["business_hours_start"] ?? "09:00:00";
+    // $businessHoursEnd = $settings["business_hours_end"] ?? "17:00:00";
     $maxDaysAdvance = $settings["max_days_advance"] ?? 30;
     $minDaysAdvance = $settings["min_days_advance"] ?? 3;
     $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["blocked_dates"], true) : []; // Ensure array
     $ieDuration = $settings["initial_eval_duration"] ?? 60;
     $pgDuration = $settings["playgroup_duration"] ?? 120;
+
+   //Get per-day hours from business_hours_by_day
+    $bizHoursByDay = [];
+    $result = $connection->query("SELECT day_name, start_time, end_time FROM business_hours_by_day");
+    while ($row = $result->fetch_assoc()) {
+        $bizHoursByDay[$row['day_name']] = [
+            'start' => $row['start_time'],
+            'end'   => $row['end_time']
+        ];
+    }
+    
+    $closedDays = array_keys(array_filter($bizHoursByDay, fn($v) => is_null($v['start']) || is_null($v['end'])));
+
+    $openOverrideDates = [];
+    $exceptions = $connection->query("SELECT exception_date FROM business_hours_exceptions WHERE start_time IS NOT NULL AND end_time IS NOT NULL");
+    while ($row = $exceptions->fetch_assoc()) {
+        $openOverrideDates[] = $row['exception_date'];
+    }
+
+    //Check for a specific date override
+    $overrideStmt = $connection->prepare("SELECT start_time, end_time FROM business_hours_exceptions WHERE exception_date = ?");
+    $overrideStmt->bind_param("s", $date);
+    $overrideStmt->execute();
+    $overrideResult = $overrideStmt->get_result();
+    $override = $overrideResult->fetch_assoc();
+
+    if ($override) {
+        $start = $override['start_time'];
+        $end = $override['end_time'];
+    } else {
+        $dayOfWeek = date("l", strtotime($date));
+        $start = $bizHoursByDay[$dayOfWeek]['start'];
+        $end = $bizHoursByDay[$dayOfWeek]['end'];
+    }
+
 
     // ✅ Fetch registered patients
     $patientsQuery = "SELECT patient_id, first_name, last_name FROM patients WHERE account_id = ?";
@@ -158,53 +193,116 @@
 
 
     <script>
-    //for timetable
+
+    let openOverrideDates = <?= json_encode($openOverrideDates) ?>;
+    let closedDays = <?= json_encode($closedDays) ?>;
+
+    console.log("closedDays", closedDays);
+
+        //for time table
     document.addEventListener("DOMContentLoaded", function () {
-        let blockedDates = <?= json_encode($blockedDates) ?>; //  Load blocked dates from PHP
-        let minDaysAdvance = <?= $minDaysAdvance ?>; 
+        let blockedDates = <?= json_encode($blockedDates) ?>;
+        let minDaysAdvance = <?= $minDaysAdvance ?>;
         let maxDaysAdvance = <?= $maxDaysAdvance ?>;
-        
+
         let today = new Date();
         let minDate = new Date(today);
-        minDate.setDate(today.getDate() + minDaysAdvance);  // ✅ Prevent booking before min_days_advance
+        minDate.setDate(today.getDate() + minDaysAdvance - 1); // ← Show March 26 properly
+
 
         let maxDate = new Date();
-        maxDate.setDate(today.getDate() + maxDaysAdvance);  // ✅ Prevent booking beyond max_days_advance
+        maxDate.setDate(today.getDate() + maxDaysAdvance);
 
-        // ✅ Apply Flatpickr to disable past dates & blocked dates
+        console.log("minDate", minDate.toISOString().split("T")[0]);
+console.log("maxDate", maxDate.toISOString().split("T")[0]);
+console.log("Today is", today.toISOString().split("T")[0]);
+
         flatpickr("#appointment_date", {
-            minDate: minDate.toISOString().split("T")[0], 
-            maxDate: maxDate.toISOString().split("T")[0], 
+            minDate: minDate.toISOString().split("T")[0],
+            maxDate: maxDate.toISOString().split("T")[0],
             dateFormat: "Y-m-d",
-            disable: blockedDates, // ✅ Blocked dates are **fully unselectable**
-            onChange: function(selectedDates, dateStr) {
-                updateAvailableTimes();
+            disable: [
+            function(date) {
+                const iso = date.toLocaleDateString("en-CA"); // ✅ local ISO date
+                const weekdayMap = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                const weekday = weekdayMap[date.getDay()];
+
+                const actualMinDate = new Date();
+                actualMinDate.setDate(actualMinDate.getDate() + <?= $minDaysAdvance ?>);
+                actualMinDate.setHours(0, 0, 0, 0);
+
+                if (date < actualMinDate) return true;
+                if (openOverrideDates.includes(iso)) return false;
+                if (closedDays.includes(weekday)) return true;
+
+                return false;
+            }
+        ],
+            onChange: function (selectedDates, dateStr) {
+                updateAvailableTimes(dateStr);
             }
         });
 
-        let timeInput = document.getElementById("appointment_time");
-        let appointmentType = document.getElementById("appointment_type");
 
-        function updateAvailableTimes() {
+        const timeInput = document.getElementById("appointment_time");
+        const appointmentType = document.getElementById("appointment_type");
+
+        async function updateAvailableTimes(dateStr) {
             timeInput.innerHTML = "";
-            let selectedType = appointmentType.value;
-            let interval = selectedType === "Playgroup" ? <?= $pgDuration ?> : <?= $ieDuration ?>;
-            let startHour = parseInt("<?= $businessHoursStart ?>".split(":")[0]);
-            let endHour = parseInt("<?= $businessHoursEnd ?>".split(":")[0]);
+            const selectedType = appointmentType.value;
+            const interval = selectedType === "Playgroup" ? <?= $pgDuration ?> : <?= $ieDuration ?>;
 
-            for (let hour = startHour; hour < endHour; hour += interval / 60) {
-                let formattedTime = `${hour.toString().padStart(2, "0")}:00`;
-                let option = document.createElement("option");
+            const res = await fetch("app_data/get_available_hours.php?date=" + dateStr);
+            const data = await res.json();
+
+            if (data.status !== "open") {
+                const option = document.createElement("option");
+                option.value = "";
+                option.textContent = "Date is closed";
+                timeInput.appendChild(option);
+                timeInput.disabled = true;
+                return;
+            }
+
+            const startHour = parseInt(data.start.split(":")[0]);
+            const startMinute = parseInt(data.start.split(":")[1]);
+            const endHour = parseInt(data.end.split(":")[0]);
+            const endMinute = parseInt(data.end.split(":")[1]);
+
+            let start = new Date();
+            start.setHours(startHour, startMinute, 0, 0);
+
+            let end = new Date();
+            end.setHours(endHour, endMinute, 0, 0);
+
+            while (start < end) {
+                const hours = start.getHours();
+                const minutes = start.getMinutes();
+                const ampm = hours >= 12 ? 'PM' : 'AM';
+                const formattedHour = hours % 12 === 0 ? 12 : hours % 12;
+                const formattedTime = `${formattedHour}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+
+                const option = document.createElement("option"); // ✅ THIS LINE WAS MISSING
                 option.value = formattedTime;
                 option.textContent = formattedTime;
+
                 timeInput.appendChild(option);
+
+                start.setMinutes(start.getMinutes() + interval);
             }
+
+
+            timeInput.disabled = false;
         }
 
         appointmentType.addEventListener("change", function () {
-            updateAvailableTimes();
+            const selectedDate = document.getElementById("appointment_date").value;
+            if (selectedDate) {
+                updateAvailableTimes(selectedDate);
+            }
         });
     });
+
 
     //if the selected patient has a pending appointment, then it will return to "select appointment type".
         document.addEventListener("DOMContentLoaded", function () {
@@ -346,7 +444,7 @@
             }
 
             // ✅ Fetch patient details
-            fetch("patient/backend/fetch_patient_details.php?patient_id=" + patientID)
+            fetch("patient/patient_data/fetch_patient_details.php?patient_id=" + patientID)
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === "success") {
@@ -376,7 +474,7 @@
                 .catch(error => console.error("Error fetching patient details:", error));
 
             // ✅ Check if the selected patient has completed Initial Evaluation
-            fetch(`patient/backend/check_patient_history.php?patient_id=${patientID}`) // 🔹 Fixed patientID typo
+            fetch(`patient/patient_data/check_patient_history.php?patient_id=${patientID}`) // 🔹 Fixed patientID typo
                 .then(response => response.json())
                 .then(data => {
                     let ieOption = appointmentTypeDropdown.querySelector("option[value='Initial Evaluation']");
