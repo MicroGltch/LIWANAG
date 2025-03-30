@@ -66,6 +66,20 @@ $totalQuery = "SELECT COUNT(*) as total FROM appointments";
 $totalResult = $connection->query($totalQuery);
 $totalAppointments = $totalResult->fetch_assoc()['total'];
 
+// Function to filter appointments by status
+function filterAppointmentsByStatus($appointments, $status) {
+    if ($status === 'others') {
+        $mainStatuses = ['pending', 'approved', 'waitlisted', 'completed', 'cancelled', 'declined'];
+        return array_filter($appointments, function($appointment) use ($mainStatuses) {
+            return !in_array(strtolower($appointment['status']), $mainStatuses);
+        });
+    } else {
+        return array_filter($appointments, function($appointment) use ($status) {
+            return strtolower($appointment['status']) === $status;
+        });
+    }
+}
+
 ?>
 
 
@@ -203,17 +217,129 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     </div>
                 </div>
 
-                <!-- ✅ Appointment Summary Cards -->
+                <!-- ✅ Clickable Appointment Summary Cards -->
                 <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
                     <?php foreach ($appointmentCounts as $status => $count): ?>
                         <div>
-                            <div class="uk-card uk-card-default uk-card-body">
+                            <div class="uk-card uk-card-default uk-card-body uk-card-hover" id="card-<?= strtolower($status) ?>">
                                 <h3 class="uk-card-title"><?= ucwords($status) ?></h3>
                                 <p>Total: <?= $count ?></p>
+                                <button class="uk-button uk-button-primary uk-width-1-1" 
+                                        onclick="showAppointments('<?= strtolower($status) ?>')">
+                                    View Details
+                                </button>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
+
+                <!-- Detail tables for each status (initially hidden) -->
+                <?php foreach ($appointmentCounts as $status => $count): ?>
+                    <div id="table-<?= strtolower($status) ?>" class="uk-margin-medium-top appointment-details" style="display: none;">
+                        <div class="uk-card uk-card-default">
+                            <div class="uk-card-header">
+                                <div class="uk-grid-small uk-flex-middle" uk-grid>
+                                    <div class="uk-width-expand">
+                                        <h3 class="uk-card-title uk-margin-remove-bottom"><?= ucwords($status) ?> Appointments</h3>
+                                        <p class="uk-text-meta uk-margin-remove-top">Showing <?= $count ?> appointments</p>
+                                    </div>
+                                    <div class="uk-width-auto">
+                                        <button class="uk-button uk-button-default" onclick="closeTable('<?= strtolower($status) ?>')">
+                                            <span uk-icon="icon: close"></span> Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="uk-card-body uk-overflow-auto">
+                                <table class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Patient</th>
+                                            <th>Client</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php 
+                                        // Filter appointments for current status
+                                        $statusAppointments = filterAppointmentsByStatus($appointments, $status);
+                                        
+                                        if (!empty($statusAppointments)):
+                                            foreach ($statusAppointments as $appointment): 
+                                        ?>
+                                            <tr>
+                                                <td><?= $appointment['appointment_id'] ?></td>
+                                                <td><?= htmlspecialchars($appointment['first_name'] . ' ' . $appointment['last_name']) ?></td>
+                                                <td><?= htmlspecialchars($appointment['client_firstname'] . ' ' . $appointment['client_lastname']) ?></td>
+                                                <td><?= date('M d, Y', strtotime($appointment['date'])) ?></td>
+                                                <td><?= date('h:i A', strtotime($appointment['time'])) ?></td>
+                                                <td>
+                                                    <span class="uk-label uk-label-<?= getStatusClass($appointment['status']) ?>">
+                                                        <?= ucfirst($appointment['status']) ?>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        <?php 
+                                            endforeach; 
+                                        else: 
+                                        ?>
+                                            <tr>
+                                                <td colspan="7" class="uk-text-center">No <?= strtolower($status) ?> appointments found</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+
+                <script>
+                function showAppointments(status) {
+                    // Hide all tables first
+                    document.querySelectorAll('.appointment-details').forEach(table => {
+                        table.style.display = 'none';
+                    });
+                    
+                    // Show the selected table
+                    document.getElementById('table-' + status).style.display = 'block';
+                    
+                    // Scroll to the table
+                    document.getElementById('table-' + status).scrollIntoView({behavior: 'smooth'});
+                }
+
+                function closeTable(status) {
+                    document.getElementById('table-' + status).style.display = 'none';
+                    document.getElementById('card-' + status).scrollIntoView({behavior: 'smooth'});
+                }
+
+                </script>
+
+                <?php
+                // Helper function to determine the UIkit label class based on status
+                function getStatusClass($status) {
+                    $status = strtolower($status);
+                    switch ($status) {
+                        case 'pending':
+                            return 'warning';
+                        case 'approved':
+                            return 'success';
+                        case 'waitlisted':
+                            return 'primary';
+                        case 'completed':
+                            return 'success';
+                        case 'cancelled':
+                            return 'danger';
+                        case 'declined':
+                            return 'danger';
+                        default:
+                            return 'default';
+                    }
+                }
+                ?>
 
                 <hr>
 
