@@ -94,13 +94,21 @@
                 <!-- Password -->
                 <div class="uk-width-1@s uk-width-1@l">
                     <label class="uk-form-label uk-text-left" for="login-pass">Password</label>
-                    <div class="uk-form-controls password-input-wrapper">
-                        <input class="password-txtbox uk-input" id="login-pass" type="password" placeholder="Input your Password..." name="password">
-                        <i class="fas fa-eye" id="togglePasswordIcon" onclick="togglePassword()"></i>
-                        <span class="invalid-feedback" id="pass-error"></span>
+                    <div class="uk-form-controls ">
+
+                    <div style="position: relative; display: flex; align-items: center;">
+                        <input class="uk-input password-txtbox" id="login-pass" name="password" type="password" 
+                            placeholder="Input your Password..." 
+                            style="width: 100%; padding-right: 40px;">
+                        <span style="position: absolute; right: 10px; cursor: pointer; top: 10px;" onclick="togglePassword()">
+                            <i class="fa fa-eye" id="togglePasswordIcon"></i>
+                        </span>
+                        
                     </div>
-                
+
                     </div>
+                    <span class="invalid-feedback" id="pass-error"></span>
+                </div>
                 
                 <div class="uk-width-1-2@s uk-width-1-2@l uk-text-left@s">
                     <label class="uk-text-small"><input class="uk-checkbox" type="checkbox" id="rememberMe"> Remember me</label>
@@ -109,7 +117,7 @@
                     <a class="forgot-password-txt" href="passwordmodify/forgetpassword.php"> Forgot Password?</a>
                 </div>
                 <div class="login-btn-div uk-width-1@s uk-width-1@l">
-                    <button type="submit" name="login" class="login-btn uk-button uk-button-primary uk-width-1@s uk-width-1@l">Log In</button>
+                    <button type="submit" name="login" class="login-btn uk-button uk-button-primary uk-width-1@s uk-width-1@l" style="border-radius: 15px">Log In</button>
                 </div>
 
                 <!-- Divider -->
