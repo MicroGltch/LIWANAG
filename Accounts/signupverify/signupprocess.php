@@ -2,7 +2,14 @@
 session_start();
 require_once "../../dbconfig.php";
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["signup"])) {
+// Add this check at the beginning of your signupprocess.php file
+if (!isset($_POST['privacy_accepted']) || $_POST['privacy_accepted'] !== 'yes') {
+    $_SESSION['signup_error'] = "You must accept the privacy policy to create an account.";
+    header("Location: ../signuppage.php");
+    exit();
+}
+
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST["signup"]) || isset($_POST['privacy_accepted'])) {
     date_default_timezone_set('Asia/Manila');
 
     $firstName = ucwords(strtolower($_POST['fname']));

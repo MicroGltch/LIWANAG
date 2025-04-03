@@ -108,18 +108,14 @@ include "../dbconfig.php"
             <div class="uk-width-1@s uk-width-1-2@l">
                 <label class="uk-form-label uk-text-left" for="password">Password</label>
                 <div class="uk-form-controls">
-
-               
                     <div style="position: relative; display: flex; align-items: center;">
                         <input class="uk-input password-input" id="password" name="password" type="password" 
                             maxlength="20" minlength="8" placeholder="Input your Password..." 
                             style="width: 100%; padding-right: 40px;">
-                        <span style="position: absolute; right: 10px; cursor: pointer; top: 10px;" onclick="togglePassword()">
+                        <span style="position: absolute; right: 10px; cursor: pointer; top: 10px;" onclick="togglePassword()">                            
                             <i class="fa fa-eye" id="togglePasswordIcon"></i>
                         </span>
                     </div>
-
-                    
                 </div>
                 <span class="error" id="passwordError" style="color: red;"></span>
             </div>
@@ -132,7 +128,7 @@ include "../dbconfig.php"
                         <input class="uk-input password-input" id="confirmPassword" name="confirmPassword" type="password" 
                             maxlength="20" minlength="8" placeholder="Confirm your Password..." 
                             style="width: 100%; padding-right: 40px;">
-                        <span style="position:absolute; right: 10px; cursor: pointer; top: 10px;" onclick="toggleConfirmPassword()">
+                        <span style="position:absolute; right: 10px; cursor: pointer; top: 10px;" onclick="toggleConfirmPassword()">                                
                             <i class="fa fa-eye" id="toggleConfirmPasswordIcon"></i>
                         </span>
                     </div>
@@ -257,130 +253,221 @@ include "../dbconfig.php"
     }
 
     
+// Add this JavaScript code to the existing script section
 
-    document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
+    // Get the form element
+    const signupForm = document.getElementById("signupvalidate");
 
-document.getElementById("signupvalidate").addEventListener("submit", function (event) {
-    let valid = true;
+    // Add a hidden field to indicate privacy policy acceptance
+    const hiddenField = document.createElement("input");
+    hiddenField.type = "hidden";
+    hiddenField.name = "privacy_accepted";
+    hiddenField.value = "no";
+    signupForm.appendChild(hiddenField);
 
-    // First Name Validation
-    let firstName = document.getElementById("firstName").value.trim();
-    let firstNameError = document.getElementById("firstNameError");
-    let nameRegex = /^[A-Za-z ]{2,30}$/;
-    if (!nameRegex.test(firstName)) {
-        firstNameError.textContent = "Only letters allowed (2-30 characters).";
-        valid = false;
-    } else {
-        firstNameError.textContent = "";
-    }
+    // Store original onsubmit behavior
+    const originalValidation = signupForm.onsubmit;
 
-    // Last Name Validation
-    let lastName = document.getElementById("lastName").value.trim();
-    let lastNameError = document.getElementById("lastNameError");
-    if (!nameRegex.test(lastName)) {
-        lastNameError.textContent = "Only letters allowed (2-30 characters).";
-        valid = false;
-    } else {
-        lastNameError.textContent = "";
-    }
+    // Replace the existing submit handler with our own
+    signupForm.onsubmit = function (event) {
+        event.preventDefault();
 
-    // Email Validation
-    let email = document.getElementById("email").value.trim();
-    let emailError = document.getElementById("emailError");
-    let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-    if (!emailRegex.test(email)) {
-        emailError.textContent = "Invalid email format.";
-        valid = false;
-    } else {
-        emailError.textContent = "";
-    }
+        // Run form validation
+        let valid = validateForm();
 
-    // Password Validation
-    let password = document.getElementById("password").value;
-    let passwordError = document.getElementById("passwordError");
-    let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-_])[A-Za-z\d@$!%*?&\-_]{8,20}$/;
-    if (!passwordRegex.test(password)) {
-        passwordError.textContent = "Password must be 8-20 chars, with uppercase, lowercase, number, and special char.";
-        valid = false;
-    } else {
-        passwordError.textContent = "";
-    }
-
-    // Confirm Password Validation
-    let confirmPassword = document.getElementById("confirmPassword").value;
-    let confirmPasswordError = document.getElementById("confirmPasswordError");
-    if (confirmPassword !== password) {
-        confirmPasswordError.textContent = "Passwords do not match.";
-        valid = false;
-    } else {
-        confirmPasswordError.textContent = "";
-    }
-
-    // Mobile Number Validation
-    let mobileNumber = document.getElementById("mobileNumber").value.trim();
-    let mobileNumberError = document.getElementById("mobileNumberError");
-
-    // Validate: must be 11 digits, and start with 09
-    let mobileRegex = /^09\d{9}$/;
-    if (!mobileRegex.test(mobileNumber)) {
-        if (mobileNumber.length !== 11) {
-            mobileNumberError.textContent = "Phone number must be exactly 11 digits.";
-        } else if (!mobileNumber.startsWith("09")) {
-            mobileNumberError.textContent = "Phone number must start with 09.";
-        } else if (!/^\d+$/.test(mobileNumber)) {
-            mobileNumberError.textContent = "Phone number must contain only digits.";
-        } else {
-            mobileNumberError.textContent = "Invalid phone number format. Must be 09XXXXXXXXX.";
+        if (valid) {
+            // Show privacy policy popup
+            showPrivacyPolicyPopup();
         }
-        valid = false;
-    } else {
-        mobileNumberError.textContent = "";
+    };
+
+    function validateForm() {
+        let valid = true;
+
+        // First Name Validation
+        let firstName = document.getElementById("firstName").value.trim();
+        let firstNameError = document.getElementById("firstNameError");
+        let nameRegex = /^[A-Za-z ]{2,30}$/;
+        if (!nameRegex.test(firstName)) {
+            firstNameError.textContent = "Only letters allowed (2-30 characters).";
+            valid = false;
+        } else {
+            firstNameError.textContent = "";
+        }
+
+        // Last Name Validation
+        let lastName = document.getElementById("lastName").value.trim();
+        let lastNameError = document.getElementById("lastNameError");
+        if (!nameRegex.test(lastName)) {
+            lastNameError.textContent = "Only letters allowed (2-30 characters).";
+            valid = false;
+        } else {
+            lastNameError.textContent = "";
+        }
+
+        // Email Validation
+        let email = document.getElementById("email").value.trim();
+        let emailError = document.getElementById("emailError");
+        let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            emailError.textContent = "Invalid email format.";
+            valid = false;
+        } else {
+            emailError.textContent = "";
+            // Check for email duplication
+            checkEmail(email)
+                .then(exists => {
+                    if (exists) {
+                        emailError.textContent = "Email already exists.";
+                        valid = false;
+                    }
+                });
+        }
+
+        // Password Validation
+        let password = document.getElementById("password").value;
+        let passwordError = document.getElementById("passwordError");
+        let passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&\-_])[A-Za-z\d@$!%*?&\-_]{8,20}$/;
+        if (!passwordRegex.test(password)) {
+            passwordError.textContent = "Password must be 8-20 chars, with uppercase, lowercase, number, and special char.";
+            valid = false;
+        } else {
+            passwordError.textContent = "";
+        }
+
+        // Confirm Password Validation
+        let confirmPassword = document.getElementById("confirmPassword").value;
+        let confirmPasswordError = document.getElementById("confirmPasswordError");
+        if (confirmPassword !== password) {
+            confirmPasswordError.textContent = "Passwords do not match.";
+            valid = false;
+        } else {
+            confirmPasswordError.textContent = "";
+        }
+
+        // Mobile Number Validation
+        let mobileNumber = document.getElementById("mobileNumber").value.trim();
+        let mobileNumberError = document.getElementById("mobileNumberError");
+        let mobileRegex = /^09\d{9}$/;
+        if (!mobileRegex.test(mobileNumber)) {
+            if (mobileNumber.length !== 11) {
+                mobileNumberError.textContent = "Phone number must be exactly 11 digits.";
+            } else if (!mobileNumber.startsWith("09")) {
+                mobileNumberError.textContent = "Phone number must start with 09.";
+            } else if (!/^\d+$/.test(mobileNumber)) {
+                mobileNumberError.textContent = "Phone number must contain only digits.";
+            } else {
+                mobileNumberError.textContent = "Invalid phone number format. Must be 09XXXXXXXXX.";
+            }
+            valid = false;
+        } else {
+            mobileNumberError.textContent = "";
+        }
+
+        // Address Validation
+        let address = document.getElementById("address").value;
+        let addressError = document.getElementById("addressError");
+        if (address.length < 5) {
+            addressError.textContent = "Address must be at least 5 characters.";
+            valid = false;
+        } else {
+            addressError.textContent = "";
+        }
+
+        return valid;
     }
 
-    // Address Validation
-    let address = document.getElementById("address").value;
-    let addressError = document.getElementById("addressError");
-    if (address.length < 5) {
-        addressError.textContent = "Address must be at least 5 characters.";
-        valid = false;
-    } else {
-        addressError.textContent = "";
-    }
-
-    // Email Duplication Check (Client-Side)
-    if (valid) { // Only perform email check if other validations pass
-        fetch('check_email.php', { // Create a PHP file called check_email.php
+    function checkEmail(email) {
+        return fetch('check_email.php', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': 'application/x-www-form-urlencoded'
             },
-            body: 'email=' + encodeURIComponent(email)
+            body: 'email=' + email
         })
-        .then(response => response.json())
-        .then(data => {
-            if (data.exists) {
-                emailError.textContent = "The email you entered is already registered. Please use a different email.";
-                valid = false;
-            }
-
-            if (!valid) {
-                event.preventDefault();
-                return false;
-            } else {
-                // If all validations pass, submit the form
-                document.getElementById("signupvalidate").submit();
-            }
-        })
-        .catch(error => {
-            valid = false;
-            event.preventDefault();
-            return false;
-        });
-    } else {
-        event.preventDefault();
-        return false;
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error checking email:', data.error);
+                    return false; // Or handle the error appropriately
+                }
+                return data.exists;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                return false; // Or handle the error appropriately
+            });
     }
-});
+
+    function showPrivacyPolicyPopup() {
+        Swal.fire({
+            title: 'Privacy Policy Agreement',
+            html: `
+                    <div style="text-align: left; height: 200px; overflow-y: auto; margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+                        <h4>Privacy Policy for Little Wanderer's Therapy Center</h4>
+                        <p><strong>1. Information We Collect</strong><br>
+                        We collect personal information that you provide during registration, including your name, email address, phone number, and address.</p>
+                        
+                        <p><strong>2. How We Use Your Information</strong><br>
+                        We use your information to provide and improve our services, communicate with you, and manage your account. Your information may be used to:</p>
+                        <ul>
+                            <li>Create and manage your account</li>
+                            <li>Schedule appointments and provide therapy services</li>
+                            <li>Send important notifications about your account or services</li>
+                            <li>Improve our website and services</li>
+                        </ul>
+                        
+                        <p><strong>3. Information Security</strong><br>
+                        We implement appropriate security measures to protect your personal information against unauthorized access, alteration, disclosure, or destruction.</p>
+                        
+                        <p><strong>4. Third-Party Disclosure</strong><br>
+                        We do not sell, trade, or otherwise transfer your personally identifiable information to outside parties unless we provide users with advance notice.</p>
+                        
+                        <p><strong>5. Your Rights</strong><br>
+                        You have the right to access, update, or delete your personal information at any time. You can do this by contacting us directly.</p>
+                    </div>
+                    <div style="text-align: left;">
+                        <input type="checkbox" id="privacyPolicyCheckbox" class="uk-checkbox">
+                        <label for="privacyPolicyCheckbox"> I have read and agree to the Privacy Policy</label>
+                    </div>
+                `,
+            showCancelButton: true,
+            confirmButtonText: 'Agree & Continue',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#1e87f0',
+            reverseButtons: true,
+            allowOutsideClick: false,
+            preConfirm: () => {
+                const checkbox = document.getElementById('privacyPolicyCheckbox');
+                if (!checkbox.checked) {
+                    Swal.showValidationMessage('You must agree to the Privacy Policy to continue');
+                    return false;
+                }
+                return true;
+            }
+        }).then((result) => {
+            // With this modified version:
+            if (result.isConfirmed) {
+                // Set hidden field to indicate acceptance
+                document.querySelector('input[name="privacy_accepted"]').value = "yes";
+
+                // Store the form's action
+                const formAction = signupForm.action;
+
+                // Clear the onsubmit handler
+                signupForm.onsubmit = null;
+
+                // Add a small delay before submitting
+                setTimeout(function () {
+                    signupForm.submit();
+                }, 100);
+
+                // For debugging, add this
+                console.log("Form submitted to: " + formAction);
+            }
+        });
+    }
 });
 
     </script>
