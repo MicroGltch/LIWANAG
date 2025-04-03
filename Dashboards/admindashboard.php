@@ -254,8 +254,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     </li>
 
                     <li>
-                        <li><a href="#clients" onclick="showSection('clients')"><span class="uk-margin-small-right" uk-icon="user"></span> Clients</a></li>
-                        <li><a href="#patients" onclick="showSection('patients')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a></li>
+                    <li><a href="#clients" onclick="showSection('clients')"><span class="uk-margin-small-right" uk-icon="user"></span> Clients</a></li>
+                    <li><a href="#patients" onclick="showSection('patients')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a></li>
                     </li>
                     </li>
 
@@ -266,8 +266,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         <span>Therapists</span>
                     </li>
                     <li>
-                        <li><a href="#manage-therapist" onclick="showSection('manage-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> Manage Therapists</a></li>
-                        <li><a href="#add-therapist" onclick="showSection('add-therapist')"><span class="uk-margin-small-right" uk-icon="plus"></span> Add Therapist</a></li>
+                    <li><a href="#manage-therapist" onclick="showSection('manage-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> Manage Therapists</a></li>
+                    <li><a href="#add-therapist" onclick="showSection('add-therapist')"><span class="uk-margin-small-right" uk-icon="plus"></span> Add Therapist</a></li>
                     </li>
                     </li>
 
@@ -277,11 +277,11 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <li>
                         <span>System</span>
                     </li>
-                        <li>
-                            <li><a href="#system-analytics" onclick="showSection('system-analytics')"><span class="uk-margin-small-right" uk-icon="settings"></span> System Analytics</a></li>
-                            <li><a href="#timetable-settings" onclick="showSection('timetable-settings')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Timetable Settings</a></li>
-                            <li><a href="#manage-content" onclick="showSection('manage-content')"><span class="uk-margin-small-right" uk-icon="file-text"></span> Manage Webpage Contents</a></li>
-                        </li>
+                    <li>
+                    <li><a href="#system-analytics" onclick="showSection('system-analytics')"><span class="uk-margin-small-right" uk-icon="settings"></span> System Analytics</a></li>
+                    <li><a href="#timetable-settings" onclick="showSection('timetable-settings')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Timetable Settings</a></li>
+                    <li><a href="#manage-content" onclick="showSection('manage-content')"><span class="uk-margin-small-right" uk-icon="file-text"></span> Manage Webpage Contents</a></li>
+                    </li>
                     </li>
 
                     <hr>
@@ -290,9 +290,9 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <li>
                         <span>Your Account</span>
                     </li>
-                        <li>
-                            <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
-                        </li>
+                    <li>
+                    <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
+                    </li>
                     </li>
                 </ul>
             </div>
@@ -342,8 +342,22 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <!-- Clients -->
             <div id="clients" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Clients</h1>
-
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <!-- ✅ Custom Search and Show Entries -->
+                    <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
+                        <div class="uk-width-1-3">
+                            <input type="text" id="clientsSearch" class="uk-input" placeholder="Search..." style="border-radius: 15px;">
+                        </div>
+                        <div class="uk-width-auto">
+                            <label for="clientsEntries" class="uk-margin-small-right">Show entries per page:</label>
+                            <select id="clientsEntries" class="uk-select" style="width: auto; border-radius: 15px;">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="uk-overflow-auto">
                         <table id="clientsTable" class="uk-table uk-table-striped uk-table-hover">
                             <thead>
@@ -390,33 +404,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 <?php endif; ?>
                             </tbody>
                         </table>
-
-                        <script>
-                            $(document).ready(function() {
-                                $('#clientsTable').DataTable({
-                                    pageLength: 10,
-                                    lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ],
-                                    language: {
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        search: "Search:",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [{
-                                        orderable: true,
-                                        targets: '_all'
-                                    }]
-                                });
-                            });
-                        </script>
                     </div>
                 </div>
             </div>
@@ -424,8 +411,22 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <!-- Patients -->
             <div id="patients" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Patients</h1>
-
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <!-- ✅ Custom Search and Show Entries -->
+                    <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
+                        <div class="uk-width-1-3">
+                            <input type="text" id="patientsSearch" class="uk-input" placeholder="Search..." style="border-radius: 15px;">
+                        </div>
+                        <div class="uk-width-auto">
+                            <label for="patientsEntries" class="uk-margin-small-right">Show entries per page:</label>
+                            <select id="patientsEntries" class="uk-select" style="width: auto; border-radius: 15px;">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="uk-overflow-auto">
                         <table id="patientsTable" class="uk-table uk-table-striped uk-table-hover">
                             <thead>
@@ -467,33 +468,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 <?php endif; ?>
                             </tbody>
                         </table>
-
-                        <script>
-                            $(document).ready(function() {
-                                $('#patientsTable').DataTable({
-                                    pageLength: 10,
-                                    lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ],
-                                    language: {
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        search: "Search:",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [{
-                                        orderable: true,
-                                        targets: '_all'
-                                    }]
-                                });
-                            });
-                        </script>
                     </div>
                 </div>
             </div>
@@ -503,6 +477,21 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 <h1 class="uk-text-bold">Manage Therapists</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <!-- ✅ Custom Search and Show Entries -->
+                    <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
+                        <div class="uk-width-1-3">
+                            <input type="text" id="therapistSearch" class="uk-input" placeholder="Search..." style="border-radius: 15px;">
+                        </div>
+                        <div class="uk-width-auto">
+                            <label for="therapistsEntries" class="uk-margin-small-right">Show entries per page:</label>
+                            <select id="therapistsEntries" class="uk-select" style="width: auto; border-radius: 15px;">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="uk-overflow-auto">
                         <table id="managetherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
                             <thead>
@@ -550,33 +539,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 <?php endif; ?>
                             </tbody>
                         </table>
-
-                        <script>
-                            $(document).ready(function() {
-                                $('#managetherapistTable').DataTable({
-                                    pageLength: 10,
-                                    lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ],
-                                    language: {
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        search: "Search:",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [{
-                                        orderable: true,
-                                        targets: '_all'
-                                    }]
-                                });
-                            });
-                        </script>
                     </div>
                 </div>
             </div>
@@ -716,19 +678,19 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                             <button class="uk-button uk-button-primary" type="submit" id="saveButton" style="border-radius: 15px;" disabled>Save Changes</button>
                         </div>
 
-            <div id="otpSection" class="uk-width-1-1" style="display: none;">
-                <h3 class="uk-card-title uk-text-bold">Enter OTP</h3>
-                <p class="uk-text-muted">A verification code has been sent to your new email address. Please enter it below to complete the change.</p>
-                <div class="uk-margin">
-                    <input class="uk-input" type="text" name="otp" id="otp" placeholder="Enter OTP">
-                    <small style="color: red;" class="error-message" data-error="otp"></small>
-                </div>
-                <!-- The buttons will be dynamically added here by JavaScript -->
-            </div>
-            <div class="uk-width-1-1 uk-margin-top">
-                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
-            </div>
-        </form>
+                        <div id="otpSection" class="uk-width-1-1" style="display: none;">
+                            <h3 class="uk-card-title uk-text-bold">Enter OTP</h3>
+                            <p class="uk-text-muted">A verification code has been sent to your new email address. Please enter it below to complete the change.</p>
+                            <div class="uk-margin">
+                                <input class="uk-input" type="text" name="otp" id="otp" placeholder="Enter OTP">
+                                <small style="color: red;" class="error-message" data-error="otp"></small>
+                            </div>
+                            <!-- The buttons will be dynamically added here by JavaScript -->
+                        </div>
+                        <div class="uk-width-1-1 uk-margin-top">
+                            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
+                        </div>
+                    </form>
 
                     <?php unset($_SESSION['update_errors']); ?>
                     <?php unset($_SESSION['update_success']); ?>
@@ -739,23 +701,23 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
 </body>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-    // Select elements
-    const editButton = document.getElementById("editButton");
-    const saveButton = document.getElementById("saveButton");
-    const form = document.getElementById("settingsvalidate");
-    const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
-    const otpSection = document.getElementById("otpSection");
-    const otpInput = document.getElementById("otp");
-    const successMessage = document.getElementById("successMessage");
-    const profileUploadInput = document.getElementById("profileUpload");
-    const uploadButton = document.getElementById("uploadButton");
-    const emailInput = document.getElementById("email"); // Select the email input
-    const removePhotoButton = document.getElementById("removePhotoButton");
-    
-     // Create all three buttons with the exact styling from Image 2
-     const resendOtpButton = document.createElement("button");
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select elements
+        const editButton = document.getElementById("editButton");
+        const saveButton = document.getElementById("saveButton");
+        const form = document.getElementById("settingsvalidate");
+        const inputs = document.querySelectorAll("#settingsvalidate input:not([type=hidden])");
+        const otpSection = document.getElementById("otpSection");
+        const otpInput = document.getElementById("otp");
+        const successMessage = document.getElementById("successMessage");
+        const profileUploadInput = document.getElementById("profileUpload");
+        const uploadButton = document.getElementById("uploadButton");
+        const emailInput = document.getElementById("email"); // Select the email input
+        const removePhotoButton = document.getElementById("removePhotoButton");
+
+        // Create all three buttons with the exact styling from Image 2
+        const resendOtpButton = document.createElement("button");
         resendOtpButton.id = "resendOtpButton";
         resendOtpButton.textContent = "RESEND OTP";
         resendOtpButton.className = "uk-button";
@@ -769,7 +731,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         resendOtpButton.style.textTransform = "uppercase";
         resendOtpButton.style.transition = ".1s ease-in-out";
         resendOtpButton.style.transitionProperty = "color, background-color, border-color";
-        
+
         const editEmailButton = document.createElement("button");
         editEmailButton.id = "editEmailButton";
         editEmailButton.textContent = "EDIT EMAIL";
@@ -781,7 +743,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         editEmailButton.style.margin = "0 10px 0 0";
         editEmailButton.style.border = "none";
         editEmailButton.style.borderRadius = "4px";
-        
+
         const cancelVerificationButton = document.createElement("button");
         cancelVerificationButton.id = "cancelVerificationButton";
         cancelVerificationButton.textContent = "CANCEL VERIFICATION";
@@ -793,24 +755,24 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         cancelVerificationButton.style.margin = "0";
         cancelVerificationButton.style.border = "none";
         cancelVerificationButton.style.borderRadius = "4px";
-        
+
         // Create a container for the buttons
         const buttonContainer = document.createElement("div");
         buttonContainer.className = "uk-margin-medium-top";
         buttonContainer.style.display = "flex";
         buttonContainer.style.justifyContent = "flex-start";
         buttonContainer.style.marginTop = "20px";
-        
+
         // Add buttons to container in the correct order
         buttonContainer.appendChild(resendOtpButton);
         buttonContainer.appendChild(editEmailButton);
         buttonContainer.appendChild(cancelVerificationButton);
-    
-    // Insert these buttons after the OTP input
-    if (otpSection) {
-        // Append the button container to the OTP section (after all existing elements)
-        otpSection.appendChild(buttonContainer);
-    }
+
+        // Insert these buttons after the OTP input
+        if (otpSection) {
+            // Append the button container to the OTP section (after all existing elements)
+            otpSection.appendChild(buttonContainer);
+        }
 
         let originalValues = {};
         inputs.forEach(input => originalValues[input.id] = input.value);
@@ -818,371 +780,480 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         // Original email value to restore if verification is canceled
         let originalEmail = emailInput ? emailInput.value : '';
 
-    // Modify Edit Button Click Event
-    if (editButton) {
-        editButton.addEventListener("click", function () {
-            if (editButton.textContent === "Edit") {
-                inputs.forEach(input => input.disabled = false);
-                saveButton.disabled = false;
-                editButton.textContent = "Cancel";
-                uploadButton.disabled = false;
-                removePhotoButton.style.pointerEvents = "auto";
-                removePhotoButton.style.color = "";
+        // Modify Edit Button Click Event
+        if (editButton) {
+            editButton.addEventListener("click", function() {
+                if (editButton.textContent === "Edit") {
+                    inputs.forEach(input => input.disabled = false);
+                    saveButton.disabled = false;
+                    editButton.textContent = "Cancel";
+                    uploadButton.disabled = false;
+                    removePhotoButton.style.pointerEvents = "auto";
+                    removePhotoButton.style.color = "";
 
-                // Enable Change Password button
-                if (changePasswordButton) {
-                    changePasswordButton.disabled = false;
+                    // Enable Change Password button
+                    if (changePasswordButton) {
+                        changePasswordButton.disabled = false;
+                    }
+
+                    // Enable password form inputs
+                    if (passwordForm) {
+                        const passwordInputs = passwordForm.querySelectorAll("input");
+                        passwordInputs.forEach(input => input.disabled = false);
+                    }
+                } else {
+                    inputs.forEach(input => {
+                        input.value = originalValues[input.id];
+                        input.disabled = true;
+                    });
+                    saveButton.disabled = true;
+                    editButton.textContent = "Edit";
+                    otpSection.style.display = "none";
+                    uploadButton.disabled = true;
+                    removePhotoButton.style.pointerEvents = "none";
+                    removePhotoButton.style.color = "grey";
+
+                    saveButton.textContent = "Save";
+                    saveButton.dataset.step = "";
+
+                    // Disable Change Password button
+                    if (changePasswordButton) {
+                        changePasswordButton.disabled = true;
+                    }
+
+                    // Disable password form inputs
+                    if (passwordForm) {
+                        const passwordInputs = passwordForm.querySelectorAll("input");
+                        passwordInputs.forEach(input => input.disabled = true);
+                    }
                 }
-
-                // Enable password form inputs
-                if (passwordForm) {
-                    const passwordInputs = passwordForm.querySelectorAll("input");
-                    passwordInputs.forEach(input => input.disabled = false);
-                }
-            } else {
-                inputs.forEach(input => {
-                    input.value = originalValues[input.id];
-                    input.disabled = true;
-                });
-                saveButton.disabled = true;
-                editButton.textContent = "Edit";
-                otpSection.style.display = "none";
-                uploadButton.disabled = true;
-                removePhotoButton.style.pointerEvents = "none";
-                removePhotoButton.style.color = "grey";
-
-                saveButton.textContent = "Save";
-                saveButton.dataset.step = "";
-
-                // Disable Change Password button
-                if (changePasswordButton) {
-                    changePasswordButton.disabled = true;
-                }
-
-                // Disable password form inputs
-                if (passwordForm) {
-                    const passwordInputs = passwordForm.querySelectorAll("input");
-                    passwordInputs.forEach(input => input.disabled = true);
-            }
-        }
-        });
-    }
-
-    // Save Button Click Event
-    if (saveButton) {
-        saveButton.addEventListener("click", function (event) {
-            if (saveButton.dataset.step === "verify") {
-                event.preventDefault();
-                verifyOTP();
-            } else {
-                event.preventDefault();
-                saveChanges();
-            }
-        });
-    }
-    
-    // Edit Email Button Click Event - Allows user to go back and edit their email
-    if (editEmailButton) {
-        editEmailButton.addEventListener("click", function(event) {
-            event.preventDefault();
-            
-            // Hide OTP section
-            otpSection.style.display = "none";
-            
-            // Enable email input
-            emailInput.disabled = false;
-            
-            // Reset save button state
-            saveButton.textContent = "Save";
-            saveButton.dataset.step = "";
-        });
-    }
-
-    // Add event listener for Resend OTP button
-if (resendOtpButton) {
-    resendOtpButton.addEventListener("click", function(event) {
-        event.preventDefault();
-        resendOtpButton.disabled = true;
-        
-        // Make the button transparent
-        resendOtpButton.style.opacity = "0.4"; // Higher transparency (lower opacity)
-        
-        // Add a countdown timer to prevent spam
-        let timeLeft = 60;
-        const originalText = resendOtpButton.textContent;
-        resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
-        
-        const countdownTimer = setInterval(() => {
-            timeLeft--;
-            resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
-            
-            if (timeLeft <= 0) {
-                clearInterval(countdownTimer);
-                resendOtpButton.textContent = originalText;
-                resendOtpButton.disabled = false;
-                resendOtpButton.style.opacity = "1"; // Restore full opacity
-            }
-        }, 1000);
-        
-        // Send request to resend OTP
-        const email = document.getElementById("email").value.trim();
-        
-        let formData = new URLSearchParams({
-            action: "resend_otp",
-            email: email
-        });
-        
-        fetch("../Accounts/manageaccount/updateinfo.php", {
-            method: "POST",
-            body: formData,
-            headers: { "Content-Type": "application/x-www-form-urlencoded" }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                Swal.fire({
-                    title: 'OTP Resent',
-                    text: 'A new verification code has been sent to your email.',
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                });
-                // Keep the button disabled and transparent during the countdown
-            } else {
-                Swal.fire({
-                    title: 'Error',
-                    text: data.error || 'Failed to resend OTP. Please try again.',
-                    icon: 'error',
-                    confirmButtonText: 'OK'
-                });
-                
-                // Reset the button immediately on error
-                clearInterval(countdownTimer);
-                resendOtpButton.textContent = originalText;
-                resendOtpButton.disabled = false;
-                resendOtpButton.style.opacity = "1"; // Restore full opacity
-            }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            Swal.fire({
-                title: 'Error',
-                text: 'An error occurred. Please try again.',
-                icon: 'error',
-                confirmButtonText: 'OK'
             });
-            
-            // Reset the button immediately on error
-            clearInterval(countdownTimer);
-            resendOtpButton.textContent = originalText;
-            resendOtpButton.disabled = false;
-            resendOtpButton.style.opacity = "1"; // Restore full opacity
+        }
+
+        // Search Functionality for Patients, Clients, and Manage Therapist Tables
+        $(document).ready(function() {
+            console.log("jQuery version:", $.fn.jquery);
+
+            // Add error handling
+            window.onerror = function(message, source, lineno, colno, error) {
+                console.error("JS Error:", message, "at", source, ":", lineno);
+                return false;
+            };
+
+            // Initialize DataTables for Clients Table
+            const clientsTable = $('#clientsTable').DataTable({
+                pageLength: 5,
+                lengthMenu: [5, 10, 25, 50],
+                order: [
+                    [0, 'asc']
+                ], // Sort by the first column by default
+                dom: 'rtip', // Remove default search and length menu
+                language: {
+                    lengthMenu: "Show _MENU_ entries per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                }
+            });
+
+            // Custom Search for Clients Table
+            $('#clientsSearch').on('keyup', function() {
+                clientsTable.search(this.value).draw();
+            });
+
+            // Custom Entries Dropdown for Clients Table
+            $('#clientsEntries').on('change', function() {
+                clientsTable.page.len(this.value).draw();
+            });
+
+            // Initialize DataTables for Patients Table
+            const patientsTable = $('#patientsTable').DataTable({
+                pageLength: 5,
+                lengthMenu: [5, 10, 25, 50],
+                order: [
+                    [0, 'asc']
+                ], // Sort by the first column by default
+                dom: 'rtip', // Remove default search and length menu
+                language: {
+                    lengthMenu: "Show _MENU_ entries per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                }
+            });
+
+            // Custom Search for Patients Table
+            $('#patientsSearch').on('keyup', function() {
+                patientsTable.search(this.value).draw();
+            });
+
+            // Custom Entries Dropdown for Patients Table
+            $('#patientsEntries').on('change', function() {
+                patientsTable.page.len(this.value).draw();
+            });
+
+            // Initialize DataTables for Manage Therapists Table
+             const therapistsTable = $('#therapistsTable').DataTable({
+                pageLength: 5,
+                lengthMenu: [5, 10, 25, 50],
+                order: [
+                    [0, 'asc']
+                ], // Sort by the first column by default
+                dom: 'rtip', // Remove default search and length menu
+                language: {
+                    lengthMenu: "Show _MENU_ entries per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                }
+            });
+
+            // Custom Search for Manage Therapists Table
+            $('#therapistSearch').on('keyup', function() {
+                therapistsTable.search(this.value).draw();
+            });
+
+            // Custom Entries Dropdown for Manage Therapists Table
+            $('#therapistsEntries').on('change', function() {
+                therapistsTable.page.len(this.value).draw();
+            });
         });
-    });
-}
-    
-    // Cancel Verification Button Click Event - Cancels email verification and restores original email
-    if (cancelVerificationButton) {
-        cancelVerificationButton.addEventListener("click", function(event) {
-            event.preventDefault();
-            
-            // Confirm cancellation with SweetAlert
-        Swal.fire({
-            title: 'Are you sure?',
-            text: "Your email will not be changed.",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, cancel verification'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Restore original email
-                emailInput.value = originalEmail;
-                
+
+
+
+        // Save Button Click Event
+        if (saveButton) {
+            saveButton.addEventListener("click", function(event) {
+                if (saveButton.dataset.step === "verify") {
+                    event.preventDefault();
+                    verifyOTP();
+                } else {
+                    event.preventDefault();
+                    saveChanges();
+                }
+            });
+        }
+
+        // Edit Email Button Click Event - Allows user to go back and edit their email
+        if (editEmailButton) {
+            editEmailButton.addEventListener("click", function(event) {
+                event.preventDefault();
+
                 // Hide OTP section
                 otpSection.style.display = "none";
-                
+
+                // Enable email input
+                emailInput.disabled = false;
+
                 // Reset save button state
                 saveButton.textContent = "Save";
                 saveButton.dataset.step = "";
-                
-                // Disable inputs if we're not in edit mode
-                if (editButton.textContent === "Edit") {
-                    inputs.forEach(input => input.disabled = true);
-                }
-                
-                Swal.fire(
-                    'Cancelled',
-                    'Email verification has been cancelled.',
-                    'info'
-                );
-            }
-        });
-    });
-}
+            });
+        }
 
-   // Function to Save Changes
-function saveChanges() {
-    let firstName = document.getElementById("firstName").value.trim();
-    let lastName = document.getElementById("lastName").value.trim();
-    let email = emailInput.value.trim(); // Use the selected email input
-    let phoneNumber = document.getElementById("mobileNumber").value.trim();
-    
-    document.querySelectorAll(".error-message").forEach(error => error.textContent = "");
-    
-    if (!firstName || !lastName || !email || !phoneNumber) {
-        Swal.fire({
-            title: 'Error!',
-            text: 'All fields are required.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        return;
-    }
-    
-    // Store the original email in case user cancels verification later
-    originalEmail = emailInput.value;
-    
-    let formData = new URLSearchParams({
-        action: "update_user_details",
-        firstName: firstName,
-        lastName: lastName,
-        email: email,
-        phoneNumber: phoneNumber
-    });
-    
-    fetch("../Accounts/manageaccount/updateinfo.php", {
-        method: "POST",
-        body: formData,
-        headers: { "Content-Type": "application/x-www-form-urlencoded" }
-    })
-        .then(response => response.json())
-        .then(data => {
-            if (data.errors) {
-                Object.entries(data.errors).forEach(([key, message]) => {
-                    let errorElement = document.querySelector(`[data-error="${key}"]`);
-                    if (errorElement) errorElement.textContent = message;
+        // Add event listener for Resend OTP button
+        if (resendOtpButton) {
+            resendOtpButton.addEventListener("click", function(event) {
+                event.preventDefault();
+                resendOtpButton.disabled = true;
+
+                // Make the button transparent
+                resendOtpButton.style.opacity = "0.4"; // Higher transparency (lower opacity)
+
+                // Add a countdown timer to prevent spam
+                let timeLeft = 60;
+                const originalText = resendOtpButton.textContent;
+                resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
+
+                const countdownTimer = setInterval(() => {
+                    timeLeft--;
+                    resendOtpButton.textContent = `WAIT (${timeLeft}s)`;
+
+                    if (timeLeft <= 0) {
+                        clearInterval(countdownTimer);
+                        resendOtpButton.textContent = originalText;
+                        resendOtpButton.disabled = false;
+                        resendOtpButton.style.opacity = "1"; // Restore full opacity
+                    }
+                }, 1000);
+
+                // Send request to resend OTP
+                const email = document.getElementById("email").value.trim();
+
+                let formData = new URLSearchParams({
+                    action: "resend_otp",
+                    email: email
                 });
-                
+
+                fetch("../Accounts/manageaccount/updateinfo.php", {
+                        method: "POST",
+                        body: formData,
+                        headers: {
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        }
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            Swal.fire({
+                                title: 'OTP Resent',
+                                text: 'A new verification code has been sent to your email.',
+                                icon: 'success',
+                                confirmButtonText: 'OK'
+                            });
+                            // Keep the button disabled and transparent during the countdown
+                        } else {
+                            Swal.fire({
+                                title: 'Error',
+                                text: data.error || 'Failed to resend OTP. Please try again.',
+                                icon: 'error',
+                                confirmButtonText: 'OK'
+                            });
+
+                            // Reset the button immediately on error
+                            clearInterval(countdownTimer);
+                            resendOtpButton.textContent = originalText;
+                            resendOtpButton.disabled = false;
+                            resendOtpButton.style.opacity = "1"; // Restore full opacity
+                        }
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'An error occurred. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+
+                        // Reset the button immediately on error
+                        clearInterval(countdownTimer);
+                        resendOtpButton.textContent = originalText;
+                        resendOtpButton.disabled = false;
+                        resendOtpButton.style.opacity = "1"; // Restore full opacity
+                    });
+            });
+        }
+
+        // Cancel Verification Button Click Event - Cancels email verification and restores original email
+        if (cancelVerificationButton) {
+            cancelVerificationButton.addEventListener("click", function(event) {
+                event.preventDefault();
+
+                // Confirm cancellation with SweetAlert
                 Swal.fire({
-                    title: 'Validation Error',
-                    text: 'Please check the form for errors.',
+                    title: 'Are you sure?',
+                    text: "Your email will not be changed.",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#3085d6',
+                    cancelButtonColor: '#d33',
+                    confirmButtonText: 'Yes, cancel verification'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Restore original email
+                        emailInput.value = originalEmail;
+
+                        // Hide OTP section
+                        otpSection.style.display = "none";
+
+                        // Reset save button state
+                        saveButton.textContent = "Save";
+                        saveButton.dataset.step = "";
+
+                        // Disable inputs if we're not in edit mode
+                        if (editButton.textContent === "Edit") {
+                            inputs.forEach(input => input.disabled = true);
+                        }
+
+                        Swal.fire(
+                            'Cancelled',
+                            'Email verification has been cancelled.',
+                            'info'
+                        );
+                    }
+                });
+            });
+        }
+
+        // Function to Save Changes
+        function saveChanges() {
+            let firstName = document.getElementById("firstName").value.trim();
+            let lastName = document.getElementById("lastName").value.trim();
+            let email = emailInput.value.trim(); // Use the selected email input
+            let phoneNumber = document.getElementById("mobileNumber").value.trim();
+
+            document.querySelectorAll(".error-message").forEach(error => error.textContent = "");
+
+            if (!firstName || !lastName || !email || !phoneNumber) {
+                Swal.fire({
+                    title: 'Error!',
+                    text: 'All fields are required.',
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
-            } else if (data.otp_required) {
-                Swal.fire({
-                    title: 'OTP Sent',
-                    text: 'OTP sent to your new email. Please enter the OTP to verify.',
-                    icon: 'info',
-                    confirmButtonText: 'OK'
+                return;
+            }
+
+            // Store the original email in case user cancels verification later
+            originalEmail = emailInput.value;
+
+            let formData = new URLSearchParams({
+                action: "update_user_details",
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                phoneNumber: phoneNumber
+            });
+
+            fetch("../Accounts/manageaccount/updateinfo.php", {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.errors) {
+                        Object.entries(data.errors).forEach(([key, message]) => {
+                            let errorElement = document.querySelector(`[data-error="${key}"]`);
+                            if (errorElement) errorElement.textContent = message;
+                        });
+
+                        Swal.fire({
+                            title: 'Validation Error',
+                            text: 'Please check the form for errors.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    } else if (data.otp_required) {
+                        Swal.fire({
+                            title: 'OTP Sent',
+                            text: 'OTP sent to your new email. Please enter the OTP to verify.',
+                            icon: 'info',
+                            confirmButtonText: 'OK'
+                        });
+
+                        otpSection.style.display = "block";
+                        saveButton.textContent = "Verify OTP";
+                        saveButton.dataset.step = "verify";
+                    } else if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: data.success,
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Error',
+                            text: 'Something went wrong.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred. Please try again.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
                 });
-                
-                otpSection.style.display = "block";
-                saveButton.textContent = "Verify OTP";
-                saveButton.dataset.step = "verify";
-            } else if (data.success) {
-                Swal.fire({
-                    title: 'Success!',
-                    text: data.success,
-                    icon: 'success',
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    location.reload();
-                });
-            } else {
+        }
+        // Function to Verify OTP
+        function verifyOTP() {
+            let otp = otpInput.value.trim();
+            if (!otp) {
                 Swal.fire({
                     title: 'Error',
-                    text: 'Something went wrong.',
+                    text: 'Please enter OTP.',
                     icon: 'error',
                     confirmButtonText: 'OK'
                 });
+                return;
             }
-        })
-        .catch(error => {
-            console.error("Error:", error);
-            Swal.fire({
-                title: 'Error',
-                text: 'An error occurred. Please try again.',
-                icon: 'error',
-                confirmButtonText: 'OK'
+
+            // Get the user details to update along with the OTP
+            let firstName = document.getElementById("firstName").value.trim();
+            let lastName = document.getElementById("lastName").value.trim();
+            let phoneNumber = document.getElementById("mobileNumber").value.trim();
+
+            // Create form data with all necessary information
+            let formData = new URLSearchParams({
+                action: "verify_otp",
+                otp: otp,
+                firstName: firstName,
+                lastName: lastName,
+                phoneNumber: phoneNumber
             });
-        });
-}
-    // Function to Verify OTP
-function verifyOTP() {
-    let otp = otpInput.value.trim();
-    if (!otp) {
-        Swal.fire({
-            title: 'Error',
-            text: 'Please enter OTP.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-        return;
-    }
 
-    // Get the user details to update along with the OTP
-    let firstName = document.getElementById("firstName").value.trim();
-    let lastName = document.getElementById("lastName").value.trim();
-    let phoneNumber = document.getElementById("mobileNumber").value.trim();
-
-    // Create form data with all necessary information
-    let formData = new URLSearchParams({
-        action: "verify_otp",
-        otp: otp,
-        firstName: firstName,
-        lastName: lastName,
-        phoneNumber: phoneNumber
-    });
-
-    fetch("../Accounts/manageaccount/updateinfo.php", {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: formData
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            fetch("../Accounts/manageaccount/updateinfo.php", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/x-www-form-urlencoded"
+                    },
+                    body: formData
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: 'Email updated successfully!',
+                            icon: 'success',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else if (data.error) {
+                        Swal.fire({
+                            title: 'Error',
+                            text: data.error,
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Invalid OTP',
+                            text: 'Invalid OTP. Please try again.',
+                            icon: 'error',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    Swal.fire({
+                        title: 'Error',
+                        text: 'An error occurred during OTP verification.',
+                        icon: 'error',
+                        confirmButtonText: 'OK'
+                    });
+                });
         }
-        return response.json();
-    })
-    .then(data => {
-        if (data.success) {
-            Swal.fire({
-                title: 'Success!',
-                text: 'Email updated successfully!',
-                icon: 'success',
-                confirmButtonText: 'OK'
-            }).then(() => {
-                location.reload();
-            });
-        } else if (data.error) {
-            Swal.fire({
-                title: 'Error',
-                text: data.error,
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        } else {
-            Swal.fire({
-                title: 'Invalid OTP',
-                text: 'Invalid OTP. Please try again.',
-                icon: 'error',
-                confirmButtonText: 'OK'
-            });
-        }
-    })
-    .catch(error => {
-        console.error("Error:", error);
-        Swal.fire({
-            title: 'Error',
-            text: 'An error occurred during OTP verification.',
-            icon: 'error',
-            confirmButtonText: 'OK'
-        });
-    });
-}
 
 
 
@@ -1245,26 +1316,26 @@ function verifyOTP() {
         }
 
         // Change Password Button
-    const changePasswordButton = document.querySelector('[uk-toggle="target: #change-password-modal"]');
+        const changePasswordButton = document.querySelector('[uk-toggle="target: #change-password-modal"]');
 
-if (changePasswordButton) {
-    // Initially disable the Change Password button
-    changePasswordButton.disabled = true;
-}
+        if (changePasswordButton) {
+            // Initially disable the Change Password button
+            changePasswordButton.disabled = true;
+        }
 
-               // Change Password
-const passwordForm = document.getElementById("change-password-form");
+        // Change Password
+        const passwordForm = document.getElementById("change-password-form");
 
-// Prevent default form submission and save actions
-changePasswordButton.addEventListener('click', function(event) {
-    // Prevent any default behavior that might submit a form or trigger save actions
-    event.preventDefault();
-    
-    // Create a function to show the password change form
-    function showPasswordChangeForm(errorMessage = null) {
-        Swal.fire({
-            title: 'Change Password',
-            html: `
+        // Prevent default form submission and save actions
+        changePasswordButton.addEventListener('click', function(event) {
+            // Prevent any default behavior that might submit a form or trigger save actions
+            event.preventDefault();
+
+            // Create a function to show the password change form
+            function showPasswordChangeForm(errorMessage = null) {
+                Swal.fire({
+                    title: 'Change Password',
+                    html: `
                 <form id="swal-password-form" class="swal-form">
                     <div class="swal-input-group">
                         <label for="swal-current-password">Current Password</label>
@@ -1282,120 +1353,126 @@ changePasswordButton.addEventListener('click', function(event) {
                     </div>
                 </form>
             `,
-            showCancelButton: true,
-            confirmButtonText: 'Change Password',
-            cancelButtonText: 'Cancel',
-            focusConfirm: false,
-            showLoaderOnConfirm: true,
-            didOpen: () => {
-                // If there's an error message, show it as a validation message
-                if (errorMessage) {
-                    Swal.showValidationMessage(errorMessage);
-                }
-            },
-            preConfirm: () => {
-                const currentPassword = document.getElementById('swal-current-password').value.trim();
-                const newPassword = document.getElementById('swal-new-password').value.trim();
-                const confirmPassword = document.getElementById('swal-confirm-password').value.trim();
-                
-                // Frontend validation
-                if (!currentPassword || !newPassword || !confirmPassword) {
-                    Swal.showValidationMessage('All fields are required');
-                    return false;
-                }
-                
-                if (newPassword !== confirmPassword) {
-                    Swal.showValidationMessage('New passwords do not match');
-                    return false;
-                }
-                
-                if (newPassword.length < 8) {
-                    Swal.showValidationMessage('Password must be at least 8 characters');
-                    return false;
-                }
-                
-                if (!/[A-Z]/.test(newPassword)) {
-                    Swal.showValidationMessage('Password must contain at least one uppercase letter');
-                    return false;
-                }
-                
-                if (!/[a-z]/.test(newPassword)) {
-                    Swal.showValidationMessage('Password must contain at least one lowercase letter');
-                    return false;
-                }
-                
-                if (!/[0-9]/.test(newPassword)) {
-                    Swal.showValidationMessage('Password must contain at least one number');
-                    return false;
-                }
-                
-                if (!/[^A-Za-z0-9]/.test(newPassword)) {
-                    Swal.showValidationMessage('Password must contain at least one special character');
-                    return false;
-                }
-                
-                // Return values for the next step
-                return { 
-                    currentPassword: currentPassword,
-                    newPassword: newPassword,
-                    confirmPassword: confirmPassword
-                };
-            },
-            allowOutsideClick: () => !Swal.isLoading()
-        }).then((result) => {
-            // If user clicked "Change Password" and validation passed
-            if (result.isConfirmed) {
-                const { currentPassword, newPassword, confirmPassword } = result.value;
-                
-                // Send password change request
-                fetch("../Accounts/manageaccount/updateinfo.php", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                    body: new URLSearchParams({
-                        action: "change_password",
-                        current_password: currentPassword,
-                        new_password: newPassword,
-                        confirm_password: confirmPassword
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log("Response received:", data);
-                    if (data.success) {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Success!',
-                            text: data.success,
-                            timer: 2000,
-                            timerProgressBar: true
-                        });
-                    } else if (data.error) {
-                        // Reopen the form with the error message but no values preserved
-                        showPasswordChangeForm(data.error);
-                    }
-                })
-                .catch(error => {
-                    console.error("Error:", error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'An unexpected error occurred. Please try again.'
-                    });
-                });
-            } else {
-              // User clicked cancel or outside the modal, reset the page (reload)
-              location.reload();
-            }
-        });
-    }
-    
-    // Show the initial password change form
-    showPasswordChangeForm();
-});
+                    showCancelButton: true,
+                    confirmButtonText: 'Change Password',
+                    cancelButtonText: 'Cancel',
+                    focusConfirm: false,
+                    showLoaderOnConfirm: true,
+                    didOpen: () => {
+                        // If there's an error message, show it as a validation message
+                        if (errorMessage) {
+                            Swal.showValidationMessage(errorMessage);
+                        }
+                    },
+                    preConfirm: () => {
+                        const currentPassword = document.getElementById('swal-current-password').value.trim();
+                        const newPassword = document.getElementById('swal-new-password').value.trim();
+                        const confirmPassword = document.getElementById('swal-confirm-password').value.trim();
 
-// Add some CSS to improve the SweetAlert form
-const style = document.createElement('style');
-style.textContent = `
+                        // Frontend validation
+                        if (!currentPassword || !newPassword || !confirmPassword) {
+                            Swal.showValidationMessage('All fields are required');
+                            return false;
+                        }
+
+                        if (newPassword !== confirmPassword) {
+                            Swal.showValidationMessage('New passwords do not match');
+                            return false;
+                        }
+
+                        if (newPassword.length < 8) {
+                            Swal.showValidationMessage('Password must be at least 8 characters');
+                            return false;
+                        }
+
+                        if (!/[A-Z]/.test(newPassword)) {
+                            Swal.showValidationMessage('Password must contain at least one uppercase letter');
+                            return false;
+                        }
+
+                        if (!/[a-z]/.test(newPassword)) {
+                            Swal.showValidationMessage('Password must contain at least one lowercase letter');
+                            return false;
+                        }
+
+                        if (!/[0-9]/.test(newPassword)) {
+                            Swal.showValidationMessage('Password must contain at least one number');
+                            return false;
+                        }
+
+                        if (!/[^A-Za-z0-9]/.test(newPassword)) {
+                            Swal.showValidationMessage('Password must contain at least one special character');
+                            return false;
+                        }
+
+                        // Return values for the next step
+                        return {
+                            currentPassword: currentPassword,
+                            newPassword: newPassword,
+                            confirmPassword: confirmPassword
+                        };
+                    },
+                    allowOutsideClick: () => !Swal.isLoading()
+                }).then((result) => {
+                    // If user clicked "Change Password" and validation passed
+                    if (result.isConfirmed) {
+                        const {
+                            currentPassword,
+                            newPassword,
+                            confirmPassword
+                        } = result.value;
+
+                        // Send password change request
+                        fetch("../Accounts/manageaccount/updateinfo.php", {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/x-www-form-urlencoded"
+                                },
+                                body: new URLSearchParams({
+                                    action: "change_password",
+                                    current_password: currentPassword,
+                                    new_password: newPassword,
+                                    confirm_password: confirmPassword
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                console.log("Response received:", data);
+                                if (data.success) {
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: 'Success!',
+                                        text: data.success,
+                                        timer: 2000,
+                                        timerProgressBar: true
+                                    });
+                                } else if (data.error) {
+                                    // Reopen the form with the error message but no values preserved
+                                    showPasswordChangeForm(data.error);
+                                }
+                            })
+                            .catch(error => {
+                                console.error("Error:", error);
+                                Swal.fire({
+                                    icon: 'error',
+                                    title: 'Error',
+                                    text: 'An unexpected error occurred. Please try again.'
+                                });
+                            });
+                    } else {
+                        // User clicked cancel or outside the modal, reset the page (reload)
+                        location.reload();
+                    }
+                });
+            }
+
+            // Show the initial password change form
+            showPasswordChangeForm();
+        });
+
+        // Add some CSS to improve the SweetAlert form
+        const style = document.createElement('style');
+        style.textContent = `
 .swal-form {
     display: flex;
     flex-direction: column;
@@ -1424,10 +1501,10 @@ style.textContent = `
     font-size: 14px;
 }
 `;
-document.head.appendChild(style);
-// Initialize OTP section to be hidden
-otpSection.style.display = "none";
-        });
+        document.head.appendChild(style);
+        // Initialize OTP section to be hidden
+        otpSection.style.display = "none";
+    });
 
     function resizeIframe(iframe) {
         iframe.style.height = iframe.contentWindow.document.body.scrollHeight + 'px';
