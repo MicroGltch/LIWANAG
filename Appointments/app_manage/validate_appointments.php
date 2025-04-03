@@ -97,27 +97,6 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             background-color: #ffffff !important;
         }
 
-        /*.action-btn {
-            width: 120px;
-            text-align: center;
-            margin: 0 auto;
-            border-radius: 15px;
-        }
-
-        .uk-button-secondary,
-        .uk-button-warning {
-            border-radius: 15px;
-            padding: 0 15px;
-            min-width: 160px;
-            margin: 5px 0;
-        }
-
-        .uk-button-secondary:hover,
-        .uk-button-warning:hover {
-            transform: translateY(-1px);
-            transition: transform 0.2s;
-        }*/
-        
         .no-break {
             white-space: nowrap;
         }
@@ -131,10 +110,14 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
     <ul class="uk-breadcrumb">
         <li><a href="manage_appointments.php">Manage Appointments</a></li>
         <li><span>Validate Appointments</span></li>
-    </ul>
+    </ul> 
 
-    <h1 class="uk-text-bold">Validate Appointments</h1>
-
+    <!-- Back Button (alt) 
+    <a href="manage_appointments.php" class="uk-link-text" style="border-radius: 15px; padding: 10px 15px; font-size: 16px; height: auto; display: inline-block;">
+        <span uk-icon="icon: arrow-left"></span> Back
+    </a>
+    -->
+    
     <!-- Tabs -->
     <ul uk-tab >
         <li><a href="#"><span uk-icon="icon: calendar"></span> Pending Appointments</a></li>
@@ -145,6 +128,25 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
     <li>
         <!-- Pending Appointments Table -->
         <div class="uk-overflow-auto">
+        <h2 class="uk-text-bold">Validate Appointments</h2>
+
+            <!-- ✅ Custom Search and Show Entries -->
+            <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
+                <div class="uk-width-1-3">
+                    <input type="text" id="customSearch" class="uk-input" placeholder="Search..." style="border-radius: 15px;">
+                </div>
+                <div class="uk-width-auto">
+                    <label for="customEntries" class="uk-margin-small-right">Show entries per page:</label>
+                    <select id="customEntries" class="uk-select" style="width: auto; border-radius: 15px;">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table -->
             <table id="pendingAppointmentsTable" class="uk-table uk-table-striped uk-table-middle uk-table-responsive">
                 <thead>
                     <tr>
@@ -180,12 +182,14 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
                             <td>
                                 <?php if (!empty($appointment['official_referral_file'])): ?>
                                     <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>" 
-                                    target="_blank" class="uk-button uk-button-secondary" style="border-radius: 15px;">
+                                    target="_blank" class="uk-button uk-button-secondary" 
+                                    style="border-radius: 15px; padding: 8px 12px; font-size: 14px; height: auto; white-space: nowrap;">
                                         View Official Referral
                                     </a>
                                 <?php elseif (!empty($appointment['proof_of_booking_referral_file'])): ?>
                                     <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>" 
-                                    target="_blank" class="uk-button uk-button-warning" style="border-radius: 15px;">
+                                    target="_blank" class="uk-button uk-button-warning" 
+                                    style="border-radius: 15px; padding: 8px 12px; font-size: 14px; height: auto; white-space: nowrap;">
                                         View Proof of Booking
                                     </a>
                                 <?php else: ?>
@@ -210,6 +214,24 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
         <!-- Waitlisted Appointments Table -->
         <div class="uk-margin-large-top">
             <h2 class="uk-text-bold">Waitlisted Appointments</h2>
+
+            <!-- ✅ Custom Search and Show Entries -->
+            <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
+                <div class="uk-width-1-3">
+                    <input type="text" id="waitlistSearch" class="uk-input" placeholder="Search..." style="border-radius: 15px;">
+                </div>
+                <div class="uk-width-auto">
+                    <label for="waitlistEntries" class="uk-margin-small-right">Show entries per page:</label>
+                    <select id="waitlistEntries" class="uk-select" style="width: auto; border-radius: 15px;">
+                        <option value="5">5</option>
+                        <option value="10">10</option>
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Table -->
             <div class="uk-overflow-auto">
                 <table id="waitlistedAppointmentsTable" class="uk-table uk-table-striped uk-table-middle uk-table-responsive">
                     <thead>
@@ -259,48 +281,63 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
         return false;
     };
 
-    // Initialize DataTables for pending appointments
-    $('#pendingAppointmentsTable').DataTable({
-        pageLength: 10,
-        lengthMenu: [10, 25, 50],
-        order: [[3, 'asc']], // Sort by date column by default
-        language: {
-            lengthMenu: "Show _MENU_ entries per page",
-            info: "Showing _START_ to _END_ of _TOTAL_ entries",
-            search: "Search:",
-            paginate: {
-                first: "First",
-                last: "Last",
-                next: "Next",
-                previous: "Previous"
-            }
-        },
-        columnDefs: [
-            { orderable: false, targets: [0] }, 
-            { orderable: true, targets: [1, 2, 3, 4, 5] }, 
-            { orderable: false, targets: [6] },
-            { type: 'date', targets: 3 }
-        ],
-        initComplete: function(settings, json) {
-            console.log("Pending appointments table initialized");
-        }
-    });
-    
-    // Initialize DataTables for waitlisted appointments if present
-    if ($('#waitlistedAppointmentsTable').length > 0) {
-        $('#waitlistedAppointmentsTable').DataTable({
-            pageLength: 10,
-            lengthMenu: [10, 25, 50],
+     // Initialize DataTables for pending appointments
+     const pendingTable = $('#pendingAppointmentsTable').DataTable({
+            pageLength: 5,
+            lengthMenu: [5, 10, 25, 50],
+            order: [[3, 'asc']], // Sort by date column by default
+            dom: 'rtip', // Remove default search and length menu
             language: {
                 lengthMenu: "Show _MENU_ entries per page",
                 info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                search: "Search:"
-            },
-            initComplete: function(settings, json) {
-                console.log("Waitlisted appointments table initialized");
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
             }
         });
-    }
+
+        // Custom Search for Pending Appointments
+        $('#customSearch').on('keyup', function() {
+            pendingTable.search(this.value).draw();
+        });
+
+        // Custom Entries Dropdown for Pending Appointments
+        $('#customEntries').on('change', function() {
+            pendingTable.page.len(this.value).draw();
+        });
+
+        // Initialize DataTables for waitlisted appointments if present
+        if ($('#waitlistedAppointmentsTable').length > 0) {
+            const waitlistedTable = $('#waitlistedAppointmentsTable').DataTable({
+                pageLength: 5,
+                lengthMenu: [5, 10, 25, 50],
+                dom: 'rtip', // Remove default search and length menu
+                language: {
+                    lengthMenu: "Show _MENU_ entries per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                    paginate: {
+                        first: "First",
+                        last: "Last",
+                        next: "Next",
+                        previous: "Previous"
+                    }
+                }
+            });
+
+            // Custom Search for Waitlisted Appointments
+            $('#waitlistSearch').on('keyup', function() {
+                waitlistedTable.search(this.value).draw();
+            });
+
+            // Custom Entries Dropdown for Waitlisted Appointments
+            $('#waitlistEntries').on('change', function() {
+                waitlistedTable.page.len(this.value).draw();
+            });
+        }
+
     
     // Use event delegation for action buttons (Approve, Decline, Waitlist)
     $(document).on('click', '.action-btn', function() {

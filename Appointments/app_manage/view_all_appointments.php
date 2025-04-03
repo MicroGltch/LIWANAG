@@ -128,7 +128,7 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
         body {
             background-color: #ffffff !important;
         }
-        
+
         .no-break {
             white-space: nowrap;
         }
@@ -194,6 +194,21 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
 
     <!-- 🔹 Appointments Table -->
     <div class="uk-width-1-1 uk-margin-top">
+        <!-- ✅ Custom Search and Show Entries -->
+        <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
+            <div class="uk-width-1-3">
+                <input type="text" id="customSearch" class="uk-input" placeholder="Search..." style="border-radius: 15px;">
+            </div>
+            <div class="uk-width-auto">
+                <label for="customEntries" class="uk-margin-small-right">Show entries per page:</label>
+                <select id="customEntries" class="uk-select" style="width: auto; border-radius: 15px;">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
         <div class="uk-overflow-auto">
             <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive uk-table-middle">
                 <thead>
@@ -235,32 +250,32 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
 
     <script>
         $(document).ready(function() {
-            $('#appointmentsTable').DataTable({
-                pageLength: 10,
-                lengthMenu: [10, 25, 50],
-                order: [
-                    [2, 'desc']
-                ], // Sort by date column by default (descending)
+            // Initialize DataTable for appointments
+            const table = $('#appointmentsTable').DataTable({
+                pageLength: 5,
+                lengthMenu: [5, 10, 25, 50],
+                order: [[2, 'asc']], // Sort by date column by default
+                dom: 'rtip', // Disable default search and length menu
                 language: {
                     lengthMenu: "Show _MENU_ entries per page",
                     info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                    search: "Search:",
                     paginate: {
                         first: "First",
                         last: "Last",
                         next: "Next",
                         previous: "Previous"
                     }
-                },
-                columnDefs: [{
-                        orderable: true,
-                        targets: '_all'
-                    }, // Make all columns sortable
-                    {
-                        type: 'date',
-                        targets: 2
-                    } // Specify date type for date column
-                ]
+                }
+            });
+
+            // Custom Search
+            $('#customSearch').on('keyup', function() {
+                table.search(this.value).draw();
+            });
+
+            // Custom Entries Dropdown
+            $('#customEntries').on('change', function() {
+                table.page.len(this.value).draw();
             });
         });
     </script>
