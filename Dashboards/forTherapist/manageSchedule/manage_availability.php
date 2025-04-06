@@ -73,7 +73,7 @@ while ($row = $bizQuery->fetch_assoc()) {
 </head>
 <body>
     <div class="uk-container uk-margin-top">
-        <h4>Manage Default Availability</h4>
+        <h4 class="uk-card-title uk-text-bold">Manage Default Availability</h4>
 
         <?php
         function generateTimeOptions($start, $end, $interval = 30) {
