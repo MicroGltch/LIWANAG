@@ -13,7 +13,7 @@
     }
     
     // Fetch timetable settings safely
-    $settingsQuery = "SELECT business_hours_start, business_hours_end, max_days_advance, min_days_advance, blocked_dates, initial_eval_duration, playgroup_duration 
+    $settingsQuery = "SELECT max_days_advance, min_days_advance, blocked_dates, initial_eval_duration, playgroup_duration 
                     FROM settings LIMIT 1";
     $settingsResult = $connection->query($settingsQuery);
     $settings = $settingsResult->fetch_assoc();
