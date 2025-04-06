@@ -127,7 +127,7 @@ $role = strtolower(trim($_SESSION['account_Type']));
     <div class="uk-container uk-margin-top appointment-container">
         <div class="appointment-form">
             <div>
-                <h2>Book an Appointment</h2>
+                <h2 class="uk-card-title uk-text-bold">Book an Appointment</h2>
                 <p>Your Role: <strong><?= ucfirst($role); ?></strong></p>
 
                 <?php if (empty($patients)): ?>

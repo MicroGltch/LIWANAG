@@ -272,9 +272,9 @@ echo "<script>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <div class="uk-margin-small-bottom uk-flex uk-flex-between uk-flex-wrap">
                         <div>
-                            <button class="uk-button uk-button-default filter-btn" data-filter="all">All</button>
-                            <button class="uk-button uk-button-primary filter-btn" data-filter="upcoming">Upcoming</button>
-                            <button class="uk-button uk-button-secondary filter-btn" data-filter="past">Past</button>
+                            <button class="uk-button uk-button-default filter-btn" data-filter="all" style="margin-right: 10px;border-radius: 15px;" >All</button>
+                            <button class="uk-button uk-button-primary filter-btn" data-filter="upcoming" style="margin-right: 10px;border-radius: 15px;" >Upcoming</button>
+                            <button class="uk-button uk-button-secondary filter-btn" data-filter="past" style="margin-right: 10px;border-radius: 15px;">Past</button>
                         </div>
                     </div>
 
@@ -283,22 +283,22 @@ echo "<script>
 
                     <thead>
                             <tr>
-                                <th data-sort="date"><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span> </th>
-                                <th data-sort="time"><span class="no-break"></span>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th data-sort="session"><span class="no-break"></span>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th data-sort="patient"><span class="no-break"></span>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th data-sort="status"><span class="no-break"></span>Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="date" style="text-align: left;"><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span> </th>
+                                <th data-sort="time" style="text-align: left;"><span class="no-break"></span>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="session" style="text-align: left;"><span class="no-break"></span>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="patient" style="text-align: left;"><span class="no-break"></span>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="status" style="text-align: left;"><span class="no-break"></span>Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($appointments as $appointment): ?>
                                 <tr data-date="<?= $appointment['date']; ?>">
-                                    <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
-                                    <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
-                                    <td><?= ucwords(htmlspecialchars($appointment['session_type'])); ?></td>
-                                    <td><?= htmlspecialchars($appointment['patient_name']); ?></td>
-                                    <td><?= ucfirst($appointment['status']); ?></td>
+                                    <td style="text-align: left;"><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
+                                    <td style="text-align: left;"><?= date('g:i A', strtotime($appointment['time'])); ?></td>
+                                    <td style="text-align: left;"><?= ucwords(htmlspecialchars($appointment['session_type'])); ?></td>
+                                    <td style="text-align: left;" ><?= htmlspecialchars($appointment['patient_name']); ?></td>
+                                    <td style="text-align: left;"><?= ucfirst($appointment['status']); ?></td>
                                     <td>
                                         <div class="button-container">
                                             <!-- ✅ Edit button logic -->
@@ -370,6 +370,7 @@ echo "<script>
                             </select>
                         </div>
 
+                        <!--
                         <div class="uk-width-1@s uk-width-1-2@l">
                             <label class="uk-form-label">Profile Picture</label>
                             <div class="js-upload uk-placeholder uk-text-center" id="profile-picture-placeholder">
@@ -382,9 +383,16 @@ echo "<script>
                                 </div>
                             </div>
                         </div>
+                        -->
+
+                        <div class="uk-width-1-2@s uk-width-1-2@l">
+                            <label class="uk-form-label">Profile Picture</label>
+                            <input class="uk-input" type="file" name="referral_file" id="profile-picture-input" required accept=".jpg,.jpeg,.png,.pdf" style="padding-top: 5px;padding-bottom: 5px;">
+                        </div>        
 
                         <div class="uk-width-1-1 uk-margin-top">
-                            <h4 class="uk-margin-small-bottom">Upload Doctor's Referral</h4>
+                        <hr class=" uk-margin-top">
+                            <h2 class="uk-margin-small-bottom uk-card-title uk-text-bold">Upload Doctor's Referral</h2>
                         </div>
 
                         <div class="uk-width-1-2@s">
@@ -398,12 +406,12 @@ echo "<script>
 
                         <div class="uk-width-1-2@s uk-width-1-2@l">
                             <label class="uk-form-label">Upload Referral File</label>
-                            <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required accept=".jpg,.jpeg,.png,.pdf">
+                            <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required accept=".jpg,.jpeg,.png,.pdf" style="padding-top: 5px;padding-bottom: 5px;">
                         </div>
 
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                            <button class="uk-button uk-button-primary" type="button" id="registerPatientButton">Register</button>
+                            <button class="uk-button uk-button-primary" type="button" id="registerPatientButton" style="border-radius: 15px;">Register</button>
                         </div>
                     </form>
                 </div>
@@ -606,9 +614,6 @@ echo "<script>
                                 <small style="color: red;" class="error-message" data-error="otp"></small>
                             </div>
                             <!-- The buttons will be dynamically added here by JavaScript -->
-                        </div>
-                        <div class="uk-width-1-1 uk-margin-top">
-                            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                         </div>
                 </div>
             </div>
