@@ -23,7 +23,7 @@ $result = $stmt->get_result();
 $patients = $result->fetch_all(MYSQLI_ASSOC);
 
 // ✅ Fetch system settings (business hours, advance booking, blocked dates)
-$settingsQuery = "SELECT business_hours_start, business_hours_end, max_days_advance, min_days_advance, blocked_dates 
+$settingsQuery = "SELECT max_days_advance, min_days_advance, blocked_dates 
                   FROM settings LIMIT 1";
 $settingsResult = $connection->query($settingsQuery);
 $settings = $settingsResult->fetch_assoc();

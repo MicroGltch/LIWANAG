@@ -59,7 +59,7 @@ $stmt->close();
 
 
 // Fetch settings from database
-$settingsQuery = "SELECT business_hours_start, business_hours_end, max_days_advance, min_days_advance, blocked_dates,
+$settingsQuery = "SELECT max_days_advance, min_days_advance, blocked_dates,
                          initial_eval_duration, playgroup_duration, service_ot_duration, service_bt_duration 
                   FROM settings LIMIT 1";
 
@@ -78,8 +78,6 @@ $sessionDurations = [
 ];
 
 $timetableSettings = [
-    "businessHoursStart" => $settings["business_hours_start"],
-    "businessHoursEnd" => $settings["business_hours_end"],
     "maxDaysAdvance" => (int) $settings["max_days_advance"],
     "minDaysAdvance" => (int) $settings["min_days_advance"],
     "blockedDates" => $blockedDates
