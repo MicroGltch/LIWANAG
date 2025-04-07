@@ -142,7 +142,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Appointment Overview</title>
+    <title>Admin - Dashboard</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
@@ -262,13 +262,13 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <hr>
 
                     <li class="uk-parent">
-                    <li>
-                        <span>Therapists</span>
-                    </li>
-                    <li>
-                        <li><a href="#manage-therapist" onclick="showSection('manage-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> Manage Therapists</a></li>
-                        <li><a href="#add-therapist" onclick="showSection('add-therapist')"><span class="uk-margin-small-right" uk-icon="plus"></span> Add Therapist</a></li>
-                    </li>
+                        <li>
+                            <span>Therapists</span>
+                        </li>
+                        <li>
+                            <li><a href="#manage-therapist" onclick="showSection('manage-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> Manage Therapists</a></li>
+                            <li><a href="#add-therapist" onclick="showSection('add-therapist')"><span class="uk-margin-small-right" uk-icon="plus"></span> Add Therapist</a></li>
+                        </li>
                     </li>
 
                     <hr>
