@@ -160,8 +160,8 @@ echo "<script>
             <div uk-navbar>
                 <div class="uk-navbar-left">
                     <ul class="uk-navbar-nav">
-                        <li><a href="#">FAQs</a></li>
-                        <li><a href="#">Terms and Conditions</a></li>
+                        <li><a href="#faqs-modal" uk-toggle>FAQs</a></li>
+                        <li><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
                     </ul>
                 </div>
                 <div class="uk-navbar-center">
@@ -623,7 +623,43 @@ echo "<script>
         <?php unset($_SESSION['update_success']); ?>
     </div>
 
+    <!-- Terms and Conditions Modal -->
+    <div id="tnc-modal" uk-modal>
+        <div class="uk-modal-dialog uk-modal-body" style="border-radius: 15px">
+            <h2 class="uk-modal-title">Terms and Conditions</h2>
+            <!-- TESTING FOR MANAGE CONTENT -->
+            <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
 
+                Donec vehicula, augue non mattis venenatis, nisl quam tincidunt velit, id mattis quam quam nec justo. Nullam efficitur tempor volutpat. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque gravida elit non libero porta, in euismod arcu aliquet. Praesent posuere posuere dolor. Nullam mattis lectus nisl, at aliquam urna interdum vitae. Etiam non lobortis urna. Donec elementum, urna sed lobortis maximus, nulla metus elementum nibh, sit amet egestas libero tellus vel nibh. Sed sapien ex, tincidunt pellentesque magna a, condimentum lobortis ante. Quisque sed sollicitudin arcu, a congue elit. Vestibulum dictum elit vitae eleifend gravida. Nulla suscipit felis at eros dignissim convallis. Mauris ut tincidunt justo. Vivamus velit leo, ornare vitae nibh eget, congue tempus quam. Duis vehicula eu erat ac fringilla.
+
+                Vivamus eleifend, risus sed iaculis tincidunt, urna dui hendrerit lacus, et pharetra nulla massa a urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi pretium eget turpis id pulvinar. Nullam in imperdiet sem, et consectetur dui. Pellentesque mattis ex in feugiat tempus. In at nunc orci. Sed accumsan scelerisque ipsum, vel lobortis sem gravida non. Curabitur facilisis, felis molestie ornare consectetur, nibh ex congue nisi, in mattis erat leo at nisi. Vestibulum et lorem nec lorem elementum eleifend. </p>
+             -->
+             <div><?php echo nl2br(htmlspecialchars_decode($content['terms'] ?? '', ENT_QUOTES)); ?></div>
+
+                <p class="uk-text-right">
+                <button class="uk-button uk-button-primary uk-modal-close" type="button" style="border-radius: 15px">Close</button>
+            </p>
+        </div>
+    </div>
+
+    <!-- FAQs Modal -->
+    <div id="faqs-modal" uk-modal>
+        <div class="uk-modal-dialog uk-modal-body" style="border-radius: 15px">
+            <h2 class="uk-modal-title">FAQs</h2>
+            <!-- TESTING FOR MANAGE CONTENT -->
+            <!-- <p> Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum placerat convallis placerat. Etiam dictum malesuada dui. Sed et tortor viverra, lobortis nibh eu, pulvinar purus. Vivamus vel lacus vitae magna blandit posuere sit amet ac neque. Aliquam consequat posuere lectus a varius. Mauris a lorem pulvinar, feugiat nunc in, varius nisi. Nunc nulla risus, ornare ultricies eleifend a, tincidunt vitae diam. Nulla metus dolor, egestas id condimentum quis, maximus sit amet urna. Nunc ac mollis augue. Phasellus tincidunt leo sed dolor molestie malesuada. Duis suscipit feugiat elit, eu viverra nisi porttitor ut. Mauris vitae imperdiet nibh. Pellentesque mattis ex condimentum erat mattis blandit. Aliquam ac venenatis tellus. Nunc in interdum nibh. Phasellus varius ornare purus ut volutpat.
+
+                Donec vehicula, augue non mattis venenatis, nisl quam tincidunt velit, id mattis quam quam nec justo. Nullam efficitur tempor volutpat. Orci varius natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Pellentesque gravida elit non libero porta, in euismod arcu aliquet. Praesent posuere posuere dolor. Nullam mattis lectus nisl, at aliquam urna interdum vitae. Etiam non lobortis urna. Donec elementum, urna sed lobortis maximus, nulla metus elementum nibh, sit amet egestas libero tellus vel nibh. Sed sapien ex, tincidunt pellentesque magna a, condimentum lobortis ante. Quisque sed sollicitudin arcu, a congue elit. Vestibulum dictum elit vitae eleifend gravida. Nulla suscipit felis at eros dignissim convallis. Mauris ut tincidunt justo. Vivamus velit leo, ornare vitae nibh eget, congue tempus quam. Duis vehicula eu erat ac fringilla.
+
+                Vivamus eleifend, risus sed iaculis tincidunt, urna dui hendrerit lacus, et pharetra nulla massa a urna. Interdum et malesuada fames ac ante ipsum primis in faucibus. Morbi pretium eget turpis id pulvinar. Nullam in imperdiet sem, et consectetur dui. Pellentesque mattis ex in feugiat tempus. In at nunc orci. Sed accumsan scelerisque ipsum, vel lobortis sem gravida non. Curabitur facilisis, felis molestie ornare consectetur, nibh ex congue nisi, in mattis erat leo at nisi. Vestibulum et lorem nec lorem elementum eleifend. </p>
+             -->
+             <div><?php echo nl2br(htmlspecialchars_decode($content['faqs'] ?? '', ENT_QUOTES)); ?></div>
+
+                <p class="uk-text-right">
+                <button class="uk-button uk-button-primary uk-modal-close" type="button" style="border-radius: 15px">Close</button>
+            </p>
+        </div>
+    </div>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

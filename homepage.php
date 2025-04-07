@@ -78,7 +78,7 @@ $stmt->close();
 
         <!-- Navbar -->
         <nav class="uk-navbar-container uk-light uk-navbar-transparent logged-out">
-            <div class="uk-container">
+            <div class="uk-container" style="max-width:1360px !important;">
                 <div uk-navbar>
 
                     <!-- Navbar Left (Mobile: Offcanvas Trigger) -->
@@ -98,7 +98,7 @@ $stmt->close();
 
                     <!-- Navbar Center -->
                     <div class="logo-center-div uk-navbar-center">
-                        <a class="logo-navbar uk-navbar-item uk-logo" href="homepage.php" style="margin-top: -15px;">
+                        <a class="logo-navbar uk-navbar-item uk-logo" href="homepage.php" style="margin-top: -20px;">
                             Little Wanderer's Therapy Center
                         </a>
                     </div>
@@ -132,13 +132,10 @@ $stmt->close();
                                 }
                                 ?>
                                 <li>
-                                    <a class="username-nav" href="#">Hi, <?php echo htmlspecialchars($account_FN); ?>!</a>
-                                    <div class="uk-navbar-dropdown">
-                                        <ul class="uk-nav uk-navbar-dropdown-nav">
-                                            <li><a href="<?php echo $dashboardURL; ?>" style="color: black !important;">Dashboard</a></li>
-                                            <li><a href="Accounts/logout.php" style="color: black !important;">Logout</a></li>
-                                        </ul>
-                                    </div>
+                                    <li><a href="<?php echo $dashboardURL; ?>" style="color: white">Dashboard</a></li>
+                                    <li><a href="Accounts/logout.php" style="color: white">Logout</a></li>
+
+
                                 </li>
                             <?php else: ?>
                                 <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
@@ -200,7 +197,7 @@ $stmt->close();
 
     <div id="section2" class="uk-section">
         <div class="uk-container">
-            <h2 class="service-title uk-text-center">
+            <h2 class="service-title uk-text-center uk-text-bold">
                 Therapy Services Offered
             </h2>
 
@@ -334,7 +331,7 @@ $stmt->close();
 
     <!--About Us Section-->
     <div id="section3" class="uk-section">
-        <h2 class="about-us-title">
+        <h2 class="about-us-title uk-text-bold">
             About Us
         </h2>
         <div class="about-us uk-grid uk-flex-middle" uk-grid style="margin-left: 0px;">
