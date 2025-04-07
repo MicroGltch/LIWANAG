@@ -80,6 +80,22 @@ function filterAppointmentsByStatus($appointments, $status) {
     }
 }
 
+ // ✅ Fetch therapists data for the table
+ try {
+    $stmt = $connection->prepare(" SELECT account_FName, account_LName, account_Email, account_PNum, account_status
+        FROM users WHERE account_Type = 'therapist'
+    ");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $therapists = $result->fetch_all(MYSQLI_ASSOC);
+} catch (Exception $e) {
+    $therapist_error = $e->getMessage();
+} finally {
+    if (isset($stmt)) {
+        $stmt->close();
+    }
+}
+
 ?>
 
 
@@ -89,7 +105,7 @@ function filterAppointmentsByStatus($appointments, $status) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Appointment Overview</title>
+    <title>Head Therapist - Dashboard</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
@@ -187,9 +203,20 @@ function filterAppointmentsByStatus($appointments, $status) {
                     </li>
                     <li><a href="#view-appointments" onclick="showSection('view-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> View All Appointments</a></li>
                     <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Appointments</a></li>                    
-                </li>
-                
-                <hr>
+                    </li>
+ 
+                    <hr>
+
+                    <li class="uk-parent">
+                            <li>
+                                <span>Therapists</span>
+                            </li>
+                            <li>
+                                <li><a href="#view-therapist" onclick="showSection('view-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> View Therapists</a></li>
+                            </li>
+                        </li>
+
+                    <hr>
 
                 <li class="uk-parent">
                     
@@ -425,6 +452,101 @@ function filterAppointmentsByStatus($appointments, $status) {
                 </div>
             </div>
 
+            <!-- Manage Therapists Section 📑-->
+            <div id="view-therapist" class="section" style="display: none;">
+                <h1 class="uk-text-bold">View Therapists</h1>
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <div class="uk-overflow-auto">
+                        <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                            <thead>
+                                <tr>
+                                    <th class="uk-table-shrink"><span class="no-break">Therapist Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                                    <th class="uk-table-shrink"><span class="no-break">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (isset($therapists) && !empty($therapists)) : ?>
+                                    <?php foreach ($therapists as $therapist) : ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?></td>
+                                            <td>
+                                                <button class="uk-button uk-button-primary uk-button-small view-details" 
+                                                        data-fname="<?= htmlspecialchars($therapist['account_FName']); ?>"
+                                                        data-lname="<?= htmlspecialchars($therapist['account_LName']); ?>"
+                                                        data-email="<?= htmlspecialchars($therapist['account_Email']); ?>"
+                                                        data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
+                                                        data-status="<?= htmlspecialchars($therapist['account_status']); ?>">
+                                                    Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php elseif (isset($therapist_error)) : ?>
+                                    <tr>
+                                        <td colspan="2"><?= htmlspecialchars($therapist_error); ?></td>
+                                    </tr>
+                                <?php else : ?>
+                                    <tr>
+                                        <td colspan="2">No therapists found.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+
+                        <script>
+                            $(document).ready(function() {
+                                // Initialize DataTable
+                                $('#viewtherapistTable').DataTable({
+                                    pageLength: 10,
+                                    lengthMenu: [10, 25, 50],
+                                    order: [
+                                        [0, 'asc']
+                                    ],
+                                    language: {
+                                        lengthMenu: "Show _MENU_ entries per page",
+                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                        search: "Search:",
+                                        paginate: {
+                                            first: "First",
+                                            last: "Last",
+                                            next: "Next",
+                                            previous: "Previous"
+                                        }
+                                    },
+                                    columnDefs: [{
+                                        orderable: true,
+                                        targets: '_all'
+                                    }]
+                                });
+                                
+                                // Add click event for the Details button
+                                $(document).on('click', '.view-details', function() {
+                                    const fname = $(this).data('fname');
+                                    const lname = $(this).data('lname');
+                                    const email = $(this).data('email');
+                                    const phone = $(this).data('phone');
+                                    const status = $(this).data('status');
+                                    
+                                    Swal.fire({
+                                        title: `${fname} ${lname}`,
+                                        html: `
+                                            <div class="uk-text-left">
+                                                <p><strong>Email:</strong> ${email}</p>
+                                                <p><strong>Phone Number:</strong> ${phone}</p>
+                                                <p><strong>Account Status:</strong> ${status}</p>
+                                            </div>
+                                        `,
+                                        icon: 'info',
+                                        confirmButtonText: 'Close'
+                                    });
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+
             <!-- Account Details Card -->
             <div id="account-details" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Account Details</h1>
@@ -487,6 +609,7 @@ function filterAppointmentsByStatus($appointments, $status) {
 
                 <div class="uk-width-1-1 uk-text-right uk-margin-top">
                     <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                    <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                     <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
                 </div>
 
@@ -498,9 +621,6 @@ function filterAppointmentsByStatus($appointments, $status) {
                         <small style="color: red;" class="error-message" data-error="otp"></small>
                     </div>
                     <!-- The buttons will be dynamically added here by JavaScript -->
-                </div>
-                <div class="uk-width-1-1 uk-margin-top">
-                    <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                 </div>
             </div>
         </div>
