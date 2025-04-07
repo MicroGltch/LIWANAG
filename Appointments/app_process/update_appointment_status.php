@@ -332,6 +332,61 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
+    
+    
+    if ($status === "completed" && $session_type === "playgroup") {
+        // ✅ Ensure attendance is marked before completing
+        $checkAttendanceQuery = "SELECT COUNT(*) AS pending FROM appointments 
+                                 WHERE pg_session_id = ? AND (pg_attendance IS NULL OR pg_attendance = '')";
+        $stmt = $connection->prepare($checkAttendanceQuery);
+        $stmt->bind_param("s", $pg_sessionID);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $pending = $result->fetch_assoc();
+    
+        if ($pending["pending"] > 0) {
+            echo json_encode(["status" => "error", "message" => "Please mark attendance for all patients before completing the session."]);
+            exit();
+        } else {
+            // ✅ Mark session as completed
+            $updateQuery = "UPDATE playgroup_sessions SET status = 'Completed' WHERE pg_session_id = ?";
+            $stmt = $connection->prepare($updateQuery);
+            $stmt->bind_param("s", $pg_sessionID);
+            $stmt->execute();
+        }
+    }
+    // ✅ Handle "Completed" Status
+    if ($status === "completed") {
+        if ($current_status === "approved") {  // <-- Fixed Logic
+            $updateQuery = "UPDATE appointments SET status = ? WHERE appointment_id = ?";
+            $stmt = $connection->prepare($updateQuery);
+            $stmt->bind_param("si", $status, $appointment_id);
+
+            if ($stmt->execute()) {
+                send_email_notification(
+                    email: $email,
+                    status: $status,
+                    session_type: $session_type,
+                    patient_name: $patient_name,
+                    client_name: $client_name,
+                    appointment_date: $appointment_date,
+                    appointment_time: $appointment_time,
+                    current_status: $current_status,
+                    therapist_id: null,
+                    isRebooked: false,
+                    reason: $validation_notes
+                );            
+                echo json_encode(["status" => "success", "title" => "Appointment Completed", "message" => "Appointment for <strong>$patient_name</strong> has been marked as <strong>Completed</strong>. Email notification sent."]);
+            } else {
+                echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to update appointment status to completed."]);
+            }
+        } else {
+            echo json_encode(["status" => "error", "title" => "Invalid Status Transition", "message" => "You cannot moddddve from '$current_status' to '$status'."]);
+        }
+        exit();
+    }
+
+
     // ✅ Handle "Declined" & "Cancelled" Status (Both Require Validation Notes)
     if ($status === "declined" || $status === "cancelled" && in_array($account_type, ["admin", "head therapist, therapist"])) {
         if (empty($validation_notes)) {
@@ -418,59 +473,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
 
 
-    
-    if ($status === "completed" && $session_type === "playgroup") {
-        // ✅ Ensure attendance is marked before completing
-        $checkAttendanceQuery = "SELECT COUNT(*) AS pending FROM appointments 
-                                 WHERE pg_session_id = ? AND (pg_attendance IS NULL OR pg_attendance = '')";
-        $stmt = $connection->prepare($checkAttendanceQuery);
-        $stmt->bind_param("s", $pg_sessionID);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $pending = $result->fetch_assoc();
-    
-        if ($pending["pending"] > 0) {
-            echo json_encode(["status" => "error", "message" => "Please mark attendance for all patients before completing the session."]);
-            exit();
-        } else {
-            // ✅ Mark session as completed
-            $updateQuery = "UPDATE playgroup_sessions SET status = 'Completed' WHERE pg_session_id = ?";
-            $stmt = $connection->prepare($updateQuery);
-            $stmt->bind_param("s", $pg_sessionID);
-            $stmt->execute();
-        }
-    }
-
-    // ✅ Handle "Completed" Status
-    if ($status === "completed") {
-        if ($appointment["status"] !== "approved") {
-            echo json_encode(["status" => "error", "title" => "Invalid Action", "message" => "Only approved appointments can be marked as completed."]);
-            exit();
-        } else {
-            $updateQuery = "UPDATE appointments SET status = ? WHERE appointment_id = ?";
-            $stmt = $connection->prepare($updateQuery);
-            $stmt->bind_param("si", $status, $appointment_id);
-        }
-        if ($stmt->execute()) {
-            send_email_notification(
-                email: $email,
-                status: $status,
-                session_type: $session_type,
-                patient_name: $patient_name,
-                client_name: $client_name,
-                appointment_date: $appointment_date,
-                appointment_time: $appointment_time,
-                current_status: $current_status,
-                therapist_id: null,
-                isRebooked: false,
-                reason: $validation_notes
-            );            echo json_encode(["status" => "success", "title" => "Appointment Completed", "message" => "Appointment for <strong>$patient_name</strong> has been marked as <strong>Completed</strong>. Email notification sent."]);
-            exit();
-        }else {
-            echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to cancel appointment."]);
-            exit();
-        }
-    }
 
         // ✅ Handle "Waitlisted" Status
         if ($status === "waitlisted") {
