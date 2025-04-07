@@ -74,7 +74,7 @@ while ($row = $exceptionsResult->fetch_assoc()) {
     <!-- ✅ WEEKLY HOURS FORM -->
     <form id="weeklyHoursForm" method="POST" class="uk-form-stacked">
         <input type="hidden" name="form_type" value="weekly_hours">
-        <h4>Weekly Business Hours</h4>
+        <h3>Weekly Business Hours</h3>
 
         <?php foreach ($days as $day):
             $start = $bizHours[$day]['start_time'] ?? '';
@@ -98,14 +98,16 @@ while ($row = $exceptionsResult->fetch_assoc()) {
         <?php endforeach; ?>
 
         <div class="uk-text-right">
-            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Weekly Hours</button>
+            <button class="uk-button uk-button-primary uk-margin-top" style="border-radius: 15px;" type="submit">Save Weekly Hours</button>
         </div>
     </form>
+
+    <hr>
 
     <!-- ✅ OVERRIDE FORM -->
     <form id="overrideDateForm" method="POST" class="uk-form-stacked uk-margin-top">
         <input type="hidden" name="form_type" value="date_override">
-        <h4>Override Specific Date</h4>
+        <h3 class="uk-text-bold">Override Specific Date</h3>
 
         <div class="uk-margin">
             <label>Date to Override:</label>
@@ -123,12 +125,12 @@ while ($row = $exceptionsResult->fetch_assoc()) {
             <label><input class="uk-checkbox" name="exception_closed" type="checkbox"> Mark this date as closed</label>
         </div>
         <div class="uk-text-right">
-            <button class="uk-button uk-button-primary" type="submit">Save Date Override</button>
+            <button class="uk-button uk-button-primary" style="border-radius: 15px;" type="submit">Save Date Override</button>
         </div>
     </form>
-
+<hr>
     <?php if (count($exceptions) > 0): ?>
-        <h4 class="uk-margin-top">Saved Overrides</h4>
+        <h3 class="uk-text-bold uk-margin-top">Saved Overrides</h3>
         <table class="uk-table uk-table-divider uk-table-small">
             <thead>
                 <tr>
@@ -151,7 +153,7 @@ while ($row = $exceptionsResult->fetch_assoc()) {
                         <td><?= $status ?></td>
                         <td><?= $timeRange ?></td>
                         <td>
-                            <button class="uk-button uk-button-danger uk-button-small delete-override-btn">Remove</button>
+                            <button class="uk-button uk-button-danger uk-button-small delete-override-btn" style="border-radius: 15px;">Remove</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -161,11 +163,11 @@ while ($row = $exceptionsResult->fetch_assoc()) {
         <p class="uk-text-muted uk-margin-small-top">No saved override dates yet.</p>
     <?php endif; ?>
 
-
+    <hr>
     <!-- ✅ GLOBAL SETTINGS FORM -->
     <form id="globalSettingsForm" method="POST" class="uk-form-stacked uk-margin-top">
         <input type="hidden" name="form_type" value="global_settings">
-        <h4>Global Settings</h4>
+        <h3 class="uk-text-bold">Global Settings</h3>
 
         <div class="uk-margin">
             <label>Max Booking Days (Advance):</label>
@@ -197,7 +199,7 @@ while ($row = $exceptionsResult->fetch_assoc()) {
         </div>
 
         <div class="uk-text-right">
-            <button class="uk-button uk-button-primary" type="submit">Save Global Settings</button>
+            <button class="uk-button uk-button-primary" style="border-radius: 15px;" type="submit">Save Global Settings</button>
         </div>
     </form>
 
