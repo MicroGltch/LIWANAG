@@ -453,86 +453,99 @@ try {
             </div>
 
             <!-- Manage Therapists Section 📑-->
-            <div id="view-therapist" class="section" style="display: none;">
-                <h1 class="uk-text-bold">View Therapists</h1>
+<div id="view-therapist" class="section" style="display: none;">
+    <h1 class="uk-text-bold">View Therapists</h1>
 
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <div class="uk-overflow-auto">
-                        <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
-                            <thead>
-                                <tr>
-                                    <th class="uk-table-shrink"><span class="no-break">First Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                    <th class="uk-table-shrink"><span class="no-break">Last Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                    <th class="uk-table-shrink"><span class="no-break">Email<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                    <th class="uk-table-shrink"><span class="no-break">Phone Number<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                    <th class="uk-table-shrink"><span class="no-break">Account Status<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                    <th class="uk-table-shrink"><span class="no-break">Appointments<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                    <th class="uk-table-shrink"><span class="no-break">Schedule<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (isset($therapists) && !empty($therapists)) : ?>
-                                    <?php foreach ($therapists as $therapist) : ?>
-                                        <tr>
-                                            <td><?= htmlspecialchars($therapist['account_FName']); ?></td>
-                                            <td><?= htmlspecialchars($therapist['account_LName']); ?></td>
-                                            <td><?= htmlspecialchars($therapist['account_Email']); ?></td>
-                                            <td><?= htmlspecialchars($therapist['account_PNum']); ?></td>
-                                            <td><?= htmlspecialchars($therapist['account_status']); ?></td>
-                                            <td>
-                                                <?php
-                                                // Add logic here to count and display appointments
-                                                // Example: You'll need to fetch appointment counts based on therapist IDs
-                                                // $appointmentCount = getAppointmentCount($therapist['account_ID']);
-                                                // echo htmlspecialchars($appointmentCount);
-                                                ?>
-                                            </td>
-                                            <td>
-                                                <!-- Add logic for viewing therapist schedule -->
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php elseif (isset($therapist_error)) : ?>
-                                    <tr>
-                                        <td colspan="7"><?= htmlspecialchars($therapist_error); ?></td>
-                                    </tr>
-                                <?php else : ?>
-                                    <tr>
-                                        <td colspan="7">No therapists found.</td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+    <div class="uk-card uk-card-default uk-card-body uk-margin">
+        <div class="uk-overflow-auto">
+            <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                <thead>
+                    <tr>
+                        <th class="uk-table-shrink"><span class="no-break">Therapist Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th class="uk-table-shrink"><span class="no-break">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (isset($therapists) && !empty($therapists)) : ?>
+                        <?php foreach ($therapists as $therapist) : ?>
+                            <tr>
+                                <td><?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?></td>
+                                <td>
+                                    <button class="uk-button uk-button-primary uk-button-small view-details" 
+                                            data-fname="<?= htmlspecialchars($therapist['account_FName']); ?>"
+                                            data-lname="<?= htmlspecialchars($therapist['account_LName']); ?>"
+                                            data-email="<?= htmlspecialchars($therapist['account_Email']); ?>"
+                                            data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
+                                            data-status="<?= htmlspecialchars($therapist['account_status']); ?>">
+                                        Details
+                                    </button>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php elseif (isset($therapist_error)) : ?>
+                        <tr>
+                            <td colspan="2"><?= htmlspecialchars($therapist_error); ?></td>
+                        </tr>
+                    <?php else : ?>
+                        <tr>
+                            <td colspan="2">No therapists found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
 
-                        <script>
-                            $(document).ready(function() {
-                                $('#viewtherapistTable').DataTable({
-                                    pageLength: 10,
-                                    lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ],
-                                    language: {
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        search: "Search:",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [{
-                                        orderable: true,
-                                        targets: '_all'
-                                    }]
-                                });
-                            });
-                        </script>
-                    </div>
-                </div>
-            </div>
+            <script>
+                $(document).ready(function() {
+                    // Initialize DataTable
+                    $('#viewtherapistTable').DataTable({
+                        pageLength: 10,
+                        lengthMenu: [10, 25, 50],
+                        order: [
+                            [0, 'asc']
+                        ],
+                        language: {
+                            lengthMenu: "Show _MENU_ entries per page",
+                            info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                            search: "Search:",
+                            paginate: {
+                                first: "First",
+                                last: "Last",
+                                next: "Next",
+                                previous: "Previous"
+                            }
+                        },
+                        columnDefs: [{
+                            orderable: true,
+                            targets: '_all'
+                        }]
+                    });
+                    
+                    // Add click event for the Details button
+                    $(document).on('click', '.view-details', function() {
+                        const fname = $(this).data('fname');
+                        const lname = $(this).data('lname');
+                        const email = $(this).data('email');
+                        const phone = $(this).data('phone');
+                        const status = $(this).data('status');
+                        
+                        Swal.fire({
+                            title: `${fname} ${lname}`,
+                            html: `
+                                <div class="uk-text-left">
+                                    <p><strong>Email:</strong> ${email}</p>
+                                    <p><strong>Phone Number:</strong> ${phone}</p>
+                                    <p><strong>Account Status:</strong> ${status}</p>
+                                </div>
+                            `,
+                            icon: 'info',
+                            confirmButtonText: 'Close'
+                        });
+                    });
+                });
+            </script>
+        </div>
+    </div>
+</div>
 
             <!-- Account Details Card -->
             <div id="account-details" class="section" style="display: none;">
@@ -596,6 +609,7 @@ try {
 
                 <div class="uk-width-1-1 uk-text-right uk-margin-top">
                     <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                    <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                     <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
                 </div>
 
@@ -607,9 +621,6 @@ try {
                         <small style="color: red;" class="error-message" data-error="otp"></small>
                     </div>
                     <!-- The buttons will be dynamically added here by JavaScript -->
-                </div>
-                <div class="uk-width-1-1 uk-margin-top">
-                    <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                 </div>
             </div>
         </div>
@@ -731,7 +742,7 @@ try {
                 removePhotoButton.style.pointerEvents = "none";
                 removePhotoButton.style.color = "grey";
 
-                saveButton.textContent = "Save";
+                saveButton.textContent = "Save Changes";
                 saveButton.dataset.step = "";
 
                 // Disable Change Password button

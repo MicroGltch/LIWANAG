@@ -38,45 +38,67 @@ if (!isset($_SESSION['account_ID']) || !in_array(strtolower($_SESSION['account_T
     <h2>Add a New Therapist Form</h2>
 
     <form id="addTherapist" class="uk-form-stacked" method="POST" action="add_therapist.php">
-        <div class="uk-width-1-2@s">
+    <div class="uk-grid-small uk-child-width-1-1 uk-child-width-1-2@s" uk-grid>
+        <div>
             <label class="uk-form-label">First Name</label>
-            <input class="uk-input" type="text" name="therapist_fname" required value="<?php echo isset($_SESSION['form_data']['therapist_fname']) ? htmlspecialchars($_SESSION['form_data']['therapist_fname']) : ''; ?>">
-            <?php if(isset($_SESSION['update_errors']['firstName'])): ?>
-                <div class="uk-text-danger uk-text-small"><?php echo $_SESSION['update_errors']['firstName']; ?></div>
-            <?php endif; ?>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="text" name="therapist_fname" required value="<?php echo isset($_SESSION['form_data']['therapist_fname']) ? htmlspecialchars($_SESSION['form_data']['therapist_fname']) : ''; ?>">
+                <?php if(isset($_SESSION['update_errors']['firstName'])): ?>
+                    <div class="uk-text-danger uk-text-small"><?php echo $_SESSION['update_errors']['firstName']; ?></div>
+                <?php endif; ?>
+            </div>
         </div>
-        <div class="uk-width-1-2@s">
+        <div>
             <label class="uk-form-label">Last Name</label>
-            <input class="uk-input" type="text" name="therapist_lname" required value="<?php echo isset($_SESSION['form_data']['therapist_lname']) ? htmlspecialchars($_SESSION['form_data']['therapist_lname']) : ''; ?>">
-            <?php if(isset($_SESSION['update_errors']['lastName'])): ?>
-                <div class="uk-text-danger uk-text-small"><?php echo $_SESSION['update_errors']['lastName']; ?></div>
-            <?php endif; ?>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="text" name="therapist_lname" required value="<?php echo isset($_SESSION['form_data']['therapist_lname']) ? htmlspecialchars($_SESSION['form_data']['therapist_lname']) : ''; ?>">
+                <?php if(isset($_SESSION['update_errors']['lastName'])): ?>
+                    <div class="uk-text-danger uk-text-small"><?php echo $_SESSION['update_errors']['lastName']; ?></div>
+                <?php endif; ?>
+            </div>
         </div>
-        <div class="uk-width-1-2@s">
+        <div>
             <label class="uk-form-label">Email</label>
-            <input class="uk-input" type="email" name="therapist_email" required value="<?php echo isset($_SESSION['form_data']['therapist_email']) ? htmlspecialchars($_SESSION['form_data']['therapist_email']) : ''; ?>">
-            <?php if(isset($_SESSION['update_errors']['email'])): ?>
-                <div class="uk-text-danger uk-text-small"><?php echo $_SESSION['update_errors']['email']; ?></div>
-            <?php endif; ?>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="email" name="therapist_email" required value="<?php echo isset($_SESSION['form_data']['therapist_email']) ? htmlspecialchars($_SESSION['form_data']['therapist_email']) : ''; ?>">
+                <?php if(isset($_SESSION['update_errors']['email'])): ?>
+                    <div class="uk-text-danger uk-text-small"><?php echo $_SESSION['update_errors']['email']; ?></div>
+                <?php endif; ?>
+            </div>
         </div>
-        <div class="uk-width-1-2@s">
+        <div>
             <label class="uk-form-label">Phone Number (Format: 09XXXXXXXXX)</label>
-            <input class="uk-input" type="text" name="therapist_phone" required value="<?php echo isset($_SESSION['form_data']['therapist_phone']) ? htmlspecialchars($_SESSION['form_data']['therapist_phone']) : ''; ?>">
-            <?php if(isset($_SESSION['update_errors']['phoneNumber'])): ?>
-                <div class="uk-text-danger uk-text-small"><?php echo $_SESSION['update_errors']['phoneNumber']; ?></div>
-            <?php endif; ?>
+            <div class="uk-form-controls">
+                <input class="uk-input" type="text" name="therapist_phone" required value="<?php echo isset($_SESSION['form_data']['therapist_phone']) ? htmlspecialchars($_SESSION['form_data']['therapist_phone']) : ''; ?>">
+                <?php if(isset($_SESSION['update_errors']['phoneNumber'])): ?>
+                    <div class="uk-text-danger uk-text-small"><?php echo $_SESSION['update_errors']['phoneNumber']; ?></div>
+                <?php endif; ?>
+            </div>
         </div>
-        <div class="uk-width-1-2@s">
+        <div>
             <label class="uk-form-label">Role</label>
-            <select class="uk-select" name="therapist_role" required>
-                <option value="therapist" <?php echo (isset($_SESSION['form_data']['therapist_role']) && $_SESSION['form_data']['therapist_role'] == 'therapist') ? 'selected' : ''; ?>>Therapist</option>
-                <option value="head therapist" <?php echo (isset($_SESSION['form_data']['therapist_role']) && $_SESSION['form_data']['therapist_role'] == 'head therapist') ? 'selected' : ''; ?>>Head Therapist</option>
-            </select>
+            <div class="uk-form-controls">
+                <select class="uk-select" name="therapist_role" required>
+                    <option value="therapist" <?php echo (isset($_SESSION['form_data']['therapist_role']) && $_SESSION['form_data']['therapist_role'] == 'therapist') ? 'selected' : ''; ?>>Therapist</option>
+                    <option value="head therapist" <?php echo (isset($_SESSION['form_data']['therapist_role']) && $_SESSION['form_data']['therapist_role'] == 'head therapist') ? 'selected' : ''; ?>>Head Therapist</option>
+                </select>
+            </div>
         </div>
-        <div class="uk-width-1-1 uk-text-right uk-margin-top">
-        <button class="uk-button uk-button-primary" type="submit" id="registerTherapist" style="border-radius: 15px; background-color:#1e87f0; color:white;">Register</button>
+        <div>
+            <label class="uk-form-label">Service Type</label>
+            <div class="uk-form-controls">
+                <select class="uk-select" name="service_type" required>
+                    <option value="Both" <?php echo (isset($_SESSION['form_data']['service_type']) && $_SESSION['form_data']['service_type'] == 'Both') ? 'selected' : ''; ?>>Both</option>
+                    <option value="Occupational" <?php echo (isset($_SESSION['form_data']['service_type']) && $_SESSION['form_data']['service_type'] == 'Occupational') ? 'selected' : ''; ?>>Occupational</option>
+                    <option value="Behavioral" <?php echo (isset($_SESSION['form_data']['service_type']) && $_SESSION['form_data']['service_type'] == 'Behavioral') ? 'selected' : ''; ?>>Behavioral</option>
+                </select>
+            </div>
         </div>
-    </form>
+    </div>
+    <div class="uk-margin-top">
+        <button class="uk-button uk-button-primary uk-align-right" type="submit" id="registerTherapist" style="border-radius: 15px; background-color:#1e87f0; color:white;">Register</button>
+    </div>
+</form>
 
     <?php
     // Display SweetAlert based on session status
@@ -120,6 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $email = trim($_POST["therapist_email"]);
     $phone = trim($_POST["therapist_phone"]);
     $role = $_POST["therapist_role"] ?? "therapist";
+    $service_type = $_POST["service_type"] ?? "Both";
     
     // ** Validate First Name **
     if (!preg_match("/^[A-Za-z ]{2,30}$/", $firstName)) {
@@ -181,14 +204,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         exit();
     } else {
         // Insert new therapist into database
-        $stmt = $connection->prepare("INSERT INTO users (account_FName, account_LName, account_Email, account_Password, account_Address, account_PNum, account_Type, account_Status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssssssss", $firstName, $lastName, $email, $defaultPassword, $accountAddress, $phone, $accountType, $accountStatus, $created, $created);
+        $stmt = $connection->prepare("INSERT INTO users (account_FName, account_LName, account_Email, account_Password, account_Address, account_PNum, account_Type, account_Status, service_Type, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("sssssssssss", $firstName, $lastName, $email, $defaultPassword, $accountAddress, $phone, $accountType, $accountStatus, $service_type, $created, $created);
 
         if ($stmt->execute()) {
             // Clear form data on success
             $_SESSION['clearForm'] = true;
             
-            if (send_email_notification($email, $therapist_name, $accountType)) {
+            if (send_email_notification($email, $therapist_name, $accountType, $service_type)) {
                 $_SESSION['swalType'] = 'success';
                 
                 // Change the SweetAlert title and message based on role
@@ -225,8 +248,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     exit();
 }
 
-// ✅ Email Sender Function
-function send_email_notification($email, $therapist_name, $accountType) {
+    // ✅ Email Sender Function
+    function send_email_notification($email, $therapist_name, $accountType, $service_type) {
     $mail = new PHPMailer(true);
 
     try {
@@ -247,16 +270,33 @@ function send_email_notification($email, $therapist_name, $accountType) {
         $roleSpecificWelcome = ($accountType == "head therapist") 
             ? "We are excited to welcome you as a <strong>Head Therapist</strong> at <strong>Little Wanderer's Therapy Center</strong>. As a Head Therapist, you will have additional responsibilities in overseeing therapy sessions and other therapists."
             : "We are excited to welcome you as a <strong>Therapist</strong> at <strong>Little Wanderer's Therapy Center</strong>. We look forward to your contribution in providing quality therapy services.";
+        
+        // Service type description
+        $serviceTypeInfo = "";
+        switch($service_type) {
+            case "Both":
+                $serviceTypeInfo = "You are registered to provide <strong>both Occupational and Behavioral therapy services</strong>. This means you will be able to handle a wide range of therapy needs for our clients.";
+                break;
+            case "Occupational":
+                $serviceTypeInfo = "You are registered to provide <strong>Occupational therapy services</strong>. Your expertise will help our clients develop the skills needed for daily living and working.";
+                break;
+            case "Behavioral":
+                $serviceTypeInfo = "You are registered to provide <strong>Behavioral therapy services</strong>. Your expertise will help our clients improve their behaviors, reactions, and interactions.";
+                break;
+        }
 
         $emailBody = "
             <h3>Welcome to Little Wanderer's Therapy Center</h3>
             <p>Dear <strong>$therapist_name</strong>,</p>
             <p>$roleSpecificWelcome Your account has been successfully created and is currently <strong>not yet activated</strong>.</p>
+            
+            <p>$serviceTypeInfo</p>
 
             <h4>Login Credentials:</h4>
             <ul>
                 <li><strong>Email:</strong> $email</li>
                 <li><strong>Temporary Password:</strong> Liwanag@2025</li>
+                <li><strong>Service Type:</strong> $service_type</li>
             </ul>
 
             <p>To activate your account, please log in using the credentials above and change your password immediately.</p>
@@ -275,6 +315,7 @@ function send_email_notification($email, $therapist_name, $accountType) {
             <p>Best Regards,<br>
             <strong>Little Wanderer's Therapy Center Team</strong></p>
         ";
+
 
         $mail->Body = $emailBody;
         $mail->send();
