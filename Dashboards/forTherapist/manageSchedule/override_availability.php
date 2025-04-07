@@ -60,7 +60,7 @@ $existingDates = array_column($overrides, 'date'); // Track already blocked date
 </head>
 <body>
     <div class="uk-container uk-margin-top">
-        <h4>Adjust Availability for Specific Dates</h4>
+        <h4 class="uk-card-title uk-text-bold">Adjust Availability for Specific Dates</h4>
 
         <form id="overrideForm" method="POST" class="uk-grid-small" uk-grid>
         
@@ -96,7 +96,7 @@ $existingDates = array_column($overrides, 'date'); // Track already blocked date
         </form>
 
         <hr>
-        <h4 class="uk-margin-top">Existing Adjustments</h4>
+        <h4 class="uk-margin-top uk-card-title uk-text-bold">Existing Adjustments</h4>
         <table class="uk-table uk-table-divider">
             <thead>
                 <tr>

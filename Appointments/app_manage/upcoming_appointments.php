@@ -63,8 +63,8 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 </head>
 <body>
     <div class="uk-container uk-margin-top">
-        <h2>Welcome, <?= htmlspecialchars($_SESSION['username']); ?></h2>
-        <h3>Upcoming Appointments</h3>
+        <h3 class="uk-card-title uk-text-bold">Welcome, <?= htmlspecialchars($_SESSION['username']); ?></h3>
+        <h4 class="uk-card-title uk-text-bold">Upcoming Appointments</h4>
         <table class="uk-table uk-table-striped">
             <thead>
                 <tr>
@@ -139,7 +139,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                                     fetch("../app_process/update_appointment_status.php", {
                                         method: "POST",
                                         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                        body: `appointment_id=${appointmentId}&status=Completed`
+                                        body: `appointment_id=${appointmentId}&status=completed`
                                     })
                                     .then(response => response.json())
                                     .then(data => {
