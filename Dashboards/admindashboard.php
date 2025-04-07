@@ -713,6 +713,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
                             <button type="button" class="uk-button uk-button-secondary" id="editButton" style="border-radius: 15px;">Edit</button>
+                            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                             <button class="uk-button uk-button-primary" type="submit" id="saveButton" style="border-radius: 15px;" disabled>Save Changes</button>
                         </div>
 
@@ -725,9 +726,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
                 <!-- The buttons will be dynamically added here by JavaScript -->
             </div>
-            <div class="uk-width-1-1 uk-margin-top">
-                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
-            </div>
+            
         </form>
 
                     <?php unset($_SESSION['update_errors']); ?>
@@ -851,7 +850,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 removePhotoButton.style.pointerEvents = "none";
                 removePhotoButton.style.color = "grey";
 
-                saveButton.textContent = "Save";
+                saveButton.textContent = "Save Changes";
                 saveButton.dataset.step = "";
 
                 // Disable Change Password button

@@ -417,10 +417,7 @@ $stmt->close();
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
             <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
             <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
-                
-                
-                <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
-            
+            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
             </div>
 
             <div id="otpSection" class="uk-width-1-1" style="display: none;">
@@ -432,9 +429,7 @@ $stmt->close();
                 </div>
                 <!-- The buttons will be dynamically added here by JavaScript -->
             </div>
-            <div class="uk-width-1-1 uk-margin-top">
-                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
-            </div>
+
         </form>
         <?php unset($_SESSION['update_errors']); ?>
         <?php unset($_SESSION['update_success']); ?>
@@ -565,7 +560,7 @@ $stmt->close();
                 removePhotoButton.style.pointerEvents = "none";
                 removePhotoButton.style.color = "grey";
 
-                saveButton.textContent = "Save";
+                saveButton.textContent = "Save Changes";
                 saveButton.dataset.step = "";
 
                 // Disable Change Password button

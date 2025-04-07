@@ -575,6 +575,7 @@ echo "<script>
 
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
                 <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                 <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
             </div>
 
@@ -586,9 +587,6 @@ echo "<script>
                     <small style="color: red;" class="error-message" data-error="otp"></small>
                 </div>
                 <!-- The buttons will be dynamically added here by JavaScript -->
-            </div>
-            <div class="uk-width-1-1 uk-margin-top">
-                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
             </div>
         </div>
     </div>
@@ -803,7 +801,7 @@ echo "<script>
                 removePhotoButton.style.pointerEvents = "none";
                 removePhotoButton.style.color = "grey";
 
-                saveButton.textContent = "Save";
+                saveButton.textContent = "Save Changes";
                 saveButton.dataset.step = "";
 
                 // Disable Change Password button
