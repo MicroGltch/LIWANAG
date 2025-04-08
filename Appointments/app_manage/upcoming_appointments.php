@@ -63,8 +63,8 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 </head>
 <body>
     <div class="uk-container uk-margin-top">
-        <h2>Welcome, <?= htmlspecialchars($_SESSION['username']); ?></h2>
-        <h3>Upcoming Appointments</h3>
+        <h3 class="uk-card-title uk-text-bold">Welcome, <?= htmlspecialchars($_SESSION['username']); ?></h3>
+        <h4 class="uk-card-title uk-text-bold">Upcoming Appointments</h4>
         <table class="uk-table uk-table-striped">
             <thead>
                 <tr>
@@ -87,9 +87,9 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                         <td>
                             <button class="uk-button uk-button-primary complete-btn"
                                 data-id="<?= $appointment['appointment_id']; ?>"
-                                data-patient-id="<?= $appointment['patient_id']; ?>">Complete
+                                data-patient-id="<?= $appointment['patient_id']; ?>" style="margin-right: 10px;border-radius: 15px;">Complete
                             </button>
-                            <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
+                            <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>" style="margin-right: 10px;border-radius: 15px;">Cancel</button>
                         </td>
                     </tr>
                 <?php endforeach; ?>

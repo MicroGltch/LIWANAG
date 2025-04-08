@@ -415,9 +415,9 @@ $stmt->close();
             <small style="color: green;" class="error-message" id="successMessage"></small>
 
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
-            <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
-            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
-            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
+            <button type="button" class="uk-button uk-button-secondary" id="editButton" style="border-radius: 15px;">Edit</button>
+            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal" style="border-radius: 15px;">Change Password</button>
+            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="border-radius: 15px;">Save Changes</button>
             </div>
 
             <div id="otpSection" class="uk-width-1-1" style="display: none;">

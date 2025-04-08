@@ -112,7 +112,7 @@ include "../dbconfig.php"
                         <input class="uk-input password-input" id="password" name="password" type="password" 
                             maxlength="20" minlength="8" placeholder="Input your Password..." 
                             style="width: 100%; padding-right: 40px;">
-                        <span style="position: absolute; right: 10px; cursor: pointer;" onclick="togglePassword()">
+                        <span style="position: absolute; right: 10px; cursor: pointer; top: 10px;" onclick="togglePassword()">                            
                             <i class="fa fa-eye" id="togglePasswordIcon"></i>
                         </span>
                     </div>
@@ -128,7 +128,7 @@ include "../dbconfig.php"
                         <input class="uk-input password-input" id="confirmPassword" name="confirmPassword" type="password" 
                             maxlength="20" minlength="8" placeholder="Confirm your Password..." 
                             style="width: 100%; padding-right: 40px;">
-                        <span style="position: absolute; right: 10px; cursor: pointer;" onclick="toggleConfirmPassword()">
+                        <span style="position:absolute; right: 10px; cursor: pointer; top: 10px;" onclick="toggleConfirmPassword()">                                
                             <i class="fa fa-eye" id="toggleConfirmPasswordIcon"></i>
                         </span>
                     </div>
@@ -475,6 +475,5 @@ document.addEventListener("DOMContentLoaded", function () {
 </body>
 
 </html>
-
 
 

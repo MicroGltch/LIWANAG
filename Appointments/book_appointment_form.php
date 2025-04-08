@@ -1,80 +1,81 @@
 <?php
-    require_once "../dbconfig.php";
-    session_start();
+require_once "../dbconfig.php";
+session_start();
 
-    if (!isset($_SESSION['account_ID'])) {
-        header("Location: ../Accounts/loginpage.php");
-        exit();
-    }
+if (!isset($_SESSION['account_ID'])) {
+    header("Location: ../Accounts/loginpage.php");
+    exit();
+}
 
-    if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "client") {
-        header("Location: ../Accounts/loginpage.php");
-        exit();
-    }
-    
-    // Fetch timetable settings safely
-    $settingsQuery = "SELECT max_days_advance, min_days_advance, blocked_dates, initial_eval_duration, playgroup_duration 
-                    FROM settings LIMIT 1";
-    $settingsResult = $connection->query($settingsQuery);
-    $settings = $settingsResult->fetch_assoc();
+if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "client") {
+    header("Location: ../Accounts/loginpage.php");
+    exit();
+}
 
-    // $businessHoursStart = $settings["business_hours_start"] ?? "09:00:00";
-    // $businessHoursEnd = $settings["business_hours_end"] ?? "17:00:00";
-    $maxDaysAdvance = $settings["max_days_advance"] ?? 30;
-    $minDaysAdvance = $settings["min_days_advance"] ?? 3;
-    $blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["blocked_dates"], true) : []; // Ensure array
-    $ieDuration = $settings["initial_eval_duration"] ?? 60;
-    $pgDuration = $settings["playgroup_duration"] ?? 120;
+// Fetch timetable settings safely
+$settingsQuery = "SELECT max_days_advance, min_days_advance, blocked_dates, initial_eval_duration, playgroup_duration 
+                     FROM settings LIMIT 1";
+$settingsResult = $connection->query($settingsQuery);
+$settings = $settingsResult->fetch_assoc();
 
-   //Get per-day hours from business_hours_by_day
-    $bizHoursByDay = [];
-    $result = $connection->query("SELECT day_name, start_time, end_time FROM business_hours_by_day");
-    while ($row = $result->fetch_assoc()) {
-        $bizHoursByDay[$row['day_name']] = [
-            'start' => $row['start_time'],
-            'end'   => $row['end_time']
-        ];
-    }
-    
-    $closedDays = array_keys(array_filter($bizHoursByDay, fn($v) => is_null($v['start']) || is_null($v['end'])));
+// $businessHoursStart = $settings["business_hours_start"] ?? "09:00:00";
+// $businessHoursEnd = $settings["business_hours_end"] ?? "17:00:00";
+$maxDaysAdvance = $settings["max_days_advance"] ?? 30;
+$minDaysAdvance = $settings["min_days_advance"] ?? 3;
+$blockedDates = !empty($settings["blocked_dates"]) ? json_decode($settings["blocked_dates"], true) : []; // Ensure array
+$ieDuration = $settings["initial_eval_duration"] ?? 60;
+$pgDuration = $settings["playgroup_duration"] ?? 120;
 
-    $openOverrideDates = [];
-    $exceptions = $connection->query("SELECT exception_date FROM business_hours_exceptions WHERE start_time IS NOT NULL AND end_time IS NOT NULL");
-    while ($row = $exceptions->fetch_assoc()) {
-        $openOverrideDates[] = $row['exception_date'];
-    }
+//Get per-day hours from business_hours_by_day
+$bizHoursByDay = [];
+$result = $connection->query("SELECT day_name, start_time, end_time FROM business_hours_by_day");
+while ($row = $result->fetch_assoc()) {
+    $bizHoursByDay[$row['day_name']] = [
+        'start' => $row['start_time'],
+        'end'   => $row['end_time']
+    ];
+}
 
-    // //Check for a specific date override
-    // $overrideStmt = $connection->prepare("SELECT start_time, end_time FROM business_hours_exceptions WHERE exception_date = ?");
-    // $overrideStmt->bind_param("s", $date);
-    // $overrideStmt->execute();
-    // $overrideResult = $overrideStmt->get_result();
-    // $override = $overrideResult->fetch_assoc();
+$closedDays = array_keys(array_filter($bizHoursByDay, fn($v) => is_null($v['start']) || is_null($v['end'])));
 
-    // if ($override) {
-    //     $start = $override['start_time'];
-    //     $end = $override['end_time'];
-    // } else {
-    //     $dayOfWeek = date("l", strtotime($date));
-    //     $start = $bizHoursByDay[$dayOfWeek]['start'];
-    //     $end = $bizHoursByDay[$dayOfWeek]['end'];
-    // }
+$openOverrideDates = [];
+$exceptions = $connection->query("SELECT exception_date FROM business_hours_exceptions WHERE start_time IS NOT NULL AND end_time IS NOT NULL");
+while ($row = $exceptions->fetch_assoc()) {
+    $openOverrideDates[] = $row['exception_date'];
+}
+
+//Check for a specific date override
+// $overrideStmt = $connection->prepare("SELECT start_time, end_time FROM business_hours_exceptions WHERE exception_date = ?");
+// $overrideStmt->bind_param("s", $date);
+// $overrideStmt->execute();
+// $overrideResult = $overrideStmt->get_result();
+// $override = $overrideResult->fetch_assoc();
+
+// if ($override) {
+//     $start = $override['start_time'];
+//     $end = $override['end_time'];
+// } else {
+//     $dayOfWeek = date("l", strtotime($date));
+//     $start = $bizHoursByDay[$dayOfWeek]['start'];
+//     $end = $bizHoursByDay[$dayOfWeek]['end'];
+// }
 
 
-    // ✅ Fetch registered patients
-    $patientsQuery = "SELECT patient_id, first_name, last_name FROM patients WHERE account_id = ?";
-    $stmt = $connection->prepare($patientsQuery);
-    $stmt->bind_param("i", $_SESSION['account_ID']);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $patients = $result->fetch_all(MYSQLI_ASSOC);
-    $stmt->close();
+// ✅ Fetch registered patients
+$patientsQuery = "SELECT patient_id, first_name, last_name FROM patients WHERE account_id = ?";
+$stmt = $connection->prepare($patientsQuery);
+$stmt->bind_param("i", $_SESSION['account_ID']);
+$stmt->execute();
+$result = $stmt->get_result();
+$patients = $result->fetch_all(MYSQLI_ASSOC);
+$stmt->close();
 
-    $role = strtolower(trim($_SESSION['account_Type']));
+$role = strtolower(trim($_SESSION['account_Type']));
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,111 +99,138 @@
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 
     <style>
-        html, body {
+        html,
+        body {
             background-color: #ffffff !important;
         }
 
         .appointment-container {
             display: flex;
-            gap: 20px; /* Adjust as needed for spacing */
+            gap: 20px;
+            /* Adjust as needed for spacing */
         }
 
         .appointment-form {
-            flex: 1; /* Take up available space */
+            flex: 1;
+            /* Take up available space */
         }
 
         .patient-details-container {
-            flex: 1; /* Take up available space */
+            flex: 1;
+            /* Take up available space */
         }
+
     </style>
 </head>
+
 <body>
     <div class="uk-container uk-margin-top appointment-container">
         <div class="appointment-form">
-            <h2>Book an Appointment</h2>
-            <p>Your Role: <strong><?= ucfirst($role); ?></strong></p>
+            <div>
+            <h2 class="uk-card-title uk-text-bold">Book an Appointment</h2>
+                <p>Your Role: <strong><?= ucfirst($role); ?></strong></p>
 
-            <?php if (empty($patients)): ?>
-                <div class="uk-alert-warning" uk-alert>
-                    <p>Please Register a Patient before Booking an Appointment.</p>
-                    <button class="uk-button uk-button-primary" onclick="goToRegisterPatient()">Register a Patient</button>
+                <?php if (empty($patients)): ?>
+                    <div class="uk-alert-warning" uk-alert style="width: 100%;">
+                        <p>Please Register a Patient before Booking an Appointment.</p>
+                        <button class="uk-button uk-button-primary" onclick="goToRegisterPatient()">Register a Patient</button>
+                    </div>
+                <?php else: ?>
+            </div>
+
+            <form id="appointmentForm" action="app_process/book_appointment_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked uk-grid-medium" uk-grid>
+                <div class="uk-width-1-1">
+                    <label class="uk-form-label" for="patient_id">Select Patient:</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" name="patient_id" id="patient_id" required>
+                            <option value="" disabled selected>Select a Patient</option>
+                            <?php foreach ($patients as $patient): ?>
+                                <option value="<?= $patient['patient_id']; ?>">
+                                    <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <input type="hidden" name="patient_name" id="patient_name_hidden">
+                    </div>
                 </div>
-            <?php else: ?>
 
-            <form id="appointmentForm" action="app_process/book_appointment_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked">
-                <label>Select Patient:</label>
-                <select class="uk-select" name="patient_id" id="patient_id" required>
-                    <option value="" disabled selected>Select a Patient</option>
-                    <?php foreach ($patients as $patient): ?>
-                        <option value="<?= $patient['patient_id']; ?>">
-                            <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']); ?>
-                        </option>
-                    <?php endforeach; ?>
-                </select>
-                <input type="hidden" name="patient_name" id="patient_name_hidden">
+                <div class="uk-width-1-1">
+                    <label class="uk-form-label" for="appointment_type">Appointment Type:</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" name="appointment_type" id="appointment_type" required>
+                            <option value="" disabled selected>Select Appointment Type</option>
+                            <option value="Initial Evaluation">Initial Evaluation</option>
+                            <option value="Playgroup">Playgroup</option>
+                        </select>
+                    </div>
+                </div>
 
-                <label>Appointment Type:</label>
-                <select class="uk-select" name="appointment_type" id="appointment_type" required>
-                    <option value="" disabled selected>Select Appointment Type</option>
-                    <option value="Initial Evaluation">Initial Evaluation</option>
-                    <option value="Playgroup">Playgroup</option>
-                </select>
+                <div class="uk-width-1-1" id="date_time_container">
+                    <label class="uk-form-label" for="appointment_date">Date:</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" type="date" name="appointment_date" id="appointment_date" required>
+                    </div>
 
+                    <label class="uk-form-label" for="appointment_time">Time:</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" name="appointment_time" id="appointment_time" required></select>
+                    </div>
+                </div>
 
-                <div id="playgroup_session_container" style="display: none;">
-                    <label>Select Playgroup Session:</label>
-                    <select class="uk-select" name="pg_session_id" id="pg_session_id" required>
-                        <option value="" disabled selected>Fetching available sessions...</option>
-                    </select>
+                <div class="uk-width-1-1" id="playgroup_session_container" style="display: none;">
+                    <label class="uk-form-label" for="pg_session_id">Select Playgroup Session:</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" name="pg_session_id" id="pg_session_id" required>
+                            <option value="" disabled selected>Fetching available sessions...</option>
+                        </select>
+                    </div>
                     <p><strong>Date:</strong> <span id="pg_selected_date"></span></p>
                     <p><strong>Time:</strong> <span id="pg_selected_time"></span></p>
                 </div>
 
-                <div id="referralQuestion" style="display: none;">
-                    <label>
+                <div class="uk-width-1-1" id="referralQuestion" style="display: none;">
+                    <label class="uk-form-label" for="has_referral">
                         Do you have a doctor's referral?
                         <i class="fas fa-info-circle" uk-tooltip="A doctor's referral is required for Initial Evaluation. If you don't have one, provide proof of a scheduled referral appointment."></i>
                     </label>
-                    <select class="uk-select" id="has_referral">
-                        <option value="" disabled selected>Select Answer</option>
-                        <option value="yes">Yes</option>
-                        <option value="no">No</option>
-                    </select>
+                    <div class="uk-form-controls">
+                        <select class="uk-select" id="has_referral">
+                            <option value="" disabled selected>Select Answer</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div id="referralUpload" style="display: none;">
-                    <label id="referralLabel">Doctor's Referral:</label>
-
-                    <input class="uk-input" type="file" name="official_referral" id="official_referral" accept=".jpg, .jpeg, .png, .pdf">
-                    <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking" accept=".jpg, .jpeg, .png, .pdf">
+                <div class="uk-width-1-1" id="referralUpload" style="display: none;">
+                    <label class="uk-form-label" id="referralLabel">Doctor's Referral:</label>
+                    <div class="uk-form-controls">
+                        <input class="uk-input" type="file" name="official_referral" id="official_referral" accept=".jpg, .jpeg, .png, .pdf">
+                        <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking" accept=".jpg, .jpeg, .png, .pdf">
+                    </div>
                 </div>
 
-                <div id="date_time_container">
-                    <label>Date:</label>
-                    <input class="uk-input" type="date" name="appointment_date" id="appointment_date" required>
-
-                    <label>Time:</label>
-                    <select class="uk-select" name="appointment_time" id="appointment_time" required></select>
+                <div class="uk-width-1-1 uk-flex uk-flex-right">
+                    <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="border-radius: 15px;">Book</button>
                 </div>
-
-                <button class="uk-button uk-button-primary uk-margin-top" type="submit">Book</button>
             </form>
             <?php endif; ?>
         </div>
 
+        <div class="vertical-separator" style="border-left: 1px solid #ccc; height: auto; margin: 0 20px;"></div>
+
         <div class="patient-details-container">
-            <div id="patientDetails" class="uk-margin uk-card uk-card-default uk-card-body" style="display: none;">
-                <h4>Patient Details</h4>
+            <div id="patientDetails" class="uk-margin uk-card uk-card-default uk-card-body" style="display: none; box-shadow: none;">
+                <h4 style="font-weight: bold;">Patient Details</h4>
+                <img id="patient_profile" src="" alt="Profile Picture" class="uk-border-rounded" style="width: 100px; height: 100px; display: none; margin: 0 auto;">
                 <p><strong>Name:</strong> <span id="patient_name"></span></p>
                 <p><strong>Birthday:</strong> <span id="patient_bday"></span></p>
                 <p><strong>Age:</strong> <span id="patient_age"></span></p>
                 <p><strong>Gender:</strong> <span id="patient_gender"></span></p>
                 <p><strong>Service Type:</strong> <span id="patient_service"></span></p>
-                <img id="patient_profile" src="" alt="Profile Picture" class="uk-border-rounded" style="width: 100px; height: 100px; display: none;">
             </div>
         </div>
     </div>
-
 
     <script>
     // Function to switch the main page section (Keep this)
@@ -643,6 +671,6 @@
 
     </script>
 
-
 </body>
+
 </html>

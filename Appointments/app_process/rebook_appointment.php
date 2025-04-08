@@ -105,9 +105,8 @@ $service_type = htmlspecialchars($patient['service_type']);
 
     <!-- UIkit Library -->
     <link rel="stylesheet" href="/LIWANAG/CSS/uikit-3.22.2/css/uikit.min.css">
-<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit.min.js"></script>
-<script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
-
+    <script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit.min.js"></script>
+    <script src="/LIWANAG/CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
 
     <!-- LIWANAG CSS -->
     <link rel="stylesheet" href="/LIWANAG/CSS/style.css" type="text/css" >
@@ -133,29 +132,34 @@ $service_type = htmlspecialchars($patient['service_type']);
 <body>
     <div class="uk-container uk-margin-top">
         <h2>Rebook Appointment for <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']); ?></h2>
-        <form id="rebookForm" action="process_rebook.php" method="POST" class="uk-form-stacked">
+        <form id="rebookForm" action="process_rebook.php" method="POST" class="uk-grid-small" uk-grid>
             <input type="hidden" name="appointment_id" value="<?= $appointmentID; ?>">
             <input type="hidden" name="patient_id" value="<?= $patientID; ?>">
 
-
-            <label>Patient Service Type:</label>
-            <select class="uk-select" name="service_type" required>
+            <div class="uk-width-1@s">
+            <label class="uk-form-label">Patient Service Type:</label>
+            <select class="uk-select" name="service_type" required style="border-radius: 15px;">
                 <option value="Occupational Therapy" <?= ($service_type == "Occupational Therapy") ? "selected" : ""; ?>>Occupational Therapy</option>
                 <option value="Behavioral Therapy" <?= ($service_type == "Behavioral Therapy") ? "selected" : ""; ?>>Behavioral Therapy</option>
             </select>
+            </div>
+
+            <div class="uk-width-1@s">
+            <label class="uk-form-label">Date for next session:</label>
+            <input class="uk-input" type="text" name="new_date" id="new_date" required style="border-radius: 15px;">
+            </div>
+
+            <div class="uk-width-1@s">
+            <label class="uk-form-label">Time for next session:</label>
+            <select class="uk-select" name="new_time" id="new_time" required style="border-radius: 15px;"></select>
+            </div>
 
 
-            <label>Date for next session:</label>
-            <input class="uk-input" type="text" name="new_date" id="new_date" required>
-
-            <label>Time for next session:</label>
-            <select class="uk-select" name="new_time" id="new_time" required></select>
-
-
-
-            <button class="uk-button uk-button-primary uk-margin-top" type="submit">Rebook Appointment</button>
+            <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="border-radius: 15px;">Rebook Appointment</button>
             <a href="../app_manage/upcoming_appointments.php" class="uk-button uk-button-default">Cancel</a>
             </form>
+
+
             <?php if ($nextWeekDate && $originalTime): ?>
                 <hr class="uk-margin">
                 <p class="uk-text-muted">Or fill in the same schedule as this week:</p>

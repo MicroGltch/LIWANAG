@@ -24,7 +24,7 @@ $patients = $result->fetch_all(MYSQLI_ASSOC);
 
 // ✅ Fetch system settings (business hours, advance booking, blocked dates)
 $settingsQuery = "SELECT max_days_advance, min_days_advance, blocked_dates 
-                  FROM settings LIMIT 1";
+                   FROM settings LIMIT 1";
 $settingsResult = $connection->query($settingsQuery);
 $settings = $settingsResult->fetch_assoc();
 
@@ -143,8 +143,8 @@ while ($row = $exceptions->fetch_assoc()) {
         </div>        
     
         <div class="uk-width-1-1 uk-text-right uk-margin-top">
-        <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="margin-right: 10px;">Rebook Appointment</button>
-        <button type="button" id="clearButton" class="uk-button uk-button-default uk-margin-top">Clear</button>
+        <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="margin-right: 10px;border-radius: 15px;">Rebook Appointment</button>
+        <button type="button" id="clearButton" class="uk-button uk-button-default uk-margin-top" style="margin-right: 10px;border-radius: 15px;">Clear</button>
         </div>
 
         
