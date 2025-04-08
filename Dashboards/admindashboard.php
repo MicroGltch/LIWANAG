@@ -477,6 +477,21 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
     <h1 class="uk-text-bold">Manage Therapists</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <!-- ✅ Custom Search and Show Entries -->
+                    <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
+                        <div class="uk-width-1-3">
+                            <input type="text" id="therapistSearch" class="uk-input" placeholder="Search..." style="border-radius: 15px;">
+                        </div>
+                        <div class="uk-width-auto">
+                            <label for="therapistsEntries" class="uk-margin-small-right">Show entries per page:</label>
+                            <select id="therapistsEntries" class="uk-select" style="width: auto; border-radius: 15px;">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="uk-overflow-auto">
                         <table id="managetherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
                             <thead>

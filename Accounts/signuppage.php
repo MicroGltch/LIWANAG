@@ -108,6 +108,7 @@ include "../dbconfig.php"
             <div class="uk-width-1@s uk-width-1-2@l">
                 <label class="uk-form-label uk-text-left" for="password">Password</label>
                 <div class="uk-form-controls">
+               
                     <div style="position: relative; display: flex; align-items: center;">
                         <input class="uk-input password-input" id="password" name="password" type="password" 
                             maxlength="20" minlength="8" placeholder="Input your Password..." 
@@ -116,6 +117,7 @@ include "../dbconfig.php"
                             <i class="fa fa-eye" id="togglePasswordIcon"></i>
                         </span>
                     </div>
+                    
                 </div>
                 <span class="error" id="passwordError" style="color: red;"></span>
             </div>
