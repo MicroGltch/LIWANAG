@@ -368,7 +368,7 @@ echo "<script>
                             </select>
                         </div>
 
-                        <!--
+                        
                         <div class="uk-width-1@s uk-width-1-2@l">
                             <label class="uk-form-label">Profile Picture</label>
                             <div class="js-upload uk-placeholder uk-text-center" id="profile-picture-placeholder">
@@ -381,7 +381,6 @@ echo "<script>
                                 </div>
                             </div>
                         </div>
-                        -->
 
                         <div class="uk-width-1-2@s uk-width-1-2@l">
                             <label class="uk-form-label">Profile Picture</label>
@@ -1650,42 +1649,40 @@ echo "<script>
             });
 
 
-
-
             // Book Appointment Form Submission Handling
-            let appointmentFormFrame = document.getElementById("appointmentFormFrame");
+            // let appointmentFormFrame = document.getElementById("appointmentFormFrame");
 
-            appointmentFormFrame.onload = function() {
-                let appointmentForm = appointmentFormFrame.contentDocument.getElementById("appointmentForm");
+            // appointmentFormFrame.onload = function() {
+            //     let appointmentForm = appointmentFormFrame.contentDocument.getElementById("appointmentForm");
 
-                if (appointmentForm) {
-                    appointmentForm.addEventListener("submit", function(e) {
-                        e.preventDefault();
+            //     if (appointmentForm) {
+            //         appointmentForm.addEventListener("submit", function(e) {
+            //             e.preventDefault();
 
-                        let formData = new FormData(this);
+            //             let formData = new FormData(this);
 
-                        fetch("../Appointments/app_process/book_appointment_process.php", {
-                                method: "POST",
-                                body: formData
-                            })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.swal) {
-                                    Swal.fire({
-                                        title: data.swal.title,
-                                        text: data.swal.text,
-                                        icon: data.swal.icon,
-                                    }).then(() => {
-                                        if (data.reload) {
-                                            window.location.reload(true); // Hard reload the page
-                                        }
-                                    });
-                                }
-                            })
-                            .catch(error => console.error("Error:", error));
-                    });
-                }
-            };
+            //             fetch("../Appointments/app_process/book_appointment_process.php", {
+            //                     method: "POST",
+            //                     body: formData
+            //                 })
+            //                 .then(response => response.json())
+            //                 .then(data => {
+            //                     if (data.swal) {
+            //                         Swal.fire({
+            //                             title: data.swal.title,
+            //                             text: data.swal.text,
+            //                             icon: data.swal.icon,
+            //                         }).then(() => {
+            //                             if (data.reload) {
+            //                                 window.location.reload(true); // Hard reload the page
+            //                             }
+            //                         });
+            //                     }
+            //                 })
+            //                 .catch(error => console.error("Error:", error));
+            //         });
+            //     }
+            // };
 
 
             // REGISTER PATIENT JS
