@@ -1616,8 +1616,8 @@ echo "<script>
                                 disable: timetableSettings.blockedDates.map(date => new Date(date))
                             });
 
-                         /*   let sessionType = document.querySelector(".edit-btn").getAttribute("data-session-type");
-                            generateTimeOptions(timetableSettings.businessHoursStart, timetableSettings.businessHoursEnd, sessionType);*/
+                            let sessionType = document.querySelector(".edit-btn").getAttribute("data-session-type");
+                            generateTimeOptions(timetableSettings.businessHoursStart, timetableSettings.businessHoursEnd, sessionType);
                         },
                         showCancelButton: true,
                         confirmButtonText: "Save Changes",
