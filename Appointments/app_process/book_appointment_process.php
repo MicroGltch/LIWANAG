@@ -295,22 +295,26 @@ try {
         $appointment_time_val = null; // Time is always NULL for waitlist
         $pg_session_id_val = null;
 
-    } else {
-        // --- NORMAL APPOINTMENT BOOKING ('book_appointment' action) ---
+    } else { // --- NORMAL APPOINTMENT BOOKING ('book_appointment' action) ---
         $status_val = "pending"; // Default status for new requests
 
-        if ($appointment_type === "Playgroup") {
+        // --- Use elseif for clear separation ---
+        if ($appointment_type === "Playgroup") { // <<< Match case sent from form
             // --- Playgroup Booking ---
-            $pg_session_id_val = filter_input(INPUT_POST, 'pg_session_id', FILTER_VALIDATE_INT);
-            if (!$pg_session_id_val) {
+            // Use direct access or SANITIZE_STRING for varchar ID
+            $pg_session_id_val = $_POST['pg_session_id'] ?? null;
+            // $pg_session_id_val = filter_input(INPUT_POST, 'pg_session_id', FILTER_SANITIZE_STRING); // Alternative
+
+            if (!$pg_session_id_val) { // Check if empty after getting it
                  throw new Exception("No Playgroup session selected.");
             }
             $referral_id_val = null; // No referral needed for Playgroup
 
             // Fetch date/time from the selected session & check capacity again (server-side check)
+            // NOTE: pg_session_id is VARCHAR in your schema
             $stmt_pg = $connection->prepare("SELECT date, time, max_capacity, current_count FROM playgroup_sessions WHERE pg_session_id = ? FOR UPDATE"); // Lock row
             if ($stmt_pg) {
-                 $stmt_pg->bind_param("s", $pg_session_id_val); // pg_session_id is varchar
+                 $stmt_pg->bind_param("s", $pg_session_id_val); // 's' for string/varchar
                  $stmt_pg->execute();
                  $pgResult = $stmt_pg->get_result();
                  if ($pgData = $pgResult->fetch_assoc()) {
@@ -318,9 +322,9 @@ try {
                      if ($pgData['current_count'] >= $pgData['max_capacity']) {
                           throw new Exception("Sorry, this Playgroup session just filled up. Please choose another.");
                      }
+                     // *** Assign date/time correctly for Playgroup ***
                      $appointment_date_val = $pgData['date'];
                      $appointment_time_val = $pgData['time'];
-                     // Note: We'll increment current_count later AFTER successful appointment insert
                  } else {
                      throw new Exception("Selected Playgroup session not found or invalid.");
                  }
@@ -328,23 +332,28 @@ try {
              } else {
                  throw new Exception("Database error fetching Playgroup session details.");
              }
+             // *** IMPORTANT: Do not proceed to IE validation ***
 
-        } else { // --- IE-OT or IE-BT Booking ---
+        } elseif ($appointment_type === "IE-OT" || $appointment_type === "IE-BT") { // <<< Use elseif here
+            // --- IE-OT or IE-BT Booking ---
             $appointment_date_val = $_POST['appointment_date'] ?? null;
             $appointment_time_val = $_POST['appointment_time'] ?? null; // Expecting HH:MM:SS
-             $pg_session_id_val = null;
-             // Referral requirement already checked
+            $pg_session_id_val = null; // Ensure PG session is null for IE
+            // Referral requirement already checked earlier
 
-             // Validate Date and Time format/values
-             if (!$appointment_date_val || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $appointment_date_val)) {
-                 throw new Exception("Invalid date provided for the appointment.");
-             }
-             if (!$appointment_time_val || !preg_match('/^\d{2}:\d{2}:\d{2}$/', $appointment_time_val)) {
-                  throw new Exception("Invalid time provided for the appointment.");
-             }
+            // *** Validate Date and Time format/values (Now ONLY runs for IE) ***
+            if (!$appointment_date_val || !preg_match('/^\d{4}-\d{2}-\d{2}$/', $appointment_date_val)) {
+                throw new Exception("Invalid date provided for the appointment.");
+            }
+            if (!$appointment_time_val || !preg_match('/^\d{2}:\d{2}:\d{2}$/', $appointment_time_val)) {
+                 throw new Exception("Invalid time provided for the appointment.");
+            }
 
-             // Optional: Add server-side check for date range (min/max advance days)
-             // Optional: Add server-side check if the selected slot IS actually available based on get_available_slots_enhanced logic (robust check against race conditions)
+            // Optional: Add server-side check for date range (min/max advance days)
+            // Optional: Add server-side check if the selected slot IS actually available
+        } else {
+             // Optional: Handle unexpected appointment types
+             throw new Exception("An invalid appointment type was submitted.");
         }
     } // End if/else for $action
 
