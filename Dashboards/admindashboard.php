@@ -473,8 +473,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </div>
 
             <!-- Manage Therapists Section 📑-->
-            <div id="manage-therapist" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Manage Therapists</h1>
+<div id="manage-therapist" class="section" style="display: none;">
+    <h1 class="uk-text-bold">Manage Therapists</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <div class="uk-overflow-auto">
