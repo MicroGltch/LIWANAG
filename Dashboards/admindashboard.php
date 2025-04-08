@@ -142,8 +142,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Appointment Overview</title>
-
+    <title>Admin - Dashboard</title>
+    
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
 
@@ -473,8 +473,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </div>
 
             <!-- Manage Therapists Section 📑-->
-            <div id="manage-therapist" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Manage Therapists</h1>
+<div id="manage-therapist" class="section" style="display: none;">
+    <h1 class="uk-text-bold">Manage Therapists</h1>
 
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <!-- ✅ Custom Search and Show Entries -->
@@ -500,6 +500,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                     <th class="uk-table-shrink"><span class="no-break">Last Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
                                     <th class="uk-table-shrink"><span class="no-break">Email<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
                                     <th class="uk-table-shrink"><span class="no-break">Phone Number<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                                    <th class="uk-table-shrink"><span class="no-break">Service Type<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
                                     <th class="uk-table-shrink"><span class="no-break">Account Status<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
                                     <th class="uk-table-shrink"><span class="no-break">Appointments<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
                                     <th class="uk-table-shrink"><span class="no-break">Actions<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
@@ -513,6 +514,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                             <td><?= htmlspecialchars($therapist['account_LName']); ?></td>
                                             <td><?= htmlspecialchars($therapist['account_Email']); ?></td>
                                             <td><?= htmlspecialchars($therapist['account_PNum']); ?></td>
+                                            <td><?= htmlspecialchars($therapist['service_Type'] ?? 'Not Set'); ?></td>
                                             <td><?= htmlspecialchars($therapist['account_status']); ?></td>
                                             <td>
                                                 <?php
@@ -523,6 +525,14 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                                 ?>
                                             </td>
                                             <td>
+                                                <!-- Edit service button -->
+                                                <button class="uk-button uk-button-small uk-button-primary edit-service-btn" 
+                                                        data-therapist-id="<?= htmlspecialchars($therapist['account_ID']); ?>"
+                                                        data-therapist-name="<?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?>"
+                                                        data-current-service="<?= htmlspecialchars($therapist['service_Type'] ?? 'Both'); ?>"
+                                                        uk-toggle="target: #edit-service-modal">
+                                                    Edit Service
+                                                </button>
                                                 <!-- add func for account deletion/disable -->
                                                 <!--<button class="uk-button" style="border-radius: 15px; background-color: #f0506e; color:white;"> Delete/Disable (idk which term ba)</button> -->
                                             </td>
@@ -530,18 +540,86 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                     <?php endforeach; ?>
                                 <?php elseif (isset($therapist_error)) : ?>
                                     <tr>
-                                        <td colspan="7"><?= htmlspecialchars($therapist_error); ?></td>
+                                        <td colspan="8"><?= htmlspecialchars($therapist_error); ?></td>
                                     </tr>
                                 <?php else : ?>
                                     <tr>
-                                        <td colspan="7">No therapists found.</td>
+                                        <td colspan="8">No therapists found.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
+
+                        <script>
+                            $(document).ready(function() {
+                                $('#managetherapistTable').DataTable({
+                                    pageLength: 10,
+                                    lengthMenu: [10, 25, 50],
+                                    order: [
+                                        [0, 'asc']
+                                    ],
+                                    language: {
+                                        lengthMenu: "Show _MENU_ entries per page",
+                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                        search: "Search:",
+                                        paginate: {
+                                            first: "First",
+                                            last: "Last",
+                                            next: "Next",
+                                            previous: "Previous"
+                                        }
+                                    },
+                                    columnDefs: [{
+                                        orderable: true,
+                                        targets: '_all'
+                                    }]
+                                });
+                                
+                                // Edit service button handler
+                                $('.edit-service-btn').on('click', function() {
+                                    // Get data from button
+                                    var therapistId = $(this).data('therapist-id');
+                                    var therapistName = $(this).data('therapist-name');
+                                    var currentService = $(this).data('current-service');
+                                    
+                                    // Fill the modal with data
+                                    $('#edit-therapist-id').val(therapistId);
+                                    $('#edit-therapist-name').text(therapistName);
+                                    $('#edit-service-type').val(currentService);
+                                });
+                            });
+                        </script>
                     </div>
                 </div>
             </div>
+
+                <!-- Edit Service Modal -->
+                <div id="edit-service-modal" uk-modal>
+                    <div class="uk-modal-dialog uk-modal-body">
+                        <h2 class="uk-modal-title">Edit Service Type</h2>
+                        <p>Change service type for <span id="edit-therapist-name"></span></p>
+                        
+                        <form id="edit-service-form" method="POST" action="update_service.php">
+                            <input type="hidden" id="edit-therapist-id" name="therapist_id">
+                            
+                            <div class="uk-margin">
+                                <label class="uk-form-label" for="edit-service-type">Service Type</label>
+                                <div class="uk-form-controls">
+                                    <select class="uk-select" id="edit-service-type" name="service_type">
+                                        <option value="Both">Both</option>
+                                        <option value="Occupational">Occupational</option>
+                                        <option value="Behavioral">Behavioral</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="uk-text-right">
+                                <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+                                <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
 
             <!-- Add Therapist -->
             <div id="add-therapist" class="section" style="display: none;">
@@ -675,6 +753,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
                             <button type="button" class="uk-button uk-button-secondary" id="editButton" style="border-radius: 15px;">Edit</button>
+                            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                             <button class="uk-button uk-button-primary" type="submit" id="saveButton" style="border-radius: 15px;" disabled>Save Changes</button>
                         </div>
 
@@ -686,9 +765,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 <small style="color: red;" class="error-message" data-error="otp"></small>
                             </div>
                             <!-- The buttons will be dynamically added here by JavaScript -->
-                        </div>
-                        <div class="uk-width-1-1 uk-margin-top">
-                            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
                         </div>
                     </form>
 
@@ -813,7 +889,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     removePhotoButton.style.pointerEvents = "none";
                     removePhotoButton.style.color = "grey";
 
-                    saveButton.textContent = "Save";
+                    saveButton.textContent = "Save Changes";
                     saveButton.dataset.step = "";
 
                     // Disable Change Password button

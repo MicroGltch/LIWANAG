@@ -66,6 +66,36 @@ $totalQuery = "SELECT COUNT(*) as total FROM appointments";
 $totalResult = $connection->query($totalQuery);
 $totalAppointments = $totalResult->fetch_assoc()['total'];
 
+// Function to filter appointments by status
+function filterAppointmentsByStatus($appointments, $status) {
+    if ($status === 'others') {
+        $mainStatuses = ['pending', 'approved', 'waitlisted', 'completed', 'cancelled', 'declined'];
+        return array_filter($appointments, function($appointment) use ($mainStatuses) {
+            return !in_array(strtolower($appointment['status']), $mainStatuses);
+        });
+    } else {
+        return array_filter($appointments, function($appointment) use ($status) {
+            return strtolower($appointment['status']) === $status;
+        });
+    }
+}
+
+ // ✅ Fetch therapists data for the table
+ try {
+    $stmt = $connection->prepare(" SELECT account_FName, account_LName, account_Email, account_PNum, account_status
+        FROM users WHERE account_Type = 'therapist'
+    ");
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $therapists = $result->fetch_all(MYSQLI_ASSOC);
+} catch (Exception $e) {
+    $therapist_error = $e->getMessage();
+} finally {
+    if (isset($stmt)) {
+        $stmt->close();
+    }
+}
+
 ?>
 
 
@@ -75,7 +105,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Appointment Overview</title>
+    <title>Head Therapist - Dashboard</title>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
@@ -173,9 +203,20 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     </li>
                     <li><a href="#view-appointments" onclick="showSection('view-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> View All Appointments</a></li>
                     <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Appointments</a></li>                    
-                </li>
-                
-                <hr>
+                    </li>
+ 
+                    <hr>
+
+                    <li class="uk-parent">
+                            <li>
+                                <span>Therapists</span>
+                            </li>
+                            <li>
+                                <li><a href="#view-therapist" onclick="showSection('view-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> View Therapists</a></li>
+                            </li>
+                        </li>
+
+                    <hr>
 
                 <li class="uk-parent">
                     
@@ -203,17 +244,129 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     </div>
                 </div>
 
-                <!-- ✅ Appointment Summary Cards -->
+                <!-- ✅ Clickable Appointment Summary Cards -->
                 <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
                     <?php foreach ($appointmentCounts as $status => $count): ?>
                         <div>
-                            <div class="uk-card uk-card-default uk-card-body">
+                            <div class="uk-card uk-card-default uk-card-body uk-card-hover" id="card-<?= strtolower($status) ?>">
                                 <h3 class="uk-card-title"><?= ucwords($status) ?></h3>
                                 <p>Total: <?= $count ?></p>
+                                <button class="uk-button uk-button-primary uk-width-1-1" 
+                                        onclick="showAppointments('<?= strtolower($status) ?>')">
+                                    View Details
+                                </button>
                             </div>
                         </div>
                     <?php endforeach; ?>
                 </div>
+
+                <!-- Detail tables for each status (initially hidden) -->
+                <?php foreach ($appointmentCounts as $status => $count): ?>
+                    <div id="table-<?= strtolower($status) ?>" class="uk-margin-medium-top appointment-details" style="display: none;">
+                        <div class="uk-card uk-card-default">
+                            <div class="uk-card-header">
+                                <div class="uk-grid-small uk-flex-middle" uk-grid>
+                                    <div class="uk-width-expand">
+                                        <h3 class="uk-card-title uk-margin-remove-bottom"><?= ucwords($status) ?> Appointments</h3>
+                                        <p class="uk-text-meta uk-margin-remove-top">Showing <?= $count ?> appointments</p>
+                                    </div>
+                                    <div class="uk-width-auto">
+                                        <button class="uk-button uk-button-default" onclick="closeTable('<?= strtolower($status) ?>')">
+                                            <span uk-icon="icon: close"></span> Close
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="uk-card-body uk-overflow-auto">
+                                <table class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Patient</th>
+                                            <th>Client</th>
+                                            <th>Date</th>
+                                            <th>Time</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php 
+                                        // Filter appointments for current status
+                                        $statusAppointments = filterAppointmentsByStatus($appointments, $status);
+                                        
+                                        if (!empty($statusAppointments)):
+                                            foreach ($statusAppointments as $appointment): 
+                                        ?>
+                                            <tr>
+                                                <td><?= $appointment['appointment_id'] ?></td>
+                                                <td><?= htmlspecialchars($appointment['first_name'] . ' ' . $appointment['last_name']) ?></td>
+                                                <td><?= htmlspecialchars($appointment['client_firstname'] . ' ' . $appointment['client_lastname']) ?></td>
+                                                <td><?= date('M d, Y', strtotime($appointment['date'])) ?></td>
+                                                <td><?= date('h:i A', strtotime($appointment['time'])) ?></td>
+                                                <td>
+                                                    <span class="uk-label uk-label-<?= getStatusClass($appointment['status']) ?>">
+                                                        <?= ucfirst($appointment['status']) ?>
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        <?php 
+                                            endforeach; 
+                                        else: 
+                                        ?>
+                                            <tr>
+                                                <td colspan="7" class="uk-text-center">No <?= strtolower($status) ?> appointments found</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+
+                <script>
+                function showAppointments(status) {
+                    // Hide all tables first
+                    document.querySelectorAll('.appointment-details').forEach(table => {
+                        table.style.display = 'none';
+                    });
+                    
+                    // Show the selected table
+                    document.getElementById('table-' + status).style.display = 'block';
+                    
+                    // Scroll to the table
+                    document.getElementById('table-' + status).scrollIntoView({behavior: 'smooth'});
+                }
+
+                function closeTable(status) {
+                    document.getElementById('table-' + status).style.display = 'none';
+                    document.getElementById('card-' + status).scrollIntoView({behavior: 'smooth'});
+                }
+
+                </script>
+
+                <?php
+                // Helper function to determine the UIkit label class based on status
+                function getStatusClass($status) {
+                    $status = strtolower($status);
+                    switch ($status) {
+                        case 'pending':
+                            return 'warning';
+                        case 'approved':
+                            return 'success';
+                        case 'waitlisted':
+                            return 'primary';
+                        case 'completed':
+                            return 'success';
+                        case 'cancelled':
+                            return 'danger';
+                        case 'declined':
+                            return 'danger';
+                        default:
+                            return 'default';
+                    }
+                }
+                ?>
 
                 <hr>
 
@@ -299,6 +452,101 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
             </div>
 
+            <!-- Manage Therapists Section 📑-->
+            <div id="view-therapist" class="section" style="display: none;">
+                <h1 class="uk-text-bold">View Therapists</h1>
+
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <div class="uk-overflow-auto">
+                        <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                            <thead>
+                                <tr>
+                                    <th class="uk-table-shrink"><span class="no-break">Therapist Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                                    <th class="uk-table-shrink"><span class="no-break">Actions</span></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php if (isset($therapists) && !empty($therapists)) : ?>
+                                    <?php foreach ($therapists as $therapist) : ?>
+                                        <tr>
+                                            <td><?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?></td>
+                                            <td>
+                                                <button class="uk-button uk-button-primary uk-button-small view-details" 
+                                                        data-fname="<?= htmlspecialchars($therapist['account_FName']); ?>"
+                                                        data-lname="<?= htmlspecialchars($therapist['account_LName']); ?>"
+                                                        data-email="<?= htmlspecialchars($therapist['account_Email']); ?>"
+                                                        data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
+                                                        data-status="<?= htmlspecialchars($therapist['account_status']); ?>">
+                                                    Details
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    <?php endforeach; ?>
+                                <?php elseif (isset($therapist_error)) : ?>
+                                    <tr>
+                                        <td colspan="2"><?= htmlspecialchars($therapist_error); ?></td>
+                                    </tr>
+                                <?php else : ?>
+                                    <tr>
+                                        <td colspan="2">No therapists found.</td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+
+                        <script>
+                            $(document).ready(function() {
+                                // Initialize DataTable
+                                $('#viewtherapistTable').DataTable({
+                                    pageLength: 10,
+                                    lengthMenu: [10, 25, 50],
+                                    order: [
+                                        [0, 'asc']
+                                    ],
+                                    language: {
+                                        lengthMenu: "Show _MENU_ entries per page",
+                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                        search: "Search:",
+                                        paginate: {
+                                            first: "First",
+                                            last: "Last",
+                                            next: "Next",
+                                            previous: "Previous"
+                                        }
+                                    },
+                                    columnDefs: [{
+                                        orderable: true,
+                                        targets: '_all'
+                                    }]
+                                });
+                                
+                                // Add click event for the Details button
+                                $(document).on('click', '.view-details', function() {
+                                    const fname = $(this).data('fname');
+                                    const lname = $(this).data('lname');
+                                    const email = $(this).data('email');
+                                    const phone = $(this).data('phone');
+                                    const status = $(this).data('status');
+                                    
+                                    Swal.fire({
+                                        title: `${fname} ${lname}`,
+                                        html: `
+                                            <div class="uk-text-left">
+                                                <p><strong>Email:</strong> ${email}</p>
+                                                <p><strong>Phone Number:</strong> ${phone}</p>
+                                                <p><strong>Account Status:</strong> ${status}</p>
+                                            </div>
+                                        `,
+                                        icon: 'info',
+                                        confirmButtonText: 'Close'
+                                    });
+                                });
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+
             <!-- Account Details Card -->
             <div id="account-details" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Account Details</h1>
@@ -360,9 +608,9 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 <small style="color: green;" class="error-message" id="successMessage"></small>
 
                 <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                    <button type="button" class="uk-button uk-button-secondary" id="editButton" style="margin-right: 10px;border-radius: 15px;">Edit</button>
-                    <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal" style="margin-right: 10px;border-radius: 15px;">Change Password</button>
-                    <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="margin-right: 10px;border-radius: 15px;">Save Changes</button>
+                    <button type="button" class="uk-button uk-button-secondary" id="editButton">Edit</button>
+                    <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal">Change Password</button>
+                    <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled>Save Changes</button>
                 </div>
 
                 <div id="otpSection" class="uk-width-1-1" style="display: none;">
@@ -373,9 +621,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         <small style="color: red;" class="error-message" data-error="otp"></small>
                     </div>
                     <!-- The buttons will be dynamically added here by JavaScript -->
-                </div>
-                <div class="uk-width-1-1 uk-margin-top">
-                    
                 </div>
             </div>
         </div>
@@ -497,7 +742,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 removePhotoButton.style.pointerEvents = "none";
                 removePhotoButton.style.color = "grey";
 
-                saveButton.textContent = "Save";
+                saveButton.textContent = "Save Changes";
                 saveButton.dataset.step = "";
 
                 // Disable Change Password button

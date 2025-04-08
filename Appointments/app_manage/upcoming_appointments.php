@@ -139,7 +139,7 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
                                     fetch("../app_process/update_appointment_status.php", {
                                         method: "POST",
                                         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                        body: `appointment_id=${appointmentId}&status=Completed`
+                                        body: `appointment_id=${appointmentId}&status=completed`
                                     })
                                     .then(response => response.json())
                                     .then(data => {

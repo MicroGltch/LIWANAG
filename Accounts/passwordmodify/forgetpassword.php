@@ -2,7 +2,7 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     
-    <title>LIWANAG - LOGIN</title>
+    <title>LIWANAG - FORGET PASSWORD</title>
     
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">

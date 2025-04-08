@@ -78,7 +78,7 @@ $stmt->close();
 
         <!-- Navbar -->
         <nav class="uk-navbar-container uk-light uk-navbar-transparent logged-out">
-            <div class="uk-container" style="max-width:1360px !important;">
+        <div class="uk-container" style="max-width:1360px !important;">
                 <div uk-navbar>
 
                     <!-- Navbar Left (Mobile: Offcanvas Trigger) -->
@@ -134,8 +134,6 @@ $stmt->close();
                                 <li>
                                     <li><a href="<?php echo $dashboardURL; ?>" style="color: white">Dashboard</a></li>
                                     <li><a href="Accounts/logout.php" style="color: white">Logout</a></li>
-
-
                                 </li>
                             <?php else: ?>
                                 <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>

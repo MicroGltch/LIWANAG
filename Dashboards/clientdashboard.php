@@ -60,8 +60,8 @@ $stmt->close();
 
 // Fetch settings from database
 $settingsQuery = "SELECT max_days_advance, min_days_advance, blocked_dates,
-                         initial_eval_duration, playgroup_duration, service_ot_duration, service_bt_duration 
-                  FROM settings LIMIT 1";
+                          initial_eval_duration, playgroup_duration, service_ot_duration, service_bt_duration 
+                   FROM settings LIMIT 1";
 
 $result = $connection->query($settingsQuery);
 $settings = $result->fetch_assoc();
@@ -78,7 +78,6 @@ $sessionDurations = [
 ];
 
 $timetableSettings = [
-
     "maxDaysAdvance" => (int) $settings["max_days_advance"],
     "minDaysAdvance" => (int) $settings["min_days_advance"],
     "blockedDates" => $blockedDates
@@ -160,8 +159,8 @@ echo "<script>
             <div uk-navbar>
                 <div class="uk-navbar-left">
                     <ul class="uk-navbar-nav">
-                        <li><a href="#faqs-modal" uk-toggle>FAQs</a></li>
-                        <li><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
+                    <li><a href="#faqs-modal" uk-toggle>FAQs</a></li>
+                    <li><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
                     </ul>
                 </div>
                 <div class="uk-navbar-center">
@@ -433,8 +432,8 @@ echo "<script>
                     </select>
                     <hr>
                     <!-- 🔹 Patient Details Form (Initially Hidden) -->
-
-
+                   
+                   
                     <form id="editPatientForm" class="uk-grid-small uk-grid" action="../Appointments/patient/patient_data/update_patient_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked" style="display: none;">
 
 
@@ -446,17 +445,17 @@ echo "<script>
                         <!------ LEMME COOK ------->
                         <div class="uk-flex uk-flex-middle">
                             <div class="profile-upload-container uk-width-1@s " style="padding: 25px; ">
+                            
+                            <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 150px; height: 150px; display: none;">
+                            
+                            <div class="uk-flex uk-flex-column uk-margin-left">
+                            
+                                <button class="uk-button uk-button-primary uk-margin-small-bottom" type="file" name="profile_picture" id="profile_picture_input">Upload Photo</button>
 
-                                <img id="profile_picture_preview" src="" class="uk-border-rounded uk-margin-top" style="width: 150px; height: 150px; display: none;">
+                            </div>
 
-                                <div class="uk-flex uk-flex-column uk-margin-left">
-
-                                    <button class="uk-button uk-button-primary uk-margin-small-bottom" type="file" name="profile_picture" id="profile_picture_input">Upload Photo</button>
-
-                                </div>
-
-
-                                <div class="uk-margin-large-left">
+                            
+                            <div class="uk-margin-large-left">
                                     <h4>Image requirements:</h4>
                                     <ul class="uk-list">
                                         <li>1. Min. 400 x 400px</li>
@@ -470,57 +469,63 @@ echo "<script>
                         </div>
 
                         <div class="uk-grid-small" uk-grid>
-
-
-                            <div class="uk-width-1-2@s">
+                        
+                        
+                        <div class="uk-width-1-2@s">
                                 <label class="uk-form-label">First Name</label>
                                 <input class="uk-input" type="text" name="first_name" id="first_name" required>
-                            </div>
+                        </div>
+                            
+
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Last Name</label>
+                        <input class="uk-input" type="text" name="last_name" id="last_name" required>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Birthday</label>
+                        <input class="uk-input" type="date" name="bday" id="bday" min="2008-01-01" max="2024-12-31" required>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Gender</label>
+                        <select class="uk-select" name="gender" id="gender">
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Official Referral</label>
+                        <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                        <label class="uk-form-label">Proof of Booking</label>
+                        <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
+                        </div>
+
+                        
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Upload New Official Referral</label>
+                            <input class="uk-input" type="file" name="official_referral" id="official_referral_input" accept=".pdf,.jpg,.jpeg,.png" disabled>
+                        </div>
+
+                        <div class="uk-width-1-2@s">
+                            <label class="uk-form-label">Upload New Proof of Booking</label>
+                            <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking_input" accept=".pdf,.jpg,.jpeg,.png" disabled>
+                        </div>
 
 
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Last Name</label>
-                                <input class="uk-input" type="text" name="last_name" id="last_name" required>
-                            </div>
+                        <div class="uk-width-1-1 uk-text-right uk-margin-top" style="margin-bottom: 15px;">
+                        
+                        <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button">Edit</button>
+                        
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
 
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Birthday</label>
-                                <input class="uk-input" type="date" name="bday" id="bday" min="2008-01-01" max="2024-12-31" required>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Gender</label>
-                                <select class="uk-select" name="gender" id="gender">
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Official Referral</label>
-                                <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
-                            </div>
-
-                            <div class="uk-width-1-2@s">
-                                <label class="uk-form-label">Proof of Booking</label>
-                                <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
-                            </div>
-
-                            <!--wth is this? if i remove it, nawawla yung save profile sa baba ren ?!?!-->
-                            <div class="uk-width-1-2 uk-text-right uk-margin-top">
-                                <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
-                            </div>
-                            <!--wtf-->
-
-                            <div class="uk-width-1-2 uk-text-right uk-margin-top" style="margin-bottom: 15px;">
-
-                                <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button">Edit</button>
-
-                                <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
-
-
-                            </div>
-
+                        
+                            </div> 
+            
 
                         </div>
 
@@ -599,11 +604,11 @@ echo "<script>
                         <small style="color: red;" class="error-message" data-error="duplicate"></small>
                         <small style="color: green;" class="error-message" id="successMessage"></small>
 
-            <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                <button type="button" class="uk-button uk-button-secondary" id="editButton" style="margin-right: 10px;border-radius: 15px;">Edit</button>
-                <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal" style="margin-right: 10px;border-radius: 15px;">Change Password</button>
-                <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="margin-right: 10px;border-radius: 15px;">Save Changes</button>
-            </div>
+                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
+                            <button type="button" class="uk-button uk-button-secondary" id="editButton" style="margin-right: 10px;border-radius: 15px;">Edit</button>
+                            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal" style="margin-right: 10px;border-radius: 15px;">Change Password</button>
+                            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="margin-right: 10px;border-radius: 15px;">Save Changes</button>
+                        </div>
 
                         <div id="otpSection" class="uk-width-1-1" style="display: none;">
                             <h3 class="uk-card-title uk-text-bold">Enter OTP</h3>
@@ -614,6 +619,7 @@ echo "<script>
                             </div>
                             <!-- The buttons will be dynamically added here by JavaScript -->
                         </div>
+
                 </div>
             </div>
         </div>
@@ -863,7 +869,7 @@ echo "<script>
                         removePhotoButton.style.pointerEvents = "none";
                         removePhotoButton.style.color = "grey";
 
-                        saveButton.textContent = "Save";
+                        saveButton.textContent = "Save Changes";
                         saveButton.dataset.step = "";
 
                         // Disable Change Password button
@@ -1610,8 +1616,8 @@ echo "<script>
                                 disable: timetableSettings.blockedDates.map(date => new Date(date))
                             });
 
-                         /*   let sessionType = document.querySelector(".edit-btn").getAttribute("data-session-type");
-                            generateTimeOptions(timetableSettings.businessHoursStart, timetableSettings.businessHoursEnd, sessionType);*/
+                            let sessionType = document.querySelector(".edit-btn").getAttribute("data-session-type");
+                            generateTimeOptions(timetableSettings.businessHoursStart, timetableSettings.businessHoursEnd, sessionType);
                         },
                         showCancelButton: true,
                         confirmButtonText: "Save Changes",

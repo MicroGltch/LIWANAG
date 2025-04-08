@@ -40,7 +40,7 @@ $waitlistQuery = "SELECT a.appointment_id, a.patient_id, a.date, a.time, a.sessi
                   FROM appointments a
                   JOIN patients p ON a.patient_id = p.patient_id
                   JOIN users u ON a.account_id = u.account_ID
-                  WHERE a.status = 'waitlisted'
+                  WHERE a.status IN ('waitlisted', 'Waitlisted - Any Day', 'Waitlisted - Specific Date')
                   ORDER BY a.date ASC, a.time ASC";
 $waitlistedAppointments = $connection->query($waitlistQuery)->fetch_all(MYSQLI_ASSOC);
 

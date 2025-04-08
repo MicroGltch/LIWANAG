@@ -108,7 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <body>
     <h2 class="uk-text-bold">Edit Webpage Contents</h2>
-
+    
     <form id="webpageForm" method="POST" class="uk-form-stacked">
 
     <div class="uk-margin">

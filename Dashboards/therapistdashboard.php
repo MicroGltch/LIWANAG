@@ -417,10 +417,7 @@ $stmt->close();
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
             <button type="button" class="uk-button uk-button-secondary" id="editButton" style="border-radius: 15px;">Edit</button>
             <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal" style="border-radius: 15px;">Change Password</button>
-                
-                
-                <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="border-radius: 15px;">Save Changes</button>
-            
+            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="border-radius: 15px;">Save Changes</button>
             </div>
 
             <div id="otpSection" class="uk-width-1-1" style="display: none;">
@@ -563,7 +560,7 @@ $stmt->close();
                 removePhotoButton.style.pointerEvents = "none";
                 removePhotoButton.style.color = "grey";
 
-                saveButton.textContent = "Save";
+                saveButton.textContent = "Save Changes";
                 saveButton.dataset.step = "";
 
                 // Disable Change Password button
