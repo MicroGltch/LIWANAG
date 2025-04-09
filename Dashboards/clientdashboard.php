@@ -450,7 +450,7 @@ echo "<script>
                             
                             <div class="uk-flex uk-flex-column uk-margin-left">
                             
-                                <button class="uk-button uk-button-primary uk-margin-small-bottom" type="file" name="profile_picture" id="profile_picture_input">Upload Photo</button>
+                                <button class="uk-button uk-button-primary uk-margin-small-bottom" type="file" name="profile_picture" id="profile_picture_input" style="border-radius: 15px;">Upload Photo</button>
 
                             </div>
 
@@ -508,20 +508,20 @@ echo "<script>
                         
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">Upload New Official Referral</label>
-                            <input class="uk-input" type="file" name="official_referral" id="official_referral_input" accept=".pdf,.jpg,.jpeg,.png" disabled>
+                            <input class="uk-input" type="file" name="official_referral" id="official_referral_input" accept=".pdf,.jpg,.jpeg,.png" disabled style="padding-top: 5px;padding-bottom: 5px;">
                         </div>
 
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">Upload New Proof of Booking</label>
-                            <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking_input" accept=".pdf,.jpg,.jpeg,.png" disabled>
+                            <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking_input" accept=".pdf,.jpg,.jpeg,.png" disabled style="padding-top: 5px;padding-bottom: 5px;">
                         </div>
 
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top" style="margin-bottom: 15px;">
                         
-                        <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button">Edit</button>
+                        <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button" style="margin-right: 10px;border-radius: 15px;" >Edit</button>
                         
-                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="margin-right: 10px;border-radius: 15px;">Save Profile Changes</button>
 
                         
                             </div> 
@@ -555,7 +555,7 @@ echo "<script>
                                 <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                                 <div class="uk-flex uk-flex-column uk-margin-left">
                                     <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" disabled>
+                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" disabled style="border-radius: 15px;">
                                         Upload Photo
                                     </button>
                                     <div class="uk-text-center">
