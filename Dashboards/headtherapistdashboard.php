@@ -82,7 +82,7 @@ function filterAppointmentsByStatus($appointments, $status) {
 
  // ✅ Fetch therapists data for the table
  try {
-    $stmt = $connection->prepare(" SELECT account_FName, account_LName, account_Email, account_PNum, account_status
+    $stmt = $connection->prepare(" SELECT account_FName, account_LName, account_Email, account_Address, account_PNum, account_status, service_Type, profile_picture
         FROM users WHERE account_Type = 'therapist'
     ");
     $stmt->execute();
@@ -230,143 +230,140 @@ function filterAppointmentsByStatus($appointments, $status) {
         </div>
 
         <!-- Content Area -->
-        <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
+<div class="uk-width-1-1 uk-width-4-5@m uk-padding">
 
-            <!-- Dashboard Section 📑 -->
-            <div id="dashboard" class="section">
-                <h1 class="uk-text-bold">Head Therapist Panel</h1>
+<!-- Dashboard Section 📑 -->
+<div id="dashboard" class="section">
+    <h1 class="uk-text-bold">Head Therapist Panel</h1>
 
-                <!-- ✅ Total Appointments Card -->
-                <div class="uk-margin-bottom">
-                    <div class="uk-card uk-card-primary uk-card-body">
-                        <h3 class="uk-card-title">Total Appointments</h3>
-                        <p>Total: <?= $totalAppointments ?></p>
-                    </div>
+    <!-- ✅ Total Appointments Card -->
+    <div class="uk-margin-bottom">
+        <div class="uk-card uk-card-primary uk-card-body">
+            <h3 class="uk-card-title">Total Appointments</h3>
+            <p>Total: <?= $totalAppointments ?></p>
+        </div>
+    </div>
+
+    <!-- ✅ Clickable Appointment Summary Cards -->
+    <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
+        <?php foreach ($appointmentCounts as $status => $count): ?>
+            <div>
+                <div class="uk-card uk-card-default uk-card-body uk-card-hover" id="card-<?= strtolower($status) ?>">
+                    <h3 class="uk-card-title"><?= ucwords($status) ?></h3>
+                    <p>Total: <?= $count ?></p>
+                    <button class="uk-button uk-button-primary uk-width-1-1" 
+                            uk-toggle="target: #modal-<?= strtolower($status) ?>">
+                        View Details
+                    </button>
                 </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
 
-                <!-- ✅ Clickable Appointment Summary Cards -->
-                <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
-                    <?php foreach ($appointmentCounts as $status => $count): ?>
-                        <div>
-                            <div class="uk-card uk-card-default uk-card-body uk-card-hover" id="card-<?= strtolower($status) ?>">
-                                <h3 class="uk-card-title"><?= ucwords($status) ?></h3>
-                                <p>Total: <?= $count ?></p>
-                                <button class="uk-button uk-button-primary uk-width-1-1" 
-                                        onclick="showAppointments('<?= strtolower($status) ?>')">
-                                    View Details
-                                </button>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+    <!-- Modal popups for each status with wider width and pagination -->
+    <?php foreach ($appointmentCounts as $status => $count): ?>
+        <!-- This creates a modal for each appointment status -->
+        <div id="modal-<?= strtolower($status) ?>" class="uk-modal-container" uk-modal>
+            <div class="uk-modal-dialog uk-modal-body">
+                <button class="uk-modal-close-default" type="button" uk-close></button>
+                <h2 class="uk-modal-title"><?= ucwords($status) ?> Appointments</h2>
+                <p class="uk-text-meta">Total: <?= $count ?> appointments</p>
+
+                <div class="uk-overflow-auto">
+                    <table id="table-<?= strtolower($status) ?>" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Client</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            // Filter appointments for current status
+                            $statusAppointments = filterAppointmentsByStatus($appointments, $status);
+                            
+                            if (!empty($statusAppointments)):
+                                foreach ($statusAppointments as $appointment): 
+                            ?>
+                                <tr>
+                                    <td><?= $appointment['appointment_id'] ?></td>
+                                    <td><?= htmlspecialchars($appointment['first_name'] . ' ' . $appointment['last_name']) ?></td>
+                                    <td><?= htmlspecialchars($appointment['client_firstname'] . ' ' . $appointment['client_lastname']) ?></td>
+                                    <td><?= date('M d, Y', strtotime($appointment['date'])) ?></td>
+                                    <td><?= date('h:i A', strtotime($appointment['time'])) ?></td>
+                                    <td>
+                                        <span class="uk-label uk-label-<?= getStatusClass($appointment['status']) ?>">
+                                            <?= ucfirst($appointment['status']) ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php 
+                                endforeach; 
+                            else: 
+                            ?>
+                                <tr>
+                                    <td colspan="7" class="uk-text-center">No <?= strtolower($status) ?> appointments found</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
+                
+                <div class="uk-modal-footer uk-text-right">
+                    <button class="uk-button uk-button-default uk-modal-close" type="button">Close</button>
+                </div>
+            </div>
+        </div>
 
-                <!-- Detail tables for each status (initially hidden) -->
-                <?php foreach ($appointmentCounts as $status => $count): ?>
-                    <div id="table-<?= strtolower($status) ?>" class="uk-margin-medium-top appointment-details" style="display: none;">
-                        <div class="uk-card uk-card-default">
-                            <div class="uk-card-header">
-                                <div class="uk-grid-small uk-flex-middle" uk-grid>
-                                    <div class="uk-width-expand">
-                                        <h3 class="uk-card-title uk-margin-remove-bottom"><?= ucwords($status) ?> Appointments</h3>
-                                        <p class="uk-text-meta uk-margin-remove-top">Showing <?= $count ?> appointments</p>
-                                    </div>
-                                    <div class="uk-width-auto">
-                                        <button class="uk-button uk-button-default" onclick="closeTable('<?= strtolower($status) ?>')">
-                                            <span uk-icon="icon: close"></span> Close
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="uk-card-body uk-overflow-auto">
-                                <table class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Patient</th>
-                                            <th>Client</th>
-                                            <th>Date</th>
-                                            <th>Time</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php 
-                                        // Filter appointments for current status
-                                        $statusAppointments = filterAppointmentsByStatus($appointments, $status);
-                                        
-                                        if (!empty($statusAppointments)):
-                                            foreach ($statusAppointments as $appointment): 
-                                        ?>
-                                            <tr>
-                                                <td><?= $appointment['appointment_id'] ?></td>
-                                                <td><?= htmlspecialchars($appointment['first_name'] . ' ' . $appointment['last_name']) ?></td>
-                                                <td><?= htmlspecialchars($appointment['client_firstname'] . ' ' . $appointment['client_lastname']) ?></td>
-                                                <td><?= date('M d, Y', strtotime($appointment['date'])) ?></td>
-                                                <td><?= date('h:i A', strtotime($appointment['time'])) ?></td>
-                                                <td>
-                                                    <span class="uk-label uk-label-<?= getStatusClass($appointment['status']) ?>">
-                                                        <?= ucfirst($appointment['status']) ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        <?php 
-                                            endforeach; 
-                                        else: 
-                                        ?>
-                                            <tr>
-                                                <td colspan="7" class="uk-text-center">No <?= strtolower($status) ?> appointments found</td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-
-                <script>
-                function showAppointments(status) {
-                    // Hide all tables first
-                    document.querySelectorAll('.appointment-details').forEach(table => {
-                        table.style.display = 'none';
-                    });
-                    
-                    // Show the selected table
-                    document.getElementById('table-' + status).style.display = 'block';
-                    
-                    // Scroll to the table
-                    document.getElementById('table-' + status).scrollIntoView({behavior: 'smooth'});
-                }
-
-                function closeTable(status) {
-                    document.getElementById('table-' + status).style.display = 'none';
-                    document.getElementById('card-' + status).scrollIntoView({behavior: 'smooth'});
-                }
-
-                </script>
-
-                <?php
-                // Helper function to determine the UIkit label class based on status
-                function getStatusClass($status) {
-                    $status = strtolower($status);
-                    switch ($status) {
-                        case 'pending':
-                            return 'warning';
-                        case 'approved':
-                            return 'success';
-                        case 'waitlisted':
-                            return 'primary';
-                        case 'completed':
-                            return 'success';
-                        case 'cancelled':
-                            return 'danger';
-                        case 'declined':
-                            return 'danger';
-                        default:
-                            return 'default';
+        <!-- Initialize DataTables for each status table -->
+        <script>
+            $(document).ready(function() {
+                $('#table-<?= strtolower($status) ?>').DataTable({
+                    pageLength: 10,
+                    lengthMenu: [10, 25, 50],
+                    order: [[3, 'asc']], // Sort by date column by default
+                    language: {
+                        lengthMenu: "Show _MENU_ entries per page",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        search: "Search:",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
                     }
-                }
-                ?>
+                });
+            });
+        </script>
+    <?php endforeach; ?>
+
+    <?php
+    // Helper function to determine the UIkit label class based on status
+    function getStatusClass($status) {
+        $status = strtolower($status);
+        switch ($status) {
+            case 'pending':
+                return 'warning';
+            case 'approved':
+                return 'success';
+            case 'waitlisted':
+                return 'primary';
+            case 'completed':
+                return 'success';
+            case 'cancelled':
+                return 'danger';
+            case 'declined':
+                return 'danger';
+            default:
+                return 'default';
+        }
+    }
+    ?>
 
                 <hr>
 
@@ -468,6 +465,18 @@ function filterAppointmentsByStatus($appointments, $status) {
                             <tbody>
                                 <?php if (isset($therapists) && !empty($therapists)) : ?>
                                     <?php foreach ($therapists as $therapist) : ?>
+                                        <?php 
+                                        // Set the correct path for profile picture with fallback
+                                        $profilePicturePath = !empty($therapist['profile_picture']) 
+                                            ? "/LIWANAG/uploads/profile_pictures/" . $therapist['profile_picture'] 
+                                            : '/LIWANAG/CSS/default.jpg';
+                                        ?>
+                                        <?php 
+                                        // Set the correct path for profile picture with fallback
+                                        $service_Type = !empty($therapist['service_Type']) 
+                                            ?  $therapist['service_Type'] 
+                                            : 'Not Set';
+                                        ?>
                                         <tr>
                                             <td><?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?></td>
                                             <td>
@@ -476,7 +485,10 @@ function filterAppointmentsByStatus($appointments, $status) {
                                                         data-lname="<?= htmlspecialchars($therapist['account_LName']); ?>"
                                                         data-email="<?= htmlspecialchars($therapist['account_Email']); ?>"
                                                         data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
-                                                        data-status="<?= htmlspecialchars($therapist['account_status']); ?>">
+                                                        data-status="<?= htmlspecialchars($therapist['account_status']); ?>"
+                                                        data-address="<?= htmlspecialchars($therapist['account_Address']); ?>"
+                                                        data-service="<?= htmlspecialchars($service_Type); ?>"
+                                                        data-picture="<?= htmlspecialchars($profilePicturePath); ?>">
                                                     Details
                                                 </button>
                                             </td>
@@ -527,22 +539,58 @@ function filterAppointmentsByStatus($appointments, $status) {
                                     const email = $(this).data('email');
                                     const phone = $(this).data('phone');
                                     const status = $(this).data('status');
+                                    const address = $(this).data('address');
+                                    const service = $(this).data('service');
+                                    const picture = $(this).data('picture');
                                     
                                     Swal.fire({
                                         title: `${fname} ${lname}`,
                                         html: `
-                                            <div class="uk-text-left">
-                                                <p><strong>Email:</strong> ${email}</p>
-                                                <p><strong>Phone Number:</strong> ${phone}</p>
-                                                <p><strong>Account Status:</strong> ${status}</p>
+                                            <div class="uk-grid-small uk-flex-middle" uk-grid>
+                                                <div class="uk-width-auto">
+                                                    <div style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden;">
+                                                        <img class="uk-border-circle" width="150" height="150" src="${picture}" alt="Profile Picture" style="object-fit: cover; width: 100%; height: 100%;">
+                                                    </div>
+                                                </div>
+                                                <div class="uk-width-expand uk-text-left">
+                                                    <p><strong>Email:</strong> ${email}</p>
+                                                    <p><strong>Phone Number:</strong> 0${phone}</p>
+                                                    <p><strong>Address:</strong> ${address}</p>
+                                                    <p><strong>Service Type:</strong> ${service.charAt(0).toUpperCase() + service.slice(1)}</p>
+                                                    <p><strong>Account Status:</strong> <span class="uk-label uk-label-${status === 'Active' ? 'success' : 'warning'}">${status}</span></p>
+                                                </div>
                                             </div>
                                         `,
-                                        icon: 'info',
-                                        confirmButtonText: 'Close'
+                                        width: 600,
+                                        padding: '2em',
+                                        confirmButtonText: 'Close',
+                                        customClass: {
+                                            container: 'therapist-details-modal'
+                                        }
                                     });
                                 });
                             });
                         </script>
+
+                        <style>
+                            /* Additional styling for the modal */
+                            .therapist-details-modal .swal2-popup {
+                                border-radius: 15px;
+                            }
+                            
+                            .therapist-details-modal .swal2-title {
+                                font-size: 1.5em;
+                                color: #333;
+                                border-bottom: 1px solid #eee;
+                                padding-bottom: 10px;
+                            }
+                            
+                            /* Ensure profile images display correctly */
+                            .uk-border-circle {
+                                background-color: #f8f8f8;
+                                border: 1px solid #eaeaea;
+                            }
+                        </style>
                     </div>
                 </div>
             </div>
