@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['therapist_id']) && is
     $service_type = $_POST['service_type'];
     
     // Validate service type
-    if (!in_array($service_type, ['Both', 'Occupational', 'Behavioral'])) {
+    if (!in_array($service_type, ['both', 'occupational', 'behavioral'])) {
         $_SESSION['swalType'] = 'error';
         $_SESSION['swalTitle'] = 'Error';
         $_SESSION['swalText'] = 'Invalid service type.';
@@ -47,6 +47,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['therapist_id']) && is
     header("Location: " . $_SERVER['HTTP_REFERER']);
     exit();
 } else {
+    error_log("Database Error: " . $connection->error);
+    $_SESSION['swalText'] = 'Failed to update service type: ' . $connection->error;
     // Invalid request
     $_SESSION['swalType'] = 'error';
     $_SESSION['swalTitle'] = 'Error';
