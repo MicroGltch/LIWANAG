@@ -288,8 +288,10 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 font-size: 14px;
                 margin: 0;
             }
+            .appointment-summary-cards{
+                padding: 0 0 0 0;
+            }
         }
-
 
 
         /* Mobile Sidebar Styles */
@@ -585,7 +587,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 <!-- ✅ Appointment Summary Cards -->
                 <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
                     <?php foreach ($appointmentCounts as $status => $count): ?>
-                        <div style="padding: 0 0 0 0;">
+                        <div class="appointment-summary-cards">
                             <div class="uk-card uk-card-default uk-card-body">
                                 <h3 class="uk-card-title"><?= ucfirst($status) ?></h3>
                                 <p>Total: <?= $count ?></p>
@@ -775,10 +777,15 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <?php if (isset($patients) && !empty($patients)) : ?>
                         <?php foreach ($patients as $patient) : ?>
                             <div class="patient-card"
+                                data-patient-id="<?= htmlspecialchars($patient['patient_id']); ?>"
                                 data-fname="<?= htmlspecialchars(strtolower($patient['patient_fname'])); ?>"
-                                data-lname="<?= htmlspecialchars(strtolower($patient['patient_lname'])); ?>">
+                                data-lname="<?= htmlspecialchars(strtolower($patient['patient_lname'])); ?>"
+                                data-birthday="<?= date('F j, Y', strtotime($patient['bday'])); ?>"
+                                data-gender="<?= htmlspecialchars($patient['gender']); ?>"
+                                data-guardian="<?= htmlspecialchars($patient['client_fname'] . ' ' . $patient['client_lname']); ?>"
+                                data-profile-picture="<?= !empty($patient['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($patient['profile_picture']) : '../CSS/default.jpg'; ?>">
                                 <h3><?= htmlspecialchars($patient['patient_fname'] . ' ' . $patient['patient_lname']); ?></h3>
-                                <button class="details-button" onclick="showPatientDetails(<?= $patient['patient_id']; ?>)" style="border-radius:15px">More Details</button>
+                                <button class="details-button" onclick="showPatientDetails('<?= $patient['patient_id']; ?>')" style="border-radius:15px">More Details</button>
                             </div>
                         <?php endforeach; ?>
                     <?php else : ?>
@@ -2188,6 +2195,46 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             }
         });
     }
+
+    // Function to show patient details in a modal
+    window.showPatientDetails = function(patientId) {
+        const patientCard = document.querySelector(`.patient-card[data-patient-id="${patientId}"]`);
+        if (patientCard) {
+            const firstName = patientCard.getAttribute('data-fname');
+            const lastName = patientCard.getAttribute('data-lname');
+            const birthday = patientCard.getAttribute('data-birthday');
+            const gender = patientCard.getAttribute('data-gender');
+            const guardian = patientCard.getAttribute('data-guardian');
+            const profilePic = patientCard.getAttribute('data-profile-picture') || '../CSS/default.jpg';
+
+            // Build the modal content with profile picture
+            let modalContent = `
+            <div class="uk-text-center uk-margin-bottom">
+                <img class="uk-border-circle" 
+                     src="${profilePic}" 
+                     alt="Patient Profile" 
+                     style="width: 100px; height: 100px; object-fit: cover; margin-bottom: 15px;">
+            </div>
+            <table class="uk-table uk-table-striped uk-text-left" style="font-size: 14px; width: 100%;">
+                <tr><td style="text-align:left"><strong>First Name:</strong></td><td style="text-align:left">${firstName}</td></tr>
+                <tr><td style="text-align:left"><strong>Last Name:</strong></td><td style="text-align:left">${lastName}</td></tr>
+                <tr><td style="text-align:left"><strong>Birthday:</strong></td><td style="text-align:left">${birthday}</td></tr>
+                <tr><td style="text-align:left"><strong>Gender:</strong></td><td style="text-align:left">${gender}</td></tr>
+                <tr><td style="text-align:left"><strong>Parent/Guardian:</strong></td><td style="text-align:left">${guardian}</td></tr>
+            </table>
+        `;
+
+            // Show the modal
+            Swal.fire({
+                title: `<h3 style="font-size: 20px; font-weight: bold; text-align: left;">Patient Details</h3>`,
+                html: modalContent,
+                showCloseButton: true,
+                cancelButtonText: 'Close',
+                focusConfirm: false,
+                showConfirmButton: false
+            });
+        }
+    };
 
     // Archive User
     document.querySelectorAll('.archive-user').forEach(button => {
