@@ -151,7 +151,8 @@ $stmt->close();
         <div class="uk-offcanvas-bar">
             <button class="uk-offcanvas-close" type="button" uk-close></button>
             <ul class="uk-nav uk-nav-default">
-                <li class="uk-active"><a href="#section2" style="color:black; margin-top:25px; border-radius: 15px;">Services</a></li>
+                <li class="uk-active"><a href="Accounts/signuppage.php" uk-toggle style="color:black; margin-top:25px; border-radius: 15px;">Sign Up</a></li>
+                <li class="uk-active"><a href="#section2" style="color:black; border-radius: 15px;">Services</a></li>
                 <li class="uk-active"><a href="#section3" style="color:black; border-radius: 15px;">About Us</a></li>
                 <li class="uk-active"><a href="#tnc-modal" uk-toggle style="color:black; border-radius: 15px;">Terms and Conditions</a></li>
                 <li class="uk-active"><a href="#faqs-modal" uk-toggle style="color:black; border-radius: 15px;">FAQs</a></li>
