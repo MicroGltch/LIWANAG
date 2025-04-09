@@ -160,12 +160,14 @@ hr.solid{
 }
 
 
-.footer{    
-    
-    width: 100vw;
+.footer {
+    width: 100%;
+    padding: 1rem;
     text-align: center;
     background-color: #1a202c;
-    
+    color: white; /* Add text color for better visibility */
+    box-sizing: border-box; /* Include padding in width calculation */
+    word-wrap: break-word; /* Ensure long words break properly */
 }
 
 .footer-text{
@@ -645,9 +647,7 @@ padding-right: 100px;
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (min-width: 600px) {
     
-    
-    
-    
+       
     .uk-navbar-left,
     .uk-navbar-right {
         flex-wrap: wrap;
@@ -669,7 +669,6 @@ padding-right: 100px;
 @media only screen and (min-width: 768px) {
 
 } 
-
 
 @media screen and (max-width: 1024px) {
     .homepage-welcome {
