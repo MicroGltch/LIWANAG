@@ -180,6 +180,7 @@ $stmt->close();
                         
                         <li><a href="#patient-details" onclick="showSection('patient-details')"><span class="uk-margin-small-right" uk-icon="user"></span> View Patients</a></li>
                         <!-- <li><a href="#rebook-patient" onclick="showSection('rebook-patient')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook a Patient </a></li> -->
+                        <li><a href="#update-patient" onclick="showSection('update-patient')"><span class="uk-margin-small-right" uk-icon="user"></span> Update Patient Details</a></li>
                         
                     </li>
 
@@ -321,10 +322,17 @@ $stmt->close();
             <div id="rebook-patient" style="display: none; " class="section">
                 <h1 class="uk-text-bold">Rebook Patient</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
-
                     <iframe id="rebookPatientFormFrame" src="../Appointments/patient/patient_manage/rebook_patient.php" style="width: 100%; height: 800px; border: none;">
                     </iframe>
+                </div>
+            </div>
 
+            <!--Update Patient Details-->
+            <div id="update-patient" style="display: none; " class="section">
+                <h1 class="uk-text-bold">Update Patient Details</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="updatePatientFrame" src="../Appointments/app_manage/update_patient_details.php" style="width: 100%; height: 800px; border: none;">
+                    </iframe>
                 </div>
             </div>
 
@@ -1292,6 +1300,41 @@ function removeProfilePhoto() {
                 let formData = new FormData(this);
 
                 fetch("../Appointments/patient/patient_manage/rebook_patient.php", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.swal) {
+                            Swal.fire({
+                                title: data.swal.title,
+                                text: data.swal.text,
+                                icon: data.swal.icon,
+                            }).then(() => {
+                                if (data.reload) {
+                                    window.location.reload(true); // Hard reload the page
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        }
+    };
+
+    //Update Patient Details iframe
+    let updatePatientFrame = document.getElementById("updatePatientFrame");
+
+    updatePatientFrame.onload = function() {
+        let updatePatientForm = updatePatientFrame.contentDocument.getElementById("updatePatientForm");
+
+        if (updatePatientForm) {
+            updatePatientForm.addEventListener("submit", function(e) {
+                e.preventDefault();
+
+                let formData = new FormData(this);
+
+                fetch("../Appointments/app_manage/update_patient_details.php", {
                         method: "POST",
                         body: formData
                     })
