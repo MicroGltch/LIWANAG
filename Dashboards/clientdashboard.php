@@ -203,6 +203,8 @@ echo "<script>
         </div>
     </nav>
 
+
+
     <hr class="solid">
 
     <!-- Main Content -->
@@ -281,15 +283,15 @@ echo "<script>
 
                     <thead>
                             <tr>
-                                <th data-sort="date" style="text-align: left;"><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span> </th>
-                                <th data-sort="time" style="text-align: left;"><span class="no-break"></span>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th data-sort="session" style="text-align: left;"><span class="no-break"></span>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th data-sort="patient" style="text-align: left;"><span class="no-break"></span>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th data-sort="status" style="text-align: left;"><span class="no-break"></span>Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th>Actions</th>
+                                <th data-sort="date" style="text-align: left;" class="table-head"><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span> </th>
+                                <th data-sort="time" style="text-align: left;" class="table-head"><span class="no-break"></span>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="session" style="text-align: left;" class="table-head"><span class="no-break"></span>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="patient" style="text-align: left;" class="table-head"><span class="no-break"></span>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="status" style="text-align: left;" class="table-head"><span class="no-break"></span>Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th class="table-head">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-body">
                             <?php foreach ($appointments as $appointment): ?>
                                 <tr data-date="<?= $appointment['date']; ?>">
                                     <td style="text-align: left;"><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
@@ -305,7 +307,7 @@ echo "<script>
                                                 $appointment['edit_count'] < 2 &&
                                                 strtolower($appointment['session_type']) !== "playgroup"
                                             ): ?>
-                                                <button class="uk-button uk-button-primary edit-btn" data-id="<?= $appointment['appointment_id']; ?>"
+                                                <button class="uk-button uk-button-primary edit-btn action-button" data-id="<?= $appointment['appointment_id']; ?>"
                                                     data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
                                                     Reschedule (<?= 2 - $appointment['edit_count']; ?> left)
                                                 </button>
@@ -314,17 +316,17 @@ echo "<script>
                                                     strtolower($appointment['session_type']) === "playgroup" &&
                                                     !in_array(strtolower($appointment['status']), ["completed", "cancelled", "declined"])
                                                 ): ?>
-                                                    <button class="uk-button uk-button-default" disabled>Reschedule Not Allowed for Playgroup</button>
+                                                    <button class="uk-button uk-button-default action-button" disabled>Reschedule Not Allowed for Playgroup</button>
                                                 <?php elseif ($appointment['edit_count'] >= 2 && $appointment['status'] === "pending"): ?>
-                                                    <button class="uk-button uk-button-default" disabled>Reschedule Limit Reached</button>
+                                                    <button class="uk-button uk-button-default action-button" disabled>Reschedule Limit Reached</button>
                                                 <?php else: ?>
-                                                    <button class="uk-button uk-button-default" disabled>Reschedule Is Not Allowed</button>
+                                                    <button class="uk-button uk-button-default action-button" disabled>Reschedule Is Not Allowed</button>
                                                 <?php endif; ?>
                                             <?php endif; ?>
 
                                             <!-- ✅ Cancel button (Allowed only for "Pending" or "Waitlisted") -->
                                             <?php if (in_array($appointment['status'], ["pending", "waitlisted"])): ?>
-                                                <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
+                                                <button class="uk-button uk-button-danger cancel-btn action-button" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
                                             <?php endif; ?>
                                         </div>
                                     </td>

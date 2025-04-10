@@ -99,6 +99,11 @@ $role = strtolower(trim($_SESSION['account_Type']));
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" />
 
     <style>
+        /* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+
+}
+
         html,
         body {
             background-color: #ffffff !important;
@@ -128,11 +133,11 @@ $role = strtolower(trim($_SESSION['account_Type']));
         <div class="appointment-form">
             <div>
             <h2 class="uk-card-title uk-text-bold">Book an Appointment</h2>
-                <p>Your Role: <strong><?= ucfirst($role); ?></strong></p>
+                <p class="mobile-text">Your Role: <strong><?= ucfirst($role); ?></strong></p>
 
                 <?php if (empty($patients)): ?>
                     <div class="uk-alert-warning" uk-alert style="width: 100%;">
-                        <p>Please Register a Patient before Booking an Appointment.</p>
+                        <p class="mobile-text">Please Register a Patient before Booking an Appointment.</p>
                         <button class="uk-button uk-button-primary" onclick="goToRegisterPatient()">Register a Patient</button>
                     </div>
                 <?php else: ?>
@@ -140,9 +145,9 @@ $role = strtolower(trim($_SESSION['account_Type']));
 
             <form id="appointmentForm" action="app_process/book_appointment_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked uk-grid-medium" uk-grid>
                 <div class="uk-width-1-1">
-                    <label class="uk-form-label" for="patient_id">Select Patient:</label>
+                    <label class="uk-form-label" for="patient_id" >Select Patient:</label>
                     <div class="uk-form-controls">
-                        <select class="uk-select" name="patient_id" id="patient_id" required>
+                        <select class="uk-select mobile-text" name="patient_id" id="patient_id" required>
                             <option value="" disabled selected>Select a Patient</option>
                             <?php foreach ($patients as $patient): ?>
                                 <option value="<?= $patient['patient_id']; ?>">
@@ -157,7 +162,7 @@ $role = strtolower(trim($_SESSION['account_Type']));
                 <div class="uk-width-1-1">
                     <label class="uk-form-label" for="appointment_type">Appointment Type:</label>
                     <div class="uk-form-controls">
-                        <select class="uk-select" name="appointment_type" id="appointment_type" required>
+                        <select class="uk-select mobile-text" name="appointment_type" id="appointment_type" required >
                             <option value="" disabled selected>Select Appointment Type</option>
                             <option value="Initial Evaluation">Initial Evaluation</option>
                             <option value="Playgroup">Playgroup</option>

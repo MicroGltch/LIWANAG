@@ -587,11 +587,15 @@ padding-right: 100px;
     }
 
     .footer{
-        height:60px;
+        height:100%;
         width: 100vw;
           
     }
 
+    .footer-info{
+        font-size: 10px !important; 
+        text-align: left;
+    }
 
     .forget-password-div{
         min-height: 80vh;
@@ -642,6 +646,35 @@ padding-right: 100px;
     .signup-btn{
         font-size: 12px;
     }
+
+    .dashboard-redirect{
+        font-size: 12px !important;
+    }
+
+    .logout-redirect{
+        font-size: 12px !important; 
+    }
+
+    .table-head{
+        font-size: 10px !important;
+    }
+
+    .table-body{
+        font-size: 10px !important;
+    }
+
+    .action-button{
+        font-size: 10px !important;
+        line-height: 1.3;
+    }
+    
+    .filter-btn{
+        font-size: 10px !important;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    
 } 
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
@@ -663,6 +696,10 @@ padding-right: 100px;
         font-size: 1.2rem;
         text-align: center;
     }
+
+
+
+
 }
 
 /* Medium devices (landscape tablets, 768px and up) */
