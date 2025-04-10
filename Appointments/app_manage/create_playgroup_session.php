@@ -29,13 +29,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $insert->bind_param("ssssi", $sessionID, $date, $time, $end_time, $max_capacity);
 
     if ($insert->execute()) {
-        $_SESSION['playgroup_success'] = "Playgroup session created successfully!";
+        echo json_encode(['status' => 'success', 'message' => 'Playgroup session created successfully!']);
     } else {
-        $_SESSION['playgroup_error'] = "Error: " . $connection->error;
+        echo json_encode(['status' => 'error', 'message' => 'Error: ' . $connection->error]);
     }
-
-    // Redirect back to dashboard
-    header("Location: playgroup_dashboard.php");
+    header("Content-Type: application/json");
     exit();
+    
 }
 ?>
