@@ -239,13 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['patient_id'])) {
                     $schedule_id = isset($_POST['default_schedule_id'][$index]) ? filter_var($_POST['default_schedule_id'][$index], FILTER_VALIDATE_INT) : null;
 
 
-                    // *** Add Past Date Validation ***
-                    $today_timestamp = strtotime('today'); // Timestamp for midnight today
-                    $makeup_timestamp = strtotime($date);
-                    if ($makeup_timestamp === false || $makeup_timestamp < $today_timestamp) {
-                        throw new Exception("Invalid makeup date: $date. Cannot schedule in the past.");
-                    }
-                    // *** End Past Date Validation ***
+  
 
 
                     if (!isTimeSlotValidForTherapist($connection, $therapistID, $day, $start_time, $end_time, false)) {
