@@ -524,7 +524,10 @@ function send_email_notification($email, $status, $session_type, $patient_name, 
         $mail->isHTML(true);
         $mail->Subject = "Appointment Update - $session_type";
 
+        $emailBody = ''; // Initialize email body
+
         if ($status === "declined" || $status === "cancelled") {
+            // This block doesn't use date/time, so no formatting needed here
             $emailBody = "
                 <h3>Appointment $status</h3>
                 <p>Dear <strong>$client_name</strong>,</p>
@@ -532,30 +535,73 @@ function send_email_notification($email, $status, $session_type, $patient_name, 
                 <p><strong>Reason:</strong> $reason</p>
                 <p>If you have any concerns, please contact us.</p>
             ";
-        } // ✅ Special email if appointment was "Waitlisted" before
-        else if ($status === "approved" && $current_status === "waitlisted") {
+        } 
+        // Special email if appointment was "Waitlisted" before being approved (rescheduled)
+        else if ($status === "approved" && isset($current_status) && $current_status === "waitlisted") {
+            // --- Format Date and Time specifically for this block ---
+            $formattedDate = $appointment_date; // Default/fallback
+            $formattedTime = $appointment_time; // Default/fallback
+            try {
+                if (!empty($appointment_date) && !empty($appointment_time)) { // Check if variables exist
+                    $dateTimeStr = $appointment_date . ' ' . $appointment_time;
+                    $appointmentDateTime = new DateTime($dateTimeStr); 
+                    $formattedDate = $appointmentDateTime->format('F j, Y'); // e.g., April 14, 2025
+                    $formattedTime = $appointmentDateTime->format('g:i A'); // e.g., 8:00 AM
+                }
+            } catch (Exception $e) {
+                error_log("Error formatting date/time for rescheduled email: " . $e->getMessage());
+                // Fallback to original format if parsing fails
+            }
+            // --- End Formatting ---
+
+            // Use the formatted variables below
             $emailBody = "
                 <h3>Appointment Rescheduled</h3>
                 <p>Dear <strong>$client_name</strong>,</p>
                 <p>Your waitlisted appointment for <strong>$session_type</strong> with <strong>$patient_name</strong> has now been assigned a new date and time.</p>
-                <p><strong>New Schedule:</strong> $appointment_date at $appointment_time</p>
+                <p><strong>New Schedule:</strong> $formattedDate at $formattedTime</p> 
                 <p>If you have any concerns, please contact us.</p>
             ";
         } 
-        // ✅ Regular approval email
+        // Regular approval email (or other statuses needing date/time)
         else {
+            // --- Format Date and Time specifically for this block ---
+            $formattedDate = $appointment_date; // Default/fallback
+            $formattedTime = $appointment_time; // Default/fallback
+            try {
+                if (!empty($appointment_date) && !empty($appointment_time)) { // Check if variables exist
+                    $dateTimeStr = $appointment_date . ' ' . $appointment_time;
+                    $appointmentDateTime = new DateTime($dateTimeStr);
+                    $formattedDate = $appointmentDateTime->format('F j, Y'); // e.g., April 14, 2025
+                    $formattedTime = $appointmentDateTime->format('g:i A'); // e.g., 8:00 AM
+                }
+            } catch (Exception $e) {
+                error_log("Error formatting date/time for standard email: " . $e->getMessage());
+                // Fallback to original format if parsing fails
+            }
+            // --- End Formatting ---
+
+            // Use the formatted variables below (Corrected from your snippet)
             $emailBody = "
                 <h3>Appointment Approved</h3>
                 <p>Dear <strong>$client_name</strong>,</p>
                 <p>Your <strong>$session_type</strong> appointment with <strong>$patient_name</strong> has been <strong>$status</strong>.</p>
-                <p><strong>Appointment time:</strong> $appointment_date at $appointment_time</p>
+                <p><strong>Appointment Date:</strong> $formattedDate</p>
+                <p><strong>Appointment Time:</strong> $formattedTime</p> 
+ 
                 <p>If you have any concerns, please contact us.</p>
             ";
         }
+
         $mail->Body = $emailBody;
         $mail->send();
         return true;
+
     } catch (Exception $e) {
+        // Log the error from PHPMailer or the DateTime formatting
+        error_log("Mailer Error or other exception: " . $e->getMessage()); 
+        // You might want to check $mail->ErrorInfo specifically if the exception came from $mail->send()
+        // if (isset($mail) && !empty($mail->ErrorInfo)) { error_log("PHPMailer ErrorInfo: " . $mail->ErrorInfo); }
         return false;
     }
 }

@@ -17,71 +17,111 @@ session_start();
 
 // --- Email Notification Function (Mostly Unchanged) ---
 function send_email_notification($email, $client_name, $patient_name, $session_type, $appointment_date, $appointment_time, $status) {
-     $mail = new PHPMailer(true);
-     $isWaitlist = stripos($status, 'waitlisted') !== false;
-     $subject = $isWaitlist ? "Waitlist Request Confirmation - Little Wanderer's" : "Appointment Request Received - Little Wanderer's";
-     $statusText = str_replace('-', ' ', $status); // Improve display
-     $statusText = ucwords($statusText); // Capitalize words
+    $mail = new PHPMailer(true);
+    $isWaitlist = stripos($status, 'waitlisted') !== false;
+    $subject = $isWaitlist ? "Waitlist Request Confirmation - Little Wanderer's" : "Appointment Request Received - Little Wanderer's";
+    
+    // Clean up status text for display
+    $statusText = str_replace('-', ' ', $status); 
+    $statusText = ucwords($statusText); 
 
-     // Format time for email if available
-     $displayTime = 'N/A';
-     if ($appointment_time) {
-          try {
-              $timeObj = new DateTime($appointment_time);
-              $displayTime = $timeObj->format('g:i A'); // e.g., 9:00 AM
-          } catch (Exception $e) { $displayTime = $appointment_time; /* fallback */ }
-     }
+    // --- Format Date and Time for Email ---
+    $formattedDate = 'N/A'; // Default/fallback for date
+    $formattedTime = 'N/A'; // Default/fallback for time
+
+    // Only proceed with formatting if we have a date
+    if (!empty($appointment_date)) {
+        try {
+            // Format the Date part
+            $dateObj = new DateTime($appointment_date);
+            $formattedDate = $dateObj->format('F j, Y'); // e.g., April 11, 2025
+
+            // Format the Time part (requires date context for reliable AM/PM)
+            if (!empty($appointment_time)) {
+                try {
+                    // Combine date and time for parsing
+                    $dateTimeStr = $appointment_date . ' ' . $appointment_time;
+                    $dateTimeObj = new DateTime($dateTimeStr);
+                    $formattedTime = $dateTimeObj->format('g:i A'); // e.g., 9:00 AM
+                } catch (Exception $timeEx) {
+                    // Handle error if time part is invalid with the date
+                    error_log("Error formatting time part '$appointment_time' with date '$appointment_date': " . $timeEx->getMessage());
+                    $formattedTime = $appointment_time; // Fallback to original time string
+                }
+            } else {
+                // If date is present but time is missing
+                $formattedTime = 'Not Specified'; 
+            }
+
+        } catch (Exception $dateEx) {
+            // Handle error if the date string itself is invalid
+            error_log("Error formatting date part '$appointment_date': " . $dateEx->getMessage());
+            $formattedDate = $appointment_date; // Fallback to original date string
+            // If date failed, use original time or 'N/A'
+            $formattedTime = !empty($appointment_time) ? $appointment_time : 'N/A'; 
+        }
+    } else {
+        // If no date was provided at all
+        $formattedDate = 'Not Specified';
+        $formattedTime = 'Not Specified';
+    }
+    // --- End Formatting ---
+
 
     try {
-        // --- SMTP Configuration (Replace with your actual credentials) ---
+        // --- SMTP Configuration ---
         $mail->isSMTP();
-        $mail->Host = 'smtp.hostinger.com'; // Your SMTP host
+        $mail->Host = 'smtp.hostinger.com'; 
         $mail->SMTPAuth = true;
-        $mail->Username = 'no-reply@myliwanag.com'; // Your SMTP username
-        $mail->Password = '[l/+1V/B4'; // Your SMTP password - Use environment variables or config file in production!
-        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Or ENCRYPTION_STARTTLS
-        $mail->Port = 465; // 465 for SMTPS, 587 for STARTTLS
+        $mail->Username = 'no-reply@myliwanag.com'; 
+        $mail->Password = '[l/+1V/B4'; // IMPORTANT: Use secure methods for passwords!
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; 
+        $mail->Port = 465; 
 
         // --- Email Headers ---
-        $mail->setFrom('no-reply@myliwanag.com', "Little Wanderer's Therapy Center"); // Your sender email and name
+        $mail->setFrom('no-reply@myliwanag.com', "Little Wanderer's Therapy Center"); 
         $mail->addAddress($email, $client_name);
         $mail->isHTML(true);
         $mail->Subject = $subject;
 
-        // --- Email Body ---
+        // --- Email Body Construction ---
         $emailBody = "
             <p>Dear <strong>" . htmlspecialchars($client_name) . "</strong>,</p>";
 
         if ($isWaitlist) {
-            $waitlistDateText = $appointment_date ? "for the specific date <strong>" . htmlspecialchars($appointment_date) . "</strong>" : "for <strong>any available day</strong>";
+            // Use the $formattedDate created above
+            $waitlistDateText = ($appointment_date && $formattedDate !== 'N/A' && $formattedDate !== 'Not Specified') 
+                ? "for the specific date <strong>" . htmlspecialchars($formattedDate) . "</strong>" 
+                : "for <strong>any available day</strong>"; // Handle case where date wasn't specified or formatting failed
+
             $emailBody .= "<p>Your request to be added to the waitlist for <strong>" . htmlspecialchars($patient_name) . "</strong> for the session type <strong>" . htmlspecialchars($session_type) . "</strong> has been received.</p>";
             $emailBody .= "<p>You requested to be waitlisted $waitlistDateText.</p>";
             $emailBody .= "<p>We will notify you if a suitable slot becomes available.</p>";
             $emailBody .= "<p><strong>Request Status:</strong> " . htmlspecialchars($statusText) . "</p>";
-        } else {
+        } else { // Regular appointment request
              $emailBody .= "<p>Your appointment request for <strong>" . htmlspecialchars($patient_name) . "</strong> has been received with the following details:</p>
             <ul>
                 <li><strong>Session Type:</strong> " . htmlspecialchars($session_type) . "</li>
-                <li><strong>Date:</strong> " . htmlspecialchars($appointment_date) . "</li>
-                <li><strong>Time:</strong> " . htmlspecialchars($displayTime) . "</li>
+                <li><strong>Date:</strong> " . htmlspecialchars($formattedDate) . "</li>
+                <li><strong>Time:</strong> " . htmlspecialchars($formattedTime) . "</li>
                 <li><strong>Status:</strong> " . htmlspecialchars($statusText) . " (Awaiting Approval)</li>
             </ul>
             <p>Our team will review your request. You will receive another email once the appointment is approved or if further information is required.</p>";
-            // Add cancellation policy link or info if applicable
-             $emailBody .= "<p>Please review our cancellation policy: [Link]</p>";
         }
 
-        $emailBody .= "<p>Thank you for choosing Little Wanderer's Therapy Center.</p>";
-        // Add contact information
-        $emailBody .= "<p>--<br>Little Wanderer's Therapy Center<br>[Your Phone Number]<br>[Your Website/Address]</p>";
+        // Add Footer
+        $emailBody .= "<p>--<br>Little Wanderer's Therapy Center<br>09274492970<br>[Your Website/Address]</p>"; // Add your actual website/address
 
+        // Send Email
         $mail->Body = $emailBody;
         $mail->send();
         error_log("Email sent successfully to $email for status $status");
-        return true;
+        return true; // Email sent successfully
+
     } catch (Exception $e) {
-        error_log("Mailer Error for $email: " . $mail->ErrorInfo);
-        return false; // Email failed
+        // Log detailed error from PHPMailer
+        error_log("Mailer Error for $email: " . $mail->ErrorInfo . " | Exception: " . $e->getMessage());
+        return false; // Email failed to send
     }
 }
 

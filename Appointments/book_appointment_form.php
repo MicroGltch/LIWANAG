@@ -1019,6 +1019,16 @@
                         resetFormDisplay(); // Reset visibility of sections
                         fetchPatientDetails(null); // Clear patient details display
                         // You might want to re-enable the submit button here if you disabled it
+                    
+                        try {
+                            log("Navigating parent window to dashboard default.");
+                            window.parent.location.href = '../Dashboards/clientdashboard.php'; 
+                        } catch (e) {
+                            console.error("Error accessing parent window. Potentially a cross-origin issue?", e);
+                            // Fallback if parent access fails (e.g., just alert user)
+                            alert("Booking successful! Please refresh your dashboard to see the changes.");
+                        }
+                                    
                     });
                 } else if (result.status === 'error' && result.swal) {
                     Swal.fire({ // Show the error Swal defined in PHP

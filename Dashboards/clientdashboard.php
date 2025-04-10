@@ -270,9 +270,9 @@ echo "<script>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <div class="uk-margin-small-bottom uk-flex uk-flex-between uk-flex-wrap">
                         <div>
-                            <button class="uk-button uk-button-default filter-btn" data-filter="all" style="margin-right: 10px;border-radius: 15px;" >All</button>
-                            <button class="uk-button uk-button-primary filter-btn" data-filter="upcoming" style="margin-right: 10px;border-radius: 15px;" >Upcoming</button>
+                            <button class="uk-button uk-button-primary filter-btn uk-active" data-filter="upcoming" style="margin-right: 10px;border-radius: 15px;" >Upcoming</button>
                             <button class="uk-button uk-button-secondary filter-btn" data-filter="past" style="margin-right: 10px;border-radius: 15px;">Past</button>
+                            <button class="uk-button uk-button-default filter-btn" data-filter="all" style="margin-right: 10px;border-radius: 15px;" >All</button>
                         </div>
                     </div>
 
@@ -368,6 +368,7 @@ echo "<script>
                             </select>
                         </div>
 
+                        <!-- To follow/fix -->
                         
                         <div class="uk-width-1@s uk-width-1-2@l">
                             <label class="uk-form-label">Profile Picture</label>
@@ -387,7 +388,9 @@ echo "<script>
                             <input class="uk-input" type="file" name="referral_file" id="profile-picture-input" required accept=".jpg,.jpeg,.png,.pdf" style="padding-top: 5px;padding-bottom: 5px;">
                         </div>        
 
-                        <div class="uk-width-1-1 uk-margin-top">
+                        <!-- Tago muna -->
+
+                        <!-- <div class="uk-width-1-1 uk-margin-top">
                         <hr class=" uk-margin-top">
                             <h2 class="uk-margin-small-bottom uk-card-title uk-text-bold">Upload Doctor's Referral</h2>
                         </div>
@@ -404,7 +407,7 @@ echo "<script>
                         <div class="uk-width-1-2@s uk-width-1-2@l">
                             <label class="uk-form-label">Upload Referral File</label>
                             <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required accept=".jpg,.jpeg,.png,.pdf" style="padding-top: 5px;padding-bottom: 5px;">
-                        </div>
+                        </div> -->
 
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
@@ -504,6 +507,7 @@ echo "<script>
                         <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
                         </div>
 
+                        <!-- Dapat ihide pero nagloloko -->
                         
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">Upload New Official Referral</label>
@@ -733,25 +737,91 @@ echo "<script>
 
     });
 
-            //upcoming past
-            document.querySelectorAll(".filter-btn").forEach(button => {
-        button.addEventListener("click", function () {
-            const filter = this.dataset.filter;
-            const rows = document.querySelectorAll("table.uk-table tbody tr");
-            const today = new Date().toISOString().split("T")[0];
+        //upcoming past
+        document.addEventListener('DOMContentLoaded', function() { // Use this if not using jQuery
+        // If using jQuery, replace the line above with: $(document).ready(function() {
 
-            rows.forEach(row => {
+        const filterButtons = document.querySelectorAll(".filter-btn");
+        const appointmentRows = document.querySelectorAll("table.uk-table tbody tr");
+        const searchInput = document.getElementById('appointmentSearch'); // Get search input
+
+        // --- Reusable Filtering Function ---
+        function applyAppointmentFilter(filterType) {
+            const today = new Date().toISOString().split("T")[0];
+            const searchTerm = searchInput.value.toLowerCase(); // Get current search term
+
+            appointmentRows.forEach(row => {
                 const rowDate = row.dataset.date;
-                if (filter === "all") {
-                    row.style.display = "";
-                } else if (filter === "upcoming") {
-                    row.style.display = rowDate >= today ? "" : "none";
-                } else if (filter === "past") {
-                    row.style.display = rowDate < today ? "" : "none";
+                let showBasedOnDate = false;
+
+                // 1. Check date filter
+                if (filterType === "all") {
+                    showBasedOnDate = true;
+                } else if (filterType === "upcoming") {
+                    showBasedOnDate = rowDate >= today;
+                } else if (filterType === "past") {
+                    showBasedOnDate = rowDate < today;
                 }
+
+                // 2. Check search filter
+                const rowText = row.textContent.toLowerCase();
+                const showBasedOnSearch = rowText.includes(searchTerm);
+
+                // 3. Show row only if both filters pass
+                row.style.display = (showBasedOnDate && showBasedOnSearch) ? "" : "none";
             });
-        });
-    });
+
+            // Update active button state
+            filterButtons.forEach(button => {
+                if (button.dataset.filter === filterType) {
+                    button.classList.add('uk-active');
+                    // Add specific styles for active button if needed (optional)
+                    if (filterType === 'upcoming') {
+                        button.classList.remove('uk-button-default', 'uk-button-secondary');
+                        button.classList.add('uk-button-primary');
+                    } else if (filterType === 'past') {
+                        button.classList.remove('uk-button-default', 'uk-button-primary');
+                        button.classList.add('uk-button-secondary');
+                    } else { // 'all'
+                        button.classList.remove('uk-button-primary', 'uk-button-secondary');
+                        button.classList.add('uk-button-default');
+                    }
+
+                } else {
+                    button.classList.remove('uk-active');
+                    // Reset other buttons to default style (optional, but good practice)
+                    if (button.dataset.filter !== 'upcoming') button.classList.remove('uk-button-primary');
+                    if (button.dataset.filter !== 'past') button.classList.remove('uk-button-secondary');
+                    if (button.dataset.filter !== 'all') button.classList.remove('uk-button-default');
+
+                    // Ensure non-active buttons have a base style if primaries/secondaries were removed
+                    if (!button.classList.contains('uk-button-primary') && !button.classList.contains('uk-button-secondary')) {
+                        button.classList.add('uk-button-default');
+                    }
+                    }
+                });
+            }
+
+            // --- Event Listener for Filter Buttons ---
+            filterButtons.forEach(button => {
+                button.addEventListener("click", function () {
+                    const filter = this.dataset.filter;
+                    applyAppointmentFilter(filter); // Call the reusable function
+                });
+            });
+
+            // --- Event Listener for Search Input ---
+            searchInput.addEventListener('input', function() {
+                // Re-apply the currently active filter when search term changes
+                const currentActiveButton = document.querySelector('.filter-btn.uk-active');
+                const currentFilter = currentActiveButton ? currentActiveButton.dataset.filter : 'upcoming'; // Default to upcoming if somehow none is active
+                applyAppointmentFilter(currentFilter);
+            });
+
+            // --- Apply Initial Filter on Page Load ---
+            applyAppointmentFilter('upcoming');
+
+            }); // End of DOMContentLoaded / $(document).ready()
 
     document.querySelector(".filter-btn[data-filter='all']").click();
 
