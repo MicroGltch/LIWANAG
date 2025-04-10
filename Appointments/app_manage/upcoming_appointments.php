@@ -104,58 +104,103 @@ $appointments = $result->fetch_all(MYSQLI_ASSOC);
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
-            // ✅ Complete Button - Ask if they want to rebook before marking as complete
-            document.querySelectorAll(".complete-btn").forEach(button => {
-                button.addEventListener("click", function () {
-                    let appointmentId = this.getAttribute("data-id");
-                    let patientId = this.getAttribute("data-patient-id"); // ✅ Fetch patient_id
 
-                    Swal.fire({
-                        title: "Rebook Next Session?",
-                        text: "Would you like to rebook a follow-up session before marking this as completed?",
-                        icon: "question",
-                        showDenyButton: true,   
-                        showCancelButton: true,  
-                        confirmButtonText: "Rebook",  
-                        cancelButtonText: "Confirm Only",  
-                        denyButtonText: "Cancel",
-                        allowOutsideClick: false,
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            // ✅ Redirect to `rebook_appointment.php` with `patient_id`
-                            window.location.href = `../app_process/rebook_appointment.php?patient_id=${patientId}&appointment_id=${appointmentId}`;
-                        } else if (result.dismiss === Swal.DismissReason.cancel) {
-                            // ✅ Confirmation before marking as complete
-                            Swal.fire({
-                                title: "Mark as Completed?",
-                                text: "Are you sure you want to mark this session as completed?",
-                                icon: "warning",
-                                showCancelButton: true,
-                                confirmButtonText: "Yes, Complete",
-                                cancelButtonText: "No",
-                                allowOutsideClick: false,
-                            }).then((confirmResult) => {
-                                if (confirmResult.isConfirmed) {
-                                    fetch("../app_process/update_appointment_status.php", {
-                                        method: "POST",
-                                        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                                        body: `appointment_id=${appointmentId}&status=completed`
-                                    })
-                                    .then(response => response.json())
-                                    .then(data => {
-                                        if (data.status === "success") {
-                                            Swal.fire("Success!", data.message, "success").then(() => location.reload());
-                                        } else {
-                                            Swal.fire("Error!", data.message, "error");
-                                        }
-                                    })
-                                    .catch(error => console.error("Error:", error));
-                                }
-                            });
-                        }
-                    });
-                });
-            });
+            document.querySelectorAll(".complete-btn").forEach(button => {
+    button.addEventListener("click", function () {
+        let appointmentId = this.getAttribute("data-id");
+        let patientId = this.getAttribute("data-patient-id"); // fetch patient_id
+
+        Swal.fire({
+            title: "Mark Appointment as Completed?",
+            text: "Are you sure you want to mark this session as completed? You will be required to update the patient details.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, complete session",
+            cancelButtonText: "Cancel",
+            allowOutsideClick: false,
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Update the appointment status to "completed"
+                fetch("../app_process/update_appointment_status.php", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: `appointment_id=${appointmentId}&status=completed`
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        // Show success message then redirect to update_patient_details.php with patient_id
+                        Swal.fire({
+                            title: "Success!",
+                            text: data.message,
+                            icon: "success",
+                            confirmButtonText: "Update Patient Details"
+                        }).then(() => {
+                            window.location.href = `update_patient_details.php?patient_id=${patientId}`;
+                        });
+                    } else {
+                        Swal.fire("Error!", data.message, "error");
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+            }
+        });
+    });
+});
+
+
+            // OLD
+            // document.querySelectorAll(".complete-btn").forEach(button => {
+            //     button.addEventListener("click", function () {
+            //         let appointmentId = this.getAttribute("data-id");
+            //         let patientId = this.getAttribute("data-patient-id"); // ✅ Fetch patient_id
+
+            //         Swal.fire({
+            //             title: "Rebook Next Session?",
+            //             text: "Would you like to rebook a follow-up session before marking this as completed?",
+            //             icon: "question",
+            //             showDenyButton: true,   
+            //             showCancelButton: true,  
+            //             confirmButtonText: "Rebook",  
+            //             cancelButtonText: "Confirm Only",  
+            //             denyButtonText: "Cancel",
+            //             allowOutsideClick: false,
+            //         }).then((result) => {
+            //             if (result.isConfirmed) {
+            //                 // ✅ Redirect to `rebook_appointment.php` with `patient_id`
+            //                 window.location.href = `../app_process/rebook_appointment.php?patient_id=${patientId}&appointment_id=${appointmentId}`;
+            //             } else if (result.dismiss === Swal.DismissReason.cancel) {
+            //                 // ✅ Confirmation before marking as complete
+            //                 Swal.fire({
+            //                     title: "Mark as Completed?",
+            //                     text: "Are you sure you want to mark this session as completed?",
+            //                     icon: "warning",
+            //                     showCancelButton: true,
+            //                     confirmButtonText: "Yes, Complete",
+            //                     cancelButtonText: "No",
+            //                     allowOutsideClick: false,
+            //                 }).then((confirmResult) => {
+            //                     if (confirmResult.isConfirmed) {
+            //                         fetch("../app_process/update_appointment_status.php", {
+            //                             method: "POST",
+            //                             headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            //                             body: `appointment_id=${appointmentId}&status=completed`
+            //                         })
+            //                         .then(response => response.json())
+            //                         .then(data => {
+            //                             if (data.status === "success") {
+            //                                 Swal.fire("Success!", data.message, "success").then(() => location.reload());
+            //                             } else {
+            //                                 Swal.fire("Error!", data.message, "error");
+            //                             }
+            //                         })
+            //                         .catch(error => console.error("Error:", error));
+            //                     }
+            //                 });
+            //             }
+            //         });
+            //     });
+            // });
 
 
             // ✅ Cancel Button with Validation Note Requirement
