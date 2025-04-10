@@ -4,7 +4,7 @@
 
     header("Content-Type: application/json");
 
-    $query = "SELECT business_hours_start, business_hours_end, max_days_advance, min_days_advance, blocked_dates
+    $query = "SELECT max_days_advance, min_days_advance, blocked_dates
             FROM settings LIMIT 1";
     $result = $connection->query($query);
 
