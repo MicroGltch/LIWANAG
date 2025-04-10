@@ -202,7 +202,8 @@ function filterAppointmentsByStatus($appointments, $status) {
                         <span>Appointments</span>
                     </li>
                     <li><a href="#view-appointments" onclick="showSection('view-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> View All Appointments</a></li>
-                    <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Appointments</a></li>                    
+                    <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Appointments</a></li>
+                    <li><a href="#playgroup" onclick="showSection('playgroup')"><span class="uk-margin-small-right" uk-icon="thumbnails"></span> Playgroup Sessions</a></li>                                        
                     </li>
  
                     <hr>
@@ -440,6 +441,15 @@ function filterAppointmentsByStatus($appointments, $status) {
                     <iframe id="viewAppointmentsFrame" src="../Appointments/app_manage/view_all_appointments.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
                 </div>
             </div>
+
+            <!-- Playgroup Sessions Section 📑-->
+            <div id="playgroup" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Playgroup Sessions</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="playgroupDashboard" src="../Appointments/app_manage/playgroup_dashboard.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
 
             <!-- Manage Timetable Settings Section 📑-->
             <div id="timetable-settings" class="section" style="display: none;">
@@ -1476,6 +1486,42 @@ otpSection.style.display = "none";
                             let formData = new FormData(this);
 
                             fetch("../Appointments/app_manage/view_all_appointments.php", {
+                                    method: "POST",
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.swal) {
+                                        Swal.fire({
+                                            title: data.swal.title,
+                                            text: data.swal.text,
+                                            icon: data.swal.icon,
+                                        }).then(() => {
+                                            if (data.reload) {
+                                                window.location.reload(true); // Hard reload the page
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
+
+                // view playgroup ifrme
+                let playgroupFrame = document.getElementById("playgroupDashboard");
+
+                playgroupFrame.onload = function() {
+                    resizeIframe(viewAppointmentsFrame);
+                    let playgroupForm = playgroupFrame.contentDocument.getElementById("playgroupForm");
+
+                    if (playgroupForm) {
+                        playgroupForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("../Appointments/app_manage/playgroup_dashboard.php", {
                                     method: "POST",
                                     body: formData
                                 })

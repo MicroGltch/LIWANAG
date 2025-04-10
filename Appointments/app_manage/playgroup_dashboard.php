@@ -279,8 +279,6 @@ document.addEventListener("DOMContentLoaded", function () {
             <?php endforeach; ?>
         <?php endif; ?>
     </div>
-
-    <a href="../../Dashboards/headtherapistdashboard.php" class="uk-button uk-button-default">Back to Main Dashboard</a>
 </div>
 </body>
 </html>
