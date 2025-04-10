@@ -136,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 echo json_encode([
                     "status" => "success",
                     "title" => "Appointment Approved",
-                    "message" => "Appointment for <strong>$patient_name</strong> has been <strong>approved</strong>. Email notification sent."
+                    "message" => "Appointment for <b>$patient_name</b> has been <b>approved</b>. Email notification sent."
                 ]);
                 exit();
             } else {
@@ -169,7 +169,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     isRebooked: false,
                     reason: $validation_notes
                 );
-                echo json_encode(["status" => "success", "title" => "Appointment Approved", "message" => "Appointment for <strong>$patient_name</strong> has been <strong>approved</strong>. Email notification sent."]);
+                echo json_encode(["status" => "success", "title" => "Appointment Approved", "message" => "Appointment for <b>$patient_name</b> has been <strong>approved</strong>. Email notification sent."]);
                 exit();
             } else {
                 echo json_encode(["status" => "error", "message" => "Failed to approve appointment."]);
@@ -210,7 +210,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 echo json_encode([
                     "status" => "success",
                     "title" => "Assigned to Playgroup Slot",
-                    "message" => "Appointment for <strong>$patient_name</strong> has been assigned to a playgroup session."
+                    "message" => "Appointment for <b>$patient_name</b> has been assigned to a playgroup session."
                 ]);
                 exit();
             } else {
@@ -253,7 +253,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             );            echo json_encode([
                 "status" => "success",
                 "title" => "Appointment Rescheduled",
-                "message" => "Appointment for <strong>$patient_name</strong> has been rescheduled and assigned to a therapist."
+                "message" => "Appointment for <b>$patient_name</b> has been rescheduled and assigned to a therapist."
             ]);
             exit();
         } else {
@@ -292,7 +292,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 therapist_id: null,
                 isRebooked: false,
                 reason: $validation_notes
-            );            echo json_encode(["status" => "success", "title" => "Appointment Cancelled", "message" => "Appointment for <strong>$patient_name</strong> has been <strong>cancelled</strong>. Email notification sent."]);
+            );            echo json_encode(["status" => "success", "title" => "Appointment Cancelled", "message" => "Appointment for <b>$patient_name</b> has been <strong>cancelled</strong>. Email notification sent."]);
             exit();
         } else {
             echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to cancel appointment."]);
@@ -376,7 +376,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     isRebooked: false,
                     reason: $validation_notes
                 );            
-                echo json_encode(["status" => "success", "title" => "Appointment Completed", "message" => "Appointment for <strong>$patient_name</strong> has been marked as <strong>Completed</strong>. Email notification sent."]);
+                echo json_encode(["status" => "success", "title" => "Appointment Completed", "message" => "Appointment for <b>$patient_name</b> has been marked as <strong>Completed</strong>. Email notification sent."]);
             } else {
                 echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to update appointment status to completed."]);
             }
@@ -410,7 +410,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 therapist_id: null,
                 isRebooked: false,
                 reason: $validation_notes
-            );            echo json_encode(["status" => "success", "title" => "Appointment $status", "message" => "Appointment for <strong>$patient_name</strong> has been <strong>$status</strong>. Email notification sent."]);
+            );            echo json_encode(["status" => "success", "title" => "Appointment $status", "message" => "Appointment for <b>$patient_name</b> has been <strong>$status</strong>. Email notification sent."]);
             exit();
         }else {
             echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to decline/cancel appointment."]);
@@ -492,7 +492,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 echo json_encode([
                     "status" => "success",
                     "title" => "Appointment Waitlisted",
-                    "message" => "Appointment for <strong>$patient_name</strong> has been moved to <strong>Waitlisted</strong>. Email notification sent."
+                    "message" => "Appointment for <b>$patient_name</b> has been moved to <strong>Waitlisted</strong>. Email notification sent."
                 ]);
                 exit();
             } else {
