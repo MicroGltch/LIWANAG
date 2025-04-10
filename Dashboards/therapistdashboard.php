@@ -179,7 +179,7 @@ $stmt->close();
                         
                         
                         <li><a href="#patient-details" onclick="showSection('patient-details')"><span class="uk-margin-small-right" uk-icon="user"></span> View Patients</a></li>
-                        <li><a href="#rebook-patient" onclick="showSection('rebook-patient')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook a Patient </a></li>
+                        <!-- <li><a href="#rebook-patient" onclick="showSection('rebook-patient')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Rebook a Patient </a></li> -->
                         
                     </li>
 

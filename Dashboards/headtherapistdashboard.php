@@ -222,9 +222,10 @@ function filterAppointmentsByStatus($appointments, $status) {
                 <li class="uk-parent">
                     
                     <li>
-                        <span>Your Account</span>
+                        <span>Settings</span>
                     </li>
-                    
+
+                    <li><a href="#timetable-settings" onclick="showSection('timetable-settings')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Timetable Settings</a></li>
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
                 </ul>
             </div>
@@ -367,63 +368,6 @@ function filterAppointmentsByStatus($appointments, $status) {
     ?>
 
                 <hr>
-
-                <!-- ✅ Appointments List -->
-                <!-- <h3>All Appointments</h3>
-                <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover">
-                    <thead>
-                        <tr>
-                            <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($appointments as $appointment): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
-                                <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
-                                <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
-                                <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
-                                <td><?= htmlspecialchars(ucwords($appointment['status'])); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-
-                <script>
-                    $(document).ready(function() {
-                        $('#appointmentsTable').DataTable({
-                            pageLength: 10,
-                            lengthMenu: [10, 25, 50],
-                            order: [
-                                [2, 'asc']
-                            ], // Sort by date column by default
-                            language: {
-                                lengthMenu: "Show _MENU_ entries per page",
-                                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                search: "Search:",
-                                paginate: {
-                                    first: "First",
-                                    last: "Last",
-                                    next: "Next",
-                                    previous: "Previous"
-                                }
-                            },
-                            columnDefs: [{
-                                    orderable: true,
-                                    targets: '_all'
-                                }, // Make all columns sortable
-                                {
-                                    type: 'date',
-                                    targets: 2
-                                } // Specify date type for date column
-                            ]
-                        });
-                    });
-                </script> -->
             </div>
 
             <!-- View and Manage Appointments Section 📑 -->
@@ -461,60 +405,73 @@ function filterAppointmentsByStatus($appointments, $status) {
 
             <!-- Manage Therapists Section 📑-->
             <div id="view-therapist" class="section" style="display: none;">
-                <h1 class="uk-text-bold">View Therapists</h1>
+            <h1 class="uk-text-bold">View Therapists</h1>
 
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <div class="uk-overflow-auto">
-                        <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
-                            <thead>
+            <div class="uk-card uk-card-default uk-card-body uk-margin">
+                <div class="uk-overflow-auto">
+                <p class="uk-text-meta uk-margin-bottom-small uk-text-right"> 
+                    <span uk-icon="icon: user; ratio: 0.9;"></span> = View Details &nbsp;&nbsp;&nbsp; 
+                    <span uk-icon="icon: calendar; ratio: 0.9;"></span> = View Schedule
+                </p>
+                    <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                        <thead>
+                            <tr>
+                                <th><span class="no-break">Therapist Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                                <th class="uk-table-shrink"><span class="no-break">Actions</span></th> 
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php if (isset($therapists) && !empty($therapists)) : ?>
+                                <?php foreach ($therapists as $therapist) : ?>
+                                    <?php 
+                                    // Set the correct path for profile picture with fallback
+                                    $profilePicturePath = !empty($therapist['profile_picture']) 
+                                        ? "/LIWANAG/uploads/profile_pictures/" . $therapist['profile_picture'] 
+                                        : '/LIWANAG/CSS/default.jpg'; // Make sure this default path is correct relative to web root
+                                    ?>
+                                    <?php 
+                                    // Set the service type with fallback
+                                    $service_Type = !empty($therapist['service_Type']) 
+                                        ? $therapist['service_Type'] 
+                                        : 'Not Set';
+                                    ?>
+                                    <?php
+                                    // Assume therapist ID is available (adjust key if needed)
+                                    $therapistId = isset($therapist['account_ID']) ? $therapist['account_ID'] : ''; 
+                                    $therapistFullName = htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']);
+                                    ?>
+                                    <tr>
+                                        <td><?= $therapistFullName; ?></td>
+                                        <td>
+                                            <button class="uk-button uk-button-primary uk-button-small view-details uk-margin-small-right" 
+                                                    uk-tooltip="title: View Details; pos: top-left" data-fname="<?= htmlspecialchars($therapist['account_FName']); ?>"
+                                                    data-lname="<?= htmlspecialchars($therapist['account_LName']); ?>"
+                                                    data-email="<?= htmlspecialchars($therapist['account_Email']); ?>"
+                                                    data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
+                                                    data-status="<?= htmlspecialchars($therapist['account_status']); ?>"
+                                                    data-address="<?= htmlspecialchars($therapist['account_Address']); ?>"
+                                                    data-service="<?= htmlspecialchars($service_Type); ?>"
+                                                    data-picture="<?= htmlspecialchars($profilePicturePath); ?>">
+                                                <span uk-icon="icon: user"></span> </button>
+
+                                            <button class="uk-button uk-button-secondary uk-button-small view-schedule" 
+                                                    uk-tooltip="title: View Schedule; pos: top-left" data-therapist-id="<?= htmlspecialchars($therapistId); ?>"
+                                                    data-therapist-name="<?= $therapistFullName; ?>">
+                                                <span uk-icon="icon: calendar"></span> </button>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            <?php elseif (isset($therapist_error)) : ?>
                                 <tr>
-                                    <th class="uk-table-shrink"><span class="no-break">Therapist Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                    <th class="uk-table-shrink"><span class="no-break">Actions</span></th>
+                                    <td colspan="2"><?= htmlspecialchars($therapist_error); ?></td> 
                                 </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (isset($therapists) && !empty($therapists)) : ?>
-                                    <?php foreach ($therapists as $therapist) : ?>
-                                        <?php 
-                                        // Set the correct path for profile picture with fallback
-                                        $profilePicturePath = !empty($therapist['profile_picture']) 
-                                            ? "/LIWANAG/uploads/profile_pictures/" . $therapist['profile_picture'] 
-                                            : '/LIWANAG/CSS/default.jpg';
-                                        ?>
-                                        <?php 
-                                        // Set the correct path for profile picture with fallback
-                                        $service_Type = !empty($therapist['service_Type']) 
-                                            ?  $therapist['service_Type'] 
-                                            : 'Not Set';
-                                        ?>
-                                        <tr>
-                                            <td><?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?></td>
-                                            <td>
-                                                <button class="uk-button uk-button-primary uk-button-small view-details" 
-                                                        data-fname="<?= htmlspecialchars($therapist['account_FName']); ?>"
-                                                        data-lname="<?= htmlspecialchars($therapist['account_LName']); ?>"
-                                                        data-email="<?= htmlspecialchars($therapist['account_Email']); ?>"
-                                                        data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
-                                                        data-status="<?= htmlspecialchars($therapist['account_status']); ?>"
-                                                        data-address="<?= htmlspecialchars($therapist['account_Address']); ?>"
-                                                        data-service="<?= htmlspecialchars($service_Type); ?>"
-                                                        data-picture="<?= htmlspecialchars($profilePicturePath); ?>">
-                                                    Details
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php elseif (isset($therapist_error)) : ?>
-                                    <tr>
-                                        <td colspan="2"><?= htmlspecialchars($therapist_error); ?></td>
-                                    </tr>
-                                <?php else : ?>
-                                    <tr>
-                                        <td colspan="2">No therapists found.</td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
+                            <?php else : ?>
+                                <tr>
+                                    <td colspan="2">No therapists found.</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
 
                         <script>
                             $(document).ready(function() {
@@ -523,7 +480,7 @@ function filterAppointmentsByStatus($appointments, $status) {
                                     pageLength: 10,
                                     lengthMenu: [10, 25, 50],
                                     order: [
-                                        [0, 'asc']
+                                        [0, 'asc'] // Order by the first column (Therapist Name)
                                     ],
                                     language: {
                                         lengthMenu: "Show _MENU_ entries per page",
@@ -536,10 +493,11 @@ function filterAppointmentsByStatus($appointments, $status) {
                                             previous: "Previous"
                                         }
                                     },
-                                    columnDefs: [{
-                                        orderable: true,
-                                        targets: '_all'
-                                    }]
+                                    columnDefs: [
+                                        { orderable: true, targets: 0 }, // Therapist Name - sortable
+                                        // Updated target index for non-orderable Actions column
+                                        { orderable: false, targets: 1 }  
+                                    ]
                                 });
                                 
                                 // Add click event for the Details button
@@ -564,7 +522,7 @@ function filterAppointmentsByStatus($appointments, $status) {
                                                 </div>
                                                 <div class="uk-width-expand uk-text-left">
                                                     <p><strong>Email:</strong> ${email}</p>
-                                                    <p><strong>Phone Number:</strong> 0${phone}</p>
+                                                    <p><strong>Phone Number:</strong> 0${phone}</p> 
                                                     <p><strong>Address:</strong> ${address}</p>
                                                     <p><strong>Service Type:</strong> ${service.charAt(0).toUpperCase() + service.slice(1)}</p>
                                                     <p><strong>Account Status:</strong> <span class="uk-label uk-label-${status === 'Active' ? 'success' : 'warning'}">${status}</span></p>
@@ -579,11 +537,50 @@ function filterAppointmentsByStatus($appointments, $status) {
                                         }
                                     });
                                 });
+
+                                // --- NEW: Add click event for the Schedule button ---
+                                $(document).on('click', '.view-schedule', function() {
+                                    const therapistId = $(this).data('therapist-id'); // Get the therapist ID
+                                    const therapistName = $(this).data('therapist-name'); // Get the therapist name
+
+                                    // Placeholder for schedule content. 
+                                    // In a real application, you would likely:
+                                    // 1. Make an AJAX call here using therapistId to fetch schedule data from the server.
+                                    // 2. Format the fetched data into HTML.
+                                    // 3. Replace the placeholder below with the generated HTML.
+                                    const scheduleContent = `
+                                        <div class="uk-text-left">
+                                            <p>Loading schedule for ${therapistName} (ID: ${therapistId})...</p>
+                                            </div>
+                                    `; 
+
+                                    Swal.fire({
+                                        title: `Schedule for ${therapistName}`,
+                                        html: scheduleContent,
+                                        width: 500, // Adjust width as needed
+                                        padding: '2em',
+                                        confirmButtonText: 'Close',
+                                        customClass: {
+                                            container: 'therapist-schedule-modal' // Optional: different class for styling
+                                        }
+                                        // You might want a preConfirm or other options if you fetch data async
+                                        // showLoaderOnConfirm: true,
+                                        // preConfirm: () => {
+                                        //    return fetch(`/api/get-schedule?therapist_id=${therapistId}`)
+                                        //      .then(response => response.json())
+                                        //      .then(data => { /* format and return data */ })
+                                        //      .catch(error => { Swal.showValidationMessage(`Request failed: ${error}`) });
+                                        // }
+                                    });
+                                });
                             });
                         </script>
 
                         <style>
-                            /* Additional styling for the modal */
+                            .uk-button > span[uk-icon] {
+                                vertical-align: middle; /* Helps align icon vertically */
+                            }
+                            /* Additional styling for the details modal */
                             .therapist-details-modal .swal2-popup {
                                 border-radius: 15px;
                             }
@@ -599,6 +596,14 @@ function filterAppointmentsByStatus($appointments, $status) {
                             .uk-border-circle {
                                 background-color: #f8f8f8;
                                 border: 1px solid #eaeaea;
+                            }
+
+                            /* --- Optional: Styling for the schedule modal --- */
+                            .therapist-schedule-modal .swal2-popup {
+                                border-radius: 10px;
+                            }
+                            .therapist-schedule-modal .swal2-title {
+                                font-size: 1.4em;
                             }
                         </style>
                     </div>
