@@ -9,7 +9,6 @@ if (!isset($_SESSION['account_ID']) || !isset($_SESSION['account_Type']) || !in_
     // Redirect to login or show an access denied message
     // header("Location: /login.php"); // Example redirect
     die("Access Denied. Head Therapist login required.");
-    exit();
 }
 
 // $userId = (int)$_SESSION['account_ID']; // Head therapist's own ID, not usually needed for display logic
