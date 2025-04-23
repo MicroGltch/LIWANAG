@@ -8,55 +8,72 @@ if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !==
     exit();
 }
 
+$therapistID = $_SESSION['account_ID'];
 
-$userid = $_SESSION['account_ID'];
+// Fetch therapist profile data
+$profileStmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
+$profileStmt->bind_param("i", $therapistID);
+$profileStmt->execute();
+$profileResult = $profileStmt->get_result();
 
-
-// Fetch user data from the database
-$stmt = $connection->prepare("SELECT account_FName, account_LName, account_Email, account_PNum, profile_picture FROM users WHERE account_ID = ?");
-$stmt->bind_param("s", $userid);
-$stmt->execute();
-$result = $stmt->get_result();
-
-
-
-
-if ($result->num_rows > 0) {
-    $userData = $result->fetch_assoc();
+if ($profileResult->num_rows > 0) {
+    $userData = $profileResult->fetch_assoc();
     $firstName = $userData['account_FName'];
     $lastName = $userData['account_LName'];
     $email = $userData['account_Email'];
     $phoneNumber = $userData['account_PNum'];
+    
     // Determine the profile picture path
-    if ($userData['profile_picture']) {
-        $profilePicture = '../uploads/profile_pictures/' . $userData['profile_picture']; // Corrected path
-    } else {
-        $profilePicture = '../CSS/default.jpg';
-    }
-    // $profilePicture = $userData['profile_picture'] ? '../uploads/' . $userData['profile_picture'] : '../CSS/default.jpg';
+    $profilePicture = $userData['profile_picture'] 
+        ? '../uploads/profile_pictures/' . $userData['profile_picture'] 
+        : '../CSS/default.jpg';
 } else {
-    echo "No Data Found.";
+    die("No therapist data found.");
 }
+$profileStmt->close();
+
+// Fetch Patients with Linked User Information
+$patientsStmt = $connection->prepare("SELECT DISTINCT 
+        p.patient_id, 
+        p.first_name AS patient_firstname, 
+        p.last_name AS patient_lastname, 
+        p.profile_picture AS patient_picture,
+        p.bday, 
+        p.gender, 
+        p.service_type, 
+        p.status,
+        u.account_ID AS user_id,
+        u.account_FName AS user_firstname,
+        u.account_LName AS user_lastname,
+        u.account_Email AS user_email,
+        u.account_PNum AS user_phone,
+        u.profile_picture AS user_picture
+    FROM appointments a 
+    JOIN patients p ON a.patient_id = p.patient_id 
+    LEFT JOIN users u ON p.account_id = u.account_ID
+    WHERE a.therapist_id = ? 
+    AND a.status = 'Completed' 
+    AND p.status IN ('enrolled', 'pending') 
+    ORDER BY p.last_name, p.first_name");
+
+$patientsStmt->bind_param("i", $therapistID);
+$patientsStmt->execute();
+$patientsResult = $patientsStmt->get_result();
+$patients = $patientsResult->fetch_all(MYSQLI_ASSOC);
+$patientsStmt->close();
 
 // Fetch therapist's upcoming appointments
-$query = "SELECT a.appointment_id, a.date, a.time, a.session_type, a.status,
+$appointmentsStmt = $connection->prepare("SELECT a.appointment_id, a.date, a.time, a.session_type, a.status,
                  p.patient_id, p.first_name, p.last_name 
           FROM appointments a
           JOIN patients p ON a.patient_id = p.patient_id
           WHERE a.therapist_id = ? AND a.status IN ('Approved', 'Pending')
-          ORDER BY a.date ASC, a.time ASC";
-$stmt = $connection->prepare($query);
-$stmt->bind_param("i", $therapistID);
-$stmt->execute();
-$result = $stmt->get_result();
-$appointments = $result->fetch_all(MYSQLI_ASSOC);
-
-
-$stmt->close();
-
-
-//upcoming appointments
-
+          ORDER BY a.date ASC, a.time ASC");
+$appointmentsStmt->bind_param("i", $therapistID);
+$appointmentsStmt->execute();
+$appointmentsResult = $appointmentsStmt->get_result();
+$appointments = $appointmentsResult->fetch_all(MYSQLI_ASSOC);
+$appointmentsStmt->close();
 ?>
 
 <!DOCTYPE html>
@@ -170,6 +187,14 @@ $stmt->close();
                     </li> 
 
                     <hr> -->
+
+                    <li class="uk-parent">
+                    <li>
+                        <span>Schedule</span>
+                    </li>
+                        <li><a href="#schedule" onclick="showSection('schedule')"><span class="uk-margin-small-right" uk-icon="user"></span> View My Schedule</a></li>
+                    </li>
+                    <hr>
 
                     <li class="uk-parent">
                     
@@ -297,26 +322,88 @@ $stmt->close();
                 </div>
             </div>
 
-            <!--Patients-->
+            <!--Schedule-->
+            <div id="schedule" style="display: none; " class="section">
+                <h1 class="uk-text-bold">My Weekly Schedule</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+
+                    <iframe id="scheduleFrame" src="forTherapist/manageSchedule/schedule_therapist.php" style="width: 100%; height: 800px; border: none;">
+                    </iframe>
+
+                </div>
+            </div>
+
+            <!-- Patients Section -->
             <div id="patient-details" style="display: none;" class="section">
                 <h1 class="uk-text-bold">Patient List</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <table id="patientTable" class="display" style="width:100%">
+                    <table id="patientTable" class="uk-table uk-table-hover uk-table-striped" style="width:100%">
                         <thead>
                             <tr>
-                                <th>Name</th>
-                                <th>Age</th>
+                                <th>Patient Details</th>
+                                <th>Client Details</th>
+                                <th>Birthday</th>
                                 <th>Service Type</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
                         <tbody>
-
-                            <!-- population area -->
-                        </tbody>
+                <?php foreach ($patients as $patient): ?>
+                    <tr>
+                        <!-- Patient Column -->
+                        <td>
+                            <div class="uk-flex uk-flex-column">
+                                <img src="<?= !empty($patient['patient_picture']) ? '../uploads/profile_pictures/' . $patient['patient_picture'] : '../CSS/default.jpg'; ?>"
+                                    alt="Patient Picture" class="uk-border-circle uk-align-center" style="width: 60px; height: 60px; object-fit: cover; margin-bottom: 8px;">
+                                <div class="uk-text-center">
+                                    <div class="uk-text-bold"><?= htmlspecialchars($patient['patient_firstname'] . ' ' . $patient['patient_lastname']) ?></div>
+                                    <div class="uk-text-meta">
+                                        <?= !empty($patient['gender']) ? htmlspecialchars($patient['gender']) : 'Gender not specified' ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <!-- Linked User Column -->
+                        <td>
+                            <?php if (!empty($patient['user_id'])): ?>
+                                <div class="uk-flex uk-flex-column">
+                                    <img src="<?= !empty($patient['user_picture']) ? '../uploads/profile_pictures/' . $patient['user_picture'] : '../CSS/default.jpg'; ?>"
+                                        alt="User Picture" class="uk-border-circle uk-align-center" style="width: 60px; height: 60px; object-fit: cover; margin-bottom: 8px;">
+                                    <div class="uk-text-center">
+                                        <div class="uk-text-bold"><?= htmlspecialchars($patient['user_firstname'] . ' ' . $patient['user_lastname']) ?></div>
+                                        <div class="uk-text-meta">
+                                            <?= htmlspecialchars($patient['user_email']) ?><br>
+                                            <?= !empty($patient['user_phone']) ? htmlspecialchars($patient['user_phone']) : 'Phone not provided' ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="uk-text-center uk-text-meta">No Linked Client</div>
+                            <?php endif; ?>
+                        </td>
+                        
+                        <!-- Birthday Column -->
+                        <td class="uk-text-center">
+                            <?= !empty($patient['bday']) ? htmlspecialchars(date('M d, Y', strtotime($patient['bday']))) : 'Not specified' ?>
+                        </td>
+                        
+                        <!-- Service Type Column -->
+                        <td class="uk-text-center"><?= htmlspecialchars($patient['service_type']) ?></td>
+                        
+                        <!-- Status Column -->
+                        <td class="uk-text-center">
+                            <span class="uk-label <?= $patient['status'] == 'enrolled' ? 'uk-label-success' : 'uk-label-warning' ?>">
+                                <?= htmlspecialchars(ucfirst($patient['status'])) ?>
+                            </span>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
                     </table>
                 </div>
             </div>
+
 
             <!--Rebook Patient-->
             <div id="rebook-patient" style="display: none; " class="section">
@@ -1300,6 +1387,41 @@ function removeProfilePhoto() {
                 let formData = new FormData(this);
 
                 fetch("../Appointments/patient/patient_manage/rebook_patient.php", {
+                        method: "POST",
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.swal) {
+                            Swal.fire({
+                                title: data.swal.title,
+                                text: data.swal.text,
+                                icon: data.swal.icon,
+                            }).then(() => {
+                                if (data.reload) {
+                                    window.location.reload(true); // Hard reload the page
+                                }
+                            });
+                        }
+                    })
+                    .catch(error => console.error("Error:", error));
+            });
+        }
+    };
+
+    //View Schedule frame
+    let scheduleFrame = document.getElementById("scheduleFrame");
+
+    scheduleFrame.onload = function() {
+        let scheduleFrameForm = scheduleFrame.contentDocument.getElementById("scheduleForm");
+
+        if (scheduleFrameForm) {
+            scheduleFrameForm.addEventListener("submit", function(e) {
+                e.preventDefault();
+
+                let formData = new FormData(this);
+
+                fetch("forTherapist/manageSchedule/schedule_therapist.php", {
                         method: "POST",
                         body: formData
                     })

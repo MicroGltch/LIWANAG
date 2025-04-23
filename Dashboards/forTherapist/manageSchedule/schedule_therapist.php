@@ -34,6 +34,9 @@ $mainHeading = "My Weekly Schedule";
         .container {
             max-width: 900px; margin: 0 auto; background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
+        .uk-container {
+            max-height: 750px; min-height: 750px;
+        }
         h1, h2 {
             text-align: center; color: #0056b3;
         }
@@ -78,9 +81,7 @@ $mainHeading = "My Weekly Schedule";
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1><?php echo htmlspecialchars($mainHeading); ?></h1>
-
+    <div class="uk-container">
         <!-- No Therapist Selector for Therapist View -->
 
         <div class="controls">

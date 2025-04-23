@@ -96,8 +96,31 @@ function filterAppointmentsByStatus($appointments, $status) {
     }
 }
 
-?>
+// Fetch All Patients with Linked User Information
+$patientsStmt = $connection->prepare("SELECT 
+        p.patient_id, 
+        p.first_name AS patient_firstname, 
+        p.last_name AS patient_lastname, 
+        p.profile_picture AS patient_picture,
+        p.bday, 
+        p.gender, 
+        p.service_type, 
+        p.status,
+        u.account_ID AS user_id,
+        u.account_FName AS user_firstname,
+        u.account_LName AS user_lastname,
+        u.account_Email AS user_email,
+        u.account_PNum AS user_phone,
+        u.profile_picture AS user_picture
+    FROM patients p
+    LEFT JOIN users u ON p.account_id = u.account_ID
+    ORDER BY p.last_name, p.first_name");
 
+$patientsStmt->execute();
+$patientsResult = $patientsStmt->get_result();
+$patients = $patientsResult->fetch_all(MYSQLI_ASSOC);
+$patientsStmt->close();
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -214,6 +237,20 @@ function filterAppointmentsByStatus($appointments, $status) {
                             </li>
                             <li>
                                 <li><a href="#view-therapist" onclick="showSection('view-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> View Therapists</a></li>
+                            </li>
+                            <li>
+                                <li><a href="#therapist-schedule" onclick="showSection('therapist-schedule')"><span class="uk-margin-small-right" uk-icon="calendar"></span>Therapist Schedules</a></li>
+                            </li>
+                        </li>
+
+                    <hr>
+
+                    <li class="uk-parent">
+                            <li>
+                                <span>Patients</span>
+                            </li>
+                            <li>
+                                <li><a href="#view-patients" onclick="showSection('view-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Patients</a></li>
                             </li>
                         </li>
 
@@ -403,212 +440,120 @@ function filterAppointmentsByStatus($appointments, $status) {
                 </div>
             </div>
 
-            <!-- Manage Therapists Section 📑-->
-            <div id="view-therapist" class="section" style="display: none;">
-            <h1 class="uk-text-bold">View Therapists</h1>
-
-            <div class="uk-card uk-card-default uk-card-body uk-margin">
-                <div class="uk-overflow-auto">
-                <p class="uk-text-meta uk-margin-bottom-small uk-text-right"> 
-                    <span uk-icon="icon: user; ratio: 0.9;"></span> = View Details &nbsp;&nbsp;&nbsp; 
-                    <span uk-icon="icon: calendar; ratio: 0.9;"></span> = View Schedule
-                </p>
-                    <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
-                        <thead>
-                            <tr>
-                                <th><span class="no-break">Therapist Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                <th class="uk-table-shrink"><span class="no-break">Actions</span></th> 
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <?php if (isset($therapists) && !empty($therapists)) : ?>
-                                <?php foreach ($therapists as $therapist) : ?>
-                                    <?php 
-                                    // Set the correct path for profile picture with fallback
-                                    $profilePicturePath = !empty($therapist['profile_picture']) 
-                                        ? "/LIWANAG/uploads/profile_pictures/" . $therapist['profile_picture'] 
-                                        : '/LIWANAG/CSS/default.jpg'; // Make sure this default path is correct relative to web root
-                                    ?>
-                                    <?php 
-                                    // Set the service type with fallback
-                                    $service_Type = !empty($therapist['service_Type']) 
-                                        ? $therapist['service_Type'] 
-                                        : 'Not Set';
-                                    ?>
-                                    <?php
-                                    // Assume therapist ID is available (adjust key if needed)
-                                    $therapistId = isset($therapist['account_ID']) ? $therapist['account_ID'] : ''; 
-                                    $therapistFullName = htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']);
-                                    ?>
-                                    <tr>
-                                        <td><?= $therapistFullName; ?></td>
-                                        <td>
-                                            <button class="uk-button uk-button-primary uk-button-small view-details uk-margin-small-right" 
-                                                    uk-tooltip="title: View Details; pos: top-left" data-fname="<?= htmlspecialchars($therapist['account_FName']); ?>"
-                                                    data-lname="<?= htmlspecialchars($therapist['account_LName']); ?>"
-                                                    data-email="<?= htmlspecialchars($therapist['account_Email']); ?>"
-                                                    data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
-                                                    data-status="<?= htmlspecialchars($therapist['account_status']); ?>"
-                                                    data-address="<?= htmlspecialchars($therapist['account_Address']); ?>"
-                                                    data-service="<?= htmlspecialchars($service_Type); ?>"
-                                                    data-picture="<?= htmlspecialchars($profilePicturePath); ?>">
-                                                <span uk-icon="icon: user"></span> </button>
-
-                                            <button class="uk-button uk-button-secondary uk-button-small view-schedule" 
-                                                    uk-tooltip="title: View Schedule; pos: top-left" data-therapist-id="<?= htmlspecialchars($therapistId); ?>"
-                                                    data-therapist-name="<?= $therapistFullName; ?>">
-                                                <span uk-icon="icon: calendar"></span> </button>
-                                        </td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            <?php elseif (isset($therapist_error)) : ?>
-                                <tr>
-                                    <td colspan="2"><?= htmlspecialchars($therapist_error); ?></td> 
-                                </tr>
-                            <?php else : ?>
-                                <tr>
-                                    <td colspan="2">No therapists found.</td>
-                                </tr>
-                            <?php endif; ?>
-                        </tbody>
-                    </table>
-
-                        <script>
-                            $(document).ready(function() {
-                                // Initialize DataTable
-                                $('#viewtherapistTable').DataTable({
-                                    pageLength: 10,
-                                    lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc'] // Order by the first column (Therapist Name)
-                                    ],
-                                    language: {
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        search: "Search:",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [
-                                        { orderable: true, targets: 0 }, // Therapist Name - sortable
-                                        // Updated target index for non-orderable Actions column
-                                        { orderable: false, targets: 1 }  
-                                    ]
-                                });
-                                
-                                // Add click event for the Details button
-                                $(document).on('click', '.view-details', function() {
-                                    const fname = $(this).data('fname');
-                                    const lname = $(this).data('lname');
-                                    const email = $(this).data('email');
-                                    const phone = $(this).data('phone');
-                                    const status = $(this).data('status');
-                                    const address = $(this).data('address');
-                                    const service = $(this).data('service');
-                                    const picture = $(this).data('picture');
-                                    
-                                    Swal.fire({
-                                        title: `${fname} ${lname}`,
-                                        html: `
-                                            <div class="uk-grid-small uk-flex-middle" uk-grid>
-                                                <div class="uk-width-auto">
-                                                    <div style="width: 150px; height: 150px; border-radius: 50%; overflow: hidden;">
-                                                        <img class="uk-border-circle" width="150" height="150" src="${picture}" alt="Profile Picture" style="object-fit: cover; width: 100%; height: 100%;">
-                                                    </div>
-                                                </div>
-                                                <div class="uk-width-expand uk-text-left">
-                                                    <p><strong>Email:</strong> ${email}</p>
-                                                    <p><strong>Phone Number:</strong> 0${phone}</p> 
-                                                    <p><strong>Address:</strong> ${address}</p>
-                                                    <p><strong>Service Type:</strong> ${service.charAt(0).toUpperCase() + service.slice(1)}</p>
-                                                    <p><strong>Account Status:</strong> <span class="uk-label uk-label-${status === 'Active' ? 'success' : 'warning'}">${status}</span></p>
-                                                </div>
-                                            </div>
-                                        `,
-                                        width: 600,
-                                        padding: '2em',
-                                        confirmButtonText: 'Close',
-                                        customClass: {
-                                            container: 'therapist-details-modal'
-                                        }
-                                    });
-                                });
-
-                                // --- NEW: Add click event for the Schedule button ---
-                                $(document).on('click', '.view-schedule', function() {
-                                    const therapistId = $(this).data('therapist-id'); // Get the therapist ID
-                                    const therapistName = $(this).data('therapist-name'); // Get the therapist name
-
-                                    // Placeholder for schedule content. 
-                                    // In a real application, you would likely:
-                                    // 1. Make an AJAX call here using therapistId to fetch schedule data from the server.
-                                    // 2. Format the fetched data into HTML.
-                                    // 3. Replace the placeholder below with the generated HTML.
-                                    const scheduleContent = `
-                                        <div class="uk-text-left">
-                                            <p>Loading schedule for ${therapistName} (ID: ${therapistId})...</p>
-                                            </div>
-                                    `; 
-
-                                    Swal.fire({
-                                        title: `Schedule for ${therapistName}`,
-                                        html: scheduleContent,
-                                        width: 500, // Adjust width as needed
-                                        padding: '2em',
-                                        confirmButtonText: 'Close',
-                                        customClass: {
-                                            container: 'therapist-schedule-modal' // Optional: different class for styling
-                                        }
-                                        // You might want a preConfirm or other options if you fetch data async
-                                        // showLoaderOnConfirm: true,
-                                        // preConfirm: () => {
-                                        //    return fetch(`/api/get-schedule?therapist_id=${therapistId}`)
-                                        //      .then(response => response.json())
-                                        //      .then(data => { /* format and return data */ })
-                                        //      .catch(error => { Swal.showValidationMessage(`Request failed: ${error}`) });
-                                        // }
-                                    });
-                                });
-                            });
-                        </script>
-
-                        <style>
-                            .uk-button > span[uk-icon] {
-                                vertical-align: middle; /* Helps align icon vertically */
-                            }
-                            /* Additional styling for the details modal */
-                            .therapist-details-modal .swal2-popup {
-                                border-radius: 15px;
-                            }
-                            
-                            .therapist-details-modal .swal2-title {
-                                font-size: 1.5em;
-                                color: #333;
-                                border-bottom: 1px solid #eee;
-                                padding-bottom: 10px;
-                            }
-                            
-                            /* Ensure profile images display correctly */
-                            .uk-border-circle {
-                                background-color: #f8f8f8;
-                                border: 1px solid #eaeaea;
-                            }
-
-                            /* --- Optional: Styling for the schedule modal --- */
-                            .therapist-schedule-modal .swal2-popup {
-                                border-radius: 10px;
-                            }
-                            .therapist-schedule-modal .swal2-title {
-                                font-size: 1.4em;
-                            }
-                        </style>
-                    </div>
+            <!-- View Therapists Schedule Section 📑-->
+            <div id="therapist-schedule" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Therapist Schedules</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="therapistScheduleFrame" src="forAdmin/schedule_head_therapist.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
                 </div>
             </div>
+
+            <!-- Patients Section -->
+<div id="view-patients" class="section" style="display: none;">
+    <h1 class="uk-text-bold">Patients Masterlist</h1>
+    <div class="uk-card uk-card-default uk-card-body uk-margin uk-width-1-1">
+        <div class="uk-overflow-auto">
+            <table id="patientMasterTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                <thead>
+                    <tr>
+                        <th><span class="no-break">Patient Details<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Client Details<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Birthday<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Service Type<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Status<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($patients as $patient): ?>
+                        <tr>
+                            <!-- Patient Column -->
+                            <td>
+                            <div class="uk-flex uk-flex-column">
+                                <img src="<?= !empty($patient['patient_picture']) ? '../uploads/profile_pictures/' . $patient['patient_picture'] : '../CSS/default.jpg'; ?>"
+                                    alt="Patient Picture" class="uk-border-circle uk-align-center" style="width: 60px; height: 60px; object-fit: cover; margin-bottom: 8px;">
+                                <div class="uk-text-center">
+                                    <div class="uk-text-bold"><?= htmlspecialchars($patient['patient_firstname'] . ' ' . $patient['patient_lastname']) ?></div>
+                                    <div class="uk-text-meta">
+                                        <?= !empty($patient['gender']) ? htmlspecialchars($patient['gender']) : 'Gender not specified' ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                            
+                            <!-- Linked User Column -->
+                            <td>
+                            <?php if (!empty($patient['user_id'])): ?>
+                                <div class="uk-flex uk-flex-column">
+                                    <img src="<?= !empty($patient['user_picture']) ? '../uploads/profile_pictures/' . $patient['user_picture'] : '../CSS/default.jpg'; ?>"
+                                        alt="User Picture" class="uk-border-circle uk-align-center" style="width: 60px; height: 60px; object-fit: cover; margin-bottom: 8px;">
+                                    <div class="uk-text-center">
+                                        <div class="uk-text-bold"><?= htmlspecialchars($patient['user_firstname'] . ' ' . $patient['user_lastname']) ?></div>
+                                        <div class="uk-text-meta">
+                                            <?= htmlspecialchars($patient['user_email']) ?><br>
+                                            <?= !empty($patient['user_phone']) ? htmlspecialchars($patient['user_phone']) : 'Phone not provided' ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="uk-text-center uk-text-meta">No Linked Client</div>
+                            <?php endif; ?>
+                        </td>
+                            
+                            <!-- Birthday Column -->
+                            <td>
+                                <?= !empty($patient['bday']) ? htmlspecialchars(date('M d, Y', strtotime($patient['bday']))) : 'Not specified' ?>
+                            </td>
+                            
+                            <!-- Service Type Column -->
+                            <td><?= htmlspecialchars($patient['service_type']) ?></td>
+                            
+                            <!-- Status Column -->
+                            <td>
+                                <span class="uk-label 
+                                    <?= $patient['status'] == 'enrolled' ? 'uk-label-success' : 
+                                    ($patient['status'] == 'pending' ? 'uk-label-warning' : 'uk-label-danger') ?>">
+                                    <?= htmlspecialchars(ucfirst($patient['status'])) ?>
+                                </span>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable for Patients Masterlist
+        $('#patientMasterTable').DataTable({
+            pageLength: 10,
+            lengthMenu: [10, 25, 50],
+            order: [
+                [0, 'asc'] // Default sort by Patient Name ascending
+            ],
+            language: {
+                lengthMenu: "Show _MENU_ entries per page",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                search: "Search:",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            },
+            columnDefs: [
+                { orderable: true, targets: 0 }, // Patient Details - Sortable
+                { orderable: true, targets: 1 }, // Client Details - Sortable
+                { orderable: true, targets: 2 }, // Birthday - Sortable
+                { orderable: true, targets: 3 }, // Service Type - Sortable
+                { orderable: true, targets: 4 }  // Status - Sortable
+            ],
+            responsive: true
+        });
+    });
+</script>
 
             <!-- Account Details Card -->
             <div id="account-details" class="section" style="display: none;">
@@ -1513,7 +1458,7 @@ otpSection.style.display = "none";
                     }
                 };
 
-                // view playgroup ifrme
+                // view playgroup iframe
                 let playgroupFrame = document.getElementById("playgroupDashboard");
 
                 playgroupFrame.onload = function() {
@@ -1548,7 +1493,78 @@ otpSection.style.display = "none";
                         });
                     }
                 };
+
+                // Manage Timetable Settings Frame
+                let manageTimetableSettingsFrame = document.getElementById("manageTimetableSettingsFrame");
+
+                manageTimetableSettingsFrame.onload = function() {
+                    resizeIframe(manageTimetableSettingsFrame);
+                    let manageTimetableSettingsForm = manageTimetableSettingsFrame.contentDocument.getElementById("manageTimetableSettingsForm");
+
+                    if (manageTimetableSettingsForm) {
+                        manageTimetableSettingsForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("forAdmin/manageWebpage/timetable_settings.php", {
+                                    method: "POST",
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.swal) {
+                                        Swal.fire({
+                                            title: data.swal.title,
+                                            text: data.swal.text,
+                                            icon: data.swal.icon,
+                                        }).then(() => {
+                                            if (data.reload) {
+                                                window.location.reload(true); // Hard reload the page
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
             
+                // therapist schedule frame
+                let therapistSchedFrame = document.getElementById("therapistScheduleFrame");
+
+                therapistSchedFrame.onload = function() {
+                    resizeIframe(therapistSchedFrame);
+                    let therapistSchedForm = therapistSchedFrame.contentDocument.getElementById("therapistForm");
+
+                    if (therapistSchedForm) {
+                        therapistSchedForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("forAdmin/schedule_head_therapist.php", {
+                                    method: "POST",
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.swal) {
+                                        Swal.fire({
+                                            title: data.swal.title,
+                                            text: data.swal.text,
+                                            icon: data.swal.icon,
+                                        }).then(() => {
+                                            if (data.reload) {
+                                                window.location.reload(true);
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
 </script>
 </body>
 
