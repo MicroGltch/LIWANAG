@@ -431,14 +431,155 @@ $patientsStmt->close();
                 </div>
             </div>
 
+    <div id="view-therapist" class="section" style="display: none;">
+    <h1 class="uk-text-bold">View Therapists</h1>
 
-            <!-- Manage Timetable Settings Section 📑-->
-            <div id="timetable-settings" class="section" style="display: none;">
-                <h1 class="uk-text-bold">Manage Timetable Settings</h1>
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <iframe id="manageTimetableSettingsFrame" src="forAdmin/manageWebpage/timetable_settings.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
-                </div>
-            </div>
+    <div class="uk-card uk-card-default uk-card-body uk-margin">
+        <div class="uk-overflow-auto">
+            <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive uk-table-middle">
+                <thead>
+                    <tr>
+                        <th><span class="no-break">Therapist Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Email<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Phone</span></th>
+                        <th><span class="no-break">Address</span></th>
+                        <th><span class="no-break">Service<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Status<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (isset($therapists) && !empty($therapists)) : ?>
+                        <?php foreach ($therapists as $therapist) : ?>
+                            <?php
+                            // Set the correct path for profile picture with fallback
+                            $profilePicturePath = !empty($therapist['profile_picture'])
+                                ? "/LIWANAG/uploads/profile_pictures/" . $therapist['profile_picture']
+                                : '/LIWANAG/CSS/default.jpg';
+
+                            // Set the service type with fallback and capitalize first letter
+                            $service_Type = !empty($therapist['service_Type'])
+                                ? ucfirst(htmlspecialchars($therapist['service_Type']))
+                                : 'Not Set';
+
+                            // Prepare other variables
+                            $therapistFullName = htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']);
+                            $email = htmlspecialchars($therapist['account_Email']);
+                            $phone = htmlspecialchars($therapist['account_PNum']);
+                            $address = htmlspecialchars($therapist['account_Address']);
+                            $status = htmlspecialchars($therapist['account_status']);
+                            $statusClass = ($status === 'Active') ? 'success' : 'warning';
+                            ?>
+                            <tr>
+                                <td>
+                                    <div class="uk-flex uk-flex-column"> 
+                                        <img src="<?= htmlspecialchars($profilePicturePath); ?>"
+                                             alt="Pic" class="uk-border-circle uk-align-center" style="width: 60px; height: 60px; object-fit: cover; margin-bottom: 8px;">
+                                        <span><?= $therapistFullName; ?></span> 
+                                    </div>
+                                </td>
+                                <td><?= $email; ?></td>
+                                <td>0<?= $phone; ?></td>
+                                <td><?= $address; ?></td>
+                                <td><?= $service_Type; ?></td>
+                                <td><span class="uk-label uk-label-<?= $statusClass; ?>"><?= $status; ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php elseif (isset($therapist_error)) : ?>
+                        <tr>
+                            <td colspan="6"><?= htmlspecialchars($therapist_error); ?></td>
+                        </tr>
+                    <?php else : ?>
+                        <tr>
+                            <td colspan="6">No therapists found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+
+            <script>
+            $(document).ready(function() {
+                // Initialize DataTable
+                $('#viewtherapistTable').DataTable({
+                    pageLength: 10,
+                    lengthMenu: [10, 25, 50],
+                    order: [
+                        [0, 'asc'] // Default sort: Order by the first column (Therapist Name) ascending
+                    ],
+                    language: {
+                        lengthMenu: "Show _MENU_ entries per page",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        search: "Search:",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
+                    },
+                    columnDefs: [
+                        // Column Index | Property | Value | Comment
+                        //--------------------------------------------------------------
+                        { orderable: true,  targets: 0 }, // Therapist (Name+Pic) - Sortable
+                        { orderable: true,  targets: 1 }, // Email - Sortable
+                        { orderable: false, targets: 2 }, // Phone - Not Sortable
+                        { orderable: false, targets: 3 }, // Address - Not Sortable
+                        { orderable: true,  targets: 4 }, // Service - Sortable
+                        { orderable: true,  targets: 5 }  // Status - Sortable
+                    ]
+                });
+            });
+        </script>
+
+            <style>
+                /* Custom styles for better appearance */
+                #viewtherapistTable th {
+                    padding: 12px 8px; /* Adjust padding */
+                    background-color: #f8f8f8; /* Light background for headers */
+                    font-weight: 600; /* Slightly bolder headers */
+                    color: #555;
+                    vertical-align: middle; /* Ensure vertical alignment */
+                }
+
+                #viewtherapistTable td {
+                    padding: 10px 8px; /* Adjust padding */
+                    vertical-align: middle; /* Ensure vertical alignment */
+                }
+
+                /* Ensure profile images display correctly */
+                .uk-border-circle {
+                    border: 1px solid #eaeaea;
+                    background-color: #fff; /* White background behind image if transparent */
+                }
+
+                /* Subtle hover effect for table rows */
+                #viewtherapistTable tbody tr:hover {
+                    background-color: #f0f8ff; /* Light blue hover, adjust as needed */
+                }
+
+                 /* Vertical alignment for icons (like sort arrows) */
+                 th > span[uk-icon] {
+                    vertical-align: middle;
+                    margin-left: 4px; /* Space between text and icon */
+                 }
+
+                 /* Ensure status label aligns nicely */
+                 #viewtherapistTable td .uk-label {
+                    vertical-align: middle;
+                 }
+
+                 /* Prevent line breaks in specific columns if needed */
+                 #viewtherapistTable td:nth-child(2), /* Email */
+                 #viewtherapistTable td:nth-child(3)  /* Phone */
+                 {
+                    white-space: nowrap;
+                 }
+
+            </style>
+        </div>
+    </div>
+</div>
+
+            
 
             <!-- View Therapists Schedule Section 📑-->
             <div id="therapist-schedule" class="section" style="display: none;">
@@ -554,6 +695,14 @@ $patientsStmt->close();
         });
     });
 </script>
+
+        <!-- Manage Timetable Settings Section 📑-->
+            <div id="timetable-settings" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Manage Timetable Settings</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="manageTimetableSettingsFrame" src="forAdmin/manageWebpage/timetable_settings.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
 
             <!-- Account Details Card -->
             <div id="account-details" class="section" style="display: none;">
