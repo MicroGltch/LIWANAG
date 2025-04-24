@@ -4,7 +4,7 @@
 /*      #id      */ /*   #firstname   */ /*    Selects the element with id="firstname"     */
 /*      *       */ /*        *       */ /*            Selects all elements                */
 /*   .class    */ /*     .intro     */ /*   Selects all elements with class="intro"      */
-/*   .class    */ /*    p.intro    */ /*  Selects all <p> elements with class="intro"   */
+/*   .class   */ /*    p.intro    */ /*  Selects all <p> elements with class="intro"   */
 
 html,body{
     background-color:#f2f4f8;
@@ -675,6 +675,48 @@ padding-right: 100px;
     }
 
     
+    #uploadButton{
+        line-height: 20px;
+        border-radius: 15px;
+    }
+
+    .image-helper{
+        font-size: 12px;
+        padding-left: 20px;
+    }
+
+    .title-helper{
+        font-size: 25px !important;
+        margin-bottom: 0px !important;
+    }
+
+
+
+
+    #editButton{
+        font-size: 10px;
+        width: 132px !important;
+        min-width: 0 !important;
+    }
+    
+    #editPatientBtn{
+        font-size: 10px !important;
+        width: 132px !important;
+        min-width: 0 !important;
+    }
+
+
+    #changePassword{
+        font-size: 10px;
+        min-width: 0 !important;
+    }
+
+    #saveChanges{
+        font-size: 10px;
+        min-width: 0 !important;
+    }
+
+
 } 
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
