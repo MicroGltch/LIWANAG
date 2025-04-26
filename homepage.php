@@ -132,8 +132,8 @@ $stmt->close();
                                 }
                                 ?>
                                 <li>
-                                    <li><a href="<?php echo $dashboardURL; ?>" style="color: white">Dashboard</a></li>
-                                    <li><a href="Accounts/logout.php" style="color: white">Logout</a></li>
+                                    <li ><a href="<?php echo $dashboardURL; ?>" style="color: white" class="dashboard-redirect" >Dashboard</a></li>
+                                    <li ><a href="Accounts/logout.php" style="color: white" class="logout-redirect" >Logout</a></li>
                                 </li>
                             <?php else: ?>
                                 <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
@@ -151,7 +151,9 @@ $stmt->close();
         <div class="uk-offcanvas-bar">
             <button class="uk-offcanvas-close" type="button" uk-close></button>
             <ul class="uk-nav uk-nav-default">
-                <li class="uk-active"><a href="#section2" style="color:black; margin-top:25px; border-radius: 15px;">Services</a></li>
+               <!-- <li class="uk-active"><a href="Accounts/signuppage.php" uk-toggle style="color:black; margin-top:25px; border-radius: 15px;">Sign Up</a></li> -->
+              <!--  <li class="uk-active"><a href="Accounts/loginpage.php" uk-toggle style="color:black; margin-top:25px; border-radius: 15px;">Login</a></li> -->
+                <li class="uk-active"><a href="#section2" style="color:black; border-radius: 15px; margin-top:10px;">Services</a></li>
                 <li class="uk-active"><a href="#section3" style="color:black; border-radius: 15px;">About Us</a></li>
                 <li class="uk-active"><a href="#tnc-modal" uk-toggle style="color:black; border-radius: 15px;">Terms and Conditions</a></li>
                 <li class="uk-active"><a href="#faqs-modal" uk-toggle style="color:black; border-radius: 15px;">FAQs</a></li>
@@ -419,8 +421,8 @@ $stmt->close();
         <div class="uk-grid-match uk-child-width-1-2@m" uk-grid>
             
         <div style="text-align: left ; ">
-                <h4 style="margin-bottom: 7px;">Little Wanderer's Therapy Center</h4>
-                <p style="margin-top: 0px;font-size: 13px;">Welcome to Little Wanderer Therapy Center! We guarantee quality service that your child and family need.</p>
+                <h4 style="margin-bottom: 7px;" class="footer-info">Little Wanderer's Therapy Center</h4>
+                <p style="margin-top: 0px;font-size: 13px;" class="footer-info">Welcome to Little Wanderer Therapy Center! We guarantee quality service that your child and family need.</p>
                 <div>
                     <a href="#" class="uk-icon-button uk-margin-small-right" uk-icon="facebook"></a>
 
@@ -430,15 +432,15 @@ $stmt->close();
         
             <div style="text-align: right;">
     <ul class="uk-list uk-list">
-        <li style="font-size:13px;">
+        <li style="font-size:13px;" class="footer-info">
             <span uk-icon="location"></span>
             <?php echo htmlspecialchars($content['address'] ?? 'Not set'); ?>
         </li>
-        <li style="font-size:13px;">
+        <li style="font-size:13px;" class="footer-info">
             <span uk-icon="receiver"></span>
             <?php echo htmlspecialchars($content['mobile'] ?? 'Not set'); ?>
         </li>
-        <li style="font-size:13px;">
+        <li style="font-size:13px;" class="footer-info">
             <span uk-icon="mail"></span>
             <a href="mailto:<?php echo htmlspecialchars($content['email'] ?? ''); ?>" class="uk-link-text">
                 <?php echo htmlspecialchars($content['email'] ?? 'Not set'); ?>

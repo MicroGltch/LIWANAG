@@ -203,6 +203,8 @@ echo "<script>
         </div>
     </nav>
 
+
+
     <hr class="solid">
 
     <!-- Main Content -->
@@ -281,15 +283,15 @@ echo "<script>
 
                     <thead>
                             <tr>
-                                <th data-sort="date" style="text-align: left;"><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span> </th>
-                                <th data-sort="time" style="text-align: left;"><span class="no-break"></span>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th data-sort="session" style="text-align: left;"><span class="no-break"></span>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th data-sort="patient" style="text-align: left;"><span class="no-break"></span>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th data-sort="status" style="text-align: left;"><span class="no-break"></span>Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                                <th>Actions</th>
+                                <th data-sort="date" style="text-align: left;" class="table-head"><span class="no-break">Date <span uk-icon="icon: arrow-down-arrow-up"></span></span> </th>
+                                <th data-sort="time" style="text-align: left;" class="table-head"><span class="no-break"></span>Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="session" style="text-align: left;" class="table-head"><span class="no-break"></span>Session Type <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="patient" style="text-align: left;" class="table-head"><span class="no-break"></span>Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th data-sort="status" style="text-align: left;" class="table-head"><span class="no-break"></span>Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
+                                <th class="table-head">Actions</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody class="table-body">
                             <?php foreach ($appointments as $appointment): ?>
                                 <tr data-date="<?= $appointment['date']; ?>">
                                     <td style="text-align: left;"><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
@@ -305,7 +307,7 @@ echo "<script>
                                                 $appointment['edit_count'] < 2 &&
                                                 strtolower($appointment['session_type']) !== "playgroup"
                                             ): ?>
-                                                <button class="uk-button uk-button-primary edit-btn" data-id="<?= $appointment['appointment_id']; ?>"
+                                                <button class="uk-button uk-button-primary edit-btn action-button" data-id="<?= $appointment['appointment_id']; ?>"
                                                     data-date="<?= $appointment['date']; ?>" data-time="<?= $appointment['time']; ?>">
                                                     Reschedule (<?= 2 - $appointment['edit_count']; ?> left)
                                                 </button>
@@ -314,17 +316,17 @@ echo "<script>
                                                     strtolower($appointment['session_type']) === "playgroup" &&
                                                     !in_array(strtolower($appointment['status']), ["completed", "cancelled", "declined"])
                                                 ): ?>
-                                                    <button class="uk-button uk-button-default" disabled>Reschedule Not Allowed for Playgroup</button>
+                                                    <button class="uk-button uk-button-default action-button" disabled>Reschedule Not Allowed for Playgroup</button>
                                                 <?php elseif ($appointment['edit_count'] >= 2 && $appointment['status'] === "pending"): ?>
-                                                    <button class="uk-button uk-button-default" disabled>Reschedule Limit Reached</button>
+                                                    <button class="uk-button uk-button-default action-button" disabled>Reschedule Limit Reached</button>
                                                 <?php else: ?>
-                                                    <button class="uk-button uk-button-default" disabled>Reschedule Is Not Allowed</button>
+                                                    <button class="uk-button uk-button-default action-button" disabled>Reschedule Is Not Allowed</button>
                                                 <?php endif; ?>
                                             <?php endif; ?>
 
                                             <!-- ✅ Cancel button (Allowed only for "Pending" or "Waitlisted") -->
                                             <?php if (in_array($appointment['status'], ["pending", "waitlisted"])): ?>
-                                                <button class="uk-button uk-button-danger cancel-btn" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
+                                                <button class="uk-button uk-button-danger cancel-btn action-button" data-id="<?= $appointment['appointment_id']; ?>">Cancel</button>
                                             <?php endif; ?>
                                         </div>
                                     </td>
@@ -450,12 +452,12 @@ echo "<script>
                             
                             <div class="uk-flex uk-flex-column uk-margin-left">
                             
-                                <button class="uk-button uk-button-primary uk-margin-small-bottom" type="file" name="profile_picture" id="profile_picture_input">Upload Photo</button>
+                                <button class="uk-button uk-button-primary uk-margin-small-bottom" type="file" name="profile_picture" id="profile_picture_input" style="border-radius: 15px; line-height: 20px;" id="uploadButton">Upload Photo</button>
 
                             </div>
 
                             
-                            <div class="uk-margin-large-left">
+                            <div class="uk-margin-large-left image-helper">
                                     <h4>Image requirements:</h4>
                                     <ul class="uk-list">
                                         <li>1. Min. 400 x 400px</li>
@@ -508,20 +510,20 @@ echo "<script>
                         
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">Upload New Official Referral</label>
-                            <input class="uk-input" type="file" name="official_referral" id="official_referral_input" accept=".pdf,.jpg,.jpeg,.png" disabled>
+                            <input class="uk-input" type="file" name="official_referral" id="official_referral_input" accept=".pdf,.jpg,.jpeg,.png" disabled style="padding-top: 5px;padding-bottom: 5px;">
                         </div>
 
                         <div class="uk-width-1-2@s">
                             <label class="uk-form-label">Upload New Proof of Booking</label>
-                            <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking_input" accept=".pdf,.jpg,.jpeg,.png" disabled>
+                            <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking_input" accept=".pdf,.jpg,.jpeg,.png" disabled style="padding-top: 5px;padding-bottom: 5px;">
                         </div>
 
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top" style="margin-bottom: 15px;">
                         
-                        <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button">Edit</button>
+                        <button id="editPatientBtn" class="uk-button uk-button-secondary uk-margin-top" type="button" style="margin-right: 10px;border-radius: 15px;"  >Edit</button>
                         
-                        <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Profile Changes</button>
+                        <button class="uk-button uk-button-primary uk-margin-top" type="submit" style="margin-right: 10px;border-radius: 15px;" id="saveChanges">Save Profile Changes</button>
 
                         
                             </div> 
@@ -547,7 +549,7 @@ echo "<script>
             <div id="account-details" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Account Details</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
+                    <h3 class="uk-card-title uk-text-bold title-helper">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="upload_profile_picture">
                         <div class="uk-flex uk-flex-middle">
@@ -555,14 +557,14 @@ echo "<script>
                                 <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                                 <div class="uk-flex uk-flex-column uk-margin-left">
                                     <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" disabled>
+                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" disabled style="border-radius: 15px;">
                                         Upload Photo
                                     </button>
                                     <div class="uk-text-center">
                                         <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();" id="removePhotoButton" style="pointer-events: none; color: grey;">remove</a>
                                     </div>
                                 </div>
-                                <div class="uk-margin-large-left">
+                                <div class="uk-margin-large-left image-helper">
                                     <h4>Image requirements:</h4>
                                     <ul class="uk-list">
                                         <li>1. Min. 400 x 400px</li>
@@ -576,7 +578,7 @@ echo "<script>
                 </div>
 
                 <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
+                    <h3 class="uk-card-title uk-text-bold title-helper">User Details</h3>
                     <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
                         <input type="hidden" name="action" id="formAction" value="update_user_details">
 
@@ -606,8 +608,8 @@ echo "<script>
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
                             <button type="button" class="uk-button uk-button-secondary" id="editButton" style="margin-right: 10px;border-radius: 15px;">Edit</button>
-                            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal" style="margin-right: 10px;border-radius: 15px;">Change Password</button>
-                            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="margin-right: 10px;border-radius: 15px;">Save Changes</button>
+                            <button class="uk-button uk-button-primary" id="changePassword" uk-toggle="target: #change-password-modal" style="margin-right: 10px;border-radius: 15px;">Change Password</button>
+                            <button class="uk-button uk-button-primary" id="saveChanges" type="submit" id="saveButton" disabled style="margin-right: 10px;border-radius: 15px;">Save Changes</button>
                         </div>
 
                         <div id="otpSection" class="uk-width-1-1" style="display: none;">
