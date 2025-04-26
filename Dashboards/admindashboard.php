@@ -873,7 +873,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         </table>
                         <script>
                             $(document).ready(function() {
-<<<<<<< HEAD
                             // Fix the Edit Service buttons that are displaying file paths
                             $('.edit-service-btn').each(function() {
                                 // Replace the button text with "Edit Service"
@@ -881,43 +880,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 
                                 // Make sure the button has the proper styling
                                 $(this).addClass('uk-button uk-button-small uk-button-primary');
-=======
-                                $('#managetherapistTable').DataTable({
-                                    pageLength: 10,
-                                    lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ],
-                                    language: {
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        search: "Search:",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [{
-                                        orderable: true,
-                                        targets: '_all'
-                                    }]
-                                });
-
-                                // Edit service button handler
-                                $('.edit-service-btn').on('click', function() {
-                                    // Get data from button
-                                    var therapistId = $(this).data('therapist-id');
-                                    var therapistName = $(this).data('therapist-name');
-                                    var currentService = $(this).data('current-service');
-
-                                    // Fill the modal with data
-                                    $('#edit-therapist-id').val(therapistId);
-                                    $('#edit-therapist-name').text(therapistName);
-                                    $('#edit-service-type').val(currentService);
-                                });
->>>>>>> origin/main
                             });
                             
                             // Explicitly handle the edit button click
@@ -941,7 +903,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 </div>
             </div>
 
-<<<<<<< HEAD
                 <!-- Edit Service Modal -->
                 <div id="edit-service-modal" uk-modal>
                     <div class="uk-modal-dialog uk-modal-body">
@@ -960,25 +921,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                         <option value="behavioral">Behavioral</option>
                                     </select>
                                 </div>
-=======
-            <!-- Edit Service Modal -->
-            <div id="edit-service-modal" uk-modal>
-                <div class="uk-modal-dialog uk-modal-body">
-                    <h2 class="uk-modal-title">Edit Service Type</h2>
-                    <p>Change service type for <span id="edit-therapist-name"></span></p>
-
-                    <form id="edit-service-form" method="POST" action="update_service.php">
-                        <input type="hidden" id="edit-therapist-id" name="therapist_id">
-
-                        <div class="uk-margin">
-                            <label class="uk-form-label" for="edit-service-type">Service Type</label>
-                            <div class="uk-form-controls">
-                                <select class="uk-select" id="edit-service-type" name="service_type">
-                                    <option value="Both">Both</option>
-                                    <option value="Occupational">Occupational</option>
-                                    <option value="Behavioral">Behavioral</option>
-                                </select>
->>>>>>> origin/main
                             </div>
                         </div>
 
@@ -988,7 +930,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         </div>
                     </form>
                 </div>
-<<<<<<< HEAD
                 <script>
                 $(document).ready(function() {
                     <?php
@@ -998,9 +939,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     echo "  title: '" . $_SESSION['swalTitle'] . "',";
                     echo "  text: '" . $_SESSION['swalText'] . "',";
                     echo "});";
-=======
-            </div>
->>>>>>> origin/main
 
                     // Clear the session variables so the alert doesn't show on subsequent page loads
                     unset($_SESSION['swalType']);
@@ -1447,11 +1385,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             });
 
             // Initialize DataTables for Manage Therapists Table
-<<<<<<< HEAD
              const therapistsTable = $('#managetherapistsTable').DataTable({
-=======
-            const therapistsTable = $('#therapistsTable').DataTable({
->>>>>>> origin/main
                 pageLength: 5,
                 lengthMenu: [5, 10, 25, 50],
                 order: [
