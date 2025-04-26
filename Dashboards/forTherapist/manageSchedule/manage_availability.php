@@ -75,21 +75,30 @@ while ($row = $bizQuery->fetch_assoc()) {
     <div class="uk-container uk-margin-top">
     <h4 class="uk-card-title uk-text-bold">Manage Default Availability</h4>
 
-        <?php
-        function generateTimeOptions($start, $end, $interval = 30) {
-            $startTime = strtotime($start);
-            $endTime = strtotime($end);
-            $options = "";
+    <?php
+function generateTimeOptions($start, $end, $selectedValue = null, $interval = 30) {
+    $startTime = strtotime($start);
+    $endTime = strtotime($end);
+    $options = "";
 
-            for ($time = $startTime; $time <= $endTime; $time += $interval * 60) {
-                $value = date("H:i", $time);           // 24-hour value to submit
-                $label = date("g:i A", $time);         // 12-hour label to display
-                $options .= "<option value=\"$value\">$label</option>";
-            }
+    // Ensure valid times - add error handling if needed
+    if ($startTime === false || $endTime === false || $startTime > $endTime) {
+        return ""; // Return empty if times are invalid
+    }
 
-            return $options;
-        }
-        ?>
+    for ($time = $startTime; $time <= $endTime; $time += $interval * 60) {
+        $value = date("H:i", $time);           // 24-hour value (e.g., "09:00")
+        $label = date("g:i A", $time);         // 12-hour label (e.g., "9:00 AM")
+
+        // Check if this option's value matches the saved value
+        $selectedAttr = ($selectedValue !== null && $value === $selectedValue) ? " selected" : "";
+
+        $options .= "<option value=\"$value\"{$selectedAttr}>$label</option>";
+    }
+
+    return $options;
+}
+?>
 
         <form id="availabilityForm" method="POST" class="uk-form-stacked">
             <table class="uk-table uk-table-divider">
@@ -101,54 +110,54 @@ while ($row = $bizQuery->fetch_assoc()) {
                     </tr>
                 </thead>
                 <tbody>
+    <?php
+    $daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+    foreach ($daysOfWeek as $day):
+        // Get the saved times for this day
+        $savedStartTimeRaw = $availability[$day]['start_time'] ?? null;
+        $savedEndTimeRaw = $availability[$day]['end_time'] ?? null;
+
+        // Format to HH:MM for comparison, only if the value exists
+        $savedStartTime = $savedStartTimeRaw ? substr($savedStartTimeRaw, 0, 5) : null; // Extract first 5 chars (HH:MM)
+        $savedEndTime = $savedEndTimeRaw ? substr($savedEndTimeRaw, 0, 5) : null;     // Extract first 5 chars (HH:MM)
+
+        // Alternative using date() and strtotime() - slightly more robust if format isn't guaranteed
+        // $savedStartTime = $savedStartTimeRaw ? date('H:i', strtotime($savedStartTimeRaw)) : null;
+        // $savedEndTime = $savedEndTimeRaw ? date('H:i', strtotime($savedEndTimeRaw)) : null;
+
+        // Get business hours for this day
+        $bizStart = $globalBizHours[$day]['start'] ?? null;
+        $bizEnd = $globalBizHours[$day]['end'] ?? null;
+            ?>
+        <tr>
+            <td><?= htmlspecialchars($day) // Good practice to escape output ?></td>
+            <td>
+                <select class="uk-select" name="start_time[<?= htmlspecialchars($day) ?>]">
+                    <option value="">--</option> <?php // Add empty value for the default option ?>
                     <?php
-                    $daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
-                    foreach ($daysOfWeek as $day): ?>
-                        <tr>
-                            <td><?= $day ?></td>
-                            <td>
-                                <select class="uk-select" name="start_time[<?= $day ?>]">
-                                    <option value="">--</option>
-                                    <?php
-                                    $bizStart = $globalBizHours[$day]['start'] ?? null;
-                                    $bizEnd = $globalBizHours[$day]['end'] ?? null;
-                                    
-                                    if ($bizStart && $bizEnd) {
-                                        $timeOptionsHTML = generateTimeOptions($bizStart, $bizEnd);
-                                        foreach (explode("</option>", $timeOptionsHTML) as $opt) {
-                                            $val = trim(strip_tags($opt));
-                                            if ($val === "") continue;
-                                            $selected = ($availability[$day]['start_time'] ?? '') === $val ? "selected" : "";
-                                            echo "<option value=\"$val\" $selected>$val</option>";
-                                        }
-                                    }
-                                    ?>
-                                </select>
-
-                            </td>
-                            <td>
-                                <select class="uk-select" name="end_time[<?= $day ?>]">
-                                    <option value="">--</option>
-                                    <?php
-                                    $bizStart = $globalBizHours[$day]['start'] ?? null;
-                                    $bizEnd = $globalBizHours[$day]['end'] ?? null;
-
-                                    if ($bizStart && $bizEnd) {
-                                        $timeOptionsHTML = generateTimeOptions($bizStart, $bizEnd);
-                                        foreach (explode("</option>", $timeOptionsHTML) as $opt) {
-                                            $val = trim(strip_tags($opt));
-                                            if ($val === "") continue;
-                                            $selected = ($availability[$day]['start_time'] ?? '') === $val ? "selected" : "";
-                                            echo "<option value=\"$val\" $selected>$val</option>";
-                                        }
-                                    }
-                                    ?>
-                                </select>
-                            </td>
-
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
+                    // Only generate options if business hours are set for the day
+                    if ($bizStart && $bizEnd) {
+                        // Pass the saved start time to the function
+                        echo generateTimeOptions($bizStart, $bizEnd, $savedStartTime);
+                    }
+                    ?>
+                </select>
+            </td>
+            <td>
+                <select class="uk-select" name="end_time[<?= htmlspecialchars($day) ?>]">
+                    <option value="">--</option> <?php // Add empty value for the default option ?>
+                    <?php
+                    // Only generate options if business hours are set for the day
+                    if ($bizStart && $bizEnd) {
+                        // Pass the saved end time to the function
+                        echo generateTimeOptions($bizStart, $bizEnd, $savedEndTime);
+                    }
+                    ?>
+                </select>
+            </td>
+        </tr>
+    <?php endforeach; ?>
+</tbody>
             </table>
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
             <button class="uk-button uk-button-primary uk-margin-top" type="submit">Save Availability</button>

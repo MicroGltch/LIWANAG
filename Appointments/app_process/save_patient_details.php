@@ -1,372 +1,542 @@
 <?php
-require_once "../../dbconfig.php"; // Adjust path as needed
-session_start(); // Ensure session is started AT THE VERY TOP
+// --- Start Output Buffering ---
+ob_start();
 
-// Enable error logging during development/debugging
-// ini_set('log_errors', 1);
-// ini_set('error_log', '/path/to/your/php-error.log'); // Set a writable path
-// error_reporting(E_ALL);
+// --- Includes and Setup ---
+// Adjust path for Composer's autoload if you installed PHPMailer via Composer
+require_once "../../Accounts/signupverify/vendor/autoload.php";
+require_once "../../dbconfig.php"; // Adjust path if needed
 
-// Check if connection is established
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+session_start(); // Start session AT THE VERY TOP
+
+// Minimal error logging (adjust as needed for production/debugging)
+ini_set('log_errors', 1);
+ini_set('error_log', '/path/to/your/php-error.log'); // IMPORTANT: Set a real, writable path
+error_reporting(E_ALL & ~E_NOTICE & ~E_WARNING); // Log errors, but maybe hide notices/warnings
+
+// Check DB connection
 if (!isset($connection)) {
-    // Log this error server-side if possible
     die("Database connection error.");
 }
 
 // --- Permission Check ---
 if (!isset($_SESSION['account_ID']) || strtolower($_SESSION['account_Type']) !== "therapist") {
-     $_SESSION['error_message'] = "Unauthorized access.";
-     // Redirect back to a safe page, maybe dashboard or the form itself
-     header("Location: ../app_manage/update_patient_details.php");
-     exit();
+    $_SESSION['error_message'] = "Unauthorized access.";
+    header("Location: ../app_manage/update_patient_details.php");
+    if (ob_get_level() > 0)
+        ob_end_flush();
+    exit();
 }
-$therapistID = $_SESSION['account_ID']; // Get logged-in therapist ID
+$therapistID = $_SESSION['account_ID'];
 
-// Define allowed patient statuses
 $allowedPatientStatuses = ['pending', 'enrolled', 'declined_enrollment', 'completed', 'cancelled'];
 
-// --- Helper Function: Check if a time slot is valid for the therapist's AVAILABILITY ---
-function isTimeSlotValidForTherapist($connection, $therapistId, $dateOrDay, $startTime, $endTime, $isMakeup = false) {
-    $isValid = false;
-    if (empty($startTime) || empty($endTime)) return false; // Need both times
-    $checkTimeStart = strtotime($startTime);
-    $checkTimeEnd = strtotime($endTime);
-
-    // Basic check: end time must be after start time
-    if ($checkTimeEnd === false || $checkTimeStart === false || $checkTimeEnd <= $checkTimeStart) {
-        error_log("[isTimeSlotValidForTherapist] Validation Fail: Invalid start/end time format or end not after start.");
+// --- Email Sending Function ---
+function sendNotificationEmail($recipientEmail, $recipientName, $subject, $htmlBody)
+{
+    // --- SMTP Configuration ---
+    $smtpHost = 'smtp.hostinger.com';
+    $smtpUsername = 'no-reply@myliwanag.com';
+    $smtpPassword = '[l/+1V/B4'; // *** IMPORTANT: Replace/Use Secure Config ***
+    $smtpPort = 465;
+    $smtpSecure = PHPMailer::ENCRYPTION_SMTPS;
+    $fromEmail = 'no-reply@myliwanag.com';
+    $fromName = "Little Wanderer's Therapy Center";
+    // --- End Config ---
+    $mail = new PHPMailer(true);
+    try {
+        $mail->isSMTP();
+        $mail->Host = $smtpHost;
+        $mail->SMTPAuth = true;
+        $mail->Username = $smtpUsername;
+        $mail->Password = $smtpPassword;
+        $mail->SMTPSecure = $smtpSecure;
+        $mail->Port = $smtpPort;
+        $mail->setFrom($fromEmail, $fromName);
+        $mail->addAddress($recipientEmail, $recipientName ?? '');
+        $mail->isHTML(true);
+        $mail->Subject = $subject;
+        $mail->Body = $htmlBody;
+        $mail->AltBody = strip_tags($htmlBody);
+        $mail->send();
+        error_log("[Email Sent] To: $recipientEmail");
+        return true;
+    } catch (Exception $e) {
+        error_log("[Email FAILED] To: $recipientEmail Error: {$mail->ErrorInfo}");
         return false;
     }
+}
 
-     $availability_blocks = []; // Array to hold ['start_time' => HH:MM:SS, 'end_time' => HH:MM:SS]
-
-    // Determine relevant availability blocks (Check override first for makeup)
-    if ($isMakeup) {
+// --- Helper Function: Check Therapist Availability (Minimal Logging) ---
+function isTimeSlotValidForTherapist($connection, $therapistId, $dateOrDay, $startTime, $endTime, $isMakeup = false)
+{
+    $isValid = false;
+    if (empty($startTime) || empty($endTime))
+        return false;
+    $checkTimeStart = strtotime($startTime);
+    $checkTimeEnd = strtotime($endTime);
+    if ($checkTimeEnd === false || $checkTimeStart === false || $checkTimeEnd <= $checkTimeStart)
+        return false;
+    $availability_blocks = [];
+    if ($isMakeup) { /* ... Fetch overrides/defaults for makeup ... */
         $date_str = $dateOrDay;
-         try { $date_obj = new DateTime($date_str); $day_of_week = $date_obj->format('l'); } catch (Exception $e) { return false; /* Invalid date */ }
-         // 1. Check Override
-         $override_query = "SELECT status, start_time, end_time FROM therapist_overrides WHERE therapist_id = ? AND date = ?";
-         $stmt_o = $connection->prepare($override_query);
-         if(!$stmt_o) { error_log("DB Prepare Error (Makeup Override): " . $connection->error); return false; }
-         $stmt_o->bind_param("is", $therapistId, $date_str);
-         $stmt_o->execute();
-         $override = $stmt_o->get_result()->fetch_assoc();
-         $stmt_o->close();
-        if ($override) {
-            if ($override['status'] === 'Unavailable') return false;
-            if ($override['status'] === 'Custom' && $override['start_time'] && $override['end_time']) { $availability_blocks[] = ['start_time' => $override['start_time'], 'end_time' => $override['end_time']]; }
-            elseif ($override['status'] === 'Custom') { return false; } // Custom but no times = unavailable
-        } else { // 2. No Override, check Default
-             $default_query = "SELECT start_time, end_time FROM therapist_default_availability WHERE therapist_id = ? AND day = ?";
-             $stmt_d = $connection->prepare($default_query);
-             if(!$stmt_d) { error_log("DB Prepare Error (Makeup Default): " . $connection->error); return false; }
-             $stmt_d->bind_param("is", $therapistId, $day_of_week);
-             $stmt_d->execute();
-             $result_d = $stmt_d->get_result();
-             while ($row = $result_d->fetch_assoc()) { $availability_blocks[] = $row; } // Fetches start_time, end_time
-             $stmt_d->close();
+        try {
+            $date_obj = new DateTime($date_str);
+            $day_of_week = $date_obj->format('l');
+        } catch (Exception $e) {
+            return false;
         }
-    } else { // Default schedule: Just check default availability
-         $day_of_week = $dateOrDay;
-          $default_query = "SELECT start_time, end_time FROM therapist_default_availability WHERE therapist_id = ? AND day = ?";
-         $stmt_d = $connection->prepare($default_query);
-         if(!$stmt_d) { error_log("DB Prepare Error (Default Avail Check): " . $connection->error); return false; }
-         $stmt_d->bind_param("is", $therapistId, $day_of_week);
-         if(!$stmt_d->execute()){ error_log("DB Execute Error (Default Avail Check): " . $stmt_d->error); $stmt_d->close(); return false; }
-         $result_d = $stmt_d->get_result();
-          if (!$result_d) { error_log("DB Get Result Error (Default Avail Check): " . $stmt_d->error); $stmt_d->close(); return false; }
-         while ($row = $result_d->fetch_assoc()) { $availability_blocks[] = $row; } // Fetches start_time, end_time
-         $stmt_d->close();
+        $stmt_o = $connection->prepare("SELECT status, start_time, end_time FROM therapist_overrides WHERE therapist_id = ? AND date = ?");
+        if (!$stmt_o) {
+            return false;
+        }
+        $stmt_o->bind_param("is", $therapistId, $date_str);
+        $stmt_o->execute();
+        $override = $stmt_o->get_result()->fetch_assoc();
+        $stmt_o->close();
+        if ($override) {
+            if ($override['status'] === 'Unavailable')
+                return false;
+            if ($override['status'] === 'Custom' && $override['start_time'] && $override['end_time']) {
+                $availability_blocks[] = ['start_time' => $override['start_time'], 'end_time' => $override['end_time']];
+            } elseif ($override['status'] === 'Custom') {
+                return false;
+            }
+        } else {
+            $stmt_d = $connection->prepare("SELECT start_time, end_time FROM therapist_default_availability WHERE therapist_id = ? AND day = ?");
+            if (!$stmt_d) {
+                return false;
+            }
+            $stmt_d->bind_param("is", $therapistId, $day_of_week);
+            $stmt_d->execute();
+            $result_d = $stmt_d->get_result();
+            while ($row = $result_d->fetch_assoc()) {
+                $availability_blocks[] = $row;
+            }
+            $stmt_d->close();
+        }
+    } else { /* Default schedule */
+        $day_of_week = $dateOrDay;
+        $stmt_d = $connection->prepare("SELECT start_time, end_time FROM therapist_default_availability WHERE therapist_id = ? AND day = ?");
+        if (!$stmt_d) {
+            return false;
+        }
+        $stmt_d->bind_param("is", $therapistId, $day_of_week);
+        if (!$stmt_d->execute()) {
+            $stmt_d->close();
+            return false;
+        }
+        $result_d = $stmt_d->get_result();
+        if (!$result_d) {
+            $stmt_d->close();
+            return false;
+        }
+        while ($row = $result_d->fetch_assoc()) {
+            $availability_blocks[] = $row;
+        }
+        $stmt_d->close();
     }
-
-    // Check if the submitted slot fits within *any* fetched block
-     if (empty($availability_blocks)) { error_log("[isTimeSlotValidForTherapist] Validation Fail: No availability blocks found."); return false; }
-     foreach ($availability_blocks as $block) {
-         $availStart = strtotime($block['start_time']);
-         $availEnd = strtotime($block['end_time']);
-         if ($availStart === false || $availEnd === false) continue; // Skip invalid blocks
-         if ($checkTimeStart >= $availStart && $checkTimeEnd <= $availEnd) {
-             $isValid = true; // Found a valid block
-             break;
-         }
-     }
-    error_log("[isTimeSlotValidForTherapist] Check for $dateOrDay $startTime-$endTime. Valid: " . ($isValid?'Yes':'No'));
+    if (empty($availability_blocks))
+        return false;
+    foreach ($availability_blocks as $block) {
+        $availStart = strtotime($block['start_time']);
+        $availEnd = strtotime($block['end_time']);
+        if ($availStart === false || $availEnd === false)
+            continue;
+        if ($checkTimeStart >= $availStart && $checkTimeEnd <= $availEnd) {
+            $isValid = true;
+            break;
+        }
+    }
     return $isValid;
 }
 
-// --- Helper Function: Check for Default Schedule Conflicts with OTHER patients ---
-function hasDefaultScheduleConflict($connection, $therapistId, $patientId, $day, $startTime, $scheduleIdToExclude = null) {
-    $conflictQuery = "SELECT COUNT(*) as count
-                      FROM patient_default_schedules
-                      WHERE therapist_id = ?    -- Same therapist
-                        AND day_of_week = ?     -- Same day
-                        AND start_time = ?      -- Same start time (primary check for overlap)
-                        AND patient_id != ?";   // Different patient
-
+// --- Helper Function: Check Default Conflict with Other Patients (Keep as is) ---
+function hasDefaultScheduleConflict($connection, $therapistId, $patientId, $day, $startTime, $scheduleIdToExclude = null)
+{
+    $conflictQuery = "SELECT COUNT(*) as count FROM patient_default_schedules WHERE therapist_id = ? AND day_of_week = ? AND start_time = ? AND patient_id != ?";
     $params = [$therapistId, $day, $startTime, $patientId];
-    $types = "issi"; // Assuming therapist_id=int, day=string, start_time=string, patient_id=int
-
+    $types = "issi";
     if ($scheduleIdToExclude !== null && filter_var($scheduleIdToExclude, FILTER_VALIDATE_INT)) {
-        $conflictQuery .= " AND id != ?"; // Exclude own ID if updating
-        $params[] = (int)$scheduleIdToExclude;
+        $conflictQuery .= " AND id != ?";
+        $params[] = (int) $scheduleIdToExclude;
         $types .= "i";
     }
-
     $stmt = $connection->prepare($conflictQuery);
-    if (!$stmt) { error_log("Prepare failed (hasDefaultScheduleConflict): " . $connection->error); return true; } // Assume conflict on error
-    if (!$stmt->bind_param($types, ...$params)) { error_log("Bind Param Failed (hasDefaultScheduleConflict): " . $stmt->error); $stmt->close(); return true; }
-    if (!$stmt->execute()) { error_log("Execute Failed (hasDefaultScheduleConflict): " . $stmt->error); $stmt->close(); return true; }
-
+    if (!$stmt) {
+        error_log("Prepare Fail Conflict Check");
+        return true;
+    }
+    $stmt->bind_param($types, ...$params);
+    if (!$stmt->execute()) {
+        $stmt->close();
+        return true;
+    }
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     $stmt->close();
-
-    $conflictExists = ($row && $row['count'] > 0);
-    error_log("Conflict Check: Therapist=$therapistId, Patient=$patientId, Day=$day, Start=$startTime, ExcludeID=" . ($scheduleIdToExclude ?? 'N/A') . ", Conflict Found: " . ($conflictExists ? 'YES' : 'NO'));
-    return $conflictExists;
+    return ($row && $row['count'] > 0);
 }
-// --- End Helper Function ---
-
 
 // --- Form Processing ---
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['patient_id'])) {
     $patient_id = filter_input(INPUT_POST, 'patient_id', FILTER_VALIDATE_INT);
     if (!$patient_id) {
-         $_SESSION['error_message'] = "Invalid Patient ID."; header("Location: ../app_manage/update_patient_details.php"); exit();
+        $_SESSION['error_message'] = "Invalid Patient ID.";
+        header("Location: ../app_manage/update_patient_details.php");
+        ob_end_flush();
+        exit();
     }
-
-    // Validate Status Input
-    $status = filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING); // Sanitize first
+    $status = filter_input(INPUT_POST, 'status', FILTER_SANITIZE_STRING);
     if (!in_array($status, $allowedPatientStatuses)) {
-        $_SESSION['error_message'] = "Invalid status value provided.";
-        header("Location: ../app_manage/update_patient_details.php?patient_id=" . urlencode($patient_id)); exit();
+        $_SESSION['error_message'] = "Invalid status value.";
+        header("Location: ../app_manage/update_patient_details.php?patient_id=" . urlencode($patient_id));
+        ob_end_flush();
+        exit();
     }
-
     $service_type = filter_input(INPUT_POST, 'service_type', FILTER_SANITIZE_STRING);
-    // Optional: Validate service_type against enum values if needed
 
-    error_log("--- Saving Patient Details ---");
-    error_log("Patient ID: $patient_id, Status: $status, Service: $service_type, Therapist: $therapistID");
+    error_log("--- Saving Patient Details (PHP Start) --- P:$patient_id, S:$status, T:$therapistID");
 
+    $commitSuccess = false;
+    $anyChangeDetected = false;
     $connection->begin_transaction();
 
     try {
-        // --- Update Patient Information ---
-        $updatePatientQuery = "UPDATE patients SET service_type=?, status=? WHERE patient_id=?";
-        $stmtPat = $connection->prepare($updatePatientQuery);
-        if (!$stmtPat) throw new Exception("Prepare failed (update patients): " . $connection->error);
+        // 1. Update Patient Info
+        $stmtPat = $connection->prepare("UPDATE patients SET service_type=?, status=? WHERE patient_id=?");
+        if (!$stmtPat)
+            throw new Exception("Prepare failed (patients)");
         $stmtPat->bind_param("ssi", $service_type, $status, $patient_id);
-        if (!$stmtPat->execute()) throw new Exception("Execute failed (update patients): " . $stmtPat->error);
-        error_log("Patient update affected rows: " . $stmtPat->affected_rows);
+        if (!$stmtPat->execute())
+            throw new Exception("Execute failed (patients)");
+        if ($stmtPat->affected_rows > 0)
+            $anyChangeDetected = true;
         $stmtPat->close();
 
+        // 2. Process Schedules
+        $defaultScheduleChangesMade = false;
+        $makeupScheduleChangesMade = false;
+        $submitted_schedule_ids = [];
+        $submitted_makeup_ids = [];
 
-        // --- Process Schedules ONLY IF Status is 'enrolled' ---
         if ($status === 'enrolled') {
-            error_log("Status is 'enrolled'. Processing schedules...");
-
-            // --- Process Default Schedules ---
-            $submitted_schedule_ids = []; // Holds IDs of ALL schedules processed in this request
-
+            // --- Process Default ---
             if (!empty($_POST['default_day'])) {
-                error_log("Processing Submitted Default Schedules...");
-                $insertDefault = "INSERT INTO patient_default_schedules (patient_id, therapist_id, day_of_week, start_time, end_time) VALUES (?, ?, ?, ?, ?)";
-                $updateDefault = "UPDATE patient_default_schedules SET day_of_week = ?, start_time = ?, end_time = ?, therapist_id = ? WHERE id = ? AND patient_id = ?";
-
-                $stmtInsert = $connection->prepare($insertDefault);
-                if (!$stmtInsert) throw new Exception("Prepare failed (insert default): " . $connection->error);
-                $stmtUpdate = $connection->prepare($updateDefault);
-                if (!$stmtUpdate) throw new Exception("Prepare failed (update default): " . $connection->error);
-
+                $stmtInsert = $connection->prepare("INSERT INTO patient_default_schedules (patient_id, therapist_id, day_of_week, start_time, end_time) VALUES (?, ?, ?, ?, ?)");
+                $stmtUpdate = $connection->prepare("UPDATE patient_default_schedules SET day_of_week = ?, start_time = ?, end_time = ?, therapist_id = ? WHERE id = ? AND patient_id = ?");
+                if (!$stmtInsert || !$stmtUpdate)
+                    throw new Exception("Prepare failed (default)");
                 foreach ($_POST['default_day'] as $index => $day) {
-                    // Validate and sanitize inputs for this row
-                     if (empty($_POST['default_start_time'][$index]) || empty($_POST['default_end_time'][$index])) {
-                         error_log("Skipping default schedule index $index due to missing start/end time.");
-                         continue; // Skip if essential time data is missing
-                     }
-                    $start_time = filter_var($_POST['default_start_time'][$index], FILTER_SANITIZE_STRING); // Basic sanitize
-                    $end_time = filter_var($_POST['default_end_time'][$index], FILTER_SANITIZE_STRING);   // Basic sanitize
-                    $schedule_id = isset($_POST['default_schedule_id'][$index]) && !empty($_POST['default_schedule_id'][$index])
-                                    ? filter_var($_POST['default_schedule_id'][$index], FILTER_VALIDATE_INT) : null;
-                    error_log("Processing Default Item [$index]: Day=$day, Start=$start_time, End=$end_time, ID=$schedule_id");
+                    if (empty($_POST['default_start_time'][$index]) || empty($_POST['default_end_time'][$index]))
+                        continue;
+                    $start_time = $_POST['default_start_time'][$index];
+                    $end_time = $_POST['default_end_time'][$index];
+                    $schedule_id = isset($_POST['default_schedule_id'][$index]) ? filter_var($_POST['default_schedule_id'][$index], FILTER_VALIDATE_INT) : null;
 
-                    // Validate Therapist Availability
+
+  
+
+
                     if (!isTimeSlotValidForTherapist($connection, $therapistID, $day, $start_time, $end_time, false)) {
-                        throw new Exception("Invalid time slot selected for default schedule on $day ($start_time - $end_time). It falls outside your available hours.");
+                        throw new Exception("Invalid slot: $day $start_time");
                     }
-                    // Validate Conflict with Other Patients
                     if (hasDefaultScheduleConflict($connection, $therapistID, $patient_id, $day, $start_time, $schedule_id)) {
-                         throw new Exception("Schedule conflict detected for $day at $start_time. This time slot is already assigned to another patient by you.");
+                        throw new Exception("Conflict: $day $start_time");
                     }
-
-                    // Perform Update or Insert
-                    if ($schedule_id) { // Update Existing
-                        if(!$stmtUpdate->bind_param("sssiii", $day, $start_time, $end_time, $therapistID, $schedule_id, $patient_id)) { throw new Exception("Bind Param Failed (UPDATE default): " . $stmtUpdate->error); }
-                        if (!$stmtUpdate->execute()) { throw new Exception("Execute failed (UPDATE default loop): " . $stmtUpdate->error); }
-                        error_log("UPDATE Default Schedule ID: $schedule_id - Affected Rows: " . $stmtUpdate->affected_rows);
-                        $submitted_schedule_ids[] = $schedule_id; // Add existing ID to keep list
-                    } else { // Insert New
-                         if(!$stmtInsert->bind_param("iisss", $patient_id, $therapistID, $day, $start_time, $end_time)) { throw new Exception("Bind Param Failed (INSERT default): " . $stmtInsert->error); }
-                        if (!$stmtInsert->execute()) { throw new Exception("Execute failed (INSERT default loop): " . $stmtInsert->error); }
+                    if ($schedule_id) {
+                        $stmtUpdate->bind_param("sssiii", $day, $start_time, $end_time, $therapistID, $schedule_id, $patient_id);
+                        if (!$stmtUpdate->execute()) {
+                            throw new Exception("Exec Update Fail (default)");
+                        }
+                        if ($stmtUpdate->affected_rows > 0)
+                            $defaultScheduleChangesMade = true;
+                        $submitted_schedule_ids[] = $schedule_id;
+                    } else {
+                        $stmtInsert->bind_param("iisss", $patient_id, $therapistID, $day, $start_time, $end_time);
+                        if (!$stmtInsert->execute()) {
+                            throw new Exception("Exec Insert Fail (default)");
+                        }
                         $newId = $stmtInsert->insert_id;
-                        error_log("INSERT New Default Schedule - Success. New ID: " . $newId);
-                        if ($newId > 0) {
-                           $submitted_schedule_ids[] = $newId; // Add NEWLY INSERTED ID to keep list
-                        } else { error_log("WARNING: Insert succeeded but insert_id was not positive ($newId)."); }
+                        if ($newId > 0)
+                            $submitted_schedule_ids[] = $newId;
+                        $defaultScheduleChangesMade = true;
                     }
-                } // End foreach loop
+                }
                 $stmtInsert->close();
                 $stmtUpdate->close();
-                error_log("Finished processing submitted default schedules loop.");
-            } else {
-                 error_log("No default schedules submitted in POST data.");
             }
-
-            // --- Delete default schedules NOT processed in this request ---
+            // Delete unsubmitted defaults
             $deleteDefaultQuery = "DELETE FROM patient_default_schedules WHERE patient_id = ?";
             $params = [$patient_id];
             $types = "i";
-
-            // Filter out any invalid IDs just in case before building NOT IN clause
             $ids_to_keep = array_unique(array_filter($submitted_schedule_ids, 'is_int'));
-
             if (!empty($ids_to_keep)) {
                 $placeholders = implode(',', array_fill(0, count($ids_to_keep), '?'));
                 $deleteDefaultQuery .= " AND id NOT IN ($placeholders)";
                 $params = array_merge($params, $ids_to_keep);
                 $types .= str_repeat('i', count($ids_to_keep));
-                error_log("Default Schedule IDs processed/submitted (To Keep): " . implode(', ', $ids_to_keep));
-            } else {
-                // No valid schedules were submitted/processed, delete ALL for this patient
-                 error_log("No valid default schedule IDs processed/submitted, deleting ALL default schedules for patient $patient_id.");
             }
-
-            error_log("Preparing DELETE query for unsubmitted default schedules: $deleteDefaultQuery");
             $stmtDelete = $connection->prepare($deleteDefaultQuery);
-            if (!$stmtDelete) throw new Exception("Prepare failed (delete default): " . $connection->error);
-            if (!$stmtDelete->bind_param($types, ...$params)) { throw new Exception("Bind Param Failed (DELETE default): " . $stmtDelete->error); }
-            if (!$stmtDelete->execute()) { throw new Exception("Execute failed (delete default): " . $stmtDelete->error); }
-            error_log("DELETE unsubmitted default schedules - Affected Rows: " . $stmtDelete->affected_rows);
+            if (!$stmtDelete)
+                throw new Exception("Prepare failed (delete default)");
+            $stmtDelete->bind_param($types, ...$params);
+            if (!$stmtDelete->execute()) {
+                throw new Exception("Exec Failed (DELETE default)");
+            }
+            if ($stmtDelete->affected_rows > 0)
+                $defaultScheduleChangesMade = true;
             $stmtDelete->close();
-            // --- End Default Delete Logic Modification ---
 
-
-            // --- Process Makeup Schedules (Apply similar logic) ---
-            $submitted_makeup_ids = []; // Holds ALL makeup IDs processed
-
+            // --- Process Makeup ---
             if (!empty($_POST['makeup_date'])) {
-                 error_log("Processing Submitted Makeup Schedules...");
-                $insertMakeup = "INSERT INTO patient_makeup_schedules (patient_id, date, start_time, end_time, notes) VALUES (?, ?, ?, ?, ?)";
-                $updateMakeup = "UPDATE patient_makeup_schedules SET date = ?, start_time = ?, end_time = ?, notes = ? WHERE id = ? AND patient_id = ?";
-                // Prepare statements... error check...
-                 $stmtInsertMkp = $connection->prepare($insertMakeup); if (!$stmtInsertMkp) throw new Exception("Prepare failed (insert makeup): " . $connection->error);
-                 $stmtUpdateMkp = $connection->prepare($updateMakeup); if (!$stmtUpdateMkp) throw new Exception("Prepare failed (update makeup): " . $connection->error);
-
-
+                $stmtInsertMkp = $connection->prepare("INSERT INTO patient_makeup_schedules (patient_id, date, start_time, end_time, notes) VALUES (?, ?, ?, ?, ?)");
+                $stmtUpdateMkp = $connection->prepare("UPDATE patient_makeup_schedules SET date = ?, start_time = ?, end_time = ?, notes = ? WHERE id = ? AND patient_id = ?");
+                if (!$stmtInsertMkp || !$stmtUpdateMkp)
+                    throw new Exception("Prepare failed (makeup)");
                 foreach ($_POST['makeup_date'] as $index => $date) {
-                    // Validate and sanitize...
-                     if (empty($_POST['makeup_start_time'][$index]) || empty($_POST['makeup_end_time'][$index])) {
-                         error_log("Skipping makeup schedule index $index due to missing start/end time.");
-                         continue;
-                     }
-                    $start_time = filter_var($_POST['makeup_start_time'][$index], FILTER_SANITIZE_STRING);
-                    $end_time = filter_var($_POST['makeup_end_time'][$index], FILTER_SANITIZE_STRING);
+                    if (empty($_POST['makeup_start_time'][$index]) || empty($_POST['makeup_end_time'][$index]))
+                        continue;
+                    $start_time = $_POST['makeup_start_time'][$index];
+                    $end_time = $_POST['makeup_end_time'][$index];
                     $notes = filter_var($_POST['makeup_notes'][$index] ?? '', FILTER_SANITIZE_STRING);
-                    $schedule_id = isset($_POST['makeup_schedule_id'][$index]) && !empty($_POST['makeup_schedule_id'][$index])
-                                    ? filter_var($_POST['makeup_schedule_id'][$index], FILTER_VALIDATE_INT) : null;
-                    error_log("Processing Makeup Item [$index]: Date=$date, Start=$start_time, End=$end_time, ID=$schedule_id");
-
-                    // Validate Availability
+                    $schedule_id = isset($_POST['makeup_schedule_id'][$index]) ? filter_var($_POST['makeup_schedule_id'][$index], FILTER_VALIDATE_INT) : null;
                     if (!isTimeSlotValidForTherapist($connection, $therapistID, $date, $start_time, $end_time, true)) {
-                        throw new Exception("Invalid time slot selected for makeup schedule on $date ($start_time - $end_time).");
+                        throw new Exception("Invalid makeup slot: $date $start_time");
                     }
-                    // Note: Typically no DB conflict check needed for one-off makeup slots, but add if required.
-
-                    if ($schedule_id) { // Update
-                         if(!$stmtUpdateMkp->bind_param("ssssii", $date, $start_time, $end_time, $notes, $schedule_id, $patient_id)){ throw new Exception("Bind Param Failed (UPDATE makeup): " . $stmtUpdateMkp->error); }
-                         if(!$stmtUpdateMkp->execute()){ throw new Exception("Execute Failed (UPDATE makeup): " . $stmtUpdateMkp->error); }
-                         error_log("UPDATE Makeup Schedule ID: $schedule_id - Affected Rows: " . $stmtUpdateMkp->affected_rows);
-                         $submitted_makeup_ids[] = $schedule_id;
-                    } else { // Insert
-                         if(!$stmtInsertMkp->bind_param("issss", $patient_id, $date, $start_time, $end_time, $notes)) { throw new Exception("Bind Param Failed (INSERT makeup): " . $stmtInsertMkp->error); }
-                         if(!$stmtInsertMkp->execute()) { throw new Exception("Execute Failed (INSERT makeup): " . $stmtInsertMkp->error); }
-                         $newId = $stmtInsertMkp->insert_id;
-                         error_log("INSERT New Makeup Schedule - Success. New ID: " . $newId);
-                         if($newId > 0) $submitted_makeup_ids[] = $newId;
+                    if ($schedule_id) {
+                        $stmtUpdateMkp->bind_param("ssssii", $date, $start_time, $end_time, $notes, $schedule_id, $patient_id);
+                        if (!$stmtUpdateMkp->execute()) {
+                            throw new Exception("Exec Failed (UPDATE makeup)");
+                        }
+                        if ($stmtUpdateMkp->affected_rows > 0)
+                            $makeupScheduleChangesMade = true;
+                        $submitted_makeup_ids[] = $schedule_id;
+                    } else {
+                        $stmtInsertMkp->bind_param("issss", $patient_id, $date, $start_time, $end_time, $notes);
+                        if (!$stmtInsertMkp->execute()) {
+                            throw new Exception("Exec Failed (INSERT makeup)");
+                        }
+                        $newId = $stmtInsertMkp->insert_id;
+                        if ($newId > 0)
+                            $submitted_makeup_ids[] = $newId;
+                        $makeupScheduleChangesMade = true;
                     }
                 }
-                 $stmtInsertMkp->close();
-                 $stmtUpdateMkp->close();
-                 error_log("Finished processing submitted makeup schedules loop.");
-            } else {
-                 error_log("No makeup schedules submitted in POST data.");
+                $stmtInsertMkp->close();
+                $stmtUpdateMkp->close();
             }
-
-            // --- Delete makeup schedules NOT processed ---
+            // Delete unsubmitted makeups
             $deleteMakeupQuery = "DELETE FROM patient_makeup_schedules WHERE patient_id = ?";
             $mkp_params = [$patient_id];
             $mkp_types = "i";
             $mkp_ids_to_keep = array_unique(array_filter($submitted_makeup_ids, 'is_int'));
-
             if (!empty($mkp_ids_to_keep)) {
-                 $mkp_placeholders = implode(',', array_fill(0, count($mkp_ids_to_keep), '?'));
-                 $deleteMakeupQuery .= " AND id NOT IN ($mkp_placeholders)";
-                 $mkp_params = array_merge($mkp_params, $mkp_ids_to_keep);
-                 $mkp_types .= str_repeat('i', count($mkp_ids_to_keep));
-                 error_log("Makeup Schedule IDs processed/submitted (To Keep): " . implode(', ', $mkp_ids_to_keep));
-            } else {
-                 error_log("No valid makeup schedule IDs processed/submitted, deleting ALL makeup schedules for patient $patient_id.");
+                $mkp_placeholders = implode(',', array_fill(0, count($mkp_ids_to_keep), '?'));
+                $deleteMakeupQuery .= " AND id NOT IN ($mkp_placeholders)";
+                $mkp_params = array_merge($mkp_params, $mkp_ids_to_keep);
+                $mkp_types .= str_repeat('i', count($mkp_ids_to_keep));
             }
-
-            error_log("Preparing DELETE query for unsubmitted makeup schedules: $deleteMakeupQuery");
             $stmtDeleteMkp = $connection->prepare($deleteMakeupQuery);
-             if (!$stmtDeleteMkp) { throw new Exception("Prepare failed (delete makeup): " . $connection->error); }
-             if (!$stmtDeleteMkp->bind_param($mkp_types, ...$mkp_params)) { throw new Exception("Bind Param Failed (DELETE makeup): " . $stmtDeleteMkp->error); }
-             if (!$stmtDeleteMkp->execute()) { throw new Exception("Execute failed (delete makeup): " . $stmtDeleteMkp->error); }
-             error_log("DELETE unsubmitted makeup schedules - Affected Rows: " . $stmtDeleteMkp->affected_rows);
-             $stmtDeleteMkp->close();
-            // --- End Makeup Delete Logic ---
+            if (!$stmtDeleteMkp) {
+                throw new Exception("Prepare failed (delete makeup)");
+            }
+            $stmtDeleteMkp->bind_param($mkp_types, ...$mkp_params);
+            if (!$stmtDeleteMkp->execute()) {
+                throw new Exception("Exec Failed (DELETE makeup)");
+            }
+            if ($stmtDeleteMkp->affected_rows > 0)
+                $makeupScheduleChangesMade = true;
+            $stmtDeleteMkp->close();
 
-        } else { // Status is NOT 'enrolled'
-            error_log("Status is NOT 'enrolled' ($status). Deleting ALL default and makeup schedules...");
-            // Delete ALL Default Schedules
-            $deleteAllDefault = "DELETE FROM patient_default_schedules WHERE patient_id = ?";
-            $stmtDelAllDef = $connection->prepare($deleteAllDefault);
-            if ($stmtDelAllDef) { $stmtDelAllDef->bind_param("i", $patient_id); $stmtDelAllDef->execute(); $stmtDelAllDef->close(); }
-            else { error_log("Prepare failed (delete all default): " . $connection->error); /* Consider throwing exception */ }
-            // Delete ALL Makeup Schedules
-            $deleteAllMakeup = "DELETE FROM patient_makeup_schedules WHERE patient_id = ?";
-            $stmtDelAllMkp = $connection->prepare($deleteAllMakeup);
-            if ($stmtDelAllMkp) { $stmtDelAllMkp->bind_param("i", $patient_id); $stmtDelAllMkp->execute(); $stmtDelAllMkp->close(); }
-            else { error_log("Prepare failed (delete all makeup): " . $connection->error); /* Consider throwing exception */ }
+        } else { // Status NOT 'enrolled' -> Delete all schedules
+            $deleteDefaultCount = 0;
+            $deleteMakeupCount = 0;
+            $stmtDelAllDef = $connection->prepare("DELETE FROM patient_default_schedules WHERE patient_id = ?");
+            if ($stmtDelAllDef) {
+                $stmtDelAllDef->bind_param("i", $patient_id);
+                $stmtDelAllDef->execute();
+                $deleteDefaultCount = $stmtDelAllDef->affected_rows;
+                $stmtDelAllDef->close();
+            }
+            $stmtDelAllMkp = $connection->prepare("DELETE FROM patient_makeup_schedules WHERE patient_id = ?");
+            if ($stmtDelAllMkp) {
+                $stmtDelAllMkp->bind_param("i", $patient_id);
+                $stmtDelAllMkp->execute();
+                $deleteMakeupCount = $stmtDelAllMkp->affected_rows;
+                $stmtDelAllMkp->close();
+            }
+            if ($deleteDefaultCount > 0)
+                $defaultScheduleChangesMade = true;
+            if ($deleteMakeupCount > 0)
+                $makeupScheduleChangesMade = true;
         }
 
-        // If all operations were successful, commit the transaction
+        $anyChangeDetected = ($patientUpdateAffected > 0 || $defaultScheduleChangesMade || $makeupScheduleChangesMade);
+
         $connection->commit();
-        $_SESSION['success_message'] = "Patient details and schedules updated successfully!";
+        $commitSuccess = true;
+        error_log("Transaction committed.");
+        $_SESSION['success_message'] = "Patient details updated successfully!";
 
     } catch (Exception $e) {
-        // An error occurred, roll back changes
         $connection->rollback();
-        error_log("!!! EXCEPTION CAUGHT - Rolling back transaction !!!");
-        error_log("Error saving patient details for ID $patient_id by Therapist $therapistID: " . $e->getMessage());
-        $_SESSION['error_message'] = "Failed to update patient details: " . $e->getMessage(); // Show specific error
-    } finally {
-        error_log("--- End Saving Patient Details ---");
-        // Close connection if it's open
-         if (isset($connection) && $connection instanceof mysqli && $connection->thread_id) {
-            $connection->close();
-         }
+        error_log("!!! EXCEPTION CAUGHT - Rolling back !!! Error: " . $e->getMessage());
+        $_SESSION['error_message'] = "Failed to update patient details: " . $e->getMessage();
+        header("Location: ../app_manage/update_patient_details.php?patient_id=" . urlencode($patient_id));
+        if (ob_get_level() > 0)
+            ob_end_flush();
+        exit();
     }
 
-    // Redirect back to the update page
-    header("Location: ../app_manage/update_patient_details.php?patient_id=" . urlencode($patient_id));
-    exit();
+    // --- Send Response and Finish Request ---
+    if ($commitSuccess) {
+        session_write_close(); // Close session lock
+        header("Location: ../app_manage/update_patient_details.php?patient_id=" . urlencode($patient_id)); // Send Redirect
+        if (ob_get_level() > 0)
+            ob_end_flush(); // Send output buffer
+        flush(); // Force output buffer flush
 
-} else {
-    // If accessed directly or without required POST data
-    $_SESSION['error_message'] = "Invalid request.";
-    header("Location: ../app_manage/update_patient_details.php"); // Redirect to the main page or list
-    exit();
-}
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } // Disconnect client
+
+        // --- Background Processing: Email Notifications ---
+        if ($anyChangeDetected) {
+            error_log("Starting background notifications...");
+            // set_time_limit(120); // Optional
+
+            $bg_connection = $connection;
+            $close_bg_connection = false;
+            if (!isset($bg_connection) || !($bg_connection instanceof mysqli) || !$bg_connection->thread_id) {
+                require "../../dbconfig.php";
+                $bg_connection = $connection;
+                $close_bg_connection = true;
+                error_log("Background task re-established DB connection.");
+            }
+
+            if (isset($bg_connection) && $bg_connection instanceof mysqli && $bg_connection->thread_id) {
+                try {
+                    // 1. Get Therapist Name
+                    $therapistName = "Therapist";
+                    $stmtTName = $bg_connection->prepare("SELECT account_FName, account_LName FROM users WHERE account_ID = ?");
+                    if ($stmtTName) {
+                        $stmtTName->bind_param("i", $therapistID);
+                        $stmtTName->execute();
+                        $tNameResult = $stmtTName->get_result()->fetch_assoc();
+                        if ($tNameResult) {
+                            $therapistName = $tNameResult['account_FName'] . ' ' . $tNameResult['account_LName'];
+                        }
+                        $stmtTName->close();
+                    }
+                    // 2. Get Patient/Client Info
+                    $patientFName = "Patient";
+                    $patientLName = "";
+                    $clientEmail = null;
+                    $clientName = null;
+                    $stmtPInfo = $bg_connection->prepare("SELECT p.first_name, p.last_name, u.account_Email, u.account_FName as userFName, u.account_LName as userLName FROM patients p LEFT JOIN users u ON p.account_id = u.account_ID WHERE p.patient_id = ?");
+                    if ($stmtPInfo) {
+                        $stmtPInfo->bind_param("i", $patient_id);
+                        $stmtPInfo->execute();
+                        $patientResult = $stmtPInfo->get_result()->fetch_assoc();
+                        if ($patientResult) {
+                            $patientFName = $patientResult['first_name'];
+                            $patientLName = $patientResult['last_name'];
+                            $clientEmail = $patientResult['account_Email'];
+                            $clientName = $patientResult['userFName'] . ' ' . $patientResult['userLName'];
+                        }
+                        $stmtPInfo->close();
+                    }
+                    // 3. Get Head Therapists
+                    $htRecipients = [];
+                    $stmtHT = $bg_connection->prepare("SELECT account_Email, account_FName, account_LName FROM users WHERE account_Type = 'head therapist' AND account_Status = 'active'");
+                    if ($stmtHT) {
+                        $stmtHT->execute();
+                        $resultHT = $stmtHT->get_result();
+                        while ($htRow = $resultHT->fetch_assoc()) {
+                            $htRecipients[] = ['email' => $htRow['account_Email'], 'name' => $htRow['account_FName'] . ' ' . $htRow['account_LName']];
+                        }
+                        $stmtHT->close();
+                    }
+                    // 4. Get Final Schedules
+                    $finalDefaultSchedules = [];
+                    $finalMakeupSchedules = [];
+                    $stmtFinalDS = $bg_connection->prepare("SELECT day_of_week, start_time, end_time FROM patient_default_schedules WHERE patient_id = ? ORDER BY FIELD(day_of_week, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'), start_time");
+                    if ($stmtFinalDS) {
+                        $stmtFinalDS->bind_param("i", $patient_id);
+                        $stmtFinalDS->execute();
+                        $finalDefaultSchedules = $stmtFinalDS->get_result()->fetch_all(MYSQLI_ASSOC);
+                        $stmtFinalDS->close();
+                    }
+                    $stmtFinalMS = $bg_connection->prepare("SELECT date, start_time, end_time, notes FROM patient_makeup_schedules WHERE patient_id = ? ORDER BY date, start_time");
+                    if ($stmtFinalMS) {
+                        $stmtFinalMS->bind_param("i", $patient_id);
+                        $stmtFinalMS->execute();
+                        $finalMakeupSchedules = $stmtFinalMS->get_result()->fetch_all(MYSQLI_ASSOC);
+                        $stmtFinalMS->close();
+                    }
+                    // 5. Construct Email Body
+                    $scheduleDetailsHTML = "<h4>Default Schedule:</h4>";
+                    if (!empty($finalDefaultSchedules)) {
+                        $scheduleDetailsHTML .= "<ul>";
+                        foreach ($finalDefaultSchedules as $sched) {
+                            $scheduleDetailsHTML .= "<li>" . htmlspecialchars($sched['day_of_week']) . ": " . date('g:i A', strtotime($sched['start_time'])) . " - " . date('g:i A', strtotime($sched['end_time'])) . "</li>";
+                        }
+                        $scheduleDetailsHTML .= "</ul>";
+                    } else {
+                        $scheduleDetailsHTML .= "<p>None.</p>";
+                    }
+                    $scheduleDetailsHTML .= "<h4>Makeup Schedule:</h4>";
+                    if (!empty($finalMakeupSchedules)) {
+                        $scheduleDetailsHTML .= "<ul>";
+                        foreach ($finalMakeupSchedules as $sched) {
+                            $scheduleDetailsHTML .= "<li>" . htmlspecialchars($sched['date']) . ": " . date('g:i A', strtotime($sched['start_time'])) . " - " . date('g:i A', strtotime($sched['end_time'])) . ($sched['notes'] ? " (" . htmlspecialchars($sched['notes']) . ")" : "") . "</li>";
+                        }
+                        $scheduleDetailsHTML .= "</ul>";
+                    } else {
+                        $scheduleDetailsHTML .= "<p>None.</p>";
+                    }
+                    $subject = "Update: Schedule for $patientFName $patientLName";
+                    $body = "<p>Patient <strong>" . htmlspecialchars($patientFName) . " " . htmlspecialchars($patientLName) . "</strong> details have been updated by therapist " . htmlspecialchars($therapistName) . ".</p>";
+                    $body .= "<hr><p><strong>Status:</strong> " . htmlspecialchars(ucfirst($status)) . "<br>";
+                    $body .= "<strong>Service:</strong> " . htmlspecialchars($service_type) . "</p>";
+                    $body .= $scheduleDetailsHTML;
+                    $body .= "<hr><p><i>This is an automated notification. Please log in to the system for full details.</i></p>";
+                    // 6. Send Emails
+                    if ($clientEmail) {
+                        sendNotificationEmail($clientEmail, $clientName, $subject, $body);
+                    }
+                    if (!empty($htRecipients)) {
+                        foreach ($htRecipients as $ht) {
+                            sendNotificationEmail($ht['email'], $ht['name'], $subject, $body);
+                        }
+                    }
+                    error_log("Finished background notifications process.");
+                } catch (Exception $emailEx) {
+                    error_log("Error during background notifications: " . $emailEx->getMessage());
+                } finally {
+                    if ($close_bg_connection && isset($bg_connection) && $bg_connection instanceof mysqli && $bg_connection->thread_id) {
+                        $bg_connection->close();
+                        error_log("Background task DB connection closed.");
+                    }
+                }
+            } else {
+                error_log("Background task: DB connection unavailable.");
+            }
+        } else {
+            error_log("Commit successful but NO changes detected. Skipping notifications.");
+            if (isset($connection) && $connection instanceof mysqli && $connection->thread_id) {
+                $connection->close();
+            }
+        }
+        exit(); // End background script
+    } // End if($commitSuccess)
+
+} else { $_SESSION['error_message'] = "Invalid request."; header("Location: ../app_manage/update_patient_details.php"); if(ob_get_level() > 0) ob_end_flush(); exit(); }
+if(ob_get_level() > 0) ob_end_flush();
+
 ?>

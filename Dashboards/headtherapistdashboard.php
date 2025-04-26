@@ -82,7 +82,7 @@ function filterAppointmentsByStatus($appointments, $status) {
 
  // ✅ Fetch therapists data for the table
  try {
-    $stmt = $connection->prepare(" SELECT account_FName, account_LName, account_Email, account_PNum, account_status
+    $stmt = $connection->prepare(" SELECT account_FName, account_LName, account_Email, account_Address, account_PNum, account_status, service_Type, profile_picture
         FROM users WHERE account_Type = 'therapist'
     ");
     $stmt->execute();
@@ -96,8 +96,31 @@ function filterAppointmentsByStatus($appointments, $status) {
     }
 }
 
-?>
+// Fetch All Patients with Linked User Information
+$patientsStmt = $connection->prepare("SELECT 
+        p.patient_id, 
+        p.first_name AS patient_firstname, 
+        p.last_name AS patient_lastname, 
+        p.profile_picture AS patient_picture,
+        p.bday, 
+        p.gender, 
+        p.service_type, 
+        p.status,
+        u.account_ID AS user_id,
+        u.account_FName AS user_firstname,
+        u.account_LName AS user_lastname,
+        u.account_Email AS user_email,
+        u.account_PNum AS user_phone,
+        u.profile_picture AS user_picture
+    FROM patients p
+    LEFT JOIN users u ON p.account_id = u.account_ID
+    ORDER BY p.last_name, p.first_name");
 
+$patientsStmt->execute();
+$patientsResult = $patientsStmt->get_result();
+$patients = $patientsResult->fetch_all(MYSQLI_ASSOC);
+$patientsStmt->close();
+?>
 
 <!DOCTYPE html>
 <html lang="en">
@@ -202,7 +225,8 @@ function filterAppointmentsByStatus($appointments, $status) {
                         <span>Appointments</span>
                     </li>
                     <li><a href="#view-appointments" onclick="showSection('view-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> View All Appointments</a></li>
-                    <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Appointments</a></li>                    
+                    <li><a href="#view-manage-appointments" onclick="showSection('view-manage-appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Appointments</a></li>
+                    <li><a href="#playgroup" onclick="showSection('playgroup')"><span class="uk-margin-small-right" uk-icon="thumbnails"></span> Playgroup Sessions</a></li>                                        
                     </li>
  
                     <hr>
@@ -214,6 +238,20 @@ function filterAppointmentsByStatus($appointments, $status) {
                             <li>
                                 <li><a href="#view-therapist" onclick="showSection('view-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> View Therapists</a></li>
                             </li>
+                            <li>
+                                <li><a href="#therapist-schedule" onclick="showSection('therapist-schedule')"><span class="uk-margin-small-right" uk-icon="calendar"></span>Therapist Schedules</a></li>
+                            </li>
+                        </li>
+
+                    <hr>
+
+                    <li class="uk-parent">
+                            <li>
+                                <span>Patients</span>
+                            </li>
+                            <li>
+                                <li><a href="#view-patients" onclick="showSection('view-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Patients</a></li>
+                            </li>
                         </li>
 
                     <hr>
@@ -221,211 +259,152 @@ function filterAppointmentsByStatus($appointments, $status) {
                 <li class="uk-parent">
                     
                     <li>
-                        <span>Your Account</span>
+                        <span>Settings</span>
                     </li>
-                    
+
+                    <li><a href="#timetable-settings" onclick="showSection('timetable-settings')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Timetable Settings</a></li>
                     <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
                 </ul>
             </div>
         </div>
 
         <!-- Content Area -->
-        <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
+<div class="uk-width-1-1 uk-width-4-5@m uk-padding">
 
-            <!-- Dashboard Section 📑 -->
-            <div id="dashboard" class="section">
-                <h1 class="uk-text-bold">Head Therapist Panel</h1>
+<!-- Dashboard Section 📑 -->
+<div id="dashboard" class="section">
+    <h1 class="uk-text-bold">Head Therapist Panel</h1>
 
-                <!-- ✅ Total Appointments Card -->
-                <div class="uk-margin-bottom">
-                    <div class="uk-card uk-card-primary uk-card-body">
-                        <h3 class="uk-card-title">Total Appointments</h3>
-                        <p>Total: <?= $totalAppointments ?></p>
-                    </div>
+    <!-- ✅ Total Appointments Card -->
+    <div class="uk-margin-bottom">
+        <div class="uk-card uk-card-primary uk-card-body">
+            <h3 class="uk-card-title">Total Appointments</h3>
+            <p>Total: <?= $totalAppointments ?></p>
+        </div>
+    </div>
+
+    <!-- ✅ Clickable Appointment Summary Cards -->
+    <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
+        <?php foreach ($appointmentCounts as $status => $count): ?>
+            <div>
+                <div class="uk-card uk-card-default uk-card-body uk-card-hover" id="card-<?= strtolower($status) ?>">
+                    <h3 class="uk-card-title"><?= ucwords($status) ?></h3>
+                    <p>Total: <?= $count ?></p>
+                    <button class="uk-button uk-button-primary uk-width-1-1" 
+                            uk-toggle="target: #modal-<?= strtolower($status) ?>">
+                        View Details
+                    </button>
                 </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
 
-                <!-- ✅ Clickable Appointment Summary Cards -->
-                <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
-                    <?php foreach ($appointmentCounts as $status => $count): ?>
-                        <div>
-                            <div class="uk-card uk-card-default uk-card-body uk-card-hover" id="card-<?= strtolower($status) ?>">
-                                <h3 class="uk-card-title"><?= ucwords($status) ?></h3>
-                                <p>Total: <?= $count ?></p>
-                                <button class="uk-button uk-button-primary uk-width-1-1" 
-                                        onclick="showAppointments('<?= strtolower($status) ?>')">
-                                    View Details
-                                </button>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
+    <!-- Modal popups for each status with wider width and pagination -->
+    <?php foreach ($appointmentCounts as $status => $count): ?>
+        <!-- This creates a modal for each appointment status -->
+        <div id="modal-<?= strtolower($status) ?>" class="uk-modal-container" uk-modal>
+            <div class="uk-modal-dialog uk-modal-body">
+                <button class="uk-modal-close-default" type="button" uk-close></button>
+                <h2 class="uk-modal-title"><?= ucwords($status) ?> Appointments</h2>
+                <p class="uk-text-meta">Total: <?= $count ?> appointments</p>
+
+                <div class="uk-overflow-auto">
+                    <table id="table-<?= strtolower($status) ?>" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Patient</th>
+                                <th>Client</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php 
+                            // Filter appointments for current status
+                            $statusAppointments = filterAppointmentsByStatus($appointments, $status);
+                            
+                            if (!empty($statusAppointments)):
+                                foreach ($statusAppointments as $appointment): 
+                            ?>
+                                <tr>
+                                    <td><?= $appointment['appointment_id'] ?></td>
+                                    <td><?= htmlspecialchars($appointment['first_name'] . ' ' . $appointment['last_name']) ?></td>
+                                    <td><?= htmlspecialchars($appointment['client_firstname'] . ' ' . $appointment['client_lastname']) ?></td>
+                                    <td><?= date('M d, Y', strtotime($appointment['date'])) ?></td>
+                                    <td><?= date('h:i A', strtotime($appointment['time'])) ?></td>
+                                    <td>
+                                        <span class="uk-label uk-label-<?= getStatusClass($appointment['status']) ?>">
+                                            <?= ucfirst($appointment['status']) ?>
+                                        </span>
+                                    </td>
+                                </tr>
+                            <?php 
+                                endforeach; 
+                            else: 
+                            ?>
+                                <tr>
+                                    <td colspan="7" class="uk-text-center">No <?= strtolower($status) ?> appointments found</td>
+                                </tr>
+                            <?php endif; ?>
+                        </tbody>
+                    </table>
                 </div>
+                
+                <div class="uk-modal-footer uk-text-right">
+                    <button class="uk-button uk-button-default uk-modal-close" type="button">Close</button>
+                </div>
+            </div>
+        </div>
 
-                <!-- Detail tables for each status (initially hidden) -->
-                <?php foreach ($appointmentCounts as $status => $count): ?>
-                    <div id="table-<?= strtolower($status) ?>" class="uk-margin-medium-top appointment-details" style="display: none;">
-                        <div class="uk-card uk-card-default">
-                            <div class="uk-card-header">
-                                <div class="uk-grid-small uk-flex-middle" uk-grid>
-                                    <div class="uk-width-expand">
-                                        <h3 class="uk-card-title uk-margin-remove-bottom"><?= ucwords($status) ?> Appointments</h3>
-                                        <p class="uk-text-meta uk-margin-remove-top">Showing <?= $count ?> appointments</p>
-                                    </div>
-                                    <div class="uk-width-auto">
-                                        <button class="uk-button uk-button-default" onclick="closeTable('<?= strtolower($status) ?>')">
-                                            <span uk-icon="icon: close"></span> Close
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="uk-card-body uk-overflow-auto">
-                                <table class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
-                                    <thead>
-                                        <tr>
-                                            <th>ID</th>
-                                            <th>Patient</th>
-                                            <th>Client</th>
-                                            <th>Date</th>
-                                            <th>Time</th>
-                                            <th>Status</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php 
-                                        // Filter appointments for current status
-                                        $statusAppointments = filterAppointmentsByStatus($appointments, $status);
-                                        
-                                        if (!empty($statusAppointments)):
-                                            foreach ($statusAppointments as $appointment): 
-                                        ?>
-                                            <tr>
-                                                <td><?= $appointment['appointment_id'] ?></td>
-                                                <td><?= htmlspecialchars($appointment['first_name'] . ' ' . $appointment['last_name']) ?></td>
-                                                <td><?= htmlspecialchars($appointment['client_firstname'] . ' ' . $appointment['client_lastname']) ?></td>
-                                                <td><?= date('M d, Y', strtotime($appointment['date'])) ?></td>
-                                                <td><?= date('h:i A', strtotime($appointment['time'])) ?></td>
-                                                <td>
-                                                    <span class="uk-label uk-label-<?= getStatusClass($appointment['status']) ?>">
-                                                        <?= ucfirst($appointment['status']) ?>
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        <?php 
-                                            endforeach; 
-                                        else: 
-                                        ?>
-                                            <tr>
-                                                <td colspan="7" class="uk-text-center">No <?= strtolower($status) ?> appointments found</td>
-                                            </tr>
-                                        <?php endif; ?>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                <?php endforeach; ?>
-
-                <script>
-                function showAppointments(status) {
-                    // Hide all tables first
-                    document.querySelectorAll('.appointment-details').forEach(table => {
-                        table.style.display = 'none';
-                    });
-                    
-                    // Show the selected table
-                    document.getElementById('table-' + status).style.display = 'block';
-                    
-                    // Scroll to the table
-                    document.getElementById('table-' + status).scrollIntoView({behavior: 'smooth'});
-                }
-
-                function closeTable(status) {
-                    document.getElementById('table-' + status).style.display = 'none';
-                    document.getElementById('card-' + status).scrollIntoView({behavior: 'smooth'});
-                }
-
-                </script>
-
-                <?php
-                // Helper function to determine the UIkit label class based on status
-                function getStatusClass($status) {
-                    $status = strtolower($status);
-                    switch ($status) {
-                        case 'pending':
-                            return 'warning';
-                        case 'approved':
-                            return 'success';
-                        case 'waitlisted':
-                            return 'primary';
-                        case 'completed':
-                            return 'success';
-                        case 'cancelled':
-                            return 'danger';
-                        case 'declined':
-                            return 'danger';
-                        default:
-                            return 'default';
+        <!-- Initialize DataTables for each status table -->
+        <script>
+            $(document).ready(function() {
+                $('#table-<?= strtolower($status) ?>').DataTable({
+                    pageLength: 10,
+                    lengthMenu: [10, 25, 50],
+                    order: [[3, 'asc']], // Sort by date column by default
+                    language: {
+                        lengthMenu: "Show _MENU_ entries per page",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        search: "Search:",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
                     }
-                }
-                ?>
+                });
+            });
+        </script>
+    <?php endforeach; ?>
+
+    <?php
+    // Helper function to determine the UIkit label class based on status
+    function getStatusClass($status) {
+        $status = strtolower($status);
+        switch ($status) {
+            case 'pending':
+                return 'warning';
+            case 'approved':
+                return 'success';
+            case 'waitlisted':
+                return 'primary';
+            case 'completed':
+                return 'success';
+            case 'cancelled':
+                return 'danger';
+            case 'declined':
+                return 'danger';
+            default:
+                return 'default';
+        }
+    }
+    ?>
 
                 <hr>
-
-                <!-- ✅ Appointments List -->
-                <!-- <h3>All Appointments</h3>
-                <table id="appointmentsTable" class="uk-table uk-table-striped uk-table-hover">
-                    <thead>
-                        <tr>
-                            <th class="uk-table-shrink">Patient <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Client <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Date <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Time <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                            <th class="uk-table-shrink">Status <span uk-icon="icon: arrow-down-arrow-up"></span></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach ($appointments as $appointment): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?></td>
-                                <td><?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?></td>
-                                <td><?= date('F j, Y', strtotime($appointment['date'])); ?></td>
-                                <td><?= date('g:i A', strtotime($appointment['time'])); ?></td>
-                                <td><?= htmlspecialchars(ucwords($appointment['status'])); ?></td>
-                            </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
-
-                <script>
-                    $(document).ready(function() {
-                        $('#appointmentsTable').DataTable({
-                            pageLength: 10,
-                            lengthMenu: [10, 25, 50],
-                            order: [
-                                [2, 'asc']
-                            ], // Sort by date column by default
-                            language: {
-                                lengthMenu: "Show _MENU_ entries per page",
-                                info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                search: "Search:",
-                                paginate: {
-                                    first: "First",
-                                    last: "Last",
-                                    next: "Next",
-                                    previous: "Previous"
-                                }
-                            },
-                            columnDefs: [{
-                                    orderable: true,
-                                    targets: '_all'
-                                }, // Make all columns sortable
-                                {
-                                    type: 'date',
-                                    targets: 2
-                                } // Specify date type for date column
-                            ]
-                        });
-                    });
-                </script> -->
             </div>
 
             <!-- View and Manage Appointments Section 📑 -->
@@ -444,106 +423,284 @@ function filterAppointmentsByStatus($appointments, $status) {
                 </div>
             </div>
 
-            <!-- Manage Timetable Settings Section 📑-->
+            <!-- Playgroup Sessions Section 📑-->
+            <div id="playgroup" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Playgroup Sessions</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="playgroupDashboard" src="../Appointments/app_manage/playgroup_dashboard.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
+    <div id="view-therapist" class="section" style="display: none;">
+    <h1 class="uk-text-bold">View Therapists</h1>
+
+    <div class="uk-card uk-card-default uk-card-body uk-margin">
+        <div class="uk-overflow-auto">
+            <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive uk-table-middle">
+                <thead>
+                    <tr>
+                        <th><span class="no-break">Therapist Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Email<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Phone</span></th>
+                        <th><span class="no-break">Address</span></th>
+                        <th><span class="no-break">Service<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Status<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php if (isset($therapists) && !empty($therapists)) : ?>
+                        <?php foreach ($therapists as $therapist) : ?>
+                            <?php
+                            // Set the correct path for profile picture with fallback
+                            $profilePicturePath = !empty($therapist['profile_picture'])
+                                ? "/LIWANAG/uploads/profile_pictures/" . $therapist['profile_picture']
+                                : '/LIWANAG/CSS/default.jpg';
+
+                            // Set the service type with fallback and capitalize first letter
+                            $service_Type = !empty($therapist['service_Type'])
+                                ? ucfirst(htmlspecialchars($therapist['service_Type']))
+                                : 'Not Set';
+
+                            // Prepare other variables
+                            $therapistFullName = htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']);
+                            $email = htmlspecialchars($therapist['account_Email']);
+                            $phone = htmlspecialchars($therapist['account_PNum']);
+                            $address = htmlspecialchars($therapist['account_Address']);
+                            $status = htmlspecialchars($therapist['account_status']);
+                            $statusClass = ($status === 'Active') ? 'success' : 'warning';
+                            ?>
+                            <tr>
+                                <td>
+                                    <div class="uk-flex uk-flex-column"> 
+                                        <img src="<?= htmlspecialchars($profilePicturePath); ?>"
+                                             alt="Pic" class="uk-border-circle uk-align-center" style="width: 60px; height: 60px; object-fit: cover; margin-bottom: 8px;">
+                                        <span><?= $therapistFullName; ?></span> 
+                                    </div>
+                                </td>
+                                <td><?= $email; ?></td>
+                                <td>0<?= $phone; ?></td>
+                                <td><?= $address; ?></td>
+                                <td><?= $service_Type; ?></td>
+                                <td><span class="uk-label uk-label-<?= $statusClass; ?>"><?= $status; ?></span></td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php elseif (isset($therapist_error)) : ?>
+                        <tr>
+                            <td colspan="6"><?= htmlspecialchars($therapist_error); ?></td>
+                        </tr>
+                    <?php else : ?>
+                        <tr>
+                            <td colspan="6">No therapists found.</td>
+                        </tr>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+
+            <script>
+            $(document).ready(function() {
+                // Initialize DataTable
+                $('#viewtherapistTable').DataTable({
+                    pageLength: 10,
+                    lengthMenu: [10, 25, 50],
+                    order: [
+                        [0, 'asc'] // Default sort: Order by the first column (Therapist Name) ascending
+                    ],
+                    language: {
+                        lengthMenu: "Show _MENU_ entries per page",
+                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                        search: "Search:",
+                        paginate: {
+                            first: "First",
+                            last: "Last",
+                            next: "Next",
+                            previous: "Previous"
+                        }
+                    },
+                    columnDefs: [
+                        // Column Index | Property | Value | Comment
+                        //--------------------------------------------------------------
+                        { orderable: true,  targets: 0 }, // Therapist (Name+Pic) - Sortable
+                        { orderable: true,  targets: 1 }, // Email - Sortable
+                        { orderable: false, targets: 2 }, // Phone - Not Sortable
+                        { orderable: false, targets: 3 }, // Address - Not Sortable
+                        { orderable: true,  targets: 4 }, // Service - Sortable
+                        { orderable: true,  targets: 5 }  // Status - Sortable
+                    ]
+                });
+            });
+        </script>
+
+            <style>
+                /* Custom styles for better appearance */
+                #viewtherapistTable th {
+                    padding: 12px 8px; /* Adjust padding */
+                    background-color: #f8f8f8; /* Light background for headers */
+                    font-weight: 600; /* Slightly bolder headers */
+                    color: #555;
+                    vertical-align: middle; /* Ensure vertical alignment */
+                }
+
+                #viewtherapistTable td {
+                    padding: 10px 8px; /* Adjust padding */
+                    vertical-align: middle; /* Ensure vertical alignment */
+                }
+
+                /* Ensure profile images display correctly */
+                .uk-border-circle {
+                    border: 1px solid #eaeaea;
+                    background-color: #fff; /* White background behind image if transparent */
+                }
+
+                /* Subtle hover effect for table rows */
+                #viewtherapistTable tbody tr:hover {
+                    background-color: #f0f8ff; /* Light blue hover, adjust as needed */
+                }
+
+                 /* Vertical alignment for icons (like sort arrows) */
+                 th > span[uk-icon] {
+                    vertical-align: middle;
+                    margin-left: 4px; /* Space between text and icon */
+                 }
+
+                 /* Ensure status label aligns nicely */
+                 #viewtherapistTable td .uk-label {
+                    vertical-align: middle;
+                 }
+
+                 /* Prevent line breaks in specific columns if needed */
+                 #viewtherapistTable td:nth-child(2), /* Email */
+                 #viewtherapistTable td:nth-child(3)  /* Phone */
+                 {
+                    white-space: nowrap;
+                 }
+
+            </style>
+        </div>
+    </div>
+</div>
+
+            
+
+            <!-- View Therapists Schedule Section 📑-->
+            <div id="therapist-schedule" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Therapist Schedules</h1>
+                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                    <iframe id="therapistScheduleFrame" src="forAdmin/schedule_head_therapist.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
+                </div>
+            </div>
+
+            <!-- Patients Section -->
+<div id="view-patients" class="section" style="display: none;">
+    <h1 class="uk-text-bold">Patients Masterlist</h1>
+    <div class="uk-card uk-card-default uk-card-body uk-margin uk-width-1-1">
+        <div class="uk-overflow-auto">
+            <table id="patientMasterTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
+                <thead>
+                    <tr>
+                        <th><span class="no-break">Patient Details<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Client Details<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Birthday<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Service Type<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                        <th><span class="no-break">Status<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($patients as $patient): ?>
+                        <tr>
+                            <!-- Patient Column -->
+                            <td>
+                            <div class="uk-flex uk-flex-column">
+                                <img src="<?= !empty($patient['patient_picture']) ? '../uploads/profile_pictures/' . $patient['patient_picture'] : '../CSS/default.jpg'; ?>"
+                                    alt="Patient Picture" class="uk-border-circle uk-align-center" style="width: 60px; height: 60px; object-fit: cover; margin-bottom: 8px;">
+                                <div class="uk-text-center">
+                                    <div class="uk-text-bold"><?= htmlspecialchars($patient['patient_firstname'] . ' ' . $patient['patient_lastname']) ?></div>
+                                    <div class="uk-text-meta">
+                                        <?= !empty($patient['gender']) ? htmlspecialchars($patient['gender']) : 'Gender not specified' ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </td>
+                            
+                            <!-- Linked User Column -->
+                            <td>
+                            <?php if (!empty($patient['user_id'])): ?>
+                                <div class="uk-flex uk-flex-column">
+                                    <img src="<?= !empty($patient['user_picture']) ? '../uploads/profile_pictures/' . $patient['user_picture'] : '../CSS/default.jpg'; ?>"
+                                        alt="User Picture" class="uk-border-circle uk-align-center" style="width: 60px; height: 60px; object-fit: cover; margin-bottom: 8px;">
+                                    <div class="uk-text-center">
+                                        <div class="uk-text-bold"><?= htmlspecialchars($patient['user_firstname'] . ' ' . $patient['user_lastname']) ?></div>
+                                        <div class="uk-text-meta">
+                                            <?= htmlspecialchars($patient['user_email']) ?><br>
+                                            <?= !empty($patient['user_phone']) ? htmlspecialchars($patient['user_phone']) : 'Phone not provided' ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php else: ?>
+                                <div class="uk-text-center uk-text-meta">No Linked Client</div>
+                            <?php endif; ?>
+                        </td>
+                            
+                            <!-- Birthday Column -->
+                            <td>
+                                <?= !empty($patient['bday']) ? htmlspecialchars(date('M d, Y', strtotime($patient['bday']))) : 'Not specified' ?>
+                            </td>
+                            
+                            <!-- Service Type Column -->
+                            <td><?= htmlspecialchars($patient['service_type']) ?></td>
+                            
+                            <!-- Status Column -->
+                            <td>
+                                <span class="uk-label 
+                                    <?= $patient['status'] == 'enrolled' ? 'uk-label-success' : 
+                                    ($patient['status'] == 'pending' ? 'uk-label-warning' : 'uk-label-danger') ?>">
+                                    <?= htmlspecialchars(ucfirst($patient['status'])) ?>
+                                </span>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Initialize DataTable for Patients Masterlist
+        $('#patientMasterTable').DataTable({
+            pageLength: 10,
+            lengthMenu: [10, 25, 50],
+            order: [
+                [0, 'asc'] // Default sort by Patient Name ascending
+            ],
+            language: {
+                lengthMenu: "Show _MENU_ entries per page",
+                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                search: "Search:",
+                paginate: {
+                    first: "First",
+                    last: "Last",
+                    next: "Next",
+                    previous: "Previous"
+                }
+            },
+            columnDefs: [
+                { orderable: true, targets: 0 }, // Patient Details - Sortable
+                { orderable: true, targets: 1 }, // Client Details - Sortable
+                { orderable: true, targets: 2 }, // Birthday - Sortable
+                { orderable: true, targets: 3 }, // Service Type - Sortable
+                { orderable: true, targets: 4 }  // Status - Sortable
+            ],
+            responsive: true
+        });
+    });
+</script>
+
+        <!-- Manage Timetable Settings Section 📑-->
             <div id="timetable-settings" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Manage Timetable Settings</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
                     <iframe id="manageTimetableSettingsFrame" src="forAdmin/manageWebpage/timetable_settings.php" style="width: 100%; border: none;" onload="resizeIframe(this);"></iframe>
-                </div>
-            </div>
-
-            <!-- Manage Therapists Section 📑-->
-            <div id="view-therapist" class="section" style="display: none;">
-                <h1 class="uk-text-bold">View Therapists</h1>
-
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <div class="uk-overflow-auto">
-                        <table id="viewtherapistTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
-                            <thead>
-                                <tr>
-                                    <th class="uk-table-shrink"><span class="no-break">Therapist Name<span uk-icon="icon: arrow-down-arrow-up"></span></span></th>
-                                    <th class="uk-table-shrink"><span class="no-break">Actions</span></th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <?php if (isset($therapists) && !empty($therapists)) : ?>
-                                    <?php foreach ($therapists as $therapist) : ?>
-                                        <tr>
-                                            <td><?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?></td>
-                                            <td>
-                                                <button class="uk-button uk-button-primary uk-button-small view-details" 
-                                                        data-fname="<?= htmlspecialchars($therapist['account_FName']); ?>"
-                                                        data-lname="<?= htmlspecialchars($therapist['account_LName']); ?>"
-                                                        data-email="<?= htmlspecialchars($therapist['account_Email']); ?>"
-                                                        data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
-                                                        data-status="<?= htmlspecialchars($therapist['account_status']); ?>">
-                                                    Details
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
-                                <?php elseif (isset($therapist_error)) : ?>
-                                    <tr>
-                                        <td colspan="2"><?= htmlspecialchars($therapist_error); ?></td>
-                                    </tr>
-                                <?php else : ?>
-                                    <tr>
-                                        <td colspan="2">No therapists found.</td>
-                                    </tr>
-                                <?php endif; ?>
-                            </tbody>
-                        </table>
-
-                        <script>
-                            $(document).ready(function() {
-                                // Initialize DataTable
-                                $('#viewtherapistTable').DataTable({
-                                    pageLength: 10,
-                                    lengthMenu: [10, 25, 50],
-                                    order: [
-                                        [0, 'asc']
-                                    ],
-                                    language: {
-                                        lengthMenu: "Show _MENU_ entries per page",
-                                        info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                        search: "Search:",
-                                        paginate: {
-                                            first: "First",
-                                            last: "Last",
-                                            next: "Next",
-                                            previous: "Previous"
-                                        }
-                                    },
-                                    columnDefs: [{
-                                        orderable: true,
-                                        targets: '_all'
-                                    }]
-                                });
-                                
-                                // Add click event for the Details button
-                                $(document).on('click', '.view-details', function() {
-                                    const fname = $(this).data('fname');
-                                    const lname = $(this).data('lname');
-                                    const email = $(this).data('email');
-                                    const phone = $(this).data('phone');
-                                    const status = $(this).data('status');
-                                    
-                                    Swal.fire({
-                                        title: `${fname} ${lname}`,
-                                        html: `
-                                            <div class="uk-text-left">
-                                                <p><strong>Email:</strong> ${email}</p>
-                                                <p><strong>Phone Number:</strong> ${phone}</p>
-                                                <p><strong>Account Status:</strong> ${status}</p>
-                                            </div>
-                                        `,
-                                        icon: 'info',
-                                        confirmButtonText: 'Close'
-                                    });
-                                });
-                            });
-                        </script>
-                    </div>
                 </div>
             </div>
 
@@ -1449,7 +1606,114 @@ otpSection.style.display = "none";
                         });
                     }
                 };
+
+                // view playgroup iframe
+                let playgroupFrame = document.getElementById("playgroupDashboard");
+
+                playgroupFrame.onload = function() {
+                    resizeIframe(viewAppointmentsFrame);
+                    let playgroupForm = playgroupFrame.contentDocument.getElementById("playgroupForm");
+
+                    if (playgroupForm) {
+                        playgroupForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("../Appointments/app_manage/playgroup_dashboard.php", {
+                                    method: "POST",
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.swal) {
+                                        Swal.fire({
+                                            title: data.swal.title,
+                                            text: data.swal.text,
+                                            icon: data.swal.icon,
+                                        }).then(() => {
+                                            if (data.reload) {
+                                                window.location.reload(true); // Hard reload the page
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
+
+                // Manage Timetable Settings Frame
+                let manageTimetableSettingsFrame = document.getElementById("manageTimetableSettingsFrame");
+
+                manageTimetableSettingsFrame.onload = function() {
+                    resizeIframe(manageTimetableSettingsFrame);
+                    let manageTimetableSettingsForm = manageTimetableSettingsFrame.contentDocument.getElementById("manageTimetableSettingsForm");
+
+                    if (manageTimetableSettingsForm) {
+                        manageTimetableSettingsForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("forAdmin/manageWebpage/timetable_settings.php", {
+                                    method: "POST",
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.swal) {
+                                        Swal.fire({
+                                            title: data.swal.title,
+                                            text: data.swal.text,
+                                            icon: data.swal.icon,
+                                        }).then(() => {
+                                            if (data.reload) {
+                                                window.location.reload(true); // Hard reload the page
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
             
+                // therapist schedule frame
+                let therapistSchedFrame = document.getElementById("therapistScheduleFrame");
+
+                therapistSchedFrame.onload = function() {
+                    resizeIframe(therapistSchedFrame);
+                    let therapistSchedForm = therapistSchedFrame.contentDocument.getElementById("therapistForm");
+
+                    if (therapistSchedForm) {
+                        therapistSchedForm.addEventListener("submit", function(e) {
+                            e.preventDefault();
+
+                            let formData = new FormData(this);
+
+                            fetch("forAdmin/schedule_head_therapist.php", {
+                                    method: "POST",
+                                    body: formData
+                                })
+                                .then(response => response.json())
+                                .then(data => {
+                                    if (data.swal) {
+                                        Swal.fire({
+                                            title: data.swal.title,
+                                            text: data.swal.text,
+                                            icon: data.swal.icon,
+                                        }).then(() => {
+                                            if (data.reload) {
+                                                window.location.reload(true);
+                                            }
+                                        });
+                                    }
+                                })
+                                .catch(error => console.error("Error:", error));
+                        });
+                    }
+                };
 </script>
 </body>
 
