@@ -4,7 +4,7 @@
 /*      #id      */ /*   #firstname   */ /*    Selects the element with id="firstname"     */
 /*      *       */ /*        *       */ /*            Selects all elements                */
 /*   .class    */ /*     .intro     */ /*   Selects all elements with class="intro"      */
-/*   .class    */ /*    p.intro    */ /*  Selects all <p> elements with class="intro"   */
+/*   .class   */ /*    p.intro    */ /*  Selects all <p> elements with class="intro"   */
 
 html,body{
     background-color:#f2f4f8;
@@ -160,12 +160,14 @@ hr.solid{
 }
 
 
-.footer{    
-    
-    width: 100vw;
+.footer {
+    width: 100%;
+    padding: 1rem;
     text-align: center;
     background-color: #1a202c;
-    
+    color: white; /* Add text color for better visibility */
+    box-sizing: border-box; /* Include padding in width calculation */
+    word-wrap: break-word; /* Ensure long words break properly */
 }
 
 .footer-text{
@@ -585,11 +587,15 @@ padding-right: 100px;
     }
 
     .footer{
-        height:60px;
+        height:100%;
         width: 100vw;
           
     }
 
+    .footer-info{
+        font-size: 10px !important; 
+        text-align: left;
+    }
 
     .forget-password-div{
         min-height: 80vh;
@@ -640,14 +646,83 @@ padding-right: 100px;
     .signup-btn{
         font-size: 12px;
     }
+
+    .dashboard-redirect{
+        font-size: 12px !important;
+    }
+
+    .logout-redirect{
+        font-size: 12px !important; 
+    }
+
+    .table-head{
+        font-size: 10px !important;
+    }
+
+    .table-body{
+        font-size: 10px !important;
+    }
+
+    .action-button{
+        font-size: 10px !important;
+        line-height: 1.3;
+    }
+    
+    .filter-btn{
+        font-size: 10px !important;
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    
+    #uploadButton{
+        line-height: 20px;
+        border-radius: 15px;
+    }
+
+    .image-helper{
+        font-size: 12px;
+        padding-left: 20px;
+    }
+
+    .title-helper{
+        font-size: 25px !important;
+        margin-bottom: 0px !important;
+    }
+
+
+
+
+    #editButton{
+        font-size: 10px;
+        width: 132px !important;
+        min-width: 0 !important;
+    }
+    
+    #editPatientBtn{
+        font-size: 10px !important;
+        width: 132px !important;
+        min-width: 0 !important;
+    }
+
+
+    #changePassword{
+        font-size: 10px;
+        min-width: 0 !important;
+    }
+
+    #saveChanges{
+        font-size: 10px;
+        min-width: 0 !important;
+    }
+
+
 } 
 
 /* Small devices (portrait tablets and large phones, 600px and up) */
 @media only screen and (min-width: 600px) {
     
-    
-    
-    
+       
     .uk-navbar-left,
     .uk-navbar-right {
         flex-wrap: wrap;
@@ -663,13 +738,16 @@ padding-right: 100px;
         font-size: 1.2rem;
         text-align: center;
     }
+
+
+
+
 }
 
 /* Medium devices (landscape tablets, 768px and up) */
 @media only screen and (min-width: 768px) {
 
 } 
-
 
 @media screen and (max-width: 1024px) {
     .homepage-welcome {

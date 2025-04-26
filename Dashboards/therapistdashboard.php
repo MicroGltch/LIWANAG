@@ -452,7 +452,7 @@ $appointmentsStmt->close();
              <div id="account-details" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Account Details</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
+                    <h3 class="uk-card-title uk-text-bold title-helper">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="upload_profile_picture">
                         <div class="uk-flex uk-flex-middle">
@@ -467,7 +467,7 @@ $appointmentsStmt->close();
                                         <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();" id="removePhotoButton" style="pointer-events: none; color: grey;">remove</a>
                                     </div>
                                 </div>
-                                <div class="uk-margin-large-left">
+                                <div class="uk-margin-large-left image-helper">
                                     <h4>Image requirements:</h4>
                                     <ul class="uk-list">
                                         <li>1. Min. 400 x 400px</li>
@@ -481,7 +481,7 @@ $appointmentsStmt->close();
                 </div>
 
                 <div class="uk-card uk-card-default uk-card-body">
-        <h3 class="uk-card-title uk-text-bold">User Details</h3>
+        <h3 class="uk-card-title uk-text-bold title-helper">User Details</h3>
         <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
             <input type="hidden" name="action" id="formAction" value="update_user_details">
 
@@ -511,8 +511,8 @@ $appointmentsStmt->close();
 
             <div class="uk-width-1-1 uk-text-right uk-margin-top">
             <button type="button" class="uk-button uk-button-secondary" id="editButton" style="border-radius: 15px;">Edit</button>
-            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal" style="border-radius: 15px;">Change Password</button>
-            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="border-radius: 15px;">Save Changes</button>
+            <button class="uk-button uk-button-primary" id="changePassword" uk-toggle="target: #change-password-modal" style="border-radius: 15px;">Change Password</button>
+            <button class="uk-button uk-button-primary" id="saveChanges" type="submit" id="saveButton" disabled style="border-radius: 15px;">Save Changes</button>
             </div>
 
             <div id="otpSection" class="uk-width-1-1" style="display: none;">
