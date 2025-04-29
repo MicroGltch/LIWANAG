@@ -209,18 +209,18 @@ echo "<script>
 
     <!-- Main Content -->
     <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport">
+
+
         <!-- Sidebar -->
-        <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
-            <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
+        <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium uk-visible@m">
+
+            <!--<button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
                 Menu <span uk-navbar-toggle-icon></span>
-            </button>
+            </button>-->
 
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
-
-
                     <h4 style="font-weight: bold;">Client Dashboard</h4>
-
                     <li class="uk-parent">
                     <li>
                         <span>Appointments</span>
@@ -262,7 +262,58 @@ echo "<script>
             </div>
         </div>
 
+        <!-- Mobile Sidebar -->
+        <div class="mobile-sidebar uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium" id="mobileSidebar">
+            <div class="mobile-sidebar-header">
+                <h4>Hi, <span> <?php echo htmlspecialchars($account_FN); ?></span>!</h4>
+                <button class="close-sidebar" onclick="toggleSidebar()"><span uk-icon="icon: close-circle;" style="padding: 16px;"></span></button>
+            </div>
+            <ul class="mobile-sidebar-menu uk-nav uk-nav-default" style="padding: 15px;">
 
+
+
+            <li class="uk-parent">
+                    <li>
+                        <span>Appointments</span>
+                    </li>
+
+                    <li>
+                        <a href="#appointments" onclick="showSection('appointments')"><span class="uk-margin-small-right" uk-icon="calendar"></span>Your Appointments</a>
+                    </li>
+
+                    <li>
+                        <a href="#book-appointment" onclick="showSection('book-appointment')"><span class="uk-margin-small-right" uk-icon="user"></span> Book Appointment</a>
+                    </li>
+
+                    </li>
+
+                    <hr>
+
+                    <li class="uk-parent">
+                    <li>
+                        <span>Patients</span>
+                    </li>
+                    <li>
+                        <a href="#register-patient" onclick="showSection('register-patient')"><span class="uk-margin-small-right" uk-icon="user"></span> Register a Patient</a>
+                    </li>
+
+                    <li><a href="#view-registered-patients" onclick="showSection('view-registered-patients')"><span class="uk-margin-small-right" uk-icon="user"></span> View Registered Patients</a></li>
+
+                    </li>
+
+                    <hr>
+
+                    <li class="uk-parent">
+                    <li>
+                        <span>Your Account</span>
+                    </li>
+                    <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
+                <?php if (isset($_SESSION['account_ID'])): ?><li><a href="../Accounts/logout.php"><span class="uk-margin-small-right" uk-icon="sign-out"></span>Logout</a></li><?php endif; ?>
+                </li>
+                </li>
+            </ul>
+        </div>
+        
         <!-- Content Area -->
         
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
@@ -1967,7 +2018,61 @@ proofReferralInput.value = "";
         });
     });
 
+// Mobile Sidebar Toggle
+document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const mobileSidebar = document.getElementById('mobileSidebar');
+            const body = document.body;
 
+            function toggleSidebar() {
+                if (mobileSidebar.classList.contains('open')) {
+                    // Close sidebar
+                    mobileSidebar.classList.remove('open');
+                    mobileSidebar.style.left = '-100%';
+
+                    // Remove overlay
+                    const overlay = document.querySelector('.sidebar-overlay');
+                    if (overlay) {
+                        overlay.remove();
+                    }
+
+                    // Enable scrolling
+                    body.style.overflow = '';
+                } else {
+                    // Open sidebar
+                    mobileSidebar.classList.add('open');
+                    mobileSidebar.style.left = '0';
+
+                    // Add overlay
+                    const overlay = document.createElement('div');
+                    overlay.className = 'sidebar-overlay';
+                    body.appendChild(overlay);
+
+                    // Disable scrolling
+                    body.style.overflow = 'hidden';
+
+                    // Add click event to overlay to close sidebar
+                    overlay.addEventListener('click', toggleSidebar);
+                }
+            }
+
+            // Attach click event to the mobile menu button
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleSidebar();
+                });
+            }
+
+            // Close sidebar when clicking the close button
+            const closeButton = document.querySelector('.close-sidebar');
+            if (closeButton) {
+                closeButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleSidebar();
+                });
+            }
+        });
 </script>
 </body>
 
