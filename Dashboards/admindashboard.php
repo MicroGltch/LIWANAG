@@ -173,13 +173,20 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             white-space: nowrap;
         }
 
+        .profile-photo {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            object-position: center;
+            border-radius: 50%;
+        }
+
         /* Adjust logo text size for medium screens */
         @media (max-width: 959px) {
             .uk-navbar-item.uk-logo {
                 font-size: 20px !important;
             }
         }
-
 
         /* Adjust logo text size for small screens */
         @media (max-width: 640px) {
@@ -190,7 +197,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
 
         /* General Card Styles */
         .client-card,
-        .patient-card {
+        .patient-card,
+        .therapist-card {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -203,16 +211,17 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         }
 
         .client-card h3,
-        .patient-card h3 {
+        .patient-card h3,
+        .therapist-card h3 {
             font-size: 16px;
             font-weight: bold;
             margin: 0;
             flex: 1;
-            /* Allow the name to take up available space */
         }
 
         .client-card .details-button,
-        .patient-card .details-button {
+        .patient-card .details-button,
+        .therapist-card .details-button {
             background-color: #1e87f0;
             color: white;
             border: none;
@@ -222,31 +231,33 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             cursor: pointer;
             text-align: center;
             margin-left: 10px;
-            /* Add spacing between name and button */
         }
 
         .client-card .details-button:hover,
-        .patient-card .details-button:hover {
+        .patient-card .details-button:hover,
+        .therapist-card .details-button:hover {
             background-color: #0056b3;
         }
 
         /* Search Bar Styles */
         #clientsCardsSearch,
-        #patientsCardsSearch {
+        #patientsCardsSearch,
+        #therapistsCardsSearch {
             margin-bottom: 15px;
         }
 
         /* Hide elements on mobile */
         .client-card[style*="display: none"],
-        .patient-card[style*="display: none"] {
+        .patient-card[style*="display: none"],
+        .therapist-card[style*="display: none"] {
             display: none !important;
         }
 
         .client-card[style*="display: flex"],
-        .patient-card[style*="display: flex"] {
+        .patient-card[style*="display: flex"],
+        .therapist-card[style*="display: flex"] {
             display: flex !important;
         }
-
 
         /* Adjust grid layout for medium screens (tablets) */
         @media (max-width: 959px) {
@@ -290,11 +301,16 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 font-size: 14px;
                 margin: 0;
             }
-            .appointment-summary-cards{
+
+            .appointment-summary-cards {
                 padding: 0 0 0 0;
             }
-        }
 
+            .profile-photo {
+                max-width: 120px;
+                max-height: 120px;
+            }
+        }
 
         /* Mobile Sidebar Styles */
         .mobile-sidebar {
@@ -853,11 +869,11 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                             </td>
                                             <td>
                                                 <!-- Edit service button -->
-                                                <button class="uk-button uk-button-small uk-button-primary edit-service-btn" 
-                                                        data-therapist-id="<?= htmlspecialchars($therapist['account_ID']); ?>"
-                                                        data-therapist-name="<?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?>"
-                                                        data-current-service="<?= htmlspecialchars($therapist['service_Type'] ?? 'Both'); ?>"
-                                                        uk-toggle="target: #edit-service-modal">
+                                                <button class="uk-button uk-button-small uk-button-primary edit-service-btn"
+                                                    data-therapist-id="<?= htmlspecialchars($therapist['account_ID']); ?>"
+                                                    data-therapist-name="<?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?>"
+                                                    data-current-service="<?= htmlspecialchars($therapist['service_Type'] ?? 'Both'); ?>"
+                                                    uk-toggle="target: #edit-service-modal">
                                                     Edit Service
                                                 </button>
                                             </td>
@@ -876,81 +892,107 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         </table>
                         <script>
                             $(document).ready(function() {
-                            // Fix the Edit Service buttons that are displaying file paths
-                            $('.edit-service-btn').each(function() {
-                                // Replace the button text with "Edit Service"
-                                $(this).text("Edit Service");
-                                
-                                // Make sure the button has the proper styling
-                                $(this).addClass('uk-button uk-button-small uk-button-primary');
+                                // Fix the Edit Service buttons that are displaying file paths
+                                $('.edit-service-btn').each(function() {
+                                    // Replace the button text with "Edit Service"
+                                    $(this).text("Edit Service");
+
+                                    // Make sure the button has the proper styling
+                                    $(this).addClass('uk-button uk-button-small uk-button-primary');
+                                });
+
+                                // Explicitly handle the edit button click
+                                $('.edit-service-btn').on('click', function(e) {
+                                    // Get data from button
+                                    var therapistId = $(this).data('therapist-id');
+                                    var therapistName = $(this).data('therapist-name');
+                                    var currentService = $(this).data('current-service');
+
+                                    // Fill the modal with data
+                                    $('#edit-therapist-id').val(therapistId);
+                                    $('#edit-therapist-name').text(therapistName);
+                                    $('#edit-service-type').val(currentService === 'Not Set' ? 'Both' : currentService);
+
+                                    // Manually open the modal using UIkit's JavaScript API
+                                    UIkit.modal('#edit-service-modal').show();
+                                });
                             });
-                            
-                            // Explicitly handle the edit button click
-                            $('.edit-service-btn').on('click', function(e) {
-                                // Get data from button
-                                var therapistId = $(this).data('therapist-id');
-                                var therapistName = $(this).data('therapist-name');
-                                var currentService = $(this).data('current-service');
-                                
-                                // Fill the modal with data
-                                $('#edit-therapist-id').val(therapistId);
-                                $('#edit-therapist-name').text(therapistName);
-                                $('#edit-service-type').val(currentService === 'Not Set' ? 'Both' : currentService);
-                                
-                                // Manually open the modal using UIkit's JavaScript API
-                                UIkit.modal('#edit-service-modal').show();
-                            });
-                        });
                         </script>
                     </div>
                 </div>
+                <!-- Card layout for mobile -->
+                <div id="therapistCardsSearch" class="uk-margin uk-hidden@m">
+                    <div class="uk-inline" style="width: 100%;">
+                        <span class="uk-form-icon" uk-icon="icon: search" style="padding: 5px 0 0 0;"></span>
+                        <input type="text" id="therapistCardsSearchInput" class="uk-input" placeholder="Search therapists..." style="border-radius: 15px; padding-left: 40px;">
+                    </div>
+                </div>
+                <div id="therapistCards" class="uk-hidden@m">
+                    <?php if (isset($therapists) && !empty($therapists)) : ?>
+                        <?php foreach ($therapists as $therapist) : ?>
+                            <div class="therapist-card"
+                                data-account-id="<?= htmlspecialchars($therapist['account_ID']); ?>"
+                                data-fname="<?= htmlspecialchars(strtolower($therapist['account_FName'])); ?>"
+                                data-lname="<?= htmlspecialchars(strtolower($therapist['account_LName'])); ?>"
+                                data-email="<?= htmlspecialchars(strtolower($therapist['account_Email'])); ?>"
+                                data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
+                                data-service-type="<?= htmlspecialchars($therapist['service_Type'] ?? 'Not Set'); ?>"
+                                data-status="<?= htmlspecialchars($therapist['account_status']); ?>">
+                                <h3><?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?></h3>
+                                <button class="details-button" onclick="showTherapistDetails('<?= $therapist['account_ID']; ?>')" style="border-radius:15px">More Details</button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <p>No therapists found.</p>
+                    <?php endif; ?>
+                </div>
             </div>
 
-                <!-- Edit Service Modal -->
-                <div id="edit-service-modal" uk-modal>
-                    <div class="uk-modal-dialog uk-modal-body">
-                        <h2 class="uk-modal-title">Edit Service Type</h2>
-                        <p>Change service type for <span id="edit-therapist-name"></span></p>
-                        
-                        <form id="edit-service-form" method="POST" action="../Dashboards/forAdmin/update_service.php">
-                            <input type="hidden" id="edit-therapist-id" name="therapist_id">
-                            
-                            <div class="uk-margin">
-                                <label class="uk-form-label" for="edit-service-type">Service Type</label>
-                                <div class="uk-form-controls">
-                                    <select class="uk-select" id="edit-service-type" name="service_type">
-                                        <option value="both">Both</option>
-                                        <option value="occupational">Occupational</option>
-                                        <option value="behavioral">Behavioral</option>
-                                    </select>
-                                </div>
+            <!-- Edit Service Modal -->
+            <div id="edit-service-modal" uk-modal>
+                <div class="uk-modal-dialog uk-modal-body" style="border-radius: 15px;">
+                    <h2 class="uk-modal-title">Edit Service Type</h2>
+                    <p>Change service type for <span id="edit-therapist-name"></span></p>
+
+                    <form id="edit-service-form" method="POST" action="../Dashboards/forAdmin/update_service.php">
+                        <input type="hidden" id="edit-therapist-id" name="therapist_id">
+
+                        <div class="uk-margin">
+                            <label class="uk-form-label" for="edit-service-type">Service Type</label>
+                            <div class="uk-form-controls">
+                                <select class="uk-select" id="edit-service-type" name="service_type">
+                                    <option value="both">Both</option>
+                                    <option value="occupational">Occupational</option>
+                                    <option value="behavioral">Behavioral</option>
+                                </select>
+                            </div>
+                            <div class="uk-text-right" style="margin: 10px 0 0 0;">
+                                <button class="uk-button uk-button-default uk-modal-close" type="button" style="border-radius: 15px;">Cancel</button>
+                                <button class="uk-button uk-button-primary" type="submit" style="border-radius: 15px;">Save Changes</button>
                             </div>
                         </div>
-
-                        <div class="uk-text-right">
-                            <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
-                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
-                        </div>
-                    </form>
                 </div>
-                <script>
+                </form>
+            </div>
+            <script>
                 $(document).ready(function() {
                     <?php
                     if (isset($_SESSION['swalType']) && isset($_SESSION['swalTitle']) && isset($_SESSION['swalText'])) {
-                    echo "Swal.fire({";
-                    echo "  icon: '" . $_SESSION['swalType'] . "',";
-                    echo "  title: '" . $_SESSION['swalTitle'] . "',";
-                    echo "  text: '" . $_SESSION['swalText'] . "',";
-                    echo "});";
+                        echo "Swal.fire({";
+                        echo "  icon: '" . $_SESSION['swalType'] . "',";
+                        echo "  title: '" . $_SESSION['swalTitle'] . "',";
+                        echo "  text: '" . $_SESSION['swalText'] . "',";
+                        echo "});";
 
-                    // Clear the session variables so the alert doesn't show on subsequent page loads
-                    unset($_SESSION['swalType']);
-                    unset($_SESSION['swalTitle']);
-                    unset($_SESSION['swalText']);
+                        // Clear the session variables so the alert doesn't show on subsequent page loads
+                        unset($_SESSION['swalType']);
+                        unset($_SESSION['swalTitle']);
+                        unset($_SESSION['swalText']);
                     }
                     ?>
                 });
-                </script>
+            </script>
+
             <!-- Add Therapist -->
             <div id="add-therapist" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Add Therapist</h1>
@@ -992,7 +1034,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                     <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <div class="uk-flex uk-flex-center">
                         <div class="uk-width-1-4">
-                            <img class="uk-border-circle" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
+                            <img class="profile-photo uk-border-circle" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                         </div>
                     </div>
                 </div>
@@ -1388,7 +1430,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             });
 
             // Initialize DataTables for Manage Therapists Table
-             const therapistsTable = $('#managetherapistsTable').DataTable({
+            const therapistsTable = $('#managetherapistsTable').DataTable({
                 pageLength: 5,
                 lengthMenu: [5, 10, 25, 50],
                 order: [
@@ -2285,6 +2327,60 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             });
         }
     };
+
+    // Function to show therapist details in a modal
+    function showTherapistDetails(therapistId) {
+        // Find the therapist card using the data attribute
+        const therapistCard = document.querySelector(`.therapist-card[data-account-id="${therapistId}"]`);
+        if (therapistCard) {
+            // Extract therapist details from the card's data attributes
+            const firstName = therapistCard.getAttribute('data-fname');
+            const lastName = therapistCard.getAttribute('data-lname');
+            const email = therapistCard.getAttribute('data-email');
+            const phone = therapistCard.getAttribute('data-phone');
+            const serviceType = therapistCard.getAttribute('data-service-type');
+            const status = therapistCard.getAttribute('data-status');
+
+            // Build the modal content
+            const modalContent = `
+            <table class="uk-table uk-table-striped uk-text-left" style="font-size: 14px; width: 100%;">
+                <tr><td style="text-align:left"><strong>First Name:</strong></td><td style="text-align:left">${firstName}</td></tr>
+                <tr><td style="text-align:left"><strong>Last Name:</strong></td><td style="text-align:left">${lastName}</td></tr>
+                <tr><td style="text-align:left"><strong>Email:</strong></td><td style="text-align:left">${email}</td></tr>
+                <tr><td style="text-align:left"><strong>Phone:</strong></td><td style="text-align:left">${phone}</td></tr>
+                <tr><td style="text-align:left"><strong>Service Type:</strong></td><td style="text-align:left">${serviceType}</td></tr>
+                <tr><td style="text-align:left"><strong>Status:</strong></td><td style="text-align:left">${status}</td></tr>
+            </table>
+            <button class="uk-button uk-button-primary" style="width: 100%; border-radius: 15px; margin-top: 10px;" onclick="openEditServiceModal('${therapistId}', '${firstName} ${lastName}', '${serviceType}')">
+                Edit Service
+            </button>
+        `;
+
+            // Show the modal using SweetAlert2
+            Swal.fire({
+                title: `<h3 style="font-size: 20px; font-weight: bold; text-align: left;">Therapist Details</h3>`,
+                html: modalContent,
+                showCloseButton: true,
+                cancelButtonText: 'Close',
+                focusConfirm: false,
+                showConfirmButton: false // Disable the default confirm button
+            });
+        }
+    }
+
+    // Function to open the Edit Service modal
+    function openEditServiceModal(therapistId, therapistName, currentService) {
+        // Close the "More Details" modal
+        Swal.close();
+
+        // Fill the modal with data
+        document.getElementById('edit-therapist-id').value = therapistId;
+        document.getElementById('edit-therapist-name').textContent = therapistName;
+        document.getElementById('edit-service-type').value = currentService === 'Not Set' ? 'both' : currentService;
+
+        // Open the modal using UIkit's JavaScript API
+        UIkit.modal('#edit-service-modal').show();
+    }
 
     // Archive User
     document.querySelectorAll('.archive-user').forEach(button => {

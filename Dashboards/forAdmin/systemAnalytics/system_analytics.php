@@ -37,6 +37,26 @@
         body {
             background-color: #ffffff !important;
         }
+
+        @media (max-width: 640px) {
+            h2 {
+                font-size: 1.25rem;
+            }
+
+            .uk-form-label {
+                font-size: 14px;
+                margin:0 0 5px 0;
+            }
+
+            .uk-input {
+                font-size: 14px;
+                margin:0 0 5px 0;
+            }
+           
+            .uk-button {
+                width: 100%;
+            }
+        }
     </style>
 </head>
 

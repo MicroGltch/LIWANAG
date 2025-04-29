@@ -59,6 +59,24 @@ $upcomingCount = $result->fetch_assoc()['count'];
         body {
             background-color: #ffffff !important;
         }
+
+        @media (max-width: 640px) {
+            body {
+                font-size: 14px;
+            }
+
+            h1 {
+                font-size: 20px;
+            }
+
+            .quick-stat-card h3{
+                margin: 0;
+            }
+
+            .quick-stat-card p{
+                margin: 0;
+            }
+        }
     </style>
 </head>
 
@@ -69,19 +87,19 @@ $upcomingCount = $result->fetch_assoc()['count'];
     <!-- ✅ Quick Statistics -->
     <div class="uk-grid-small uk-child-width-1-3@s uk-text-center" uk-grid>
         <div>
-            <div class="uk-card uk-card-default uk-card-body">
+            <div class="uk-card uk-card-default uk-card-body quick-stat-card">
                 <h3><?= $totalCount; ?></h3>
                 <p>Total Appointments</p>
             </div>
         </div>
         <div>
-            <div class="uk-card uk-card-default uk-card-body">
+            <div class="uk-card uk-card-default uk-card-body quick-stat-card">
                 <h3><?= $pendingCount; ?></h3>
                 <p>Pending Appointments</p>
             </div>
         </div>
         <div>
-            <div class="uk-card uk-card-default uk-card-body">
+            <div class="uk-card uk-card-default uk-card-body quick-stat-card">
                 <h3><?= $upcomingCount; ?></h3>
                 <p>Upcoming Appointments</p>
             </div>

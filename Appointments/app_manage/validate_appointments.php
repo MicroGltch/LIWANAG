@@ -118,6 +118,46 @@ $connection->close(); // Close DB connection
         .therapist-option label[disabled] input {
             cursor: not-allowed;
         }
+
+        /* Add this CSS to align table contents to the left */
+        #pendingAppointmentsTable th,
+        #pendingAppointmentsTable td,
+        #waitlistedAppointmentsTable th,
+        #waitlistedAppointmentsTable td {
+            text-align: left;
+        }
+
+        /* Optional: Center align specific columns like "Actions" */
+        #pendingAppointmentsTable th.uk-text-center,
+        #pendingAppointmentsTable td.uk-text-center,
+        #waitlistedAppointmentsTable th.uk-text-center,
+        #waitlistedAppointmentsTable td.uk-text-center {
+            text-align: center;
+        }
+
+        /* Add these styles to your existing CSS */
+        .action-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            width: 40px; /* Fixed width for the container */
+        }
+
+        .action-btn-group .uk-button {
+            width: 100%;
+            height: 32px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            line-height: 30px;
+        }
+
+        .action-btn-group .uk-button span[uk-icon] {
+            width: 16px;
+            height: 16px;
+        }
     </style>
 </head>
 
@@ -177,40 +217,80 @@ $connection->close(); // Close DB connection
                                 $clientPic = !empty($appointment['client_picture']) ? '../../uploads/profile_pictures/' . $appointment['client_picture'] : '../../uploads/profile_pictures/default.png';
                             ?>
                                 <tr>
-                                    <td class="no-break">
-                                        <img src="<?= $patientPic ?>" alt="P" class="uk-border-circle" style="width: 35px; height: 35px; object-fit: cover; margin-right: 5px;">
-                                        <?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?>
-                                    </td>
-                                    <td class="no-break">
-                                        <img src="<?= $clientPic ?>" alt="C" class="uk-border-circle" style="width: 35px; height: 35px; object-fit: cover; margin-right: 5px;">
-                                        <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
-                                    </td>
-                                    <td class="no-break"><?= htmlspecialchars(date("M d, Y", strtotime($appointment['date']))); ?></td>
-                                    <td class="no-break"><?= htmlspecialchars(date("g:i A", strtotime($appointment['time']))); ?></td>
-                                    <td class="no-break"><?= htmlspecialchars(date("M d, Y g:i A", strtotime($appointment['created_at']))); ?></td>
-                                    <td><?= htmlspecialchars(ucwords(str_replace('_', ' ', strtolower($appointment['display_session_type'])))); ?></td>
                                     <td>
+                                        <div class="uk-flex uk-flex-middle">
+                                            <div class="uk-margin-small-right">
+                                                <img src="<?= $patientPic ?>" alt="P" class="uk-border-circle" 
+                                                     style="width: 35px; height: 35px; object-fit: cover;">
+                                            </div>
+                                            <div class="uk-text-truncate uk-text-emphasis">
+                                                <?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="uk-flex uk-flex-middle">
+                                            <div class="uk-margin-small-right">
+                                                <img src="<?= $clientPic ?>" alt="C" class="uk-border-circle" 
+                                                     style="width: 35px; height: 35px; object-fit: cover;">
+                                            </div>
+                                            <div class="uk-text-truncate uk-text-emphasis">
+                                                <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="uk-text-nowrap uk-text-emphasis">
+                                        <?= htmlspecialchars(date("M d, Y", strtotime($appointment['date']))); ?>
+                                    </td>
+                                    <td class="uk-text-nowrap">
+                                        <?= htmlspecialchars(date("g:i A", strtotime($appointment['time']))); ?>
+                                    </td>
+                                    <td class="uk-text-nowrap uk-text-muted uk-text-small">
+                                        <?= htmlspecialchars(date("M d, Y g:i A", strtotime($appointment['created_at']))); ?>
+                                    </td>
+                                    <td class="uk-text-emphasis">
+                                        <?= htmlspecialchars(ucwords(str_replace('_', ' ', strtolower($appointment['display_session_type'])))); ?>
+                                    </td>
+                                    <td class="uk-text-center">
                                         <?php if (!empty($appointment['official_referral_file'])): ?>
-                                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>" target="_blank" class="uk-link-text" uk-tooltip="View Official Referral"><span uk-icon="icon: file-pdf; ratio: 1.1"></span></a>
+                                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>" 
+                                               target="_blank" class="uk-link-text uk-text-primary" 
+                                               uk-tooltip="View Official Referral">
+                                                <span uk-icon="icon: file-pdf; ratio: 1.2"></span>
+                                            </a>
                                         <?php elseif (!empty($appointment['proof_of_booking_referral_file'])): ?>
-                                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>" target="_blank" class="uk-link-text" uk-tooltip="View Proof of Booking"><span uk-icon="icon: file-text; ratio: 1.1"></span></a>
+                                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>" 
+                                               target="_blank" class="uk-link-text uk-text-primary" 
+                                               uk-tooltip="View Proof of Booking">
+                                                <span uk-icon="icon: file-text; ratio: 1.2"></span>
+                                            </a>
                                         <?php else: ?>
-                                            <span class="uk-text-muted uk-text-small">N/A</span>
+                                            <span class="uk-text-muted">—</span>
                                         <?php endif; ?>
                                     </td>
-                                    <td class="uk-text-center no-break">
-                                        <button class="uk-button uk-button-primary uk-button-small action-btn" data-id="<?= $appointment['appointment_id']; ?>" data-action="Approve" uk-tooltip="Approve and Assign Therapist">
-                                            <span uk-icon="check"></span>
-                                        </button>
-                                        <button class="uk-button uk-button-danger uk-button-small action-btn" data-id="<?= $appointment['appointment_id']; ?>" data-action="Decline" uk-tooltip="Decline Request">
-                                            <span uk-icon="ban"></span>
-                                        </button>
-                                        <?php // Only show waitlist if NOT a rebooking request
-                                        if (strpos(strtolower($appointment['display_session_type']), 'rebooking') === false): ?>
-                                            <button class="uk-button uk-button-secondary uk-button-small action-btn" data-id="<?= $appointment['appointment_id']; ?>" data-action="Waitlist" uk-tooltip="Move to Waitlist">
-                                                <span uk-icon="history"></span>
+                                    <td class="uk-text-center">
+                                        <div class="action-btn-group">
+                                            <button class="uk-button uk-button-small uk-button-primary action-btn" 
+                                                    data-id="<?= $appointment['appointment_id']; ?>" 
+                                                    data-action="Approve" 
+                                                    uk-tooltip="Approve and Assign Therapist">
+                                                <span uk-icon="check"></span>
                                             </button>
-                                        <?php endif; ?>
+                                            <button class="uk-button uk-button-small uk-button-danger action-btn" 
+                                                    data-id="<?= $appointment['appointment_id']; ?>" 
+                                                    data-action="Decline" 
+                                                    uk-tooltip="Decline Request">
+                                                <span uk-icon="ban"></span>
+                                            </button>
+                                            <?php if (strpos(strtolower($appointment['display_session_type']), 'rebooking') === false): ?>
+                                                <button class="uk-button uk-button-small uk-button-secondary action-btn" 
+                                                        data-id="<?= $appointment['appointment_id']; ?>" 
+                                                        data-action="Waitlist" 
+                                                        uk-tooltip="Move to Waitlist">
+                                                    <span uk-icon="history"></span>
+                                                </button>
+                                            <?php endif; ?>
+                                        </div>
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
@@ -307,15 +387,14 @@ $connection->close(); // Close DB connection
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
     <script>
-
         const API_ENDPOINTS = {
-                    getDetails: '../app_data/get_appointment_details.php',
-                    getTherapists: '../app_data/get_available_therapists.php',
-                    getPlaygroupSessions: '../app_data/get_open_playgroup_sessions.php',
-                    getTimetableSettings: '../app_data/get_timetable_settings.php', // Needed for assign modal
-                    getSlotsEnhanced: '../app_data/get_available_slots_enhanced.php', // Needed for assign modal
-                    updateStatus: '../app_process/update_appointment_status.php' // Adjust path if needed
-                };
+            getDetails: '../app_data/get_appointment_details.php',
+            getTherapists: '../app_data/get_available_therapists.php',
+            getPlaygroupSessions: '../app_data/get_open_playgroup_sessions.php',
+            getTimetableSettings: '../app_data/get_timetable_settings.php', // Needed for assign modal
+            getSlotsEnhanced: '../app_data/get_available_slots_enhanced.php', // Needed for assign modal
+            updateStatus: '../app_process/update_appointment_status.php' // Adjust path if needed
+        };
 
         // --- Helper Functions ---
         function log(...args) {
@@ -390,7 +469,8 @@ $connection->close(); // Close DB connection
                         ],
                         dom: 'lrtip',
                         language: {
-                            /* Custom text */ }
+                            /* Custom text */
+                        }
                     });
 
                     $('#waitlistSearch').on('keyup', function() {
@@ -593,7 +673,7 @@ $connection->close(); // Close DB connection
 
             // Construct URL
             const therapistUrl = `../app_data/get_available_therapists.php?date=${appointmentDate}&time=${appointmentTime}&session_type=${encodeURIComponent(sessionType)}`;
-                        log("Fetching therapists using URL:", therapistUrl);
+            log("Fetching therapists using URL:", therapistUrl);
 
             // Show loading specifically for therapist fetch
             Swal.fire({
@@ -836,26 +916,37 @@ $connection->close(); // Close DB connection
 
         // --- WAITLIST ACTION ---
         function handleWaitlistAction(appointmentId, detailsHtml, buttonElement) {
-              log(`Handling Waitlist: ID=${appointmentId}`); // <<< CONFIRM THIS LOG APPEARS
-              Swal.fire({
-                  title: "Move to Waitlist?",
-                  html: detailsHtml + `<label class="uk-form-label uk-text-bold">Reason (Required):</label><textarea id="waitlistReason" class="uk-textarea swal2-textarea" placeholder="e.g., Fully booked..."></textarea>`,
-                  icon: 'question', showCancelButton: true, confirmButtonText: "Confirm Waitlist", cancelButtonText: "Cancel",
-                  preConfirm: () => {
-                      const reason = document.getElementById("waitlistReason")?.value.trim(); // Safe access
-                      if (!reason) { Swal.showValidationMessage("Reason required."); return false; }
-                      return reason;
-                  }
-              }).then((result) => {
-                   resetButtonState(buttonElement); // Reset after interaction
-                   if (result.isConfirmed) {
-                        log("Waitlist confirmed, calling updateAppointmentStatus...");
-                        updateAppointmentStatus(
-                            { appointment_id: appointmentId, status: "waitlisted", validation_notes: result.value },
-                            "Moved to waitlist", "Failed to waitlist", buttonElement
-                        );
-                   } else { log("Waitlist cancelled."); }
-              });
+            log(`Handling Waitlist: ID=${appointmentId}`); // <<< CONFIRM THIS LOG APPEARS
+            Swal.fire({
+                title: "Move to Waitlist?",
+                html: detailsHtml + `<label class="uk-form-label uk-text-bold">Reason (Required):</label><textarea id="waitlistReason" class="uk-textarea swal2-textarea" placeholder="e.g., Fully booked..."></textarea>`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: "Confirm Waitlist",
+                cancelButtonText: "Cancel",
+                preConfirm: () => {
+                    const reason = document.getElementById("waitlistReason")?.value.trim(); // Safe access
+                    if (!reason) {
+                        Swal.showValidationMessage("Reason required.");
+                        return false;
+                    }
+                    return reason;
+                }
+            }).then((result) => {
+                resetButtonState(buttonElement); // Reset after interaction
+                if (result.isConfirmed) {
+                    log("Waitlist confirmed, calling updateAppointmentStatus...");
+                    updateAppointmentStatus({
+                            appointment_id: appointmentId,
+                            status: "waitlisted",
+                            validation_notes: result.value
+                        },
+                        "Moved to waitlist", "Failed to waitlist", buttonElement
+                    );
+                } else {
+                    log("Waitlist cancelled.");
+                }
+            });
         }
 
         // --- REMOVE FROM WAITLIST ACTION ---
@@ -888,32 +979,43 @@ $connection->close(); // Close DB connection
 
         // --- ASSIGN SLOT FROM WAITLIST (Non-Playgroup) ---
         function handleAssignAction(appointmentId, buttonElement) { // Ensure buttonElement is passed
-    log(`Handling Assign Slot from Waitlist: ID=${appointmentId}`);
-    let originalAppointmentData = null;
-    // Show initial loading indicator
-    Swal.fire({ title: 'Loading...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), showConfirmButton: false });
+            log(`Handling Assign Slot from Waitlist: ID=${appointmentId}`);
+            let originalAppointmentData = null;
+            // Show initial loading indicator
+            Swal.fire({
+                title: 'Loading...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+                showConfirmButton: false
+            });
 
-    fetch(`${API_ENDPOINTS.getDetails}?appointment_id=${appointmentId}`)
-        .then(response => response.ok ? response.json() : Promise.reject('Failed details fetch'))
-        .then(appointmentData => {
-            if (appointmentData.status !== "success" || !appointmentData.details) { throw new Error(appointmentData.message || "Could not load details."); }
-            originalAppointmentData = appointmentData;
-            // Update loading message before next fetch
-            Swal.update({ title: 'Loading Settings...' });
-            return fetch(API_ENDPOINTS.getTimetableSettings); // Chain next fetch
-        })
-        .then(response => response.ok ? response.json() : Promise.reject('Failed settings fetch'))
-        .then(settingsData => {
-             if (settingsData.status !== "success" || !settingsData.settings) { throw new Error(settingsData.message || "Could not load settings."); }
-             const settings = settingsData.settings;
-             const blockedDates = settings.blocked_dates || []; // Already decoded by PHP
-             const patientName = originalAppointmentData.details.patient_name || 'N/A';
-             const sessionType = originalAppointmentData.details.raw_session_type || 'N/A';
+            fetch(`${API_ENDPOINTS.getDetails}?appointment_id=${appointmentId}`)
+                .then(response => response.ok ? response.json() : Promise.reject('Failed details fetch'))
+                .then(appointmentData => {
+                    if (appointmentData.status !== "success" || !appointmentData.details) {
+                        throw new Error(appointmentData.message || "Could not load details.");
+                    }
+                    originalAppointmentData = appointmentData;
+                    // Update loading message before next fetch
+                    Swal.update({
+                        title: 'Loading Settings...'
+                    });
+                    return fetch(API_ENDPOINTS.getTimetableSettings); // Chain next fetch
+                })
+                .then(response => response.ok ? response.json() : Promise.reject('Failed settings fetch'))
+                .then(settingsData => {
+                    if (settingsData.status !== "success" || !settingsData.settings) {
+                        throw new Error(settingsData.message || "Could not load settings.");
+                    }
+                    const settings = settingsData.settings;
+                    const blockedDates = settings.blocked_dates || []; // Already decoded by PHP
+                    const patientName = originalAppointmentData.details.patient_name || 'N/A';
+                    const sessionType = originalAppointmentData.details.raw_session_type || 'N/A';
 
-             // Show Assign Swal - This returns a Promise
-             return Swal.fire({ // *** Return the Swal promise ***
-                  title: "Assign New Slot",
-                  html: `
+                    // Show Assign Swal - This returns a Promise
+                    return Swal.fire({ // *** Return the Swal promise ***
+                        title: "Assign New Slot",
+                        html: `
                       <div style="text-align: left; margin-bottom: 15px; font-size: 0.9em;">
                           <p><strong>Patient:</strong> ${patientName}</p>
                           <p><strong>Session Type:</strong> ${ucfirst(sessionType.replace(/[-_]/g, ' '))}</p><hr style='margin: 10px 0;'>
@@ -923,46 +1025,62 @@ $connection->close(); // Close DB connection
                           <div class="uk-margin"><label class="uk-form-label uk-text-bold" for="assignTime">New Time:</label><div class="uk-form-controls"><select id="assignTime" class="uk-select swal2-select" disabled><option value="">-- Select Date --</option></select></div></div>
                           <div class="uk-margin"><label class="uk-form-label uk-text-bold">Assign Therapist:</label><div id="assignTherapistContainer"><p class="uk-text-muted uk-text-small">Select date & time.</p></div></div>
                       </div>`,
-                  width: '600px',
-                  allowOutsideClick: false, // Prevent closing by clicking outside during selection
-                  showCancelButton: true,
-                  confirmButtonText: "Assign & Approve",
-                  cancelButtonText: "Cancel",
-                  didOpen: () => { setupAssignDateTimeFields(settings, blockedDates, sessionType); },
-                  preConfirm: () => {
-                       const dateInput = document.getElementById("assignDate");
-                       const time = document.getElementById("assignTime").value;
-                       const selectedTherapist = document.querySelector('#assignTherapistContainer input[name="therapist"]:checked');
-                       const fpInstance = dateInput._flatpickr;
-                       const selectedDate = fpInstance?.selectedDates[0] ? fpInstance.formatDate(fpInstance.selectedDates[0], "Y-m-d") : null;
+                        width: '600px',
+                        allowOutsideClick: false, // Prevent closing by clicking outside during selection
+                        showCancelButton: true,
+                        confirmButtonText: "Assign & Approve",
+                        cancelButtonText: "Cancel",
+                        didOpen: () => {
+                            setupAssignDateTimeFields(settings, blockedDates, sessionType);
+                        },
+                        preConfirm: () => {
+                            const dateInput = document.getElementById("assignDate");
+                            const time = document.getElementById("assignTime").value;
+                            const selectedTherapist = document.querySelector('#assignTherapistContainer input[name="therapist"]:checked');
+                            const fpInstance = dateInput._flatpickr;
+                            const selectedDate = fpInstance?.selectedDates[0] ? fpInstance.formatDate(fpInstance.selectedDates[0], "Y-m-d") : null;
 
-                       if (!selectedDate || !time || !selectedTherapist) { Swal.showValidationMessage("Select date, time, & therapist."); return false; }
-                       return { date: selectedDate, time: time, therapist_id: selectedTherapist.value };
-                  }
-              }); // *** End of Swal.fire call ***
-         }) // *** End of .then(settingsData => ...) ***
-         .then((result) => { // *** This .then() receives the result of the Swal.fire promise ***
-              // Reset button state HERE, after the user has interacted with the modal
-              resetButtonState(buttonElement);
+                            if (!selectedDate || !time || !selectedTherapist) {
+                                Swal.showValidationMessage("Select date, time, & therapist.");
+                                return false;
+                            }
+                            return {
+                                date: selectedDate,
+                                time: time,
+                                therapist_id: selectedTherapist.value
+                            };
+                        }
+                    }); // *** End of Swal.fire call ***
+                }) // *** End of .then(settingsData => ...) ***
+                .then((result) => { // *** This .then() receives the result of the Swal.fire promise ***
+                    // Reset button state HERE, after the user has interacted with the modal
+                    resetButtonState(buttonElement);
 
-              if (result.isConfirmed) {
-                   log("Assign Swal confirmed. Calling updateAppointmentStatus...");
-                   updateAppointmentStatus({
-                       appointment_id: appointmentId, status: "approved", date: result.value.date, time: result.value.time,
-                       therapist_id: result.value.therapist_id, validation_notes: "Assigned from waitlist."
-                   }, "Assigned successfully", "Failed assignment", buttonElement);
-              } else {
-                   log("Assignment cancelled by user (Cancel button or Esc/Outside click).");
-                   // No further action needed, button state already reset
-              }
-          })
-         .catch(error => {
-              Swal.close(); // Close any loading Swal if fetches failed
-              console.error("Error during waitlist assignment process:", error);
-              Swal.fire("Error", "Could not proceed with assignment. " + error.message, "error");
-              resetButtonState(buttonElement); // Reset button state on any error in the chain
-         });
-}
+                    if (result.isConfirmed) {
+                        log("Assign Swal confirmed. Calling updateAppointmentStatus...");
+                        updateAppointmentStatus({
+                            appointment_id: appointmentId,
+                            status: "approved",
+                            date: result.value.date,
+                            time: result.value.time,
+                            therapist_id: result.value.therapist_id,
+                            validation_notes: "Assigned from waitlist."
+                        }, "Assigned successfully", "Failed assignment", buttonElement);
+                    } else {
+                        log("Assignment cancelled by user (Cancel button or Esc/Outside click).");
+                        // No further action needed, button state already reset
+                    }
+                })
+                .catch(error => {
+                    Swal.close(); // Close any loading Swal if fetches failed
+                    console.error("Error during waitlist assignment process:", error);
+                    // Avoid showing Swal again if it was already shown (like "No Sessions") unless it's a new error
+                    if (error !== "No sessions found") {
+                        Swal.fire("Error", "Could not proceed with assignment. " + error.message, "error");
+                    }
+                    resetButtonState(buttonElement); // Reset button state on any error in the chain
+                });
+        }
 
 
         // --- Setup Date/Time/Therapist fields for ASSIGNING from waitlist ---
@@ -1092,92 +1210,124 @@ $connection->close(); // Close DB connection
 
         // --- ASSIGN SLOT FROM WAITLIST (Playgroup) ---
         // Apply similar logic: reset button after Swal interaction or in catch
-function handleAssignPlaygroupAction(appointmentId, buttonElement) {
-    log(`Handling Assign Playgroup from Waitlist: ID=${appointmentId}`);
-    Swal.fire({ title: 'Loading...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), showConfirmButton: false });
-
-    fetch(API_ENDPOINTS.getPlaygroupSessions)
-        .then(response => response.ok ? response.json() : Promise.reject('Failed sessions fetch'))
-        .then(slotData => {
-            if (slotData.status !== "success" || !slotData.sessions || slotData.sessions.length === 0) {
-                Swal.fire("No Sessions", "No open sessions.", "warning");
-                resetButtonState(buttonElement); // Reset on fetch error/no data
-                return Promise.reject("No sessions found"); // Stop promise chain
-            }
-            let options = slotData.sessions.map(session => { /* format */ return `<option value="${session.pg_session_id}">...</option>`; }).join('');
-            // Show Select Session Swal and RETURN its promise
-            return Swal.fire({
-                title: "Assign to Playgroup Session", html: `<p>Assigning ID: ${appointmentId}</p><label ...>Select Session:</label><select id="pgSlotSelectAssign">...</select>`,
-                showCancelButton: true, confirmButtonText: "Assign & Approve", cancelButtonText: "Cancel",
-                preConfirm: () => { /* validate selection */ return { pg_session_id: selected }; }
+        function handleAssignPlaygroupAction(appointmentId, buttonElement) {
+            log(`Handling Assign Playgroup from Waitlist: ID=${appointmentId}`);
+            Swal.fire({
+                title: 'Loading...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+                showConfirmButton: false
             });
-        })
-        .then((result) => { // Receives result from Swal
-             resetButtonState(buttonElement); // Reset after interaction
-             if (result.isConfirmed) {
-                  log("Assign Playgroup Swal confirmed.");
-                  updateAppointmentStatus({ appointment_id: appointmentId, status: "approved", pg_session_id: result.value.pg_session_id, validation_notes: "Assigned from waitlist." }, "Assigned...", "Failed...", buttonElement);
-             } else {
-                  log("Playgroup assignment cancelled.");
-             }
-         })
-        .catch(error => { // Catches errors from fetch OR "No sessions found" rejection
-             Swal.close();
-             console.error("Error assigning playgroup from waitlist:", error);
-             // Avoid showing Swal again if it was already shown (like "No Sessions") unless it's a new error
-             if (error !== "No sessions found") {
-                Swal.fire("Error", "Failed to assign Playgroup slot.", "error");
-             }
-             resetButtonState(buttonElement); // Reset on error/catch
-        });
-}
+
+            fetch(API_ENDPOINTS.getPlaygroupSessions)
+                .then(response => response.ok ? response.json() : Promise.reject('Failed sessions fetch'))
+                .then(slotData => {
+                    if (slotData.status !== "success" || !slotData.sessions || slotData.sessions.length === 0) {
+                        Swal.fire("No Sessions", "No open sessions.", "warning");
+                        resetButtonState(buttonElement); // Reset on fetch error/no data
+                        return Promise.reject("No sessions found"); // Stop promise chain
+                    }
+                    let options = slotData.sessions.map(session => {
+                        /* format */
+                        return `<option value="${session.pg_session_id}">...</option>`;
+                    }).join('');
+                    // Show Select Session Swal and RETURN its promise
+                    return Swal.fire({
+                        title: "Assign to Playgroup Session",
+                        html: `<p>Assigning ID: ${appointmentId}</p><label ...>Select Session:</label><select id="pgSlotSelectAssign">...</select>`,
+                        showCancelButton: true,
+                        confirmButtonText: "Assign & Approve",
+                        cancelButtonText: "Cancel",
+                        preConfirm: () => {
+                            /* validate selection */
+                            return {
+                                pg_session_id: selected
+                            };
+                        }
+                    });
+                })
+                .then((result) => { // Receives result from Swal
+                    resetButtonState(buttonElement); // Reset after interaction
+                    if (result.isConfirmed) {
+                        log("Assign Playgroup Swal confirmed.");
+                        updateAppointmentStatus({
+                            appointment_id: appointmentId,
+                            status: "approved",
+                            pg_session_id: result.value.pg_session_id,
+                            validation_notes: "Assigned from waitlist."
+                        }, "Assigned...", "Failed...", buttonElement);
+                    } else {
+                        log("Playgroup assignment cancelled.");
+                    }
+                })
+                .catch(error => { // Catches errors from fetch OR "No sessions found" rejection
+                    Swal.close();
+                    console.error("Error assigning playgroup from waitlist:", error);
+                    // Avoid showing Swal again if it was already shown (like "No Sessions") unless it's a new error
+                    if (error !== "No sessions found") {
+                        Swal.fire("Error", "Failed to assign Playgroup slot.", "error");
+                    }
+                    resetButtonState(buttonElement); // Reset on error/catch
+                });
+        }
 
 
         // --- Universal Update Status Function ---
         function updateAppointmentStatus(data, successMessage, errorMessage, buttonElement = null) {
             log("Updating status with data:", data);
-             if (!buttonElement || buttonElement.length === 0) { buttonElement = $(`button[data-id="${data.appointment_id}"]`).first(); }
+            if (!buttonElement || buttonElement.length === 0) {
+                buttonElement = $(`button[data-id="${data.appointment_id}"]`).first();
+            }
 
-            Swal.fire({ title: 'Processing Update...', allowOutsideClick: false, didOpen: () => Swal.showLoading(), showConfirmButton: false });
+            Swal.fire({
+                title: 'Processing Update...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading(),
+                showConfirmButton: false
+            });
 
             // *** Check endpoint URL again ***
             log("Calling updateStatus endpoint:", API_ENDPOINTS.updateStatus);
 
             fetch(API_ENDPOINTS.updateStatus, {
-                method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(data)
-            })
-            // *** ADD MORE LOGGING TO FETCH RESPONSE ***
-            .then(response => {
-                log("Update Status Raw Response Status:", response.status);
-                if (!response.ok) {
-                     // Try to get text even for errors
-                     return response.text().then(text => {
-                         log("Update Status Raw Error Response Text:", text);
-                         throw new Error(`Update Error (${response.status})`);
-                     });
-                }
-                // If OK, try to parse JSON
-                return response.json().catch(parseError => {
-                    log("Update Status JSON Parse Error:", parseError);
-                    // We might have received OK status but non-JSON body (e.g., HTML redirect)
-                    throw new Error("Invalid JSON received from update status endpoint.");
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(data)
+                })
+                // *** ADD MORE LOGGING TO FETCH RESPONSE ***
+                .then(response => {
+                    log("Update Status Raw Response Status:", response.status);
+                    if (!response.ok) {
+                        // Try to get text even for errors
+                        return response.text().then(text => {
+                            log("Update Status Raw Error Response Text:", text);
+                            throw new Error(`Update Error (${response.status})`);
+                        });
+                    }
+                    // If OK, try to parse JSON
+                    return response.json().catch(parseError => {
+                        log("Update Status JSON Parse Error:", parseError);
+                        // We might have received OK status but non-JSON body (e.g., HTML redirect)
+                        throw new Error("Invalid JSON received from update status endpoint.");
+                    });
+                })
+                .then(responseData => {
+                    log("Update Status Parsed Response:", responseData);
+                    if (responseData.status === "success") {
+                        Swal.fire("Success!", responseData.message || successMessage, "success").then(() => location.reload());
+                    } else {
+                        Swal.fire("Error", responseData.message || errorMessage, "error");
+                        resetButtonState(buttonElement); // Reset on specific error from server
+                    }
+                })
+                .catch(error => {
+                    // This catches fetch errors, bad JSON parse, or thrown errors from !response.ok
+                    console.error("Error updating appointment status:", error);
+                    Swal.fire("Error", `${errorMessage}. ${error.message}`, "error");
+                    resetButtonState(buttonElement); // Reset on any catch
                 });
-            })
-            .then(responseData => {
-                log("Update Status Parsed Response:", responseData);
-                if (responseData.status === "success") {
-                    Swal.fire("Success!", responseData.message || successMessage, "success").then(() => location.reload());
-                } else {
-                     Swal.fire("Error", responseData.message || errorMessage, "error");
-                     resetButtonState(buttonElement); // Reset on specific error from server
-                }
-            })
-            .catch(error => {
-                 // This catches fetch errors, bad JSON parse, or thrown errors from !response.ok
-                 console.error("Error updating appointment status:", error);
-                 Swal.fire("Error", `${errorMessage}. ${error.message}`, "error");
-                 resetButtonState(buttonElement); // Reset on any catch
-            });
         }
 
 

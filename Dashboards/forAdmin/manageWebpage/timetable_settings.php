@@ -64,7 +64,48 @@ while ($row = $exceptionsResult->fetch_assoc()) {
     <script src="../../../CSS/uikit-3.22.2/js/uikit-icons.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <style> html, body { background-color: #ffffff !important; } </style>
+    <style> 
+        html, body { 
+            background-color: #ffffff !important; 
+            } 
+
+            @media (max-width: 640px) {
+                .uk-table {
+                    font-size: 12px;
+                    width: 100%;
+                }
+                .uk-table th,
+                .uk-table td {
+                    padding: 6px 4px;
+                }
+
+                .uk-table td:first-child {
+                    font-size: 11px;
+                }
+
+                .uk-table td:nth-child(3) {
+                    font-size: 11px;
+                }
+
+                .uk-button-small {
+                    padding: 0 6px;
+                    font-size: 11px;
+                    line-height: 20px;
+                    height: auto;
+                }
+
+                .uk-table-wrapper {
+                    width: 100%;
+                    margin-bottom: 15px;
+                }
+
+                .uk-table th {
+                    font-size: 11px;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+    </style>
 </head>
 
 <body class="uk-container uk-margin-top">
