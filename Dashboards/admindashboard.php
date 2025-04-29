@@ -655,8 +655,11 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                             <td><?= htmlspecialchars($client['account_PNum']); ?></td>
                                             <td><?= htmlspecialchars($client['account_status']); ?></td>
                                             <td><?= htmlspecialchars($client['appointment_count']); ?></td>
-                                            <td><?php if ($client['account_status'] != 'Archived') { ?>
-                                                    <button class="uk-button archive-user" style="border-radius: 15px; background-color: #f0506e; color:white;" data-account-id="><?= $client['account_ID']; ?>">Archive</button>
+                                            <td>
+                                                <?php if ($client['account_status'] == 'Archived') { ?>
+                                                    <button class="uk-button activate-user" style="border-radius: 15px; background-color: #32d296; color:white;" data-account-id="<?= $client['account_ID']; ?>">Activate</button>
+                                                <?php } else { ?>
+                                                    <button class="uk-button archive-user" style="border-radius: 15px; background-color: #f0506e; color:white;" data-account-id="<?= $client['account_ID']; ?>">Archive</button>
                                                 <?php } ?>
                                             </td>
                                             <!-- Activate account logic to follow
@@ -2136,17 +2139,19 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </table>
         `;
 
-            // Add the "Archive" button only if the account is not archived
-            if (status !== 'Archived') {
+            // Add the appropriate button based on account status
+            if (status === 'Archived') {
+                modalContent += `
+                <button class="uk-button" style="width: 100%; border-radius:15px; background-color: #32d296; color:white;" onclick="activateClient('${accountID}')">
+                    Activate
+                </button>
+                `;
+            } else {
                 modalContent += `
                 <button class="uk-button uk-button-danger" style="width: 100%; border-radius:15px" onclick="archiveClient('${accountID}')">
                     Archive
                 </button>
-            `;
-            } else {
-                modalContent += `
-                <p style="color: red; font-weight: bold; margin-top: 15px;"></p>
-            `;
+                `;
             }
 
             // Show the modal
@@ -2188,10 +2193,50 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 'The account has been archived successfully.',
                                 'success'
                             ).then(() => {
-                                location.reload(); // Reload the page to reflect changes
+                                location.reload();
                             });
                         } else {
                             throw new Error('Failed to archive the account.');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', error.message, 'error');
+                    });
+            }
+        });
+    }
+
+    // Function to activate a client (modal)
+    function activateClient(accountID) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This user will be activated and access their Account!",
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#32d296',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, activate it',
+            cancelButtonText: 'No, cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('../Accounts/manageaccount/activate_account.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `account_id=${accountID}`
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire(
+                                'Activated!',
+                                'The account has been activated successfully.',
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            throw new Error('Failed to activate the account.');
                         }
                     })
                     .catch(error => {
@@ -2275,6 +2320,49 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                             Swal.fire(
                                 'Error!',
                                 'Failed to archive the account.',
+                                'error'
+                            );
+                        }
+                    });
+                }
+            });
+        });
+    });
+
+    // Activate User
+    document.querySelectorAll('.activate-user').forEach(button => {
+        button.addEventListener('click', function() {
+            const accountId = this.dataset.accountId;
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This user will be activated and access their Account!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    fetch('../Accounts/manageaccount/activate_account.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: 'account_id=' + accountId
+                    }).then(response => {
+                        if (response.ok) {
+                            Swal.fire(
+                                'Activated!',
+                                'The account has been activated successfully.',
+                                'success'
+                            ).then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire(
+                                'Error!',
+                                'Failed to activate the account.',
                                 'error'
                             );
                         }
