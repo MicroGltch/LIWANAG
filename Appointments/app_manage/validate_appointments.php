@@ -119,7 +119,6 @@ $connection->close(); // Close DB connection
             cursor: not-allowed;
         }
 
-        /* Add this CSS to align table contents to the left */
         #pendingAppointmentsTable th,
         #pendingAppointmentsTable td,
         #waitlistedAppointmentsTable th,
@@ -127,7 +126,6 @@ $connection->close(); // Close DB connection
             text-align: left;
         }
 
-        /* Optional: Center align specific columns like "Actions" */
         #pendingAppointmentsTable th.uk-text-center,
         #pendingAppointmentsTable td.uk-text-center,
         #waitlistedAppointmentsTable th.uk-text-center,
@@ -135,28 +133,54 @@ $connection->close(); // Close DB connection
             text-align: center;
         }
 
-        /* Add these styles to your existing CSS */
         .action-btn-group {
             display: flex;
             flex-direction: column;
-            gap: 4px;
-            width: 40px; /* Fixed width for the container */
+            gap: 8px;
+            align-items: center;
         }
 
         .action-btn-group .uk-button {
-            width: 100%;
-            height: 32px;
-            padding: 0;
-            display: flex;
+            width: 45px !important;
+            height: 45px !important;
+            padding: 0 !important;
+            display: flex !important;
             align-items: center;
             justify-content: center;
             margin: 0;
-            line-height: 30px;
+            min-height: 45px !important;
+            border-radius: 4px;
+        }
+
+        /* Add these new styles to ensure consistent sizing for all action buttons */
+        .action-btn-group .uk-button,
+        .action-btn-group .uk-button.uk-button-secondary {
+            width: 45px !important;
+            min-width: 45px !important;
+            max-width: 45px !important;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            padding: 0 !important;
         }
 
         .action-btn-group .uk-button span[uk-icon] {
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Ensure icons are centered */
+        .action-btn-group .uk-button span[uk-icon]::before {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+
+        .action-btn-group .uk-button:hover {
+            transform: translateY(-1px);
+            transition: transform 0.2s ease;
         }
     </style>
 </head>
@@ -181,18 +205,20 @@ $connection->close(); // Close DB connection
                 <h2 class="uk-card-title uk-text-bold">Validate Pending Appointments</h2>
 
                 <!-- Custom Search and Show Entries -->
-                <div class="uk-flex uk-flex-between uk-flex-middle uk-margin-bottom">
-                    <div class="uk-width-1-3@m uk-width-1-2@s">
+                <div class="uk-flex uk-flex-between uk-flex-middle uk-grid-small uk-margin-small" uk-grid>
+                    <div class="uk-width-1-2@s uk-width-expand@m">
                         <input type="text" id="pendingSearch" class="uk-input uk-form-small" placeholder="Search Pending...">
                     </div>
                     <div class="uk-width-auto">
-                        <label for="pendingEntries" class="uk-form-label uk-margin-small-right">Show:</label>
-                        <select id="pendingEntries" class="uk-select uk-form-width-xsmall uk-form-small">
-                            <option value="5">5</option>
-                            <option value="10" selected>10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                        </select>
+                        <div class="uk-flex uk-flex-middle">
+                            <label for="pendingEntries" class="uk-form-label uk-margin-small-right">Show:</label>
+                            <select id="pendingEntries" class="uk-select uk-form-width-xsmall uk-form-small">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -220,8 +246,8 @@ $connection->close(); // Close DB connection
                                     <td>
                                         <div class="uk-flex uk-flex-middle">
                                             <div class="uk-margin-small-right">
-                                                <img src="<?= $patientPic ?>" alt="P" class="uk-border-circle" 
-                                                     style="width: 35px; height: 35px; object-fit: cover;">
+                                                <img src="<?= $patientPic ?>" alt="P" class="uk-border-circle"
+                                                    style="width: 35px; height: 35px; object-fit: cover;">
                                             </div>
                                             <div class="uk-text-truncate uk-text-emphasis">
                                                 <?= htmlspecialchars($appointment['first_name'] . " " . $appointment['last_name']); ?>
@@ -231,8 +257,8 @@ $connection->close(); // Close DB connection
                                     <td>
                                         <div class="uk-flex uk-flex-middle">
                                             <div class="uk-margin-small-right">
-                                                <img src="<?= $clientPic ?>" alt="C" class="uk-border-circle" 
-                                                     style="width: 35px; height: 35px; object-fit: cover;">
+                                                <img src="<?= $clientPic ?>" alt="C" class="uk-border-circle"
+                                                    style="width: 35px; height: 35px; object-fit: cover;">
                                             </div>
                                             <div class="uk-text-truncate uk-text-emphasis">
                                                 <?= htmlspecialchars($appointment['client_firstname'] . " " . $appointment['client_lastname']); ?>
@@ -253,15 +279,15 @@ $connection->close(); // Close DB connection
                                     </td>
                                     <td class="uk-text-center">
                                         <?php if (!empty($appointment['official_referral_file'])): ?>
-                                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>" 
-                                               target="_blank" class="uk-link-text uk-text-primary" 
-                                               uk-tooltip="View Official Referral">
+                                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['official_referral_file']); ?>"
+                                                target="_blank" class="uk-link-text uk-text-primary"
+                                                uk-tooltip="View Official Referral">
                                                 <span uk-icon="icon: file-pdf; ratio: 1.2"></span>
                                             </a>
                                         <?php elseif (!empty($appointment['proof_of_booking_referral_file'])): ?>
-                                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>" 
-                                               target="_blank" class="uk-link-text uk-text-primary" 
-                                               uk-tooltip="View Proof of Booking">
+                                            <a href="../../uploads/doctors_referrals/<?= htmlspecialchars($appointment['proof_of_booking_referral_file']); ?>"
+                                                target="_blank" class="uk-link-text uk-text-primary"
+                                                uk-tooltip="View Proof of Booking">
                                                 <span uk-icon="icon: file-text; ratio: 1.2"></span>
                                             </a>
                                         <?php else: ?>
@@ -270,23 +296,23 @@ $connection->close(); // Close DB connection
                                     </td>
                                     <td class="uk-text-center">
                                         <div class="action-btn-group">
-                                            <button class="uk-button uk-button-small uk-button-primary action-btn" 
-                                                    data-id="<?= $appointment['appointment_id']; ?>" 
-                                                    data-action="Approve" 
-                                                    uk-tooltip="Approve and Assign Therapist">
+                                            <button class="uk-button uk-button-small uk-button-primary action-btn"
+                                                data-id="<?= $appointment['appointment_id']; ?>"
+                                                data-action="Approve"
+                                                uk-tooltip="Approve and Assign Therapist">
                                                 <span uk-icon="check"></span>
                                             </button>
-                                            <button class="uk-button uk-button-small uk-button-danger action-btn" 
-                                                    data-id="<?= $appointment['appointment_id']; ?>" 
-                                                    data-action="Decline" 
-                                                    uk-tooltip="Decline Request">
+                                            <button class="uk-button uk-button-small uk-button-danger action-btn"
+                                                data-id="<?= $appointment['appointment_id']; ?>"
+                                                data-action="Decline"
+                                                uk-tooltip="Decline Request">
                                                 <span uk-icon="ban"></span>
                                             </button>
                                             <?php if (strpos(strtolower($appointment['display_session_type']), 'rebooking') === false): ?>
-                                                <button class="uk-button uk-button-small uk-button-secondary action-btn" 
-                                                        data-id="<?= $appointment['appointment_id']; ?>" 
-                                                        data-action="Waitlist" 
-                                                        uk-tooltip="Move to Waitlist">
+                                                <button class="uk-button uk-button-small uk-button-secondary action-btn"
+                                                    data-id="<?= $appointment['appointment_id']; ?>"
+                                                    data-action="Waitlist"
+                                                    uk-tooltip="Move to Waitlist">
                                                     <span uk-icon="history"></span>
                                                 </button>
                                             <?php endif; ?>
@@ -310,18 +336,20 @@ $connection->close(); // Close DB connection
                 <h2 class="uk-card-title uk-text-bold">Waitlisted Appointments</h2>
 
                 <!-- Custom Search and Show Entries -->
-                <div class="uk-flex uk-flex-between uk-flex-middle uk-margin-bottom">
-                    <div class="uk-width-1-3@m uk-width-1-2@s">
-                        <input type="text" id="waitlistSearch" class="uk-input uk-form-small" placeholder="Search Waitlist...">
+                <div class="uk-flex uk-flex-between uk-flex-middle uk-grid-small uk-margin-small" uk-grid>
+                    <div class="uk-width-1-2@s uk-width-expand@m">
+                        <input type="text" id="pendingSearch" class="uk-input uk-form-small" placeholder="Search Pending...">
                     </div>
                     <div class="uk-width-auto">
-                        <label for="waitlistEntries" class="uk-form-label uk-margin-small-right">Show:</label>
-                        <select id="waitlistEntries" class="uk-select uk-form-width-xsmall uk-form-small">
-                            <option value="5">5</option>
-                            <option value="10" selected>10</option>
-                            <option value="25">25</option>
-                            <option value="50">50</option>
-                        </select>
+                        <div class="uk-flex uk-flex-middle">
+                            <label for="pendingEntries" class="uk-form-label uk-margin-small-right">Show:</label>
+                            <select id="pendingEntries" class="uk-select uk-form-width-xsmall uk-form-small">
+                                <option value="5">5</option>
+                                <option value="10" selected>10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
                     </div>
                 </div>
 
@@ -436,13 +464,12 @@ $connection->close(); // Close DB connection
             try {
                 const pendingTable = $('#pendingAppointmentsTable').DataTable({
                     pageLength: 10, // Default length
-                    lengthMenu: [5, 10, 25, 50],
-                    // Order by Date (column index 2), then Time (column index 3) ascending
+                    lengthChange: false, // Disable the default "Show entries" dropdown
                     order: [
-                        [2, 'asc'],
-                        [3, 'asc']
+                        [2, 'asc'], // Order by Date (column index 2)
+                        [3, 'asc'] // Then by Time (column index 3)
                     ],
-                    dom: 'lrtip', // Keep length menu, remove default search, keep table, info, pagination
+                    dom: 'lrtip', // Keep table, info, and pagination; remove default search and length menu
                     language: {
                         // Customize text if needed
                     }
@@ -462,14 +489,13 @@ $connection->close(); // Close DB connection
                 if ($('#waitlistedAppointmentsTable').length > 0) {
                     const waitlistedTable = $('#waitlistedAppointmentsTable').DataTable({
                         pageLength: 10,
-                        lengthMenu: [5, 10, 25, 50],
-                        // Order by Patient Name (column 0) by default? Or another column?
+                        lengthChange: false, // Disable the default "Show entries" dropdown
                         order: [
-                            [0, 'asc']
+                            [0, 'asc'] // Order by Patient Name (column 0) by default
                         ],
                         dom: 'lrtip',
                         language: {
-                            /* Custom text */
+                            // Customize text if needed
                         }
                     });
 
@@ -483,7 +509,6 @@ $connection->close(); // Close DB connection
                 } else {
                     log("Waitlist table not found, skipping initialization.");
                 }
-
             } catch (e) {
                 console.error("Error initializing DataTables:", e);
                 // Handle error - maybe show a message to the user
@@ -1071,7 +1096,7 @@ $connection->close(); // Close DB connection
                         // No further action needed, button state already reset
                     }
                 })
-                .catch(error => {
+                .catch(error => { // Catches errors from fetch OR "No sessions found" rejection
                     Swal.close(); // Close any loading Swal if fetches failed
                     console.error("Error during waitlist assignment process:", error);
                     // Avoid showing Swal again if it was already shown (like "No Sessions") unless it's a new error
@@ -1261,7 +1286,7 @@ $connection->close(); // Close DB connection
                     }
                 })
                 .catch(error => { // Catches errors from fetch OR "No sessions found" rejection
-                    Swal.close();
+                    Swal.close(); // Close any loading Swal if fetches failed
                     console.error("Error assigning playgroup from waitlist:", error);
                     // Avoid showing Swal again if it was already shown (like "No Sessions") unless it's a new error
                     if (error !== "No sessions found") {
