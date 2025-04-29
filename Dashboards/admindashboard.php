@@ -171,17 +171,13 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             white-space: nowrap;
         }
 
-
         .profile-photo {
             width: 150px;
             height: 150px;
             object-fit: cover;
             object-position: center;
             border-radius: 50%;
-
-
         }
-
 
         /* Adjust logo text size for medium screens */
         @media (max-width: 959px) {
@@ -190,16 +186,12 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             }
         }
 
-
-
-
         /* Adjust logo text size for small screens */
         @media (max-width: 640px) {
             .uk-navbar-item.uk-logo {
                 font-size: 15px !important;
             }
         }
-
 
         /* General Card Styles */
         .client-card,
@@ -216,7 +208,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-
         .client-card h3,
         .patient-card h3,
         .therapist-card h3 {
@@ -226,7 +217,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             flex: 1;
             /* Allow the name to take up available space */
         }
-
 
         .client-card .details-button,
         .patient-card .details-button,
@@ -243,13 +233,11 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             /* Add spacing between name and button */
         }
 
-
         .client-card .details-button:hover,
         .patient-card .details-button:hover,
         .therapist-card .details-button:hover {
             background-color: #0056b3;
         }
-
 
         /* Search Bar Styles */
         #clientsCardsSearch,
@@ -258,7 +246,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             margin-bottom: 15px;
         }
 
-
         /* Hide elements on mobile */
         .client-card[style*="display: none"],
         .patient-card[style*="display: none"],
@@ -266,15 +253,11 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             display: none !important;
         }
 
-
         .client-card[style*="display: flex"],
         .patient-card[style*="display: flex"],
         .therapist-card[style*="display: flex"] {
             display: flex !important;
         }
-
-
-
 
         /* Adjust grid layout for medium screens (tablets) */
         @media (max-width: 959px) {
@@ -282,18 +265,15 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 margin: 0;
             }
 
-
             .uk-grid-small>* {
                 width: calc(50% - 10px);
                 /* 2 columns with gap */
                 margin: 5px;
             }
 
-
             .uk-card {
                 margin-bottom: 10px;
             }
-
 
             .profile-photo {
                 width: 120px;
@@ -301,51 +281,41 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             }
         }
 
-
         /* Adjust grid layout for small screens (mobile) */
         @media (max-width: 640px) {
             .uk-grid-small {
                 margin: 0;
             }
 
-
             .uk-grid-small>* {
                 width: calc(50% - 10px);
                 margin: 5px;
             }
-
 
             .uk-card {
                 padding: 12px;
                 margin-bottom: 10px;
             }
 
-
             .uk-card-body h3 {
                 font-size: 18px;
                 margin-bottom: 8px;
             }
-
 
             .uk-card-body p {
                 font-size: 14px;
                 margin: 0;
             }
 
-
             .appointment-summary-cards {
                 padding: 0 0 0 0;
             }
-
 
             .profile-photo {
                 max-width: 120px;
                 max-height: 120px;
             }
         }
-
-
-
 
         /* Mobile Sidebar Styles */
         .mobile-sidebar {
@@ -363,23 +333,19 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             -webkit-overflow-scrolling: touch;
         }
 
-
         .mobile-sidebar.open {
             left: 0;
         }
 
-
         .mobile-sidebar-header {
             padding: 15px 15px 0 15px;
         }
-
 
         .mobile-sidebar-header h4 {
             margin: 0;
             font-size: 20px;
             font-weight: bold;
         }
-
 
         .sidebar-overlay {
             position: fixed;
@@ -392,30 +358,24 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             animation: fadeIn 0.3s ease;
         }
 
-
         .sidebar-overlay.show {
             display: block;
             opacity: 1;
         }
-
 
         .mobile-menu-button {
             cursor: pointer;
             padding: 10px 10px 10px 0;
         }
 
-
         @keyframes fadeIn {
             from {
                 opacity: 0;
             }
-
-
             to {
                 opacity: 1;
             }
         }
-
 
         .close-sidebar {
             position: absolute;
@@ -428,7 +388,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             z-index: 10000;
         }
 
-
         /* Table Styles */
         #clientsTable,
         #patientsTable,
@@ -437,22 +396,17 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             border-collapse: collapse;
         }
 
-
         /* Hide the table on small screens */
         @media (max-width: 640px) {
-
-
             #clientsTable,
             #patientsTable,
             #therapistsTable {
                 display: none;
             }
 
-
             .hide-on-mobile {
                 display: none !important;
             }
-
 
             .dataTables_info,
             .dataTables_paginate {
@@ -460,8 +414,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             }
         }
     </style>
-
-
 </head>
 
 <body>

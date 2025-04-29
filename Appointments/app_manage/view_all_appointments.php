@@ -132,6 +132,63 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
         .no-break {
             white-space: nowrap;
         }
+
+        /* General Card Styles */
+        .appointment-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .appointment-card h3 {
+            font-size: 14px;
+            font-weight: bold;
+            margin: auto;
+            flex: 1;
+        }
+
+        .appointment-card .details-button {
+            background-color: #1e87f0;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            cursor: pointer;
+            text-align: center;
+            margin-left: 10px;
+        }
+
+        .appointment-card .details-button:hover {
+            background-color: #0056b3;
+        }
+
+        @media (max-width: 640px) {
+            .uk-table {
+                display: none;
+            }
+
+            #appointmentsCards {
+                display: block !important;
+            }
+
+            .appointment-card {
+                margin-bottom: 15px;
+                display: none;
+                /* Hide all cards by default */
+            }
+
+            .appointment-card.visible {
+                display: flex;
+                /* Show only visible cards */
+            }
+        }
     </style>
 
 </head>
@@ -140,7 +197,7 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
     <!-- Main Content -->
     <!-- 🔹 Filters Section -->
     <form method="GET" class="uk-width-1-1">
-        <div class="uk-grid-small uk-flex uk-flex-middle uk-grid-match" uk-grid>
+        <div class="uk-grid-small uk-flex uk-flex-middle uk-grid-match uk-visible@m" uk-grid>
             <div class="uk-width-1-5@m">
                 <label class="uk-form-label">Status:</label>
                 <select class="uk-select" name="status">
@@ -186,14 +243,14 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             </div>
         </div>
 
-        <div class="uk-text-right uk-margin-top">
+        <div class="uk-text-right uk-margin-top uk-visible@m">
             <button class="uk-button" type="submit" style="border-radius: 15px; background-color:#1e87f0; color:white;">Apply Filters</button>
             <a href="view_all_appointments.php" class="uk-button uk-button-default" style="border-radius: 15px;">Reset</a>
         </div>
     </form>
 
     <!-- 🔹 Appointments Table -->
-    <div class="uk-width-1-1 uk-margin-top">
+    <div class="uk-width-1-1 uk-margin-top uk-visible@m">
         <!-- ✅ Custom Search and Show Entries -->
         <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
             <div class="uk-width-1-3">
@@ -246,7 +303,55 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             </table>
         </div>
     </div>
-
+    <!-- Card layout for mobile -->
+    <div id="appointmentsCardsSearch" class="uk-margin uk-hidden@m">
+        <div class="uk-flex uk-flex-left" style="width: 100%; gap: 10px; display: flex;">
+            <div class="uk-inline" style="flex: 1;">
+                <span class="uk-form-icon" uk-icon="icon: search"></span>
+                <input type="text" id="appointmentsCardsSearchInput" class="uk-input" placeholder="Search..." style="border-radius: 25px; padding-left: 40px; border: 1px solid #e5e5e5; width: 100%;">
+            </div>
+            <div class="uk-inline" style="width: auto;">
+                <select id="appointmentsCardsEntries" class="uk-select" style="border-radius: 25px; padding: 0 10px; border: 1px solid #e5e5e5; min-width: 80px;">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="25">25</option>
+                    <option value="50">50</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div id="appointmentsCards" class="uk-hidden@m">
+        <?php if (isset($appointments) && !empty($appointments)) : ?>
+            <?php foreach ($appointments as $index => $appointment) : ?>
+                <div class="appointment-card"
+                    data-index="<?= $index; ?>"
+                    data-appointment-id="<?= htmlspecialchars($appointment['appointment_id']); ?>"
+                    data-patient="<?= htmlspecialchars($appointment['patient_firstname'] . ' ' . $appointment['patient_lastname']); ?>"
+                    data-client="<?= htmlspecialchars($appointment['client_firstname'] . ' ' . $appointment['client_lastname']); ?>"
+                    data-date="<?= date('F j, Y', strtotime($appointment['date'])); ?>"
+                    data-time="<?= date('g:i A', strtotime($appointment['time'])); ?>"
+                    data-session="<?= htmlspecialchars($appointment['session_type']); ?>"
+                    data-therapist="<?= !empty($appointment['therapist_firstname']) ? htmlspecialchars($appointment['therapist_firstname'] . ' ' . $appointment['therapist_lastname']) : 'Not Assigned'; ?>"
+                    data-status="<?= htmlspecialchars($appointment['status']); ?>"
+                    data-patient-picture="<?= !empty($appointment['patient_picture']) ? '../../uploads/profile_pictures/' . htmlspecialchars($appointment['patient_picture']) : '../../CSS/default.jpg'; ?>"
+                    data-client-picture="<?= !empty($appointment['client_picture']) ? '../../uploads/profile_pictures/' . htmlspecialchars($appointment['client_picture']) : '../../CSS/default.jpg'; ?>"
+                    style="display: <?= $index < 5 ? 'flex' : 'none'; ?>;">
+                    <div class="uk-flex uk-flex-left uk-flex-between" style="width: 100%;">
+                        <div class="uk-flex uk-flex-left">
+                            <img src="<?= !empty($appointment['patient_picture']) ? '../../uploads/profile_pictures/' . htmlspecialchars($appointment['patient_picture']) : '../../CSS/default.jpg'; ?>"
+                                alt="Patient"
+                                class="uk-border-circle"
+                                style="width: 40px; height: 40px; object-fit: cover; margin-right: 15px;">
+                            <h3><?= htmlspecialchars($appointment['patient_firstname'] . ' ' . $appointment['patient_lastname']); ?></h3>
+                        </div>
+                        <button class="details-button" onclick="showAppointmentDetails('<?= $appointment['appointment_id']; ?>')" style="border-radius:15px">More Details</button>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else : ?>
+            <p>No appointments found.</p>
+        <?php endif; ?>
+    </div>
 
     <script>
         $(document).ready(function() {
@@ -254,7 +359,9 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             const table = $('#appointmentsTable').DataTable({
                 pageLength: 5,
                 lengthMenu: [5, 10, 25, 50],
-                order: [[2, 'asc']], // Sort by date column by default
+                order: [
+                    [2, 'asc']
+                ], // Sort by date column by default
                 dom: 'rtip', // Disable default search and length menu
                 language: {
                     lengthMenu: "Show _MENU_ entries per page",
@@ -277,6 +384,184 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
             $('#customEntries').on('change', function() {
                 table.page.len(this.value).draw();
             });
+        });
+
+        window.showAppointmentDetails = function(appointmentId) {
+            // Find the appointment card using the provided ID
+            const appointmentCard = document.querySelector(`.appointment-card[data-appointment-id="${appointmentId}"]`);
+
+            if (appointmentCard) {
+                // Retrieve appointment data from the card's dataset
+                const patient = appointmentCard.dataset.patient || "N/A";
+                const client = appointmentCard.dataset.client || "N/A";
+                const date = appointmentCard.dataset.date || "N/A";
+                const time = appointmentCard.dataset.time || "N/A";
+                const session = appointmentCard.dataset.session || "N/A";
+                const therapist = appointmentCard.dataset.therapist || "Not Assigned";
+                const status = appointmentCard.dataset.status || "N/A";
+                const patientPic = appointmentCard.dataset.patientPicture || '../../CSS/default.jpg';
+                const clientPic = appointmentCard.dataset.clientPicture || '../../CSS/default.jpg';
+
+                // Debugging: Log the retrieved data to the console
+                console.log("Appointment Details:", {
+                    patient,
+                    client,
+                    date,
+                    time,
+                    session,
+                    therapist,
+                    status,
+                    patientPic,
+                    clientPic
+                });
+
+                // Construct the modal content
+                const modalContent = `
+                <div>
+                    <table class="uk-table uk-table-striped uk-text-left" style="font-size: 14px; width: 100%; margin-top: 15px; display: flex !important;">
+                        <tr>
+                            <td style="text-align:left; width: 35%;"><strong>Patient:</strong></td>
+                            <td>
+                                <div class="uk-flex uk-flex-middle">
+                                    <img class="uk-border-circle" 
+                                        src="${patientPic}" 
+                                        alt="Patient Profile" 
+                                        style="width: 30px; height: 30px; object-fit: cover; margin-right: 10px;">
+                                    <span>${patient}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left"><strong>Client:</strong></td>
+                            <td>
+                                <div class="uk-flex uk-flex-middle">
+                                    <img class="uk-border-circle" 
+                                        src="${clientPic}" 
+                                        alt="Client Profile" 
+                                        style="width: 30px; height: 30px; object-fit: cover; margin-right: 10px;">
+                                    <span>${client}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr><td style="text-align:left"><strong>Date:</strong></td><td>${date}</td></tr>
+                        <tr><td style="text-align:left"><strong>Time:</strong></td><td>${time}</td></tr>
+                        <tr><td style="text-align:left"><strong>Session:</strong></td><td>${session}</td></tr>
+                        <tr><td style="text-align:left"><strong>Therapist:</strong></td><td>${therapist}</td></tr>
+                        <tr><td style="text-align:left"><strong>Status:</strong></td><td>${status}</td></tr>
+                    </table>
+                </div>
+            `;
+
+                // Display the modal using SweetAlert2
+                Swal.fire({
+                    title: '<h3 style="font-size: 20px; font-weight: bold; text-align: left;">Appointment Details</h3>',
+                    html: modalContent,
+                    showCloseButton: true,
+                    showConfirmButton: false,
+                    width: '90%',
+                    customClass: {
+                        container: 'appointment-modal'
+                    }
+                });
+            } else {
+                // Debugging: Log an error if the appointment card is not found
+                console.error("Appointment card not found for ID:", appointmentId);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Appointment details could not be found.',
+                    showConfirmButton: true
+                });
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get DOM elements
+            const searchInput = document.getElementById('appointmentsCardsSearchInput');
+            const entriesDropdown = document.getElementById('appointmentsCardsEntries');
+            const appointmentsContainer = document.getElementById('appointmentsCards');
+            const appointmentCards = document.querySelectorAll('.appointment-card');
+
+            function filterCards() {
+                if (!searchInput || !entriesDropdown || !appointmentsContainer) return;
+
+                const searchTerm = searchInput.value.toLowerCase().trim();
+                const maxEntries = parseInt(entriesDropdown.value, 10);
+                let visibleCount = 0;
+                let hasVisibleCards = false;
+
+                // Remove existing no results message if present
+                const existingMessage = appointmentsContainer.querySelector('.no-results-message');
+                if (existingMessage) {
+                    existingMessage.remove();
+                }
+
+                // Filter cards
+                appointmentCards.forEach(card => {
+                    // Get all searchable data
+                    const patient = card.getAttribute('data-patient')?.toLowerCase() || '';
+                    const client = card.getAttribute('data-client')?.toLowerCase() || '';
+                    const date = card.getAttribute('data-date')?.toLowerCase() || '';
+                    const time = card.getAttribute('data-time')?.toLowerCase() || '';
+                    const session = card.getAttribute('data-session')?.toLowerCase() || '';
+                    const therapist = card.getAttribute('data-therapist')?.toLowerCase() || '';
+                    const status = card.getAttribute('data-status')?.toLowerCase() || '';
+
+                    // Check if card matches search criteria
+                    const matches = patient.includes(searchTerm) ||
+                        client.includes(searchTerm) ||
+                        date.includes(searchTerm) ||
+                        time.includes(searchTerm) ||
+                        session.includes(searchTerm) ||
+                        therapist.includes(searchTerm) ||
+                        status.includes(searchTerm);
+
+                    // Show/hide card based on search and entry limit
+                    if (matches && visibleCount < maxEntries) {
+                        card.style.display = 'flex';
+                        visibleCount++;
+                        hasVisibleCards = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Show no results message if needed
+                if (!hasVisibleCards) {
+                    const noResults = document.createElement('p');
+                    noResults.className = 'no-results-message';
+                    noResults.style.textAlign = 'center';
+                    noResults.style.padding = '20px';
+                    noResults.style.width = '100%';
+                    noResults.textContent = searchTerm ? 'No matching appointments found.' : 'No appointments to display.';
+                    appointmentsContainer.appendChild(noResults);
+                }
+            }
+
+            // Add event listeners
+            if (searchInput && entriesDropdown) {
+                searchInput.addEventListener('input', filterCards);
+                entriesDropdown.addEventListener('change', filterCards);
+
+                // Initial filter
+                filterCards();
+            }
+
+            // Clear search
+            const clearSearch = () => {
+                if (searchInput) {
+                    searchInput.value = '';
+                    filterCards();
+                }
+            };
+
+            // Reset entries
+            const resetEntries = () => {
+                if (entriesDropdown) {
+                    entriesDropdown.value = '5';
+                    filterCards();
+                }
+            };
         });
     </script>
 </body>

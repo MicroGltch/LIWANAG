@@ -144,6 +144,91 @@ echo "<script>
             margin-bottom: 0;
             /* Remove margin from the last button */
         }
+
+          /* Adjust logo text size for medium screens */
+          @media (max-width: 959px) {
+            .uk-navbar-item.uk-logo {
+                font-size: 20px !important;
+            }
+        }
+
+        /* Adjust logo text size for small screens */
+        @media (max-width: 640px) {
+            .uk-navbar-item.uk-logo {
+                font-size: 15px !important;
+            }
+        }
+        
+         /* Mobile Sidebar Styles */
+         .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            transition: left 0.3s ease;
+            z-index: 9999;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-sidebar.open {
+            left: 0;
+        }
+
+        .mobile-sidebar-header {
+            padding: 15px 15px 0 15px;
+        }
+
+        .mobile-sidebar-header h4 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .mobile-menu-button {
+            cursor: pointer;
+            padding: 10px 10px 10px 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .close-sidebar {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            z-index: 10000;
+        }
     </style>
 </head>
 
@@ -157,7 +242,14 @@ echo "<script>
     <nav class="uk-navbar-container logged-in">
         <div class="uk-container">
             <div uk-navbar>
-                <div class="uk-navbar-left">
+                <!--Mobile Menu-->
+                <div class="uk-navbar-left uk-hidden@m">
+                    <a href="#" class="mobile-menu-button" onclick="toggleSidebar(); return false;"">
+                    <span uk-icon="menu" style="color: black; display: flex; justify-content: center; align-items: center; width: 30px; height: 30px;"></span>
+                    </a>
+                </div>
+
+                <div class="uk-navbar-left uk-visible@m">
                     <ul class="uk-navbar-nav">
                     <li><a href="#faqs-modal" uk-toggle>FAQs</a></li>
                     <li><a href="#tnc-modal" uk-toggle>Terms and Conditions</a></li>
@@ -166,7 +258,7 @@ echo "<script>
                 <div class="uk-navbar-center">
                     <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
                 </div>
-                <div class="uk-navbar-right">
+                <div class="uk-navbar-right uk-visible@m">
                     <ul class="uk-navbar-nav">
                         <li>
                             <a href="#" class="uk-navbar-item">
@@ -1538,9 +1630,61 @@ echo "<script>
         }
 
 
-        document.querySelector('.sidebar-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar-nav').classList.toggle('uk-open');
-        });
+         // Mobile Sidebar Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileSidebar = document.getElementById('mobileSidebar');
+        const body = document.body;
+
+        function toggleSidebar() {
+            if (mobileSidebar.classList.contains('open')) {
+                // Close sidebar
+                mobileSidebar.classList.remove('open');
+                mobileSidebar.style.left = '-100%';
+
+                // Remove overlay
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (overlay) {
+                    overlay.remove();
+                }
+
+                // Enable scrolling
+                body.style.overflow = '';
+            } else {
+                // Open sidebar
+                mobileSidebar.classList.add('open');
+                mobileSidebar.style.left = '0';
+
+                // Add overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'sidebar-overlay';
+                body.appendChild(overlay);
+
+                // Disable scrolling
+                body.style.overflow = 'hidden';
+
+                // Add click event to overlay to close sidebar
+                overlay.addEventListener('click', toggleSidebar);
+            }
+        }
+
+        // Attach click event to the mobile menu button
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleSidebar();
+            });
+        }
+
+        // Close sidebar when clicking the close button
+        const closeButton = document.querySelector('.close-sidebar');
+        if (closeButton) {
+            closeButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleSidebar();
+            });
+        }
+    });
 
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => {
@@ -2018,61 +2162,7 @@ proofReferralInput.value = "";
         });
     });
 
-// Mobile Sidebar Toggle
-document.addEventListener('DOMContentLoaded', function() {
-            const mobileMenuButton = document.querySelector('.mobile-menu-button');
-            const mobileSidebar = document.getElementById('mobileSidebar');
-            const body = document.body;
-
-            function toggleSidebar() {
-                if (mobileSidebar.classList.contains('open')) {
-                    // Close sidebar
-                    mobileSidebar.classList.remove('open');
-                    mobileSidebar.style.left = '-100%';
-
-                    // Remove overlay
-                    const overlay = document.querySelector('.sidebar-overlay');
-                    if (overlay) {
-                        overlay.remove();
-                    }
-
-                    // Enable scrolling
-                    body.style.overflow = '';
-                } else {
-                    // Open sidebar
-                    mobileSidebar.classList.add('open');
-                    mobileSidebar.style.left = '0';
-
-                    // Add overlay
-                    const overlay = document.createElement('div');
-                    overlay.className = 'sidebar-overlay';
-                    body.appendChild(overlay);
-
-                    // Disable scrolling
-                    body.style.overflow = 'hidden';
-
-                    // Add click event to overlay to close sidebar
-                    overlay.addEventListener('click', toggleSidebar);
-                }
-            }
-
-            // Attach click event to the mobile menu button
-            if (mobileMenuButton) {
-                mobileMenuButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    toggleSidebar();
-                });
-            }
-
-            // Close sidebar when clicking the close button
-            const closeButton = document.querySelector('.close-sidebar');
-            if (closeButton) {
-                closeButton.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    toggleSidebar();
-                });
-            }
-        });
+       
 </script>
 </body>
 
