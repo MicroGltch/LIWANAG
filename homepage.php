@@ -103,63 +103,74 @@ $stmt->close();
                         </a>
                     </div>
 
-                    <!-- Navbar Right -->
-                    <div class="uk-navbar-right">
-                        <ul class="uk-navbar-nav">
-                            <?php if (isset($_SESSION['account_ID'])): ?>
-                                <?php
-                                $account_ID = $_SESSION['account_ID'];
-                                $query = "SELECT account_FName, account_Type FROM users WHERE account_ID = ?";
-                                $stmt = $connection->prepare($query);
-                                $stmt->bind_param("i", $account_ID);
-                                $stmt->execute();
-                                $stmt->bind_result($account_FN, $account_Type);
-                                $stmt->fetch();
-                                $stmt->close();
-                                $connection->close();
+<!-- Navbar Right (Desktop only) -->
+<div class="uk-navbar-right uk-visible@s">
+    <ul class="uk-navbar-nav">
+        <?php if (isset($_SESSION['account_ID'])): ?>
+            <?php
+            $account_ID = $_SESSION['account_ID'];
+            $query = "SELECT account_FName, account_Type FROM users WHERE account_ID = ?";
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param("i", $account_ID);
+            $stmt->execute();
+            $stmt->bind_result($account_FN, $account_Type);
+            $stmt->fetch();
+            $stmt->close();
+            $connection->close();
 
-                                switch ($account_Type) {
-                                    case 'admin':
-                                        $dashboardURL = "Dashboards/admindashboard.php";
-                                        break;
-                                    case 'therapist':
-                                        $dashboardURL = "Dashboards/therapistdashboard.php";
-                                        break;
-                                    case 'client':
-                                    default:
-                                        $dashboardURL = "Dashboards/clientdashboard.php";
-                                        break;
-                                }
-                                ?>
-                                <li>
-                                    <li ><a href="<?php echo $dashboardURL; ?>" style="color: white" class="dashboard-redirect" >Dashboard</a></li>
-                                    <li ><a href="Accounts/logout.php" style="color: white" class="logout-redirect" >Logout</a></li>
-                                </li>
-                            <?php else: ?>
-                                <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
-                                <li><a href="Accounts/loginpage.php">Login</a></li>
-                            <?php endif; ?>
-                        </ul>
-                    </div>
+            switch ($account_Type) {
+                case 'admin':
+                    $dashboardURL = "Dashboards/admindashboard.php";
+                    break;
+                case 'therapist':
+                    $dashboardURL = "Dashboards/therapistdashboard.php";
+                    break;
+                case 'client':
+                default:
+                    $dashboardURL = "Dashboards/clientdashboard.php";
+                    break;
+            }
+            ?>
+            <li><a href="<?php echo $dashboardURL; ?>" style="color: white">Dashboard</a></li>
+            <li><a href="Accounts/logout.php" style="color: white">Logout</a></li>
+        <?php else: ?>
+            <li><a href="Accounts/signuppage.php">Sign Up to Book an Appointment</a></li>
+            <li><a href="Accounts/loginpage.php">Login</a></li>
+        <?php endif; ?>
+    </ul>
+</div>
+
                 </div>
             </div>
         </nav>
     </div>
 
-    <!-- Offcanvas Menu (Mobile) -->
-    <div id="offcanvas-slide" uk-offcanvas="mode: slide; overlay: true">
-        <div class="uk-offcanvas-bar">
-            <button class="uk-offcanvas-close" type="button" uk-close></button>
-            <ul class="uk-nav uk-nav-default">
-               <!-- <li class="uk-active"><a href="Accounts/signuppage.php" uk-toggle style="color:black; margin-top:25px; border-radius: 15px;">Sign Up</a></li> -->
-              <!--  <li class="uk-active"><a href="Accounts/loginpage.php" uk-toggle style="color:black; margin-top:25px; border-radius: 15px;">Login</a></li> -->
-                <li class="uk-active"><a href="#section2" style="color:black; border-radius: 15px; margin-top:10px;">Services</a></li>
-                <li class="uk-active"><a href="#section3" style="color:black; border-radius: 15px;">About Us</a></li>
-                <li class="uk-active"><a href="#tnc-modal" uk-toggle style="color:black; border-radius: 15px;">Terms and Conditions</a></li>
-                <li class="uk-active"><a href="#faqs-modal" uk-toggle style="color:black; border-radius: 15px;">FAQs</a></li>
-            </ul>
-        </div>
+<!-- Offcanvas Menu (Mobile only) -->
+<div id="offcanvas-slide" uk-offcanvas="mode: slide; overlay: true">
+    <div class="uk-offcanvas-bar">
+        <button class="uk-offcanvas-close" type="button" uk-close></button>
+        <ul class="uk-nav uk-nav-default">
+
+            <!-- Auth Links (Mobile only) -->
+            <div class="uk-hidden@s">
+                <?php if (isset($_SESSION['account_ID'])): ?>
+                    <li class="uk-active"><a href="<?php echo $dashboardURL; ?>" style="color:black; border-radius: 15px;">Dashboard</a></li>
+                    <li class="uk-active"><a href="Accounts/logout.php" style="color:black; border-radius: 15px;">Logout</a></li>
+                <?php else: ?>
+                    <li class="uk-active"><a href="Accounts/signuppage.php" style="color:black; border-radius: 15px;">Sign Up</a></li>
+                    <li class="uk-active"><a href="Accounts/loginpage.php" style="color:black; border-radius: 15px;">Login</a></li>
+                <?php endif; ?>
+            </div>
+
+            <!-- Common Navigation Links -->
+            <li class="uk-active"><a href="#section2" style="color:black; border-radius: 15px; margin-top:10px;">Services</a></li>
+            <li class="uk-active"><a href="#section3" style="color:black; border-radius: 15px;">About Us</a></li>
+            <li class="uk-active"><a href="#tnc-modal" uk-toggle style="color:black; border-radius: 15px;">Terms and Conditions</a></li>
+            <li class="uk-active"><a href="#faqs-modal" uk-toggle style="color:black; border-radius: 15px;">FAQs</a></li>
+        </ul>
     </div>
+</div>
+
 
 
     <!---------------- Welcome Section ---------------->
