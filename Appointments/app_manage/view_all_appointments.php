@@ -452,7 +452,7 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
                 </div>
             `;
 
-                // Display the modal using SweetAlert2
+                // Display the modal
                 Swal.fire({
                     title: '<h3 style="font-size: 20px; font-weight: bold; text-align: left;">Appointment Details</h3>',
                     html: modalContent,
