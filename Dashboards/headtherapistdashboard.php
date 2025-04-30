@@ -255,7 +255,8 @@ $patientsStmt->close();
         }
 
         /* Mobile Card Styles for Therapists */
-        .viewtherapist-card {
+        .viewtherapist-card,
+        .patientmasterlist-card {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -267,7 +268,8 @@ $patientsStmt->close();
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
-        .viewtherapist-card img {
+        .viewtherapist-card,
+        .patientmasterlist-card img {
             width: 80px;
             height: 80px;
             object-fit: cover;
@@ -275,19 +277,22 @@ $patientsStmt->close();
             margin-bottom: 10px;
         }
 
-        .viewtherapist-card h3 {
+        .viewtherapist-card,
+        .patientmasterlist-card h3 {
             font-size: 16px;
             font-weight: bold;
             margin: 5px 0;
         }
 
-        .viewtherapist-card p {
+        .viewtherapist-card,
+        .patientmasterlist-card p {
             font-size: 14px;
             color: #666;
             margin: 5px 0;
         }
 
-        .viewtherapist-card .details-button {
+        .viewtherapist-card,
+        .patientmasterlist-card .details-button {
             background-color: #1e87f0;
             color: white;
             border: none;
@@ -298,11 +303,13 @@ $patientsStmt->close();
             margin-top: 10px;
         }
 
-        .viewtherapist-card .details-button:hover {
+        .viewtherapist-card,
+        .patientmasterlist-card .details-button:hover {
             background-color: #0056b3;
         }
 
-        .viewtherapist .details-button:hover {
+        .viewtherapist,
+        .patientmasterlist-card .details-button:hover {
             background-color: #0056b3;
         }
 
@@ -926,33 +933,32 @@ $patientsStmt->close();
                         </style>
                     </div>
                 </div>
-            </div>
-
-            <!-- Card layout for mobile -->
-            <div id="viewtherapistCardsSearch" class="uk-margin uk-hidden@m">
-                <div class="uk-inline" style="width: 100%;">
-                    <span class="uk-form-icon" uk-icon="icon: search" style="padding: 5px 0 0 0;"></span>
-                    <input type="text" id="viewtherapistCardsSearchInput" class="uk-input" placeholder="Search therapists..." style="border-radius: 15px; padding-left: 40px;">
+                <!-- Card layout for mobile -->
+                <div id="viewtherapistCardsSearch" class="uk-margin uk-hidden@m">
+                    <div class="uk-inline" style="width: 100%;">
+                        <span class="uk-form-icon" uk-icon="icon: search" style="padding: 5px 0 0 0;"></span>
+                        <input type="text" id="viewtherapistCardsSearchInput" class="uk-input" placeholder="Search therapists..." style="border-radius: 15px; padding-left: 40px;">
+                    </div>
                 </div>
-            </div>
-            <div id="viewtherapistCards" class="uk-hidden@m">
-                <?php if (isset($therapists) && !empty($therapists)) : ?>
-                    <?php foreach ($therapists as $therapist) : ?>
-                        <div class="viewtherapist-card"
-                            data-account-id="<?= htmlspecialchars($therapist['account_ID']); ?>"
-                            data-fullname="<?= htmlspecialchars(strtolower($therapist['account_FName'] . ' ' . $therapist['account_LName'])); ?>"
-                            data-email="<?= htmlspecialchars(strtolower($therapist['account_Email'])); ?>"
-                            data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
-                            data-address="<?= htmlspecialchars($therapist['account_Address']); ?>"
-                            data-status="<?= htmlspecialchars($therapist['account_status']); ?>"
-                            data-profile-picture="<?= !empty($therapist['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($therapist['profile_picture']) : '../CSS/default.jpg'; ?>">
-                            <h3><?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?></h3>
-                            <button class="details-button" onclick="showTherapistDetails('<?= $therapist['account_ID']; ?>')" style="border-radius:15px">More Details</button>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else : ?>
-                    <p>No therapists found.</p>
-                <?php endif; ?>
+                <div id="viewtherapistCards" class="uk-hidden@m">
+                    <?php if (isset($therapists) && !empty($therapists)) : ?>
+                        <?php foreach ($therapists as $therapist) : ?>
+                            <div class="viewtherapist-card"
+                                data-account-id="<?= htmlspecialchars($therapist['account_ID']); ?>"
+                                data-fullname="<?= htmlspecialchars(strtolower($therapist['account_FName'] . ' ' . $therapist['account_LName'])); ?>"
+                                data-email="<?= htmlspecialchars(strtolower($therapist['account_Email'])); ?>"
+                                data-phone="<?= htmlspecialchars($therapist['account_PNum']); ?>"
+                                data-address="<?= htmlspecialchars($therapist['account_Address']); ?>"
+                                data-status="<?= htmlspecialchars($therapist['account_status']); ?>"
+                                data-profile-picture="<?= !empty($therapist['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($therapist['profile_picture']) : '../CSS/default.jpg'; ?>">
+                                <h3><?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?></h3>
+                                <button class="details-button" onclick="showTherapistDetails('<?= $therapist['account_ID']; ?>')" style="border-radius:15px">More Details</button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <p>No therapists found.</p>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <!-- View Therapists Schedule Section 📑-->
@@ -1034,6 +1040,33 @@ $patientsStmt->close();
                             </tbody>
                         </table>
                     </div>
+                </div>
+                <!-- Card layout for mobile -->
+                <div id="patientMasterlistCardsSearch" class="uk-margin uk-hidden@m">
+                    <div class="uk-inline" style="width: 100%;">
+                        <span class="uk-form-icon" uk-icon="icon: search" style="padding: 5px 0 0 0;"></span>
+                        <input type="text" id="patientMasterlistCardsSearchInput" class="uk-input" placeholder="Search patients..." style="border-radius: 15px; padding-left: 40px;">
+                    </div>
+                </div>
+                <div id="patientMasterlistCards" class="uk-hidden@m">
+                    <?php if (isset($patients) && !empty($patients)) : ?>
+                        <?php foreach ($patients as $patient) : ?>
+                            <div class="patientmasterlist-card"
+                                data-patient-id="<?= htmlspecialchars($patient['patient_id']); ?>"
+                                data-patient-details="<?= htmlspecialchars(strtolower($patient['patient_firstname'] . ' ' . $patient['patient_lastname'])); ?>"
+                                data-client-details="<?= htmlspecialchars(strtolower($patient['user_firstname'] . ' ' . $patient['user_lastname'])); ?>"
+                                data-birthday="<?= date('M d, Y', strtotime($patient['bday'])); ?>"
+                                data-service-type="<?= htmlspecialchars($patient['service_type']); ?>"
+                                data-status="<?= htmlspecialchars($patient['status']); ?>"
+                                data-patient-profilepicture="<?= !empty($patient['patient_picture']) ? '../uploads/profile_pictures/' . $patient['patient_picture'] : '../CSS/default.jpg'; ?>"
+                                data-client-profilepicture="<?= !empty($patient['user_picture']) ? '../uploads/profile_pictures/' . $patient['user_picture'] : '../CSS/default.jpg'; ?>">
+                                <h3><?= htmlspecialchars($patient['patient_firstname'] . ' ' . $patient['patient_lastname']); ?></h3>
+                                <button class="details-button" onclick="showPatientMasterlistDetails('<?= $patient['patient_id']; ?>')" style="border-radius:15px">More Details</button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <p>No patients found.</p>
+                    <?php endif; ?>
                 </div>
             </div>
 
@@ -1990,19 +2023,19 @@ $patientsStmt->close();
         }
 
 
-            // Function to show therapist details in a modal
-            window.showTherapistDetails = function(therapistId) {
-                const viewTherapist = document.querySelector(`.viewtherapist-card[data-account-id="${therapistId}"]`);
-                if (viewTherapist) {
-                    const fullname = viewTherapist.getAttribute('data-fullname');
-                    const email = viewTherapist.getAttribute('data-email');
-                    const phone = viewTherapist.getAttribute('data-phone');
-                    const address = viewTherapist.getAttribute('data-address');
-                    const status = viewTherapist.getAttribute('data-status');
-                    const profilePic = viewTherapist.getAttribute('data-profile-picture') || '../CSS/default.jpg';
+        // Function to show therapist details in a modal
+        window.showTherapistDetails = function(therapistId) {
+            const viewTherapist = document.querySelector(`.viewtherapist-card[data-account-id="${therapistId}"]`);
+            if (viewTherapist) {
+                const fullname = viewTherapist.getAttribute('data-fullname');
+                const email = viewTherapist.getAttribute('data-email');
+                const phone = viewTherapist.getAttribute('data-phone');
+                const address = viewTherapist.getAttribute('data-address');
+                const status = viewTherapist.getAttribute('data-status');
+                const profilePic = viewTherapist.getAttribute('data-profile-picture') || '../CSS/default.jpg';
 
-                    // Build the modal content with profile picture
-                    let modalContent = `
+                // Build the modal content with profile picture
+                let modalContent = `
                         <div class="uk-text-center uk-margin-bottom">
                             <img class="uk-border-circle" 
                                 src="${profilePic}" 
@@ -2018,46 +2051,134 @@ $patientsStmt->close();
                         </table>
                     `;
 
-                    // Show the modal
-                    Swal.fire({
-                        title: `<h3 style="font-size: 20px; font-weight: bold; text-align: left;">Therapist Details</h3>`,
-                        html: modalContent,
-                        showCloseButton: true,
-                        cancelButtonText: 'Close',
-                        focusConfirm: false,
-                        showConfirmButton: false
-                    });
-                } else {
-                    console.error("Therapist card not found for ID:", therapistId);
-                }
-            };
-
-            // Search functionality for therapist cards
-            document.getElementById('viewtherapistCardsSearchInput').addEventListener('input', function () {
-                const searchValue = this.value.toLowerCase();
-                const therapistCards = document.querySelectorAll('.viewtherapist-card');
-
-                therapistCards.forEach(card => {
-                    const fullName = card.getAttribute('data-fullname');
-                    const email = card.getAttribute('data-email');
-                    const phone = card.getAttribute('data-phone');
-                    const address = card.getAttribute('data-address');
-
-                    // Check if the search value matches any of the card's attributes
-                    if (
-                        fullName.includes(searchValue) ||
-                        email.includes(searchValue) ||
-                        phone.includes(searchValue) ||
-                        address.includes(searchValue)
-                    ) {
-                        card.style.display = ''; // Show the card
-                    } else {
-                        card.style.display = 'none'; // Hide the card
-                    }
+                // Show the modal
+                Swal.fire({
+                    title: `<h3 style="font-size: 20px; font-weight: bold; text-align: left;">Therapist Details</h3>`,
+                    html: modalContent,
+                    showCloseButton: true,
+                    cancelButtonText: 'Close',
+                    focusConfirm: false,
+                    showConfirmButton: false
                 });
-            });
+            } else {
+                console.error("Therapist card not found for ID:", therapistId);
+            }
+        };
 
-            
+        // Search functionality for therapist cards
+        document.getElementById('viewtherapistCardsSearchInput').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const therapistCards = document.querySelectorAll('.viewtherapist-card');
+
+            therapistCards.forEach(card => {
+                const fullName = card.getAttribute('data-fullname');
+                const email = card.getAttribute('data-email');
+                const phone = card.getAttribute('data-phone');
+                const address = card.getAttribute('data-address');
+
+                // Check if the search value matches any of the card's attributes
+                if (
+                    fullName.includes(searchValue) ||
+                    email.includes(searchValue) ||
+                    phone.includes(searchValue) ||
+                    address.includes(searchValue)
+                ) {
+                    card.style.display = ''; // Show the card
+                } else {
+                    card.style.display = 'none'; // Hide the card
+                }
+            });
+        });
+
+        // Function to show patient details in a modal
+        window.showPatientMasterlistDetails = function(patientId) {
+            const patientMasterlistCard = document.querySelector(`.patientmasterlist-card[data-patient-details][data-patient-id="${patientId}"]`);
+            if (patientMasterlistCard) {
+                const patientDetails = patientMasterlistCard.getAttribute('data-patient-details');
+                const clientDetails = patientMasterlistCard.getAttribute('data-client-details');
+                const birthday = patientMasterlistCard.getAttribute('data-birthday');
+                const serviceType = patientMasterlistCard.getAttribute('data-service-type');
+                const status = patientMasterlistCard.getAttribute('data-status');
+                const patientProfilePicture = patientMasterlistCard.getAttribute('data-patient-profilepicture') || '../CSS/default.jpg';
+                const clientProfilePicture = patientMasterlistCard.getAttribute('data-client-profilepicture') || '../CSS/default.jpg';
+
+                // Build the modal content
+                let modalContent = `
+                <div>
+                    <table class="uk-table uk-table-striped uk-text-left" style="font-size: 14px; width: 100%; margin-top: 15px; display: flex !important;">
+                        <tr>
+                            <td style="text-align:left; width: 35%;"><strong>Patient:</strong></td>
+                            <td>
+                                <div class="uk-flex uk-flex-middle">
+                                    <img class="uk-border-circle" 
+                                        src="${patientProfilePicture}" 
+                                        alt="Patient Profile" 
+                                        style="width: 30px; height: 30px; object-fit: cover; margin-right: 10px;">
+                                    <span>${patientDetails}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:left"><strong>Client:</strong></td>
+                            <td>
+                                <div class="uk-flex uk-flex-middle">
+                                    <img class="uk-border-circle" 
+                                        src="${clientProfilePicture}" 
+                                        alt="Client Profile" 
+                                        style="width: 30px; height: 30px; object-fit: cover; margin-right: 10px;">
+                                    <span>${clientDetails}</span>
+                                </div>
+                            </td>
+                        </tr>
+                        <tr><td style="text-align:left"><strong>Birthday:</strong></td><td>${birthday}</td></tr>
+                        <tr><td style="text-align:left"><strong>Service Type:</strong></td><td>${serviceType}</td></tr>
+                        <tr><td style="text-align:left"><strong>Status:</strong></td><td>${status}</td></tr>
+                    </table>
+                </div>
+            `;
+
+                // Show the modal
+                Swal.fire({
+                    title: `<h3 style="font-size: 20px; font-weight: bold; text-align: left;">Patient Details</h3>`,
+                    html: modalContent,
+                    showCloseButton: true,
+                    cancelButtonText: 'Close',
+                    focusConfirm: false,
+                    showConfirmButton: false
+                });
+            } else {
+                console.error("Patient card not found for ID:", patientId);
+            }
+        };
+
+        // Search functionality for patient cards
+        document.getElementById('patientMasterlistCardsSearchInput').addEventListener('input', function() {
+            const searchValue = this.value.toLowerCase();
+            const patientCards = document.querySelectorAll('.patientmasterlist-card');
+
+            patientCards.forEach(card => {
+                const patientDetails = card.getAttribute('data-patient-details').toLowerCase();
+                const clientDetails = card.getAttribute('data-client-details').toLowerCase();
+                const birthday = card.getAttribute('data-birthday').toLowerCase();
+                const serviceType = card.getAttribute('data-service-type').toLowerCase();
+                const status = card.getAttribute('data-status').toLowerCase();
+
+                // Check if the search value matches any of the card's attributes
+                if (
+                    patientDetails.includes(searchValue) ||
+                    clientDetails.includes(searchValue) ||
+                    birthday.includes(searchValue) ||
+                    serviceType.includes(searchValue) ||
+                    status.includes(searchValue)
+                ) {
+                    card.style.display = ''; // Show the card
+                } else {
+                    card.style.display = 'none'; // Hide the card
+                }
+            });
+        });
+
+
         // View and manage appointments iframe
         let viewManageAppointmentsFrame = document.getElementById('viewManageAppointmentsFrame');
 
