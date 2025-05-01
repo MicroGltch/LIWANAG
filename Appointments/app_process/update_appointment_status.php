@@ -67,7 +67,22 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     $appointment = $result->fetch_assoc();
-    $current_status = strtolower($appointment['status']);
+    // Fetch the raw status from DB and lowercase it
+    $raw_db_status = strtolower($appointment['status']);
+
+    // Normalize the status for logical comparisons
+    // If the status starts with 'waitlisted', treat it as 'waitlisted'
+    if (str_starts_with($raw_db_status, 'waitlisted')) { // PHP 8+ function
+        $current_status = 'waitlisted';
+    } else {
+        $current_status = $raw_db_status; // Otherwise, use the original lowercase status
+    }
+    // For PHP < 8.0, use strpos:
+    // if (strpos($raw_db_status, 'waitlisted') === 0) {
+    //     $current_status = 'waitlisted';
+    // } else {
+    //     $current_status = $raw_db_status;
+    // }
     $email = $appointment['account_Email'];
     $session_type = $appointment['session_type'];
     $appointment_date = $appointment['date'];
