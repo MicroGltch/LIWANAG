@@ -13,6 +13,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $last_name = $_POST['patient_lname'];
     $bday = $_POST['patient_birthday'];
     $gender = $_POST['patient_gender'];
+    $referral_type = isset($_POST['referral_type']) ? $_POST['referral_type'] : 'none';
 
     // Check for duplicates
     $stmt_check = $connection->prepare("SELECT COUNT(*) FROM patients WHERE first_name = ? AND last_name = ? AND bday = ? AND gender = ?");
@@ -29,12 +30,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Handle profile picture
     $target_dir_profile = "../../../uploads/profile_pictures/";
-    if (!isset($_FILES['profile_picture']) || $_FILES['profile_picture']['error'] !== 0) {
+    if (!isset($_FILES['patient_picture']) || $_FILES['patient_picture']['error'] !== 0) {
         echo json_encode(['status' => 'error', 'message' => 'Profile picture is required.']);
         exit();
     }
 
-    $profile = $_FILES['profile_picture'];
+    $profile = $_FILES['patient_picture'];
     $profile_ext = strtolower(pathinfo($profile['name'], PATHINFO_EXTENSION));
     $allowed_types = ["jpg", "jpeg", "png"];
     $max_file_size = 5 * 1024 * 1024;
@@ -66,42 +67,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $patient_id = $stmt->insert_id; // Get inserted patient ID
         $stmt->close();
 
-        // ✅ Handle Doctor’s Referral Upload (Unified)
-        $uploadDir = "../../../uploads/doctors_referrals/";
-        $officialFileName = null;
-        $proofFileName = null;
-        $referralType = null;
-
-        if (!empty($_FILES['referral_file']['name'])) {
-            $referral_ext = strtolower(pathinfo($_FILES['referral_file']['name'], PATHINFO_EXTENSION));
-            if (!in_array($referral_ext, ["jpg", "jpeg", "png", "pdf"])) {
+        // Handle Doctor's Referral Upload
+        if ($referral_type !== 'none' && isset($_FILES['referral_file']) && $_FILES['referral_file']['error'] === 0) {
+            $uploadDir = "../../../uploads/doctors_referrals/";
+            
+            // Make sure directory exists
+            if (!file_exists($uploadDir)) {
+                mkdir($uploadDir, 0755, true);
+            }
+            
+            $referral_file = $_FILES['referral_file'];
+            $referral_ext = strtolower(pathinfo($referral_file['name'], PATHINFO_EXTENSION));
+            $allowed_referral_types = ["jpg", "jpeg", "png", "pdf"];
+            
+            if (!in_array($referral_ext, $allowed_referral_types)) {
                 echo json_encode(['status' => 'error', 'message' => 'Invalid referral file type.']);
                 exit();
             }
-
-            $type = $_POST['referral_type']; // expected: official or proof_of_booking
-
-            if ($type === 'official') {
-                $officialFileName = time() . "_official_" . basename($_FILES['referral_file']['name']);
-                move_uploaded_file($_FILES['referral_file']['tmp_name'], $uploadDir . $officialFileName);
-                $referralType = 'official';
-            } elseif ($type === 'proof_of_booking') {
-                $proofFileName = time() . "_proof_" . basename($_FILES['referral_file']['name']);
-                move_uploaded_file($_FILES['referral_file']['tmp_name'], $uploadDir . $proofFileName);
-                $referralType = 'proof_of_booking';
+            
+            $new_referral_name = uniqid('referral_') . "." . $referral_ext;
+            $referral_path = $uploadDir . $new_referral_name;
+            
+            if (!move_uploaded_file($referral_file['tmp_name'], $referral_path)) {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to upload referral file.']);
+                exit();
             }
-        }
-
-        // ✅ Insert into `doctor_referrals` if file was uploaded
-        if ($officialFileName || $proofFileName) {
+            
+            // Prepare values for database insertion
+            $official_referral_file = null;
+            $proof_of_booking_file = null;
+            
+            if ($referral_type === 'official') {
+                $official_referral_file = $new_referral_name;
+            } else if ($referral_type === 'proof_of_booking') {
+                $proof_of_booking_file = $new_referral_name;
+            }
+            
+            // Insert into doctor_referrals table
             $insertReferralSQL = "INSERT INTO doctor_referrals (patient_id, official_referral_file, proof_of_booking_referral_file, referral_type)
-                                  VALUES (?, ?, ?, ?)";
+                                 VALUES (?, ?, ?, ?)";
             $stmt = $connection->prepare($insertReferralSQL);
-            $stmt->bind_param("isss", $patient_id, $officialFileName, $proofFileName, $referralType);
-            $stmt->execute();
+            $stmt->bind_param("isss", $patient_id, $official_referral_file, $proof_of_booking_file, $referral_type);
+            
+            if (!$stmt->execute()) {
+                echo json_encode(['status' => 'error', 'message' => 'Failed to save referral information: ' . $stmt->error]);
+                exit();
+            }
             $stmt->close();
         }
-
+        
         echo json_encode(['status' => 'success', 'message' => 'Patient registered successfully!']);
     } else {
         echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $stmt->error]);
