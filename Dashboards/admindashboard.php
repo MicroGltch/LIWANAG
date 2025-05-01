@@ -145,7 +145,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin - Dashboard</title>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="">
 
@@ -172,6 +172,226 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
         .no-break {
             white-space: nowrap;
         }
+
+        /* Adjust logo text size for medium screens */
+        @media (max-width: 959px) {
+            .uk-navbar-item.uk-logo {
+                font-size: 20px !important;
+            }
+        }
+
+
+        /* Adjust logo text size for small screens */
+        @media (max-width: 640px) {
+            .uk-navbar-item.uk-logo {
+                font-size: 15px !important;
+            }
+        }
+
+        /* General Card Styles */
+        .client-card,
+        .patient-card {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .client-card h3,
+        .patient-card h3 {
+            font-size: 16px;
+            font-weight: bold;
+            margin: 0;
+            flex: 1;
+            /* Allow the name to take up available space */
+        }
+
+        .client-card .details-button,
+        .patient-card .details-button {
+            background-color: #1e87f0;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 14px;
+            cursor: pointer;
+            text-align: center;
+            margin-left: 10px;
+            /* Add spacing between name and button */
+        }
+
+        .client-card .details-button:hover,
+        .patient-card .details-button:hover {
+            background-color: #0056b3;
+        }
+
+        /* Search Bar Styles */
+        #clientsCardsSearch,
+        #patientsCardsSearch {
+            margin-bottom: 15px;
+        }
+
+        /* Hide elements on mobile */
+        .client-card[style*="display: none"],
+        .patient-card[style*="display: none"] {
+            display: none !important;
+        }
+
+        .client-card[style*="display: flex"],
+        .patient-card[style*="display: flex"] {
+            display: flex !important;
+        }
+
+
+        /* Adjust grid layout for medium screens (tablets) */
+        @media (max-width: 959px) {
+            .uk-grid-small {
+                margin: 0;
+            }
+
+            .uk-grid-small>* {
+                width: calc(50% - 10px);
+                /* 2 columns with gap */
+                margin: 5px;
+            }
+
+            .uk-card {
+                margin-bottom: 10px;
+            }
+        }
+
+        /* Adjust grid layout for small screens (mobile) */
+        @media (max-width: 640px) {
+            .uk-grid-small {
+                margin: 0;
+            }
+
+            .uk-grid-small>* {
+                width: calc(50% - 10px);
+                margin: 5px;
+            }
+
+            .uk-card {
+                padding: 12px;
+                margin-bottom: 10px;
+            }
+
+            .uk-card-body h3 {
+                font-size: 18px;
+                margin-bottom: 8px;
+            }
+
+            .uk-card-body p {
+                font-size: 14px;
+                margin: 0;
+            }
+            .appointment-summary-cards{
+                padding: 0 0 0 0;
+            }
+        }
+
+
+        /* Mobile Sidebar Styles */
+        .mobile-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 80%;
+            max-width: 300px;
+            height: 100vh;
+            background-color: #fff;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            transition: left 0.3s ease;
+            z-index: 9999;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .mobile-sidebar.open {
+            left: 0;
+        }
+
+        .mobile-sidebar-header {
+            padding: 15px 15px 0 15px;
+        }
+
+        .mobile-sidebar-header h4 {
+            margin: 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9998;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .sidebar-overlay.show {
+            display: block;
+            opacity: 1;
+        }
+
+        .mobile-menu-button {
+            cursor: pointer;
+            padding: 10px 10px 10px 0;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        .close-sidebar {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            background: none;
+            border: none;
+            padding: 8px;
+            cursor: pointer;
+            z-index: 10000;
+        }
+
+        /* Table Styles */
+        #clientsTable,
+        #patientsTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        /* Hide the table on small screens */
+        @media (max-width: 640px) {
+
+            #clientsTable,
+            #patientsTable {
+                display: none;
+            }
+
+            .hide-on-mobile {
+                display: none !important;
+            }
+
+            .dataTables_info,
+            .dataTables_paginate {
+                display: none !important;
+            }
+        }
     </style>
 
 </head>
@@ -184,10 +404,17 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
     <nav class="uk-navbar-container logged-in">
         <div class="uk-container">
             <div uk-navbar>
+                <!--Mobile Menu-->
+                <div class="uk-navbar-left uk-hidden@m">
+                    <a href="#" class="mobile-menu-button" onclick="toggleSidebar(); return false;"">
+                    <span uk-icon="menu" style="color: black; display: flex; justify-content: center; align-items: center; width: 30px; height: 30px;"></span>
+                    </a>
+                </div>
+
                 <div class="uk-navbar-center">
                     <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
                 </div>
-                <div class="uk-navbar-right">
+                <div class="uk-navbar-right uk-visible@m">
                     <ul class="uk-navbar-nav">
                         <li>
                             <a href="#" class="uk-navbar-item">
@@ -227,13 +454,9 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
     <hr class="solid">
 
     <!-- Main Content -->
-    <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport">
+    <div class="uk-flex uk-flex-column uk-flex-row@m uk-height-viewport ">
         <!-- Sidebar -->
-        <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium">
-            <button class="uk-button uk-button-default uk-hidden@m uk-width-1-1 uk-margin-bottom sidebar-toggle" type="button">
-                Menu <span uk-navbar-toggle-icon></span>
-            </button>
-
+        <div class="uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium uk-visible@m">
             <div class="sidebar-nav">
                 <ul class="uk-nav uk-nav-default">
                     <h4 style="font-weight: bold;">Admin Dashboard</h4>
@@ -300,6 +523,53 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             </div>
         </div>
 
+        <!-- Mobile Sidebar -->
+        <div class="mobile-sidebar uk-width-1-1 uk-width-1-5@m uk-background-default uk-padding uk-box-shadow-medium" id="mobileSidebar">
+            <div class="mobile-sidebar-header">
+                <h4>Hi, <span> <?php echo htmlspecialchars($account_FN); ?></span>!</h4>
+                <button class="close-sidebar" onclick="toggleSidebar()"><span uk-icon="icon: close-circle;" style="padding: 16px;"></span></button>
+            </div>
+            <ul class="mobile-sidebar-menu uk-nav uk-nav-default" style="padding: 15px;">
+
+
+                <li>
+                <li><a href="#dashboard" onclick="showSection('dashboard')"><span class="uk-margin-small-right" uk-icon="home"></span> Dashboard</a></li>
+                </li>
+                <hr>
+                <li class="uk-parent">
+                <li><span>Accounts</span></li>
+                <li>
+                <li><a href="#clients" onclick="showSection('clients')"><span class="uk-margin-small-right" uk-icon="user"></span> Clients</a></li>
+                <li><a href="#patients" onclick="showSection('patients')"><span class="uk-margin-small-right" uk-icon="user"></span> Patients</a></li>
+                </li>
+                </li>
+                <hr>
+                <li class="uk-parent">
+                <li><span>Therapists</span></li>
+                <li>
+                <li><a href="#manage-therapist" onclick="showSection('manage-therapist')"><span class="uk-margin-small-right" uk-icon="user"></span> Manage Therapists</a></li>
+                <li><a href="#add-therapist" onclick="showSection('add-therapist')"><span class="uk-margin-small-right" uk-icon="plus"></span> Add Therapist</a></li>
+                </li>
+                </li>
+                <hr>
+                <li class="uk-parent">
+                <li><span>System</span></li>
+                <li>
+                <li><a href="#system-analytics" onclick="showSection('system-analytics')"><span class="uk-margin-small-right" uk-icon="settings"></span> System Analytics</a></li>
+                <li><a href="#timetable-settings" onclick="showSection('timetable-settings')"><span class="uk-margin-small-right" uk-icon="calendar"></span> Manage Timetable Settings</a></li>
+                <li><a href="#manage-content" onclick="showSection('manage-content')"><span class="uk-margin-small-right" uk-icon="file-text"></span> Manage Webpage Contents</a></li>
+                </li>
+                </li>
+                <hr>
+                <li class="uk-parent">
+                <li><span>Your Account</span></li>
+                <li>
+                <li><a href="#account-details" onclick="showSection('account-details')"><span class="uk-margin-small-right" uk-icon="user"></span> Account Details</a></li>
+                <?php if (isset($_SESSION['account_ID'])): ?><li><a href="../Accounts/logout.php"><span class="uk-margin-small-right" uk-icon="sign-out"></span>Logout</a></li><?php endif; ?>
+                </li>
+                </li>
+            </ul>
+        </div>
 
         <!-- Content Area -->
         <div class="uk-width-1-1 uk-width-4-5@m uk-padding">
@@ -319,7 +589,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 <!-- ✅ Appointment Summary Cards -->
                 <div class="uk-grid-small uk-child-width-1-3@m" uk-grid>
                     <?php foreach ($appointmentCounts as $status => $count): ?>
-                        <div>
+                        <div class="appointment-summary-cards">
                             <div class="uk-card uk-card-default uk-card-body">
                                 <h3 class="uk-card-title"><?= ucfirst($status) ?></h3>
                                 <p>Total: <?= $count ?></p>
@@ -344,7 +614,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
             <!-- Clients -->
             <div id="clients" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Clients</h1>
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                <div class="uk-card uk-card-default uk-card-body uk-margin uk-visible@m">
                     <!-- ✅ Custom Search and Show Entries -->
                     <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
                         <div class="uk-width-1-3">
@@ -408,12 +678,38 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         </table>
                     </div>
                 </div>
+                <!-- Card layout for mobile -->
+                <div id="clientsCardsSearch" class="uk-margin uk-hidden@m">
+                    <div class="uk-inline" style="width: 100%;">
+                        <span class="uk-form-icon" uk-icon="icon: search" style="padding: 5px 0 0 0;"></span>
+                        <input type="text" id="clientsCardsSearchInput" class="uk-input" placeholder="Search clients..." style="border-radius: 15px; padding-left: 40px;">
+                    </div>
+                </div>
+                <div id="clientsCards" class="uk-hidden@m">
+                    <?php if (isset($clients) && !empty($clients)) : ?>
+                        <?php foreach ($clients as $client) : ?>
+                            <div class="client-card"
+                                data-account-id="<?= htmlspecialchars(strtolower($client['account_ID'])); ?>"
+                                data-fname="<?= htmlspecialchars(strtolower($client['account_FName'])); ?>"
+                                data-lname="<?= htmlspecialchars(strtolower($client['account_LName'])); ?>"
+                                data-email="<?= htmlspecialchars(strtolower($client['account_Email'])); ?>"
+                                data-phone="<?= htmlspecialchars($client['account_PNum']); ?>"
+                                data-status="<?= htmlspecialchars($client['account_status']); ?>"
+                                data-appointments="<?= htmlspecialchars($client['appointment_count']); ?>">
+                                <h3><?= htmlspecialchars($client['account_FName'] . ' ' . $client['account_LName']); ?></h3>
+                                <button class="details-button" onclick="showClientDetails(<?= $client['account_ID']; ?>)" style="border-radius:15px">More Details</button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <p>No clients found.</p>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <!-- Patients -->
             <div id="patients" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Patients</h1>
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                <div class="uk-card uk-card-default uk-card-body uk-margin uk-visible@m">
                     <!-- ✅ Custom Search and Show Entries -->
                     <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
                         <div class="uk-width-1-3">
@@ -472,13 +768,54 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         </table>
                     </div>
                 </div>
+                <!-- Card layout for mobile -->
+                <div id="patientsCardsSearch" class="uk-margin uk-hidden@m">
+                    <div class="uk-inline" style="width: 100%;">
+                        <span class="uk-form-icon" uk-icon="icon: search" style="padding: 5px 0 0 0;"></span>
+                        <input type="text" id="patientsCardsSearchInput" class="uk-input" placeholder="Search patients..." style="border-radius: 15px; padding-left: 40px;">
+                    </div>
+                </div>
+                <div id="patientsCards" class="uk-hidden@m">
+                    <?php if (isset($patients) && !empty($patients)) : ?>
+                        <?php foreach ($patients as $patient) : ?>
+                            <div class="patient-card"
+                                data-patient-id="<?= htmlspecialchars($patient['patient_id']); ?>"
+                                data-fname="<?= htmlspecialchars(strtolower($patient['patient_fname'])); ?>"
+                                data-lname="<?= htmlspecialchars(strtolower($patient['patient_lname'])); ?>"
+                                data-birthday="<?= date('F j, Y', strtotime($patient['bday'])); ?>"
+                                data-gender="<?= htmlspecialchars($patient['gender']); ?>"
+                                data-guardian="<?= htmlspecialchars($patient['client_fname'] . ' ' . $patient['client_lname']); ?>"
+                                data-profile-picture="<?= !empty($patient['profile_picture']) ? '../uploads/profile_pictures/' . htmlspecialchars($patient['profile_picture']) : '../CSS/default.jpg'; ?>">
+                                <h3><?= htmlspecialchars($patient['patient_fname'] . ' ' . $patient['patient_lname']); ?></h3>
+                                <button class="details-button" onclick="showPatientDetails('<?= $patient['patient_id']; ?>')" style="border-radius:15px">More Details</button>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php else : ?>
+                        <p>No patients found.</p>
+                    <?php endif; ?>
+                </div>
             </div>
 
             <!-- Manage Therapists Section 📑-->
-<div id="manage-therapist" class="section" style="display: none;">
-    <h1 class="uk-text-bold">Manage Therapists</h1>
+            <div id="manage-therapist" class="section" style="display: none;">
+                <h1 class="uk-text-bold">Manage Therapists</h1>
 
-                <div class="uk-card uk-card-default uk-card-body uk-margin">
+                <div class="uk-card uk-card-default uk-card-body uk-margin uk-visible@m">
+                    <!-- ✅ Custom Search and Show Entries -->
+                    <div class="uk-flex uk-flex-between uk-flex-middle uk-margin">
+                        <div class="uk-width-1-3">
+                            <input type="text" id="therapistSearch" class="uk-input" placeholder="Search..." style="border-radius: 15px;">
+                        </div>
+                        <div class="uk-width-auto">
+                            <label for="therapistsEntries" class="uk-margin-small-right">Show entries per page:</label>
+                            <select id="therapistsEntries" class="uk-select" style="width: auto; border-radius: 15px;">
+                                <option value="5">5</option>
+                                <option value="10">10</option>
+                                <option value="25">25</option>
+                                <option value="50">50</option>
+                            </select>
+                        </div>
+                    </div>
                     <div class="uk-overflow-auto">
                         <table id="managetherapistsTable" class="uk-table uk-table-striped uk-table-hover uk-table-responsive">
                             <thead>
@@ -512,6 +849,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                                 ?>
                                             </td>
                                             <td>
+                                                <!-- Edit service button -->
                                                 <button class="uk-button uk-button-small uk-button-primary edit-service-btn" 
                                                         data-therapist-id="<?= htmlspecialchars($therapist['account_ID']); ?>"
                                                         data-therapist-name="<?= htmlspecialchars($therapist['account_FName'] . ' ' . $therapist['account_LName']); ?>"
@@ -584,13 +922,13 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                     </select>
                                 </div>
                             </div>
-                            
-                            <div class="uk-text-right">
-                                <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
-                                <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
-                            </div>
-                        </form>
-                    </div>
+                        </div>
+
+                        <div class="uk-text-right">
+                            <button class="uk-button uk-button-default uk-modal-close" type="button">Cancel</button>
+                            <button class="uk-button uk-button-primary" type="submit">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
                 <script>
                 $(document).ready(function() {
@@ -925,6 +1263,52 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 }
             });
 
+            // Mobile search functionality
+            const mobileSearchInput = document.getElementById('clientsCardsSearchInput');
+            const clientCards = document.querySelectorAll('.client-card');
+
+
+            if (mobileSearchInput) {
+                mobileSearchInput.addEventListener('input', function() {
+                    const searchTerm = this.value.toLowerCase().trim();
+                    console.log('Searching for:', searchTerm); // Debug log
+
+
+                    let found = false;
+                    clientCards.forEach(card => {
+                        const firstName = card.getAttribute('data-fname');
+                        const lastName = card.getAttribute('data-lname');
+                        const fullName = `${firstName} ${lastName}`.toLowerCase();
+
+
+                        if (fullName.includes(searchTerm)) {
+                            card.style.display = 'flex';
+                            found = true;
+                            console.log('Found match:', fullName); // Debug log
+                        } else {
+                            card.style.display = 'none';
+                        }
+                    });
+
+
+                    // Show/hide "No results" message
+                    let noResultsMessage = document.getElementById('noResultsMessage');
+                    if (!found && searchTerm !== '') {
+                        if (!noResultsMessage) {
+                            noResultsMessage = document.createElement('p');
+                            noResultsMessage.id = 'noResultsMessage';
+                            noResultsMessage.textContent = 'No clients found';
+                            noResultsMessage.style.textAlign = 'center';
+                            noResultsMessage.style.marginTop = '10px';
+                            document.getElementById('clientsCards').appendChild(noResultsMessage);
+                        }
+                    } else if (noResultsMessage) {
+                        noResultsMessage.remove();
+                    }
+                });
+            }
+
+
             // Custom Search for Clients Table
             $('#clientsSearch').on('keyup', function() {
                 clientsTable.search(this.value).draw();
@@ -952,6 +1336,41 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         next: "Next",
                         previous: "Previous"
                     }
+                }
+            });
+
+            // Mobile search functionality for patients
+            document.getElementById('patientsCardsSearchInput').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase().trim();
+                const patientCards = document.querySelectorAll('.patient-card');
+                let found = false;
+
+                patientCards.forEach(card => {
+                    const firstName = card.getAttribute('data-fname');
+                    const lastName = card.getAttribute('data-lname');
+                    const fullName = `${firstName} ${lastName}`.toLowerCase();
+
+                    if (fullName.includes(searchTerm)) {
+                        card.style.display = 'flex';
+                        found = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                // Show/hide "No results" message
+                let noResultsMessage = document.getElementById('noResultsMessage');
+                if (!found && searchTerm !== '') {
+                    if (!noResultsMessage) {
+                        noResultsMessage = document.createElement('p');
+                        noResultsMessage.id = 'noResultsMessage';
+                        noResultsMessage.textContent = 'No patients found';
+                        noResultsMessage.style.textAlign = 'center';
+                        noResultsMessage.style.marginTop = '10px';
+                        document.getElementById('patientsCards').appendChild(noResultsMessage);
+                    }
+                } else if (noResultsMessage) {
+                    noResultsMessage.remove();
                 }
             });
 
@@ -985,6 +1404,7 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 }
             });
 
+            //
             // Custom Search for Manage Therapists Table
             $('#therapistSearch').on('keyup', function() {
                 therapistsTable.search(this.value).draw();
@@ -1576,8 +1996,64 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
     }
 
     // Sidebar Toggle
-    document.querySelector('.sidebar-toggle').addEventListener('click', function() {
-        document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+    //document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+    //    document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+    //});
+
+    // Mobile Sidebar Toggle
+    document.addEventListener('DOMContentLoaded', function() {
+        const mobileMenuButton = document.querySelector('.mobile-menu-button');
+        const mobileSidebar = document.getElementById('mobileSidebar');
+        const body = document.body;
+
+        function toggleSidebar() {
+            if (mobileSidebar.classList.contains('open')) {
+                // Close sidebar
+                mobileSidebar.classList.remove('open');
+                mobileSidebar.style.left = '-100%';
+
+                // Remove overlay
+                const overlay = document.querySelector('.sidebar-overlay');
+                if (overlay) {
+                    overlay.remove();
+                }
+
+                // Enable scrolling
+                body.style.overflow = '';
+            } else {
+                // Open sidebar
+                mobileSidebar.classList.add('open');
+                mobileSidebar.style.left = '0';
+
+                // Add overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'sidebar-overlay';
+                body.appendChild(overlay);
+
+                // Disable scrolling
+                body.style.overflow = 'hidden';
+
+                // Add click event to overlay to close sidebar
+                overlay.addEventListener('click', toggleSidebar);
+            }
+        }
+
+        // Attach click event to the mobile menu button
+        if (mobileMenuButton) {
+            mobileMenuButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleSidebar();
+            });
+        }
+
+        // Close sidebar when clicking the close button
+        const closeButton = document.querySelector('.close-sidebar');
+        if (closeButton) {
+            closeButton.addEventListener('click', function(e) {
+                e.preventDefault();
+                toggleSidebar();
+            });
+        }
     });
 
     // Show Section
@@ -1634,6 +2110,136 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                 .catch(error => console.error("Error:", error));
         }
     }
+
+    // Function to show client details in a modal
+    window.showClientDetails = function(clientId) {
+        const clientCard = document.querySelector(`.client-card[data-account-id="${clientId}"]`);
+        if (clientCard) {
+            const accountID = clientCard.getAttribute('data-account-id');
+            const firstName = clientCard.getAttribute('data-fname');
+            const lastName = clientCard.getAttribute('data-lname');
+            const email = clientCard.getAttribute('data-email');
+            const phone = clientCard.getAttribute('data-phone');
+            const status = clientCard.getAttribute('data-status');
+            const appointments = clientCard.getAttribute('data-appointments');
+
+            // Build the modal content
+            let modalContent = `
+            <table class="uk-table uk-table-striped uk-text-left" style="font-size: 14px; width: 100%;">
+                <tr><td style="text-align:left"><strong>Account ID:</strong></td><td style="text-align:left">${accountID}</td></tr>
+                <tr><td style="text-align:left"><strong>First Name:</strong></td><td style="text-align:left">${firstName}</td></tr>
+                <tr><td style="text-align:left"><strong>Last Name:</strong></td><td style="text-align:left">${lastName}</td></tr>
+                <tr><td style="text-align:left"><strong>Email:</strong></td><td style="text-align:left">${email}</td></tr>
+                <tr><td style="text-align:left"><strong>Phone:</strong></td><td style="text-align:left">${phone}</td></tr>
+                <tr><td style="text-align:left"><strong>Status:</strong></td><td style="text-align:left">${status}</td></tr>
+                <tr><td style="text-align:left"><strong>Appointments:</strong></td><td style="text-align:left">${appointments}</td></tr>
+            </table>
+        `;
+
+            // Add the "Archive" button only if the account is not archived
+            if (status !== 'Archived') {
+                modalContent += `
+                <button class="uk-button uk-button-danger" style="width: 100%; border-radius:15px" onclick="archiveClient('${accountID}')">
+                    Archive
+                </button>
+            `;
+            } else {
+                modalContent += `
+                <p style="color: red; font-weight: bold; margin-top: 15px;"></p>
+            `;
+            }
+
+            // Show the modal
+            Swal.fire({
+                title: `<h3 style="font-size: 20px; font-weight: bold; text-align: left;">Client Details</h3>`,
+                html: modalContent,
+                showCloseButton: true,
+                cancelButtonText: 'Close',
+                focusConfirm: false,
+                showConfirmButton: false // Disable the default confirm button
+            });
+        }
+    };
+
+    // Function to archive a client (modal)
+    function archiveClient(accountID) {
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "This action will archive the account and it cannot be undone.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, archive it',
+            cancelButtonText: 'No, cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                fetch('../Accounts/manageaccount/archive_account.php', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded'
+                        },
+                        body: `account_id=${accountID}`
+                    })
+                    .then(response => {
+                        if (response.ok) {
+                            Swal.fire(
+                                'Archived!',
+                                'The account has been archived successfully.',
+                                'success'
+                            ).then(() => {
+                                location.reload(); // Reload the page to reflect changes
+                            });
+                        } else {
+                            throw new Error('Failed to archive the account.');
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire('Error', error.message, 'error');
+                    });
+            }
+        });
+    }
+
+    // Function to show patient details in a modal
+    window.showPatientDetails = function(patientId) {
+        const patientCard = document.querySelector(`.patient-card[data-patient-id="${patientId}"]`);
+        if (patientCard) {
+            const firstName = patientCard.getAttribute('data-fname');
+            const lastName = patientCard.getAttribute('data-lname');
+            const birthday = patientCard.getAttribute('data-birthday');
+            const gender = patientCard.getAttribute('data-gender');
+            const guardian = patientCard.getAttribute('data-guardian');
+            const profilePic = patientCard.getAttribute('data-profile-picture') || '../CSS/default.jpg';
+
+            // Build the modal content with profile picture
+            let modalContent = `
+            <div class="uk-text-center uk-margin-bottom">
+                <img class="uk-border-circle" 
+                     src="${profilePic}" 
+                     alt="Patient Profile" 
+                     style="width: 100px; height: 100px; object-fit: cover; margin-bottom: 15px;">
+            </div>
+            <table class="uk-table uk-table-striped uk-text-left" style="font-size: 14px; width: 100%;">
+                <tr><td style="text-align:left"><strong>First Name:</strong></td><td style="text-align:left">${firstName}</td></tr>
+                <tr><td style="text-align:left"><strong>Last Name:</strong></td><td style="text-align:left">${lastName}</td></tr>
+                <tr><td style="text-align:left"><strong>Birthday:</strong></td><td style="text-align:left">${birthday}</td></tr>
+                <tr><td style="text-align:left"><strong>Gender:</strong></td><td style="text-align:left">${gender}</td></tr>
+                <tr><td style="text-align:left"><strong>Parent/Guardian:</strong></td><td style="text-align:left">${guardian}</td></tr>
+            </table>
+        `;
+
+            // Show the modal
+            Swal.fire({
+                title: `<h3 style="font-size: 20px; font-weight: bold; text-align: left;">Patient Details</h3>`,
+                html: modalContent,
+                showCloseButton: true,
+                cancelButtonText: 'Close',
+                focusConfirm: false,
+                showConfirmButton: false
+            });
+        }
+    };
 
     // Archive User
     document.querySelectorAll('.archive-user').forEach(button => {

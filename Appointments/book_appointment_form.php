@@ -118,6 +118,11 @@
     <link rel="stylesheet" href="../CSS/style.css" type="text/css" /> <!-- Adjust path -->
 
     <style>
+        /* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
+
+}
+
         html, body { background-color: #ffffff !important; }
         .appointment-container { display: flex; gap: 30px; flex-wrap: wrap; }
         .appointment-form { flex: 2; min-width: 300px; }
@@ -136,39 +141,41 @@
             <h2 class="uk-card-title">Book an Appointment</h2>
             <!-- <p>Your Role: <strong><?= ucfirst($role); ?></strong></p> -->
 
-            <?php if (empty($patients)): ?>
-                <div class="uk-alert-warning" uk-alert>
-                    <a class="uk-alert-close" uk-close></a>
-                    <p>You currently have no registered patients eligible for booking. Please register a patient first.</p>
-                     <!-- Button might link to a registration page or trigger a modal -->
-                    <button class="uk-button uk-button-primary uk-button-small" onclick="goToRegisterPatient()">Register a Patient</button>
-                </div>
-            <?php else: ?>
+                <?php if (empty($patients)): ?>
+                    <div class="uk-alert-warning" uk-alert style="width: 100%;">
+                        <a class="uk-alert-close" uk-close></a>
+                        <p class="mobile-text">Please Register a Patient before Booking an Appointment.</p>
+                        <button class="uk-button uk-button-primary uk-button-small" onclick="goToRegisterPatient()">Register a Patient</button>
+                    </div>
+                <?php else: ?>
+            </div>
 
-            <form id="appointmentForm" action="app_process/book_appointment_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked">
-                 <!-- Patient Selection -->
-                <div class="uk-margin">
-                    <label for="patient_id">Select Patient:</label>
-                    <select class="uk-select" name="patient_id" id="patient_id" required>
+            <form id="appointmentForm" action="app_process/book_appointment_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked uk-grid-medium" uk-grid>
+                <div class="uk-width-1-1">
+                    <label class="uk-form-label" for="patient_id" >Select Patient:</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select mobile-text" name="patient_id" id="patient_id" required>
                         <option value="" disabled selected>-- Select Patient --</option>
-                        <?php foreach ($patients as $patient): ?>
-                            <option value="<?= htmlspecialchars($patient['patient_id']); ?>" data-status="<?= htmlspecialchars($patient['status']); ?>">
-                                <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']); ?>
-                            </option>
-                        <?php endforeach; ?>
-                    </select>
-                    <input type="hidden" name="patient_name" id="patient_name_hidden">
+                            <?php foreach ($patients as $patient): ?>
+                                <option value="<?= htmlspecialchars($patient['patient_id']); ?>" data-status="<?= htmlspecialchars($patient['status']); ?>">
+                                    <?= htmlspecialchars($patient['first_name'] . " " . $patient['last_name']); ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                        <input type="hidden" name="patient_name" id="patient_name_hidden">
+                    </div>
                 </div>
 
-                <!-- Appointment Type Selection -->
-                <div class="uk-margin">
-                    <label for="appointment_type">Appointment Type:</label>
-                    <select class="uk-select" name="appointment_type" id="appointment_type" required>
-                        <option value="" disabled selected>-- Select Type --</option>
-                        <option value="IE-OT">Initial Evaluation - OT</option>
-                        <option value="IE-BT">Initial Evaluation - BT</option>
-                        <option value="Playgroup">Playgroup</option>
-                    </select>
+                <div class="uk-width-1-1">
+                    <label class="uk-form-label" for="appointment_type">Appointment Type:</label>
+                    <div class="uk-form-controls">
+                        <select class="uk-select mobile-text" name="appointment_type" id="appointment_type" required >
+                            <option value="" disabled selected>-- Select Type --</option>
+                            <option value="IE-OT">Initial Evaluation - OT</option>
+                            <option value="IE-BT">Initial Evaluation - BT</option>
+                            <option value="Playgroup">Playgroup</option>
+                        </select>
+                    </div>
                 </div>
 
                 <!-- Playgroup Session Selection (Conditional) -->
