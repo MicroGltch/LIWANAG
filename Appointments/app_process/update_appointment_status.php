@@ -376,7 +376,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                     isRebooked: false,
                     reason: $validation_notes
                 );            
-                echo json_encode(["status" => "success", "title" => "Appointment Completed", "message" => "Appointment for <b>$patient_name</b> has been marked as <strong>Completed</strong>. Email notification sent."]);
+                echo json_encode(["status" => "success", "title" => "Appointment Completed", "message" => "Appointment for $patient_name has been marked as Completed. Email notification sent."]);
             } else {
                 echo json_encode(["status" => "error", "title" => "Database Error", "message" => "Failed to update appointment status to completed."]);
             }
