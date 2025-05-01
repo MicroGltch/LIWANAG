@@ -144,6 +144,128 @@ echo "<script>
             margin-bottom: 0;
             /* Remove margin from the last button */
         }
+
+        .button-containers .uk-button {
+            height: 40px;
+            border-radius: 15px;
+            padding: 0 10px;
+            margin: 0;
+        }
+        .button-containers {
+            gap: 20px;
+            width: 100%;
+            padding: 0;
+            text-align: right;
+        }
+         /* Adjust layout for small screens (mobile) */
+         @media (max-width: 640px) {
+            .uk-grid-small {
+                margin: 0;
+            }
+
+            .uk-grid-small>* {
+                width: calc(50% - 10px);
+                margin: 5px;
+            }
+
+            .uk-card {
+                padding: 12px;
+                margin-bottom: 10px;
+            }
+
+            .uk-card-body h3 {
+                font-size: 18px;
+                margin-bottom: 8px;
+            }
+
+            .uk-card-body p {
+                font-size: 14px;
+                margin: 0;
+            }
+
+            .uk-card-body button {
+                font-size: 12px;
+                padding: 0;
+                min-height: 30px;
+            }
+
+            .uk-card-body {
+                padding: 15px;
+            }
+
+            .uk-card-body h3.uk-card-title {
+                font-size: 16px;
+                margin-bottom: 6px;
+            }
+
+            .uk-card-body p {
+                font-size: 13px;
+                margin-bottom: 8px;
+            }
+
+            .uk-card-body .uk-button {
+                margin-top: 5px;
+                border-radius: 15px;
+            }
+
+            .appointment-summary-cards {
+                padding: 0 0 0 0;
+            }
+
+            .profile-photo {
+                max-width: 120px;
+                max-height: 120px;
+            }
+
+            .settings-form {
+                padding: 0;
+            }
+
+            .button-containes {
+                width: 100%;
+                margin: 0;
+                justify-content: flex-end;
+            }
+
+            .button-containers .uk-button {
+                width: fit-content;
+                padding: 0 10px;
+                font-size: 12px;
+                margin-bottom: 10px;
+            }
+
+            #editButton {
+                width: fit-content !important;
+                padding: 0 10px !important;
+            }
+        }
+        /* Adjust layout for medium screens (tablets) */
+        @media (max-width: 959px) {
+            .uk-grid-small {
+                margin: 0;
+            }
+
+            .uk-grid-small>* {
+                width: calc(50% - 10px);
+                /* 2 columns with gap */
+                margin: 5px;
+            }
+
+            .uk-card {
+                margin-bottom: 10px;
+            }
+
+            .uk-card-body button {
+                font-size: 13px;
+                padding: 8px 12px;
+                border-radius: 15px;
+            }
+
+            .profile-photo {
+                width: 120px;
+                height: 120px;
+            }
+        }
     </style>
 </head>
 
@@ -544,7 +666,7 @@ echo "<script>
             <div id="account-details" class="section" style="display: none;">
                 <h1 class="uk-text-bold">Account Details</h1>
                 <div class="uk-card uk-card-default uk-card-body uk-margin">
-                    <h3 class="uk-card-title uk-text-bold title-helper">Profile Photo</h3>
+                    <h3 class="uk-card-title uk-text-bold">Profile Photo</h3>
                     <form action="settings.php" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="action" value="upload_profile_picture">
                         <div class="uk-flex uk-flex-middle">
@@ -552,14 +674,14 @@ echo "<script>
                                 <img class="uk-border-circle profile-preview" src="<?php echo $profilePicture; ?>" alt="Profile Photo">
                                 <div class="uk-flex uk-flex-column uk-margin-left">
                                     <input type="file" name="profile_picture" id="profileUpload" class="uk-hidden">
-                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" disabled style="border-radius: 15px;">
+                                    <button type="button" class="uk-button uk-button-primary uk-margin-small-bottom" id="uploadButton" style="border-radius: 15px;" disabled>
                                         Upload Photo
                                     </button>
                                     <div class="uk-text-center">
                                         <a href="#" class="uk-link-muted" onclick="removeProfilePhoto();" id="removePhotoButton" style="pointer-events: none; color: grey;">remove</a>
                                     </div>
                                 </div>
-                                <div class="uk-margin-large-left image-helper">
+                                <div class="uk-margin-large-left uk-visible@m">
                                     <h4>Image requirements:</h4>
                                     <ul class="uk-list">
                                         <li>1. Min. 400 x 400px</li>
@@ -571,28 +693,26 @@ echo "<script>
                         </div>
                     </form>
                 </div>
-
                 <div class="uk-card uk-card-default uk-card-body">
-                    <h3 class="uk-card-title uk-text-bold title-helper">User Details</h3>
+                    <h3 class="uk-card-title uk-text-bold">User Details</h3>
                     <form id="settingsvalidate" action="../Accounts/manageaccount/updateinfo.php" method="post" class="uk-grid-small" uk-grid>
                         <input type="hidden" name="action" id="formAction" value="update_user_details">
-
-                        <div class="uk-width-1-2@s">
+                        <div class="settings-form uk-width-1-2@s">
                             <label class="uk-form-label">First Name</label>
                             <input class="uk-input" type="text" name="firstName" id="firstName" value="<?php echo $firstName; ?>" disabled>
                             <small style="color: red;" class="error-message" data-error="firstName"></small>
                         </div>
-                        <div class="uk-width-1-2@s">
+                        <div class="settings-form uk-width-1-2@s">
                             <label class="uk-form-label">Last Name</label>
                             <input class="uk-input" type="text" name="lastName" id="lastName" value="<?php echo $lastName; ?>" disabled>
                             <small style="color: red;" class="error-message" data-error="lastName"></small>
                         </div>
-                        <div class="uk-width-1-1">
+                        <div class="settings-form uk-width-1-1">
                             <label class="uk-form-label">Email</label>
                             <input class="uk-input" type="email" name="email" id="email" value="<?php echo $email; ?>" disabled>
                             <small style="color: red;" class="error-message" data-error="email"></small>
                         </div>
-                        <div class="uk-width-1-1">
+                        <div class="settings-form uk-width-1-1">
                             <label class="uk-form-label">Phone Number</label>
                             <input class="uk-input" type="tel" name="phoneNumber" id="mobileNumber" value="<?php echo '0' . $phoneNumber; ?>" disabled>
                             <small style="color: red;" class="error-message" data-error="phoneNumber"></small>
@@ -601,10 +721,10 @@ echo "<script>
                         <small style="color: red;" class="error-message" data-error="duplicate"></small>
                         <small style="color: green;" class="error-message" id="successMessage"></small>
 
-                        <div class="uk-width-1-1 uk-text-right uk-margin-top">
-                            <button type="button" class="uk-button uk-button-secondary" id="editButton" style="margin-right: 10px;border-radius: 15px;">Edit</button>
-                            <button class="uk-button uk-button-primary" id="changePassword" uk-toggle="target: #change-password-modal" style="margin-right: 10px;border-radius: 15px;">Change Password</button>
-                            <button class="uk-button uk-button-primary" id="saveChanges" type="submit" id="saveButton" disabled style="margin-right: 10px;border-radius: 15px;">Save Changes</button>
+                        <div class="button-containers uk-width-1-1 uk-width-1-1@s">
+                            <button class="uk-button uk-button-secondary" type="button" id="editButton" style="margin-right: 10px;border-radius: 15px;">Edit</button>
+                            <button class="uk-button uk-button-primary" uk-toggle="target: #change-password-modal" style="margin-right: 10px;border-radius: 15px;">Change Password</button>
+                            <button class="uk-button uk-button-primary" type="submit" id="saveButton" disabled style="margin-right: 10px;border-radius: 15px;">Save Changes</button>
                         </div>
 
                         <div id="otpSection" class="uk-width-1-1" style="display: none;">
@@ -616,14 +736,13 @@ echo "<script>
                             </div>
                             <!-- The buttons will be dynamically added here by JavaScript -->
                         </div>
-
                 </div>
             </div>
         </div>
-        </form>
-
-        <?php unset($_SESSION['update_errors']); ?>
-        <?php unset($_SESSION['update_success']); ?>
+    </div>
+    </form>
+    <?php unset($_SESSION['update_errors']); ?>
+    <?php unset($_SESSION['update_success']); ?>
     </div>
 
     <!-- Terms and Conditions Modal -->
