@@ -133,7 +133,7 @@
         .fa-info-circle { margin-left: 5px; color: #1e87f0; cursor: help; }
     </style>
 </head>
-<body>
+<div>
     <div class="uk-container uk-margin-large-top appointment-container">
 
         <!-- Appointment Booking Form Section -->
@@ -148,7 +148,7 @@
                         <button class="uk-button uk-button-primary uk-button-small" onclick="goToRegisterPatient()">Register a Patient</button>
                     </div>
                 <?php else: ?>
-            </div>
+            <!-- </div> -->
 
             <form id="appointmentForm" action="app_process/book_appointment_process.php" method="POST" enctype="multipart/form-data" class="uk-form-stacked uk-grid-medium" uk-grid>
                 <div class="uk-width-1-1">
@@ -233,24 +233,24 @@
                 </div>
             </form>
             <?php endif; ?>
-        </div>
+            </div>
 
-        <!-- Patient Details Display Section -->
-        <div class="patient-details-container">
-            <div id="patientDetails" class="uk-card uk-card-default uk-card-body" style="display: none;">
-                <h4 class="uk-card-title">Patient Details</h4>
-                <img id="patient_profile" src="" alt="Profile Picture" class="uk-border-circle uk-align-right" style="width: 80px; height: 80px; object-fit: cover; display: none;">
-                <p><strong>Name:</strong> <span id="patient_name"></span></p>
-                <p><strong>Birthday:</strong> <span id="patient_bday"></span></p>
-                <p><strong>Age:</strong> <span id="patient_age"></span></p>
-                <p><strong>Gender:</strong> <span id="patient_gender"></span></p>
-                <p><strong>Service Type:</strong> <span id="patient_service"></span></p>
-                 <p><strong>Status:</strong> <span id="patient_status"></span></p>
+                <!-- Patient Details Display Section -->
+                <div class="patient-details-container">
+                    <div id="patientDetails" class="uk-card uk-card-default uk-card-body" style="display: none;">
+                        <h4 class="uk-card-title">Patient Details</h4>
+                        <img id="patient_profile" src="" alt="Profile Picture" class="uk-border-circle uk-align-right" style="width: 80px; height: 80px; object-fit: cover; display: none;">
+                        <p><strong>Name:</strong> <span id="patient_name"></span></p>
+                        <p><strong>Birthday:</strong> <span id="patient_bday"></span></p>
+                        <p><strong>Age:</strong> <span id="patient_age"></span></p>
+                        <p><strong>Gender:</strong> <span id="patient_gender"></span></p>
+                        <p><strong>Service Type:</strong> <span id="patient_service"></span></p>
+                        <p><strong>Status:</strong> <span id="patient_status"></span></p>
 
+                    </div>
+                </div>
             </div>
         </div>
-    </div>
-
 
     <!-- JavaScript -->
     <script src="https://cdn.jsdelivr.net/npm/uikit@3.19.2/dist/js/uikit.min.js"></script>
