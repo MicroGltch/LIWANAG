@@ -370,46 +370,39 @@ echo "<script>
                             </select>
                         </div>
 
-                        <!-- To follow/fix -->
-                        
-                        <div class="uk-width-1@s uk-width-1-2@l">
+                        <div class="uk-width-1-2@s uk-width-1-2@l">
                             <label class="uk-form-label">Profile Picture</label>
-                            <div class="js-upload uk-placeholder uk-text-center" id="profile-picture-placeholder">
+                            <div id="profile-picture-placeholder" class="uk-placeholder uk-text-center">
                                 <span uk-icon="icon: cloud-upload"></span>
-                                <span class="uk-text-middle">Drag and drop a file or</span>
-                                <div uk-form-custom>
-                                    <input type="file" multiple name="profile_picture" accept=".jpg, .jpeg, .png" required id="profile-picture-input">
-                                    <span class="uk-link">Browse</span>
-                                    <span class="uk-text-middle" id="file-name-display">to choose a file</span>
+                                <span class="uk-text-middle"><a class="uk-link" id="profile-picture-trigger">Upload</a> <span id="file-name-display">Patient Picture</span></span>
+                                <input class="uk-input uk-hidden" type="file" name="patient_picture" id="profile-picture-input" required accept=".jpg,.jpeg,.png">
+                            </div>
+                        </div>
+
+                        <!-- Doctor Referral Section -->
+                        <div class="uk-width-1-1">
+                            <div class="uk-margin">
+                                <label class="uk-form-label">Doctor Referral (Optional)</label>
+                                <div class="uk-form-controls">
+                                    <div class="uk-margin uk-grid-small uk-child-width-auto uk-grid">
+                                        <label><input class="uk-radio" type="radio" name="referral_type" value="official"> Official Doctor Referral</label>
+                                        <label><input class="uk-radio" type="radio" name="referral_type" value="proof_of_booking"> Proof of Booking</label>
+                                        <label><input class="uk-radio" type="radio" name="referral_type" value="none" checked> None</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="uk-width-1-2@s uk-width-1-2@l">
-                            <label class="uk-form-label">Profile Picture</label>
-                            <input class="uk-input" type="file" name="referral_file" id="profile-picture-input" required accept=".jpg,.jpeg,.png,.pdf" style="padding-top: 5px;padding-bottom: 5px;">
-                        </div>        
-
-                        <!-- Tago muna -->
-
-                        <!-- <div class="uk-width-1-1 uk-margin-top">
-                        <hr class=" uk-margin-top">
-                            <h2 class="uk-margin-small-bottom uk-card-title uk-text-bold">Upload Doctor's Referral</h2>
+                        <div class="uk-width-1-2@s uk-width-1-2@l" id="referral-file-section" style="display: none;">
+                            <div class="uk-margin">
+                                <label class="uk-form-label">Upload File</label>
+                                <div id="referral-file-placeholder" class="uk-placeholder uk-text-center">
+                                    <span uk-icon="icon: cloud-upload"></span>
+                                    <span class="uk-text-middle">Click <a class="uk-link" id="referral-file-trigger">here</a> <span id="referral-file-name-display">to choose a file</span></span>
+                                    <input class="uk-input uk-hidden" type="file" name="referral_file" id="referral-file-input" accept=".jpg,.jpeg,.png,.pdf">
+                                </div>
+                            </div>
                         </div>
-
-                        <div class="uk-width-1-2@s">
-                            <label class="uk-form-label">Referral Type</label>
-                            <select class="uk-select" name="referral_type" id="referral_type_select" required>
-                                <option value="" disabled selected>Select Referral Type</option>
-                                <option value="official">Official Referral</option>
-                                <option value="proof_of_booking">Proof of Booking</option>
-                            </select>
-                        </div>
-
-                        <div class="uk-width-1-2@s uk-width-1-2@l">
-                            <label class="uk-form-label">Upload Referral File</label>
-                            <input class="uk-input" type="file" name="referral_file" id="referral_file_input" required accept=".jpg,.jpeg,.png,.pdf" style="padding-top: 5px;padding-bottom: 5px;">
-                        </div> -->
 
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top">
@@ -509,18 +502,17 @@ echo "<script>
                         <a id="proof_of_booking_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
                         </div>
 
-                        <!-- Dapat ihide pero nagloloko -->
-                        
-                        <div class="uk-width-1-2@s">
+                        <!-- Official Referral Upload Section -->
+                        <div class="uk-width-1-2@s" id="official_referral_upload_section" style="display: none;">
                             <label class="uk-form-label">Upload New Official Referral</label>
-                            <input class="uk-input" type="file" name="official_referral" id="official_referral_input" accept=".pdf,.jpg,.jpeg,.png" disabled style="padding-top: 5px;padding-bottom: 5px;">
+                            <input class="uk-input" type="file" name="official_referral" id="official_referral_input" accept=".pdf,.jpg,.jpeg,.png">
                         </div>
 
-                        <div class="uk-width-1-2@s">
+                        <!-- Proof of Booking Upload Section -->
+                        <div class="uk-width-1-2@s" id="proof_of_booking_upload_section" style="display: none;">
                             <label class="uk-form-label">Upload New Proof of Booking</label>
-                            <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking_input" accept=".pdf,.jpg,.jpeg,.png" disabled style="padding-top: 5px;padding-bottom: 5px;">
+                            <input class="uk-input" type="file" name="proof_of_booking" id="proof_of_booking_input" accept=".pdf,.jpg,.jpeg,.png">
                         </div>
-
 
                         <div class="uk-width-1-1 uk-text-right uk-margin-top" style="margin-bottom: 15px;">
                         
@@ -1759,89 +1751,138 @@ echo "<script>
 
             // REGISTER PATIENT JS
 
-            document.getElementById("profile-picture-input").addEventListener("change", function() {
-                if (this.files && this.files[0]) {
-                    document.getElementById("profile-picture-placeholder").classList.remove("uk-placeholder");
-                    document.getElementById("file-name-display").textContent = this.files[0].name;
-                } else {
-                    document.getElementById("profile-picture-placeholder").classList.add("uk-placeholder");
-                    document.getElementById("file-name-display").textContent = "to choose a file";
-                }
-            });
+            // File input handling for profile picture
+        document.getElementById("profile-picture-trigger").addEventListener("click", function() {
+            document.getElementById("profile-picture-input").click();
+        });
 
-            document.getElementById("registerPatientButton").addEventListener("click", function() {
-                let form = document.getElementById("patientRegistrationForm");
-                let formData = new FormData(form);
+        document.getElementById("profile-picture-input").addEventListener("change", function() {
+            if (this.files && this.files[0]) {
+                document.getElementById("profile-picture-placeholder").classList.remove("uk-placeholder");
+                document.getElementById("file-name-display").textContent = this.files[0].name;
+            } else {
+                document.getElementById("profile-picture-placeholder").classList.add("uk-placeholder");
+                document.getElementById("file-name-display").textContent = "Patient Picture";
+            }
+        });
 
-                let firstName = formData.get("patient_fname");
-                let lastName = formData.get("patient_lname");
-                let birthday = formData.get("patient_birthday");
-                let gender = formData.get("patient_gender");
-                let file = formData.get("profile_picture") ? formData.get("profile_picture").name : "No file selected";
-
-
-                // Validation for first and last names
-                const nameRegex = /^[A-Za-z ]{2,30}$/;
-                if (!nameRegex.test(firstName)) {
-                    Swal.fire("Validation Error", "First name must be between 2 and 30 characters and contain only letters and spaces.", "error");
-                    return; // Stop the registration process
-                }
-                if (!nameRegex.test(lastName)) {
-                    Swal.fire("Validation Error", "Last name must be between 2 and 30 characters and contain only letters and spaces.", "error");
-                    return; // Stop the registration process
-                }
-
-
-                Swal.fire({
-                    title: "Confirm Registration",
-                    html: `
-                    <strong>First Name:</strong> ${firstName} <br/>
-                    <strong>Last Name:</strong> ${lastName} <br/>
-                    <strong>Birthday:</strong> ${birthday} <br/>
-                    <strong>Gender:</strong> ${gender} <br/>
-                    <strong>Profile Picture:</strong> ${file} <br/>
-                `,
-                    icon: "question",
-                    showCancelButton: true,
-                    confirmButtonText: "Submit",
-                    cancelButtonText: "Cancel",
-                    confirmButtonColor: "#28a745",
-                    cancelButtonColor: "#dc3545"
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        // Proceed with form submission
-                        fetch("../Appointments/patient/patient_manage/register_patient_form.php", {
-                                method: "POST",
-                                body: formData
-                            })
-                            .then(response => response.json()) // Parse JSON
-                            .then(data => {
-                                if (data.status === "success") {
-                                    Swal.fire("Success!", data.message, "success").then(() => {
-                                        form.reset();
-                                        document.getElementById("file-name-display").textContent = "";
-
-                                        // Hard reload the page
-                                        location.reload(true);
-
-                                        // Optional: Scroll to the registered patients section after reload
-                                        setTimeout(() => {
-                                            window.location.href = "#view-registered-patients"; // Adjust the ID accordingly
-                                        }, 500);
-                                    });
-                                } else if (data.status === "duplicate") {
-                                    Swal.fire("Duplicate!", data.message, "warning");
-                                } else {
-                                    Swal.fire("Error!", data.message, "error");
-                                }
-                            })
-                            .catch(error => {
-                                console.error("Error:", error);
-                                Swal.fire("Error!", "An unexpected error occurred.", "error");
-                            });
+        // Handle referral type selection
+        document.querySelectorAll('input[name="referral_type"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                if (this.value === 'official' || this.value === 'proof_of_booking') {
+                    document.getElementById('referral-file-section').style.display = 'block';
+                    if (this.value === 'official') {
+                        document.getElementById('referral-file-input').setAttribute('required', '');
+                    } else if (this.value === 'proof_of_booking') {
+                        document.getElementById('referral-file-input').setAttribute('required', '');
                     }
-                });
+                } else {
+                    document.getElementById('referral-file-section').style.display = 'none';
+                    document.getElementById('referral-file-input').removeAttribute('required');
+                }
             });
+        });
+
+        // File input handling for referral
+        document.getElementById("referral-file-trigger").addEventListener("click", function() {
+            document.getElementById("referral-file-input").click();
+        });
+
+        document.getElementById("referral-file-input").addEventListener("change", function() {
+            if (this.files && this.files[0]) {
+                document.getElementById("referral-file-placeholder").classList.remove("uk-placeholder");
+                document.getElementById("referral-file-name-display").textContent = this.files[0].name;
+            } else {
+                document.getElementById("referral-file-placeholder").classList.add("uk-placeholder");
+                document.getElementById("referral-file-name-display").textContent = "to choose a file";
+            }
+        });
+
+        document.getElementById("registerPatientButton").addEventListener("click", function() {
+            let form = document.getElementById("patientRegistrationForm");
+            let formData = new FormData(form);
+
+            let firstName = formData.get("patient_fname");
+            let lastName = formData.get("patient_lname");
+            let birthday = formData.get("patient_birthday");
+            let gender = formData.get("patient_gender");
+            let file = formData.get("patient_picture") ? formData.get("patient_picture").name : "No file selected";
+            let referralType = formData.get("referral_type");
+            let referralFile = formData.get("referral_file") ? formData.get("referral_file").name : "None";
+
+            // Validation for first and last names
+            const nameRegex = /^[A-Za-z ]{2,30}$/;
+            if (!nameRegex.test(firstName)) {
+                Swal.fire("Validation Error", "First name must be between 2 and 30 characters and contain only letters and spaces.", "error");
+                return; // Stop the registration process
+            }
+            if (!nameRegex.test(lastName)) {
+                Swal.fire("Validation Error", "Last name must be between 2 and 30 characters and contain only letters and spaces.", "error");
+                return; // Stop the registration process
+            }
+
+            // Validate referral file if a type is selected
+            if ((referralType === 'official' || referralType === 'proof_of_booking') && !formData.get("referral_file").name) {
+                Swal.fire("Validation Error", "Please upload a " + (referralType === 'official' ? "doctor referral" : "proof of booking") + " file.", "error");
+                return;
+            }
+
+            Swal.fire({
+                title: "Confirm Registration",
+                html: `
+                <strong>First Name:</strong> ${firstName} <br/>
+                <strong>Last Name:</strong> ${lastName} <br/>
+                <strong>Birthday:</strong> ${birthday} <br/>
+                <strong>Gender:</strong> ${gender} <br/>
+                <strong>Profile Picture:</strong> ${file} <br/>
+                <strong>Referral Type:</strong> ${referralType !== 'none' ? referralType.replace('_', ' ').toUpperCase() : 'None'} <br/>
+                ${referralType !== 'none' ? `<strong>Referral File:</strong> ${referralFile} <br/>` : ''}
+            `,
+                icon: "question",
+                showCancelButton: true,
+                confirmButtonText: "Submit",
+                cancelButtonText: "Cancel",
+                confirmButtonColor: "#28a745",
+                cancelButtonColor: "#dc3545"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with form submission
+                    fetch("../Appointments/patient/patient_manage/register_patient_form.php", {
+                            method: "POST",
+                            body: formData
+                        })
+                        .then(response => response.json()) // Parse JSON
+                        .then(data => {
+                            if (data.status === "success") {
+                                Swal.fire("Success!", data.message, "success").then(() => {
+                                    form.reset();
+                                    document.getElementById("file-name-display").textContent = "to choose a file";
+                                    document.getElementById("referral-file-name-display").textContent = "to choose a file";
+                                    document.getElementById("profile-picture-placeholder").classList.add("uk-placeholder");
+                                    document.getElementById("referral-file-placeholder").classList.add("uk-placeholder");
+                                    document.getElementById("referral-file-section").style.display = "none";
+
+                                    // Hard reload the page
+                                    location.reload(true);
+
+                                    // Optional: Scroll to the registered patients section after reload
+                                    setTimeout(() => {
+                                        window.location.href = "#view-registered-patients"; // Adjust the ID accordingly
+                                    }, 500);
+                                });
+                            } else if (data.status === "duplicate") {
+                                Swal.fire("Duplicate!", data.message, "warning");
+                            } else {
+                                Swal.fire("Error!", data.message, "error");
+                            }
+                        })
+                        .catch(error => {
+                            console.error("Error:", error);
+                            Swal.fire("Error!", "An unexpected error occurred.", "error");
+                        });
+                }
+            });
+        });
 
             // VIEW AND EDIT PATIENT JS
 
@@ -1860,23 +1901,34 @@ echo "<script>
         let editPatientBtn = document.getElementById("editPatientBtn");
         let saveProfileChangesBtn = document.querySelector("#editPatientForm button[type='submit']");
 
-        
-        // Referral Section
-        // let uploadReferralSection = document.getElementById("uploadReferralForm");
-        // uploadReferralSection.style.display = "none";
+        // Define the upload sections
+        const officialReferralUploadSection = document.getElementById("official_referral_upload_section");
+        const proofOfBookingUploadSection = document.getElementById("proof_of_booking_upload_section");
 
-        // Initially disable form fields
+        // Initially hide them (redundant if using uk-hidden, but ensures JS control)
+        officialReferralUploadSection.style.display = "none";
+        proofOfBookingUploadSection.style.display = "none";
+
+        // Modify toggleFormInputs() to handle visibility
         function toggleFormInputs(disable) {
             firstNameInput.disabled = disable;
             lastNameInput.disabled = disable;
-            birthdayInput.disabled  = disable;
+            birthdayInput.disabled = disable;
             genderInput.disabled = disable;
             profilePicInput.disabled = disable;
 
-            officialReferralInput.disabled = disable;
-    proofReferralInput.disabled = disable;
+            // 🔥 NEW: Toggle upload sections' visibility
+            if (disable) {
+                // VIEW MODE: Hide upload sections
+                officialReferralUploadSection.style.display = "none";
+                proofOfBookingUploadSection.style.display = "none";
+            } else {
+                // EDIT MODE: Show upload sections
+                officialReferralUploadSection.style.display = "block";
+                proofOfBookingUploadSection.style.display = "block";
+            }
 
-            // Instead of hiding the save button entirely, we’ll disable it to keep layout intact
+            // Save button handling (existing)
             saveProfileChangesBtn.disabled = disable;
             saveProfileChangesBtn.style.opacity = disable ? "0.5" : "1";
             saveProfileChangesBtn.style.pointerEvents = disable ? "none" : "auto";
@@ -1885,7 +1937,7 @@ echo "<script>
         // Load patient details when selecting from dropdown
         patientDropdown.addEventListener("change", function () {
             officialReferralInput.value = "";
-proofReferralInput.value = "";
+            proofReferralInput.value = "";
 
             let patientID = this.value;
             if (!patientID) {
@@ -1926,7 +1978,7 @@ proofReferralInput.value = "";
 
                     const officialLink = document.getElementById("official_referral_link");
                     if (latestReferrals && latestReferrals.official && latestReferrals.official.official_referral_file) {
-                        officialLink.href = "../../uploads/doctors_referrals/" + latestReferrals.official.official_referral_file;
+                        officialLink.href = "../uploads/doctors_referrals/" + latestReferrals.official.official_referral_file;
                         officialLink.style.display = "inline-block";
                     } else {
                         officialLink.href = "#";
@@ -1935,7 +1987,7 @@ proofReferralInput.value = "";
 
                     const proofLink = document.getElementById("proof_of_booking_link");
                     if (latestReferrals && latestReferrals.proof_of_booking && latestReferrals.proof_of_booking.proof_of_booking_referral_file) {
-                        proofLink.href = "../../uploads/doctors_referrals/" + latestReferrals.proof_of_booking.proof_of_booking_referral_file;
+                        proofLink.href = "../uploads/doctors_referrals/" + latestReferrals.proof_of_booking.proof_of_booking_referral_file;
                         proofLink.style.display = "inline-block";
                     } else {
                         proofLink.href = "#";
