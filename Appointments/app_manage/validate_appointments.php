@@ -552,9 +552,9 @@ $connection->close(); // Close DB connection
                         }
 
                         // ** Check essential details **
-                        if (!data.details || !data.details.date || !data.details.time || !data.details.raw_session_type) { // ** Check raw_session_type **
+                        if (!data.details || !data.details.date || !data.details.time || !data.details.raw_session_type || !data.details.client_phone) { // ** Check raw_session_type **
                             console.error("Essential details missing:", data.details);
-                            Swal.fire("Error", "Incomplete appointment details received (date, time, or type missing).", "error");
+                            Swal.fire("Error", "Incomplete appointment details received (date, time, ,phone number or type missing).", "error");
                             button.removeData('processing'); // Clear flag
                             return;
                         }
@@ -590,6 +590,7 @@ $connection->close(); // Close DB connection
                          <div style="text-align: left; margin-bottom: 15px;">
                              <p><strong>Patient:</strong> ${data.details.patient_name || 'N/A'}</p>
                              <p><strong>Client:</strong> ${data.details.client_name || 'N/A'}</p>
+                             <p><strong>Phone Number:</strong> 0${data.details.client_phone || 'N/A'}</p>
                              <p><strong>Date:</strong> ${formattedDate}</p>
                              <p><strong>Time:</strong> ${formattedTime}</p>
                              <p><strong>Session Type:</strong> ${ucfirst(displaySessionType.replace(/_/g, ' '))}</p> <!-- Use display type -->

@@ -90,6 +90,7 @@ $query = "SELECT a.date, a.time, a.status,
                  p.profile_picture AS patient_picture,
                  u.account_FName AS client_firstname, u.account_LName AS client_lastname,
                  u.profile_picture AS client_picture,
+                 u.account_PNum AS client_phone, -- Added client phone number
                  tr.account_FName AS rebooked_by_firstname, tr.account_LName AS rebooked_by_lastname,
                  dr.referral_id, -- Include referral ID
                  dr.official_referral_file, dr.proof_of_booking_referral_file
@@ -159,6 +160,7 @@ if ($result->num_rows === 1) {
         "rebooked_by_name" => !empty($appointment["rebooked_by_firstname"])
             ? htmlspecialchars($appointment["rebooked_by_firstname"] . " " . $appointment["rebooked_by_lastname"])
             : null,
+        "client_phone" => htmlspecialchars($appointment["client_phone"]),
         "validation_notes" => htmlspecialchars($appointment["validation_notes"] ?? ''),
 
         // Paths for images
