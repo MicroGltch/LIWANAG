@@ -664,12 +664,7 @@ $patientsStmt->close();
                                                     </td>
                                                 </tr>
                                             <?php
-                                            endforeach;
-                                        else:
-                                            ?>
-                                            <tr>
-                                                <td colspan="7" class="uk-text-center">No <?= strtolower($status) ?> appointments found</td>
-                                            </tr>
+                                            endforeach;?>
                                         <?php endif; ?>
                                     </tbody>
                                 </table>
@@ -684,25 +679,27 @@ $patientsStmt->close();
                     <!-- Initialize DataTables for each status table -->
                     <script>
                         $(document).ready(function() {
-                            $('#table-<?= strtolower($status) ?>').DataTable({
-                                pageLength: 10,
-                                lengthMenu: [10, 25, 50],
-                                order: [
-                                    [3, 'asc']
-                                ], // Sort by date column by default
-                                language: {
-                                    lengthMenu: "Show _MENU_ entries per page",
-                                    info: "Showing _START_ to _END_ of _TOTAL_ entries",
-                                    search: "Search:",
-                                    paginate: {
-                                        first: "First",
-                                        last: "Last",
-                                        next: "Next",
-                                        previous: "Previous"
-                                    }
-                                }
-                            });
+                        $('#table-<?= strtolower($status) ?>').DataTable({
+                            pageLength: 10,
+                            lengthMenu: [10, 25, 50],
+                            order: [
+                                [3, 'asc']
+                            ],
+                            language: {
+                                lengthMenu: "Show _MENU_ entries per page",
+                                info: "Showing _START_ to _END_ of _TOTAL_ entries",
+                                search: "Search:",
+                                paginate: {
+                                    first: "First",
+                                    last: "Last",
+                                    next: "Next",
+                                    previous: "Previous"
+                                },
+                                // Add this line:
+                                emptyTable: "No <?= strtolower($status) ?> appointments found"
+                            }
                         });
+                    });
                     </script>
                 <?php endforeach; ?>
 

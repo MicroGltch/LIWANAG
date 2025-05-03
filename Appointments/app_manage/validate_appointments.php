@@ -392,11 +392,7 @@ $connection->close(); // Close DB connection
                                     </td>
                                 </tr>
                             <?php endforeach; ?>
-                            <?php if (empty($waitlistedAppointments)): ?>
-                                <tr>
-                                    <td colspan="6" class="uk-text-center uk-text-muted">No waitlisted appointments found.</td>
-                                </tr>
-                            <?php endif; ?>
+                            
                         </tbody>
                     </table>
                 </div>
@@ -487,17 +483,19 @@ $connection->close(); // Close DB connection
 
                 // --- Initialize Waitlist DataTable (if table exists) ---
                 if ($('#waitlistedAppointmentsTable').length > 0) {
-                    const waitlistedTable = $('#waitlistedAppointmentsTable').DataTable({
-                        pageLength: 10,
-                        lengthChange: false, // Disable the default "Show entries" dropdown
-                        order: [
-                            [0, 'asc'] // Order by Patient Name (column 0) by default
-                        ],
-                        dom: 'lrtip',
-                        language: {
-                            // Customize text if needed
-                        }
-                    });
+                const waitlistedTable = $('#waitlistedAppointmentsTable').DataTable({
+                    pageLength: 10,
+                    lengthChange: false,
+                    order: [
+                        [0, 'asc']
+                    ],
+                    dom: 'lrtip',
+                    language: {
+                        // Add this line:
+                        emptyTable: "No waitlisted appointments found."
+                        // Add other language settings if needed
+                    }
+                });
 
                     $('#waitlistSearch').on('keyup', function() {
                         waitlistedTable.search(this.value).draw();
