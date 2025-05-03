@@ -656,7 +656,7 @@ $pending_pattern_times = $all_bookings['pending_pattern_candidates'];
 
 
 // --- Generate and Check Potential Slots ---
-$slotIncrementMinutes = 15;
+$slotIncrementMinutes = 60;
 $potential_start_times = generate_potential_slots($clinicStartTimeStr, $clinicEndTimeStr, $slotIncrementMinutes); error_log("GetSlots Info: Generated " . count($potential_start_times) . " potential slots.");
 $available_slots = []; $pending_slots = [];
 

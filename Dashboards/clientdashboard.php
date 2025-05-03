@@ -614,6 +614,32 @@ echo "<script>
                         </select>
                         </div>
 
+                         <!-- ***** START: Default Schedule Display ***** -->
+                         <div class="uk-width-1-1 uk-margin-top">
+                            <hr> <!-- Optional separator -->
+                            <h4 class="uk-text-bold">Default Weekly Schedule</h4>
+                            <div id="patient-default-schedule-display" style="display: none;">
+                                <table class="uk-table uk-table-divider uk-table-small uk-table-middle uk-table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Day</th>
+                                            <th>Start Time</th>
+                                            <th>End Time</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="patient-default-schedule-body">
+                                        <!-- Schedule rows will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
+                                <p id="no-default-schedule-message" class="uk-text-muted" style="display: none;">No default schedule has been set for this patient.</p>
+                            </div>
+                        </div>
+                        <!-- ***** END: Default Schedule Display ***** -->
+
+
+                        <div class="uk-width-1-1 uk-margin-top"><hr></div> <!-- Optional separator -->
+
+
                         <div class="uk-width-1-2@s">
                         <label class="uk-form-label">Official Referral</label>
                         <a id="official_referral_link" href="#" class="uk-button uk-button-link" target="_blank" style="display: none;">View File</a>
@@ -2055,121 +2081,191 @@ echo "<script>
         
         // Load patient details when selecting from dropdown
         patientDropdown.addEventListener("change", function () {
-            officialReferralInput.value = "";
+            officialReferralInput.value = ""; // Reset file inputs
             proofReferralInput.value = "";
+
+            // Get references to the new schedule elements
+            let scheduleDisplayDiv = document.getElementById("patient-default-schedule-display");
+            let scheduleTableBody = document.getElementById("patient-default-schedule-body");
+            let noScheduleMsg = document.getElementById("no-default-schedule-message");
 
             let patientID = this.value;
             if (!patientID) {
                 editForm.style.display = "none";
-                uploadReferralSection.style.display = "none"; // Hide referral section when no patient is selected
+                // uploadReferralSection.style.display = "none"; // Keep your existing logic
+                scheduleDisplayDiv.style.display = "none"; // Hide schedule if no patient selected
                 return;
             }
 
+            // Clear previous schedule content
+            scheduleTableBody.innerHTML = '';
+            noScheduleMsg.style.display = 'none';
+            scheduleDisplayDiv.style.display = 'none'; // Hide initially before fetch
+
             fetch("../Appointments/patient/patient_data/fetch_patient_details.php?patient_id=" + patientID)
-            .then(response => response.json())
-            .then(data => {
+                .then(response => response.json())
+                .then(data => {
 
-                if (data.status === "success") {
-                    const patient = data.patient;
+                    if (data.status === "success") {
+                        const patient = data.patient;
+                        const latestReferrals = data.latest_referrals;
+                        const defaultSchedule = data.default_schedule; // *** Get schedule data ***
 
-                    patientIDInput.value = patient.patient_id;
-                    firstNameInput.value = patient.first_name;
-                    lastNameInput.value = patient.last_name;
-                    genderInput.value = patient.gender;
-                    existingProfilePicInput.value = patient.profile_picture;
+                        // --- Populate Basic Patient Info (Your existing code) ---
+                        patientIDInput.value = patient.patient_id;
+                        firstNameInput.value = patient.first_name;
+                        lastNameInput.value = patient.last_name;
+                        genderInput.value = patient.gender;
+                        existingProfilePicInput.value = patient.profile_picture;
+                        if (patient.bday && patient.bday !== "0000-00-00") {
+                            birthdayInput.value = patient.bday;
+                        } else {
+                            birthdayInput.value = "";
+                        }
+                        if (patient.profile_picture) {
+                            profilePicPreview.src = "../uploads/profile_pictures/" + patient.profile_picture + '?t=' + new Date().getTime(); // Add cache buster
+                            profilePicPreview.style.display = "block";
+                        } else {
+                            profilePicPreview.src = '../CSS/default.jpg'; // Show default if none
+                            profilePicPreview.style.display = "block"; // Always show the img tag, just change src
+                            // Or hide completely: profilePicPreview.style.display = "none";
+                        }
 
-                    // ✅ Reset birthday properly
-                    if (patient.bday && patient.bday !== "0000-00-00") {
-                        birthdayInput.value = patient.bday;
+                        // --- Populate Referrals (Your existing code) ---
+                        const officialLink = document.getElementById("official_referral_link");
+                        if (latestReferrals && latestReferrals.official && latestReferrals.official.official_referral_file) {
+                            officialLink.href = "../../uploads/doctors_referrals/" + latestReferrals.official.official_referral_file;
+                            officialLink.style.display = "inline-block";
+                        } else {
+                            officialLink.href = "#";
+                            officialLink.style.display = "none";
+                        }
+                        const proofLink = document.getElementById("proof_of_booking_link");
+                        if (latestReferrals && latestReferrals.proof_of_booking && latestReferrals.proof_of_booking.proof_of_booking_referral_file) {
+                            proofLink.href = "../../uploads/doctors_referrals/" + latestReferrals.proof_of_booking.proof_of_booking_referral_file;
+                            proofLink.style.display = "inline-block";
+                        } else {
+                            proofLink.href = "#";
+                            proofLink.style.display = "none";
+                        }
+
+
+                        // --- *** NEW: Populate Default Schedule *** ---
+                        if (defaultSchedule && defaultSchedule.length > 0) {
+                            // Schedule exists, populate the table
+                            defaultSchedule.forEach(slot => {
+                                const row = scheduleTableBody.insertRow();
+                                const cellDay = row.insertCell();
+                                const cellStart = row.insertCell();
+                                const cellEnd = row.insertCell();
+
+                                cellDay.textContent = slot.day_of_week;
+                                // Use pre-formatted time from PHP or format here
+                                cellStart.textContent = slot.start_time_formatted || formatTimeForDisplay(slot.start_time);
+                                cellEnd.textContent = slot.end_time_formatted || formatTimeForDisplay(slot.end_time);
+                            });
+                            scheduleDisplayDiv.style.display = 'block'; // Show the schedule container
+                            noScheduleMsg.style.display = 'none';      // Hide the 'no schedule' message
+                        } else {
+                            // No schedule found
+                            scheduleTableBody.innerHTML = '';          // Ensure table body is empty
+                            noScheduleMsg.style.display = 'block';     // Show the 'no schedule' message
+                            scheduleDisplayDiv.style.display = 'block'; // Show container (to display the message)
+                        }
+                        // --- *** END NEW SCHEDULE POPULATION *** ---
+
+
+                        // Show form and sections (Your existing code)
+                        toggleFormInputs(true); // Disable inputs initially
+                        editForm.style.display = "grid"; // Use grid as defined in your form class
+                        // uploadReferralSection.style.display = "block"; // Keep your existing logic
+
+                        // Reset edit button state
+                        editPatientBtn.textContent = "Edit";
+                        saveProfileChangesBtn.style.display = "none"; // Hide save button initially
+                        saveProfileChangesBtn.disabled = true;
+                        saveProfileChangesBtn.style.opacity = "0.5";
+                        saveProfileChangesBtn.style.pointerEvents = "none";
+
+
                     } else {
-                        birthdayInput.value = ""; // Leave blank
+                        editForm.style.display = "none";
+                        // uploadReferralSection.style.display = "none";
+                        scheduleDisplayDiv.style.display = "none"; // Hide schedule on error too
+                        Swal.fire("Error", data.message || "Patient details could not be loaded.", "error");
                     }
-
-                    if (patient.profile_picture) {
-                        profilePicPreview.src = "../uploads/profile_pictures/" + patient.profile_picture;
-                        profilePicPreview.style.display = "block";
-                    } else {
-                        profilePicPreview.style.display = "none";
-                    }
-
-                   // ✅ Load latest referral file links
-                    const latestReferrals = data.latest_referrals;
-
-                    const officialLink = document.getElementById("official_referral_link");
-                    if (latestReferrals && latestReferrals.official && latestReferrals.official.official_referral_file) {
-                        officialLink.href = "../uploads/doctors_referrals/" + latestReferrals.official.official_referral_file;
-                        officialLink.style.display = "inline-block";
-                    } else {
-                        officialLink.href = "#";
-                        officialLink.style.display = "none";
-                    }
-
-                    const proofLink = document.getElementById("proof_of_booking_link");
-                    if (latestReferrals && latestReferrals.proof_of_booking && latestReferrals.proof_of_booking.proof_of_booking_referral_file) {
-                        proofLink.href = "../uploads/doctors_referrals/" + latestReferrals.proof_of_booking.proof_of_booking_referral_file;
-                        proofLink.style.display = "inline-block";
-                    } else {
-                        proofLink.href = "#";
-                        proofLink.style.display = "none";
-                    }
-
-
-                    // Show form and section
-                    toggleFormInputs(true);
-                    editForm.style.display = "block";
-                    uploadReferralSection.style.display = "block";
-
-                } else {
+                })
+                .catch(error => {
+                    console.error("Error fetching patient details:", error);
                     editForm.style.display = "none";
-                    uploadReferralSection.style.display = "none";
-                    Swal.fire("Error", "Patient details could not be loaded.", "error");
-                }
-            })
-            .catch(error => console.error("Error fetching patient details:", error));
+                    scheduleDisplayDiv.style.display = "none";
+                    Swal.fire("Fetch Error", "Could not retrieve patient data. Check console for details.", "error");
+                });
         });
 
-            // Ensure the birthday value is preserved when submitting the form
-            document.getElementById("editPatientForm").addEventListener("submit", function(event) {
-                console.log("Birthday value before submission:", birthdayInput.value);
+        // Helper function for time formatting (if not done in PHP)
+        function formatTimeForDisplay(timeString) {
+            if (!timeString) return '';
+            const [hours, minutes] = timeString.split(':');
+            const h = parseInt(hours);
+            const m = parseInt(minutes);
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            const hour12 = h % 12 || 12; // Convert hour 0 to 12
+            return `${hour12}:${minutes.padStart(2, '0')} ${ampm}`;
+        }
 
-                // If birthday is empty but should be required, you can prevent submission
-                if (birthdayInput.required && birthdayInput.value.trim() === "") {
-                    event.preventDefault();
-                    Swal.fire("Error", "Birthday field is required.", "error");
-                    return false;
-                }
-            });
+        // Make sure toggleFormInputs exists and works as expected
+        function toggleFormInputs(disable) {
+            // ... your existing toggleFormInputs function ...
+            firstNameInput.disabled = disable;
+            lastNameInput.disabled = disable;
+            birthdayInput.disabled = disable;
+            genderInput.disabled = disable;
+            // Profile pic input button might need different handling if it's a file input trigger
+            // document.getElementById('profile_picture_button_trigger').disabled = disable; // If you have a separate trigger button
+            profilePicInput.disabled = disable; // Assuming profilePicInput is the <button> triggering the file input
 
-        // Toggle edit mode when clicking "Edit" button
+            officialReferralInput.disabled = disable;
+            proofReferralInput.disabled = disable;
+
+            // Ensure Save button state is managed correctly
+            if (saveProfileChangesBtn) {
+                saveProfileChangesBtn.disabled = disable;
+                saveProfileChangesBtn.style.opacity = disable ? "0.5" : "1";
+                saveProfileChangesBtn.style.pointerEvents = disable ? "none" : "auto";
+                // Hide save button completely when form is not editable
+                saveProfileChangesBtn.style.display = disable ? "none" : "inline-block";
+            }
+        }
+
+        // Ensure edit button logic correctly manages the save button display
         editPatientBtn.addEventListener("click", function () {
-            let isDisabled = firstNameInput.disabled;
-            toggleFormInputs(!isDisabled);
-            
-            // Change button text to "Save" if enabling edit mode
-            editPatientBtn.textContent = isDisabled ? "Cancel" : "Edit";
-            
-            // Show/hide "Save" button
-            saveProfileChangesBtn.style.display = isDisabled ? "inline-block" : "none";
+            let isDisabled = firstNameInput.disabled; // Check current state BEFORE toggling
+            toggleFormInputs(!isDisabled); // Toggle the disabled state
 
-                // If canceling, reload patient details to reset changes
-                if (!isDisabled) {
-                    patientDropdown.dispatchEvent(new Event("change"));
-                }
-            });
+            // Update button text and Save button visibility based on the NEW state
+            if (!isDisabled) { // Means we were editing, now canceling/viewing
+                editPatientBtn.textContent = "Edit";
+                // Reload patient details to reset any unsaved changes
+                patientDropdown.dispatchEvent(new Event("change"));
+            } else { // Means we were viewing, now editing
+                editPatientBtn.textContent = "Cancel";
+            }
+        });
 
 
-            // Show preview when selecting a new profile picture
-            profilePicInput.addEventListener("change", function() {
-                let file = this.files[0];
-                if (file) {
-                    let reader = new FileReader();
-                    reader.onload = function(e) {
-                        profilePicPreview.src = e.target.result;
-                        profilePicPreview.style.display = "block";
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+        // Add cache buster to profile picture preview on file selection too
+        profilePicInput.addEventListener("change", function() {
+            let file = this.files[0];
+            if (file) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    profilePicPreview.src = e.target.result; // Preview the selected file
+                    profilePicPreview.style.display = "block";
+                };
+                reader.readAsDataURL(file);
+            }
+        });
 
             // Upload Referral Logic
             document.getElementById("uploadReferralBtn").addEventListener("click", function() {
