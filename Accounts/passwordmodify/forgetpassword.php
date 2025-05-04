@@ -45,7 +45,7 @@
             <div uk-navbar>
                 <!--Navbar Center-->
                 <div class="uk-navbar-center">
-                    <a class="logo-navbar uk-navbar-item uk-logo" href="..\..\..\LIWANAG\homepage.php">Little Wanderer's Therapy Center</a>
+                    <a class="logo-navbar uk-navbar-item uk-logo" href="..\..\..\LIWANAG\index.php">Little Wanderer's Therapy Center</a>
                 </div>
 
                 <!--Navbar Right-->

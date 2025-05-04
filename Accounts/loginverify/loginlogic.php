@@ -88,7 +88,7 @@ if (isset($_POST['email']) && isset($_POST['password'])) {
             $_SESSION['account_Type'] = $accountType;
 
             // Redirect based on account type
-            $redirectURL = '../homepage.php'; // Default redirect
+            $redirectURL = '../index.php'; // Default redirect
 
             if ($accountType === 'admin') {
                 $redirectURL = '../Dashboards/admindashboard.php';

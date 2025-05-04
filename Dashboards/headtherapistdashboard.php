@@ -449,7 +449,7 @@ $patientsStmt->close();
                     </ul>
                 </div>
                 <div class="uk-navbar-center">
-                    <a class="uk-navbar-item uk-logo" href="../homepage.php">Little Wanderer's Therapy Center</a>
+                    <a class="uk-navbar-item uk-logo" href="../index.php">Little Wanderer's Therapy Center</a>
                 </div>
                 <div class="uk-navbar-right uk-visible@m">
                     <ul class="uk-navbar-nav">

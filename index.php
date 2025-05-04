@@ -98,7 +98,7 @@ $stmt->close();
 
                     <!-- Navbar Center -->
                     <div class="logo-center-div uk-navbar-center">
-                        <a class="logo-navbar uk-navbar-item uk-logo" href="homepage.php" style="margin-top: -20px;">
+                        <a class="logo-navbar uk-navbar-item uk-logo" href="index.php" style="margin-top: -20px;">
                             Little Wanderer's Therapy Center
                         </a>
                     </div>
