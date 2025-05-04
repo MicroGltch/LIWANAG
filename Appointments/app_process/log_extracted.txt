@@ -1,8 +1,0 @@
-Array
-(
-    [appointment_id] => 80
-    [status] => approved
-    [date] => 2025-03-28
-    [time] => 14:00
-    [therapist_id] => 66
-)
