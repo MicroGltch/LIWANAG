@@ -348,8 +348,6 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
                         </div>
                     </div>
                 <?php endforeach; ?>
-            <?php else : ?>
-                <p>No appointments found.</p>
             <?php endif; ?>
         </div>
 
@@ -371,7 +369,8 @@ $therapists = $therapistResult->fetch_all(MYSQLI_ASSOC);
                         last: "Last",
                         next: "Next",
                         previous: "Previous"
-                    }
+                    },
+                    emptyTable: "No Appointments found"
                 }
             });
 

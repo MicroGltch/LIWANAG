@@ -688,10 +688,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                     <tr>
                                         <td colspan="7"><?= htmlspecialchars($client_error); ?></td>
                                     </tr>
-                                <?php else : ?>
-                                    <tr>
-                                        <td colspan="7">No clients found.</td>
-                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -777,10 +773,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 <?php elseif (isset($patient_error)) : ?>
                                     <tr>
                                         <td colspan="6"><?= htmlspecialchars($patient_error); ?></td>
-                                    </tr>
-                                <?php else : ?>
-                                    <tr>
-                                        <td colspan="6">No patients found.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -882,10 +874,6 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                                 <?php elseif (isset($therapist_error)) : ?>
                                     <tr>
                                         <td colspan="8"><?= htmlspecialchars($therapist_error); ?></td>
-                                    </tr>
-                                <?php else : ?>
-                                    <tr>
-                                        <td colspan="8">No therapists found.</td>
                                     </tr>
                                 <?php endif; ?>
                             </tbody>
@@ -1304,7 +1292,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         last: "Last",
                         next: "Next",
                         previous: "Previous"
-                    }
+                    },
+                    emptyTable: "No Clients found"
                 }
             });
 
@@ -1380,7 +1369,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         last: "Last",
                         next: "Next",
                         previous: "Previous"
-                    }
+                    },
+                    emptyTable: "No Patients found"
                 }
             });
 
@@ -1445,7 +1435,8 @@ $totalAppointments = $totalResult->fetch_assoc()['total'];
                         last: "Last",
                         next: "Next",
                         previous: "Previous"
-                    }
+                    },
+                    emptyTable: "No Therapist found"
                 }
             });
 

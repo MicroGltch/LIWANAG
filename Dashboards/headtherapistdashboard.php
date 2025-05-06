@@ -695,7 +695,6 @@ $patientsStmt->close();
                                     next: "Next",
                                     previous: "Previous"
                                 },
-                                // Add this line:
                                 emptyTable: "No <?= strtolower($status) ?> appointments found"
                             }
                         });
@@ -812,10 +811,6 @@ $patientsStmt->close();
                                     <tr>
                                         <td colspan="6"><?= htmlspecialchars($therapist_error); ?></td>
                                     </tr>
-                                <?php else : ?>
-                                    <tr>
-                                        <td colspan="6">No therapists found.</td>
-                                    </tr>
                                 <?php endif; ?>
                             </tbody>
                         </table>
@@ -867,7 +862,8 @@ $patientsStmt->close();
                                             orderable: true,
                                             targets: 5
                                         } // Status - Sortable
-                                    ]
+                                    ],
+                                    emptyTable: "No Therapist found"
                                 });
                             });
                         </script>
@@ -1108,6 +1104,7 @@ $patientsStmt->close();
                                 targets: 4
                             } // Status - Sortable
                         ],
+                        emptyTable: "No Patients found",
                         responsive: true
                     });
                 });

@@ -33,7 +33,11 @@ $stmt->close();
 $query = "SELECT *, DATE_FORMAT(updated_at, '%M %d, %Y %h:%i %p') AS formatted_updated_at FROM settings LIMIT 1";
 $result = $connection->query($query);
 $settings = $result->fetch_assoc();
-$blockedDates = json_decode($settings['blocked_dates'], true);
+if ($settings && isset($settings['blocked_dates'])) {
+    $blockedDates = json_decode($settings['blocked_dates'], true);
+} else {
+    $blockedDates = []; // fallback to empty array
+}
 
 // ✅ Load weekly business hours
 $days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
