@@ -18,25 +18,75 @@ switch ($formType) {
     case 'global_settings':
         $max_days_advance = $_POST['max_days_advance'];
         $min_days_advance = $_POST['min_days_advance'];
-        $blocked_dates = isset($_POST['blocked_dates']) ? explode(",", str_replace(" ", "", $_POST['blocked_dates'])) : [];
-        $blocked_dates_json = json_encode($blocked_dates);
-
-        $query = "UPDATE settings SET 
-            max_days_advance = ?, 
-            min_days_advance = ?, 
-            blocked_dates = ?, 
-            updated_at = NOW()
-            WHERE setting_id = 1";
-
-        $stmt = $connection->prepare($query);
-        $stmt->bind_param("iis", $max_days_advance, $min_days_advance, $blocked_dates_json);
-
-        if ($stmt->execute()) {
-            echo json_encode(["status" => "success", "message" => "Settings updated successfully.", "updated_at" => date("F d, Y h:i A")]);
+        $initial_eval_duration = $_POST['initial_eval_duration'];
+        $playgroup_duration = $_POST['playgroup_duration'];
+        $service_ot_duration = $_POST['service_ot_duration'];
+        $service_bt_duration = $_POST['service_bt_duration'];
+    
+        // Check if the settings row exists
+        $check = $connection->query("SELECT COUNT(*) as count FROM settings WHERE setting_id = 1");
+        $row = $check->fetch_assoc();
+    
+        if ($row['count'] == 0) {
+            // Insert new settings row
+            $query = "INSERT INTO settings (
+                        setting_id,
+                        max_days_advance,
+                        min_days_advance,
+                        initial_eval_duration,
+                        playgroup_duration,
+                        service_ot_duration,
+                        service_bt_duration,
+                        updated_at
+                      ) VALUES (1, ?, ?, ?, ?, ?, ?, NOW())";
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param(
+                "iiiiii",
+                $max_days_advance,
+                $min_days_advance,
+                $initial_eval_duration,
+                $playgroup_duration,
+                $service_ot_duration,
+                $service_bt_duration
+            );
         } else {
-            echo json_encode(["status" => "error", "message" => "Failed to update settings. SQL Error: " . $stmt->error]);
+            // Update existing row
+            $query = "UPDATE settings SET 
+                        max_days_advance = ?, 
+                        min_days_advance = ?, 
+                        initial_eval_duration = ?, 
+                        playgroup_duration = ?, 
+                        service_ot_duration = ?, 
+                        service_bt_duration = ?, 
+                        updated_at = NOW()
+                      WHERE setting_id = 1";
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param(
+                "iiiiii",
+                $max_days_advance,
+                $min_days_advance,
+                $initial_eval_duration,
+                $playgroup_duration,
+                $service_ot_duration,
+                $service_bt_duration
+            );
+        }
+    
+        if ($stmt->execute()) {
+            echo json_encode([
+                "status" => "success",
+                "message" => "Settings saved successfully.",
+                "updated_at" => date("F d, Y h:i A")
+            ]);
+        } else {
+            echo json_encode([
+                "status" => "error",
+                "message" => "Failed to save settings. SQL Error: " . $stmt->error
+            ]);
         }
         break;
+    
+    
 
     case 'weekly_hours':
         if (isset($_POST['weekly_hours'])) {
