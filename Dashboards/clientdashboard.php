@@ -441,9 +441,6 @@ echo "<script>
         </div>
     </nav>
 
-
-
-
     <hr class="solid">
 
     <!-- Main Content -->
@@ -506,8 +503,6 @@ echo "<script>
                 <button class="close-sidebar" onclick="toggleSidebar()"><span uk-icon="icon: close-circle;" style="padding: 16px;"></span></button>
             </div>
             <ul class="mobile-sidebar-menu uk-nav uk-nav-default" style="padding: 15px;">
-
-
 
             <li class="uk-parent">
                     <li>
@@ -1860,9 +1855,66 @@ echo "<script>
         }
 
 
-        document.querySelector('.sidebar-toggle').addEventListener('click', function() {
-            document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+        //document.querySelector('.sidebar-toggle').addEventListener('click', function() {
+           // document.querySelector('.sidebar-nav').classList.toggle('uk-open');
+        //});
+
+        // Mobile Sidebar Toggle
+        document.addEventListener('DOMContentLoaded', function() {
+            const mobileMenuButton = document.querySelector('.mobile-menu-button');
+            const mobileSidebar = document.getElementById('mobileSidebar');
+            const body = document.body;
+
+            function toggleSidebar() {
+                if (mobileSidebar.classList.contains('open')) {
+                    // Close sidebar
+                    mobileSidebar.classList.remove('open');
+                    mobileSidebar.style.left = '-100%';
+
+                    // Remove overlay
+                    const overlay = document.querySelector('.sidebar-overlay');
+                    if (overlay) {
+                        overlay.remove();
+                    }
+
+                    // Enable scrolling
+                    body.style.overflow = '';
+                } else {
+                    // Open sidebar
+                    mobileSidebar.classList.add('open');
+                    mobileSidebar.style.left = '0';
+
+                    // Add overlay
+                    const overlay = document.createElement('div');
+                    overlay.className = 'sidebar-overlay';
+                    body.appendChild(overlay);
+
+                    // Disable scrolling
+                    body.style.overflow = 'hidden';
+
+                    // Add click event to overlay to close sidebar
+                    overlay.addEventListener('click', toggleSidebar);
+                }
+            }
+
+            // Attach click event to the mobile menu button
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleSidebar();
+                });
+            }
+
+            // Close sidebar when clicking the close button
+            const closeButton = document.querySelector('.close-sidebar');
+            if (closeButton) {
+                closeButton.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    toggleSidebar();
+                });
+            }
         });
+
 
         function showSection(sectionId) {
             document.querySelectorAll('.section').forEach(section => {
@@ -2466,62 +2518,6 @@ echo "<script>
             })
             .catch(error => console.error("Error:", error));
         });
-    });
-
-         // Mobile Sidebar Toggle
-         document.addEventListener('DOMContentLoaded', function() {
-        const mobileMenuButton = document.querySelector('.mobile-menu-button');
-        const mobileSidebar = document.getElementById('mobileSidebar');
-        const body = document.body;
-
-        function toggleSidebar() {
-            if (mobileSidebar.classList.contains('open')) {
-                // Close sidebar
-                mobileSidebar.classList.remove('open');
-                mobileSidebar.style.left = '-100%';
-
-                // Remove overlay
-                const overlay = document.querySelector('.sidebar-overlay');
-                if (overlay) {
-                    overlay.remove();
-                }
-
-                // Enable scrolling
-                body.style.overflow = '';
-            } else {
-                // Open sidebar
-                mobileSidebar.classList.add('open');
-                mobileSidebar.style.left = '0';
-
-                // Add overlay
-                const overlay = document.createElement('div');
-                overlay.className = 'sidebar-overlay';
-                body.appendChild(overlay);
-
-                // Disable scrolling
-                body.style.overflow = 'hidden';
-
-                // Add click event to overlay to close sidebar
-                overlay.addEventListener('click', toggleSidebar);
-            }
-        }
-
-        // Attach click event to the mobile menu button
-        if (mobileMenuButton) {
-            mobileMenuButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                toggleSidebar();
-            });
-        }
-
-        // Close sidebar when clicking the close button
-        const closeButton = document.querySelector('.close-sidebar');
-        if (closeButton) {
-            closeButton.addEventListener('click', function(e) {
-                e.preventDefault();
-                toggleSidebar();
-            });
-        }
     });
 
 </script>
